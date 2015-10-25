@@ -9,14 +9,14 @@
 #include "cl_util.h"
 #include "cl_entity.h"
 #include "triangleapi.h"
-#include "vgui_TeamFortressViewport.h"
 
 // these are included for the math functions
 #include "com_model.h"
 #include "studio_util.h"
 
 #pragma warning(disable: 4244)
-
+//seems not used
+#if 0
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -157,4 +157,4 @@ void CHudOverview::InitHUDData()
 //	gEngfuncs.Overview_SetDrawOverview( 1 );
 //	gEngfuncs.Overview_SetDrawInset( 0 );
 }
-
+#endif

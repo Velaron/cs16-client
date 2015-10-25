@@ -14,9 +14,9 @@
 #include "const.h"
 #include "camera.h"
 #include "in_defs.h"
-
+#ifdef _WIN32
 #include "windows.h"
-
+#endif
 float CL_KeyState (kbutton_t *key);
 
 extern "C" 

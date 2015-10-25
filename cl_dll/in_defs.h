@@ -16,6 +16,16 @@
 // fall over
 #define	ROLL	2 
 
+#ifdef _WIN32
 #define DLLEXPORT __declspec( dllexport )
+#else
+#define DLLEXPORT
+typedef struct point_s{
+	int x;
+	int y;
+} POINT;
+#define GetCursorPos(x)
+#define SetCursorPos(x,y)
+#endif
 
 #endif

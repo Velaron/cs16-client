@@ -90,7 +90,7 @@ struct HUDLIST {
 //
 //-----------------------------------------------------
 //
-#include "..\game_shared\voice_status.h"
+//#include "voice_status.h"
 #include "hud_spectator.h"
 
 
@@ -654,10 +654,7 @@ public:
 
 };
 
-class TeamFortressViewport;
-
 extern CHud gHUD;
-extern TeamFortressViewport *gViewPort;
 
 extern int g_iPlayerClass;
 extern int g_iTeamNumber;

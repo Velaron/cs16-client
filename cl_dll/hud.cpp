@@ -24,58 +24,9 @@
 #include <stdio.h>
 #include "parsemsg.h"
 #include "hud_servers.h"
-#include "vgui_int.h"
-#include "vgui_TeamFortressViewport.h"
 
 #include "demo.h"
 #include "demo_api.h"
-#include "vgui_scorepanel.h"
-
-
-
-class CHLVoiceStatusHelper : public IVoiceStatusHelper
-{
-public:
-	virtual void GetPlayerTextColor(int entindex, int color[3])
-	{
-		color[0] = color[1] = color[2] = 255;
-
-		if( entindex >= 0 && entindex < sizeof(g_PlayerExtraInfo)/sizeof(g_PlayerExtraInfo[0]) )
-		{
-			int iTeam = g_PlayerExtraInfo[entindex].teamnumber;
-
-			if ( iTeam < 0 )
-			{
-				iTeam = 0;
-			}
-
-			iTeam = iTeam % iNumberOfTeamColors;
-
-			color[0] = iTeamColors[iTeam][0];
-			color[1] = iTeamColors[iTeam][1];
-			color[2] = iTeamColors[iTeam][2];
-		}
-	}
-
-	virtual void UpdateCursorState()
-	{
-		gViewPort->UpdateCursorState();
-	}
-
-	virtual int	GetAckIconHeight()
-	{
-		return ScreenHeight - gHUD.m_iFontHeight*3 - 6;
-	}
-
-	virtual bool			CanShowSpeakerLabels()
-	{
-		if( gViewPort && gViewPort->m_pScoreBoard )
-			return !gViewPort->m_pScoreBoard->isVisible();
-		else
-			return false;
-	}
-};
-static CHLVoiceStatusHelper g_VoiceStatusHelper;
 
 
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
@@ -127,141 +78,112 @@ int __MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 // TFFree Command Menu
 void __CmdFunc_OpenCommandMenu(void)
 {
-	if ( gViewPort )
-	{
-		gViewPort->ShowCommandMenu( gViewPort->m_StandardMenu );
-	}
+
 }
 
 // TFC "special" command
 void __CmdFunc_InputPlayerSpecial(void)
 {
-	if ( gViewPort )
-	{
-		gViewPort->InputPlayerSpecial();
-	}
+
 }
 
 void __CmdFunc_CloseCommandMenu(void)
 {
-	if ( gViewPort )
-	{
-		gViewPort->InputSignalHideCommandMenu();
-	}
+
 }
 
 void __CmdFunc_ForceCloseCommandMenu( void )
 {
-	if ( gViewPort )
-	{
-		gViewPort->HideCommandMenu();
-	}
+
 }
 
 void __CmdFunc_ToggleServerBrowser( void )
 {
-	if ( gViewPort )
-	{
-		gViewPort->ToggleServerBrowser();
-	}
+
 }
 
 // TFFree Command Menu Message Handlers
 int __MsgFunc_ValClass(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_ValClass( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_TeamNames(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_TeamNames( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_Feign(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_Feign( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_Detpack(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_Detpack( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_VGUIMenu(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_VGUIMenu( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_MOTD( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_BuildSt(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_BuildSt( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_RandomPC(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_RandomPC( pszName, iSize, pbuf );
+
 	return 0;
 }
  
 int __MsgFunc_ServerName(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_ServerName( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_ScoreInfo(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_ScoreInfo( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_TeamScore(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_TeamScore( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_TeamInfo(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_TeamInfo( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_Spectator(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_Spectator( pszName, iSize, pbuf );
+
 	return 0;
 }
 
 int __MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_AllowSpec( pszName, iSize, pbuf );
+
 	return 0;
 }
  
@@ -346,7 +268,6 @@ void CHud :: Init( void )
 	m_AmmoSecondary.Init();
 	m_TextMessage.Init();
 	m_StatusIcons.Init();
-	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
 
 	m_Menu.Init();
 	
@@ -423,7 +344,8 @@ void CHud :: VidInit( void )
 			// count the number of sprites of the appropriate res
 			m_iSpriteCount = 0;
 			client_sprite_t *p = m_pSpriteList;
-			for ( int j = 0; j < m_iSpriteCountAllRes; j++ )
+			int j;
+			for ( j = 0; j < m_iSpriteCountAllRes; j++ )
 			{
 				if ( p->iRes == m_iRes )
 					m_iSpriteCount++;
@@ -494,7 +416,6 @@ void CHud :: VidInit( void )
 	m_AmmoSecondary.VidInit();
 	m_TextMessage.VidInit();
 	m_StatusIcons.VidInit();
-	GetClientVoiceMgr()->VidInit();
 }
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)

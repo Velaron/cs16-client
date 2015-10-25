@@ -18,9 +18,9 @@
 // implementation of CHudHealth class
 //
 
-#include "STDIO.H"
-#include "STDLIB.H"
-#include "MATH.H"
+#include "stdio.h"
+#include "stdlib.h"
+#include "math.h"
 
 #include "hud.h"
 #include "cl_util.h"
@@ -377,9 +377,9 @@ int CHudHealth::DrawDamage(float flTime)
 	a = (int)( fabs(sin(flTime*2)) * 256.0);
 
 	ScaleColors(r, g, b, a);
-
+	int i;
 	// Draw all the items
-	for (int i = 0; i < NUM_DMG_TYPES; i++)
+	for (i = 0; i < NUM_DMG_TYPES; i++)
 	{
 		if (m_bitsDamage & giDmgFlags[i])
 		{

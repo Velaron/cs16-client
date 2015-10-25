@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "vgui_TeamFortressViewport.h"
+//#include "vgui_TeamFortressViewport.h"
 
 extern float *GetClientColor( int clientIndex );
 
@@ -99,8 +99,8 @@ int CHudSayText :: Draw( float flTime )
 {
 	int y = Y_START;
 
-	if ( ( gViewPort && gViewPort->AllowedToPrintText() == FALSE) || !m_HUD_saytext->value )
-		return 1;
+	//if ( ( gViewPort && gViewPort->AllowedToPrintText() == FALSE) || !m_HUD_saytext->value )
+		//return 1;
 
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
 	flScrollTime = min( flScrollTime, flTime + m_HUD_saytext_time->value );
@@ -166,15 +166,16 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 
 void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex )
 {
-	if ( gViewPort && gViewPort->AllowedToPrintText() == FALSE )
+	/*if ( gViewPort && gViewPort->AllowedToPrintText() == FALSE )
 	{
 		// Print it straight to the console
 		ConsolePrint( pszBuf );
 		return;
-	}
+	}*/
 
 	// find an empty string slot
-	for ( int i = 0; i < MAX_LINES; i++ )
+	int i;
+	for ( i = 0; i < MAX_LINES; i++ )
 	{
 		if ( ! *g_szLineBuffer[i] )
 			break;
