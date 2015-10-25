@@ -249,7 +249,7 @@ float V_CalcRoll (vec3_t angles, vec3_t velocity, float rollangle, float rollspe
 	}
 	return side * sign;
 }
-
+#if 0
 typedef struct pitchdrift_s
 {
 	float		pitchvel;
@@ -348,7 +348,7 @@ void V_DriftPitch ( struct ref_params_s *pparams )
 		pparams->cl_viewangles[PITCH] -= move;
 	}
 }
-
+#endif
 /* 
 ============================================================================== 
 						VIEW RENDERING 
@@ -502,7 +502,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	vec3_t camAngles, camForward, camRight, camUp;
 	cl_entity_t *pwater;
 
-	V_DriftPitch ( pparams );
+	//V_DriftPitch ( pparams );
 
 	if ( gEngfuncs.IsSpectateOnly() )
 	{
@@ -1674,7 +1674,7 @@ V_Init
 */
 void V_Init (void)
 {
-	gEngfuncs.pfnAddCommand ("centerview", V_StartPitchDrift );
+	//gEngfuncs.pfnAddCommand ("centerview", V_StartPitchDrift );
 
 	scr_ofsx			= gEngfuncs.pfnRegisterVariable( "scr_ofsx","0", 0 );
 	scr_ofsy			= gEngfuncs.pfnRegisterVariable( "scr_ofsy","0", 0 );

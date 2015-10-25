@@ -524,10 +524,12 @@ void IN_ScoreUp(void)
 void IN_MLookUp (void)
 {
 	KeyUp( &in_mlook );
+#if 0
 	if ( !( in_mlook.state & 1 ) && lookspring->value )
 	{
 		V_StartPitchDrift();
 	}
+#endif
 }
 
 /*
@@ -615,7 +617,7 @@ void CL_AdjustAngles ( float frametime, float *viewangles )
 	}
 	if (in_klook.state & 1)
 	{
-		V_StopPitchDrift ();
+		//V_StopPitchDrift ();
 		viewangles[PITCH] -= speed*cl_pitchspeed->value * CL_KeyState (&in_forward);
 		viewangles[PITCH] += speed*cl_pitchspeed->value * CL_KeyState (&in_back);
 	}
@@ -625,10 +627,10 @@ void CL_AdjustAngles ( float frametime, float *viewangles )
 	
 	viewangles[PITCH] -= speed*cl_pitchspeed->value * up;
 	viewangles[PITCH] += speed*cl_pitchspeed->value * down;
-
+#if 0
 	if (up || down)
 		V_StopPitchDrift ();
-		
+#endif
 	if (viewangles[PITCH] > cl_pitchdown->value)
 		viewangles[PITCH] = cl_pitchdown->value;
 	if (viewangles[PITCH] < -cl_pitchup->value)
