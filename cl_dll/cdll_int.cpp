@@ -251,7 +251,7 @@ Called by engine every frame that client .dll is loaded
 
 void DLLEXPORT HUD_Frame( double time )
 {
-	ServersThink( time );
+	//ServersThink( time );
 
 	//GetClientVoiceMgr()->Frame(time);
 }

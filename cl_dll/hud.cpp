@@ -271,7 +271,7 @@ void CHud :: Init( void )
 
 	m_Menu.Init();
 	
-	ServersInit();
+	//ServersInit();
 
 	MsgFunc_ResetHUD(0, 0, NULL );
 }
@@ -296,7 +296,7 @@ CHud :: ~CHud()
 		m_pHudList = NULL;
 	}
 
-	ServersShutdown();
+	//ServersShutdown();
 }
 
 // GetSpriteIndex()

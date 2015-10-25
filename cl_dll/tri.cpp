@@ -17,7 +17,11 @@
 #include "cl_entity.h"
 #include "triangleapi.h"
 
+#ifdef _WIN32
 #define DLLEXPORT __declspec( dllexport )
+#else
+#define DLLEXPORT
+#endif
 
 extern "C"
 {
