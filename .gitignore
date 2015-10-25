@@ -1,6 +1,6 @@
-.o
-.orig
-.obj
-.dll
-.exe
-
+*.o
+*.orig
+*.obj
+*.dll
+*.exe
+*.so
