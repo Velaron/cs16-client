@@ -14,6 +14,8 @@ typedef unsigned char byte;
 //---------------------------------------------------------------------------
 // client_textmessage_t
 //---------------------------------------------------------------------------
+
+#define CLIENT_TEXTMESAGE_S
 typedef struct client_textmessage_s
 {
 	int		effect;

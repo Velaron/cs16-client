@@ -68,6 +68,7 @@ typedef struct client_sprite_s
 	wrect_t rc;
 } client_sprite_t;
 
+#ifndef CLIENT_TEXTMESAGE_S
 typedef struct client_textmessage_s
 {
 	int		effect;
@@ -82,6 +83,7 @@ typedef struct client_textmessage_s
 	const char *pName;
 	const char *pMessage;
 } client_textmessage_t;
+#endif
 
 typedef struct hud_player_info_s
 {
