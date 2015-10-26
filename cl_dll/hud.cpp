@@ -109,11 +109,11 @@ int __MsgFunc_ValClass(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
-int __MsgFunc_TeamNames(const char *pszName, int iSize, void *pbuf)
+/*int __MsgFunc_TeamNames(const char *pszName, int iSize, void *pbuf)
 {
 
 	return 0;
-}
+}*/
 
 int __MsgFunc_Feign(const char *pszName, int iSize, void *pbuf)
 {
@@ -157,7 +157,7 @@ int __MsgFunc_ServerName(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
-int __MsgFunc_ScoreInfo(const char *pszName, int iSize, void *pbuf)
+/*int __MsgFunc_ScoreInfo(const char *pszName, int iSize, void *pbuf)
 {
 
 	return 0;
@@ -174,7 +174,7 @@ int __MsgFunc_TeamInfo(const char *pszName, int iSize, void *pbuf)
 
 	return 0;
 }
-
+*/
 int __MsgFunc_Spectator(const char *pszName, int iSize, void *pbuf)
 {
 
@@ -206,16 +206,16 @@ void CHud :: Init( void )
 	HOOK_COMMAND( "togglebrowser", ToggleServerBrowser );
 
 	HOOK_MESSAGE( ValClass );
-	HOOK_MESSAGE( TeamNames );
+	//HOOK_MESSAGE( TeamNames );
 	HOOK_MESSAGE( Feign );
 	HOOK_MESSAGE( Detpack );
 	HOOK_MESSAGE( MOTD );
 	HOOK_MESSAGE( BuildSt );
 	HOOK_MESSAGE( RandomPC );
 	HOOK_MESSAGE( ServerName );
-	HOOK_MESSAGE( ScoreInfo );
+/*	HOOK_MESSAGE( ScoreInfo );
 	HOOK_MESSAGE( TeamScore );
-	HOOK_MESSAGE( TeamInfo );
+	HOOK_MESSAGE( TeamInfo );*/
 
 	HOOK_MESSAGE( Spectator );
 	HOOK_MESSAGE( AllowSpec );
@@ -268,7 +268,7 @@ void CHud :: Init( void )
 	m_AmmoSecondary.Init();
 	m_TextMessage.Init();
 	m_StatusIcons.Init();
-
+	m_Scoreboard.Init();
 	m_Menu.Init();
 	
 	//ServersInit();
@@ -416,6 +416,7 @@ void CHud :: VidInit( void )
 	m_AmmoSecondary.VidInit();
 	m_TextMessage.VidInit();
 	m_StatusIcons.VidInit();
+	m_Scoreboard.VidInit();
 }
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)

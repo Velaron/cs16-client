@@ -110,8 +110,9 @@ int CHudDeathNotice :: Draw( float flTime )
 
 		rgDeathNoticeList[i].flDisplayTime = min( rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME );
 
-		// Only draw if the viewport will let me
+		// Hide when scoreboard drawing. It will break triapi
 		//if ( gViewPort && gViewPort->AllowedToPrintText() )
+		if ( !gHUD.m_Scoreboard.m_iShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission )
 		{
 			// Draw the death notice
 			y = YRES(DEATHNOTICE_TOP) + 2 + (20 * i);  //!!!
@@ -170,6 +171,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	//if (gViewPort)
 	//	gViewPort->DeathMsg( killer, victim );
+	gHUD.m_Scoreboard.DeathMsg( killer, victim );
 
 	gHUD.m_Spectator.DeathMessage(victim);
 	int i;
@@ -186,6 +188,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	//if (gViewPort)
 		//gViewPort->GetAllPlayersInfo();
+	gHUD.m_Scoreboard.GetAllPlayersInfo();
 
 	// Get the Killer's name
 	char *killer_name = g_PlayerInfoList[ killer ].name;

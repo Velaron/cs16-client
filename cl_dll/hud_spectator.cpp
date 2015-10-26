@@ -424,6 +424,7 @@ int CHudSpectator::Draw(float flTime)
 	
 	// make sure we have player info
 	//gViewPort->GetAllPlayersInfo();
+	gHUD.m_Scoreboard.GetAllPlayersInfo();
 
 
 	// loop through all the players and draw additional infos to their sprites on the map
@@ -628,7 +629,7 @@ void CHudSpectator::FindNextPlayer(bool bReverse)
 
 	// make sure we have player info
 	//gViewPort->GetAllPlayersInfo();
-
+	gHUD.m_Scoreboard.GetAllPlayersInfo();
 
 	do
 	{
