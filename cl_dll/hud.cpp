@@ -132,13 +132,13 @@ int __MsgFunc_VGUIMenu(const char *pszName, int iSize, void *pbuf)
 
 	return 0;
 }
-
+/*
 int __MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 {
 
 	return 0;
 }
-
+*/
 int __MsgFunc_BuildSt(const char *pszName, int iSize, void *pbuf)
 {
 
@@ -209,7 +209,7 @@ void CHud :: Init( void )
 	//HOOK_MESSAGE( TeamNames );
 	HOOK_MESSAGE( Feign );
 	HOOK_MESSAGE( Detpack );
-	HOOK_MESSAGE( MOTD );
+	//HOOK_MESSAGE( MOTD );
 	HOOK_MESSAGE( BuildSt );
 	HOOK_MESSAGE( RandomPC );
 	HOOK_MESSAGE( ServerName );
@@ -270,6 +270,7 @@ void CHud :: Init( void )
 	m_StatusIcons.Init();
 	m_Scoreboard.Init();
 	m_Menu.Init();
+	m_MOTD.Init();
 	
 	//ServersInit();
 
@@ -417,6 +418,7 @@ void CHud :: VidInit( void )
 	m_TextMessage.VidInit();
 	m_StatusIcons.VidInit();
 	m_Scoreboard.VidInit();
+	m_MOTD.VidInit();
 }
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)

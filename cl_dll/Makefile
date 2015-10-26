@@ -65,6 +65,7 @@ SRCS+=./util.cpp
 SRCS+=./view.cpp
 SRCS+=./input_xash3d.cpp
 SRCS+=./scoreboard.cpp
+SRCS+=./MOTD.cpp
 DEFINES =  -I../common -I. -I../game_shared -I../pm_shared -I../engine -Wno-write-strings -DLINUX -D_LINUX -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -I../dlls/ -fpermissive -w
 CFLAGS = -Og -ggdb
 OBJS = $(SRCS:.cpp=.o) $(SRCS_C:.c=.o)
