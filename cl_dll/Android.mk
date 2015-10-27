@@ -1,5 +1,28 @@
-CC= gcc -m32
-CXX = g++ -m32
+#hlsdk-2.3 client port for android
+#Copyright (c) mittorn
+
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := client
+#ifeq ($(XASH_SDL),1)
+#APP_PLATFORM := android-12
+#LOCAL_SHARED_LIBRARIES += SDL2 
+#LOCAL_CFLAGS += -DXASH_SDL
+#else
+APP_PLATFORM := android-8
+#endif
+LOCAL_CONLYFLAGS += -std=c99
+
+include $(XASH3D_CONFIG)
+
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a-hard)
+LOCAL_MODULE_FILENAME = libclient_hardfp
+endif
+
+LOCAL_CFLAGS += -fsigned-char -DCLIENT_DLL=1
+
 SRCS+=../dlls/crossbow.cpp
 SRCS+=../dlls/crowbar.cpp
 SRCS+=../dlls/egon.cpp
@@ -68,15 +91,15 @@ SRCS+=./scoreboard.cpp
 SRCS+=./MOTD.cpp
 INCLUDES =  -I../common -I. -I../game_shared -I../pm_shared -I../engine -I../dlls
 DEFINES = -Wno-write-strings -DLINUX -D_LINUX -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -fpermissive -w
-CFLAGS = -Og -ggdb
-OBJS = $(SRCS:.cpp=.o) $(SRCS_C:.c=.o)
-%.o : %.c
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -fPIC -c $< -o $@
 
-%.o : %.cpp
-	$(CXX) $(CFLAGS) $(INCLUDES) $(DEFINES) -fPIC -c $< -o $@
-client.so : $(OBJS)
-	$(CXX) $(OBJS) -o client.so -shared -Wl,--no-undefined -fPIC -lm -ldl
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/. \
+		 $(LOCAL_PATH)/../common \
+		 $(LOCAL_PATH)/../engine \
+		 $(LOCAL_PATH)/../game_shared \
+		 $(LOCAL_PATH)/../dlls \
+		 $(LOCAL_PATH)/../pm_shared
+LOCAL_CFLAGS += $(DEFINES) $(INCLUDES)
 
-clean:
-	$(RM) $(OBJS)
+LOCAL_SRC_FILES := $(SRCS) $(SRCS_C)
+
+include $(BUILD_SHARED_LIBRARY)
