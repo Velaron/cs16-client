@@ -112,7 +112,7 @@ int CHudDeathNotice :: Draw( float flTime )
 
 		// Hide when scoreboard drawing. It will break triapi
 		//if ( gViewPort && gViewPort->AllowedToPrintText() )
-		if ( !gHUD.m_Scoreboard.m_iShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission && !gHUD.m_MOTD.m_bShow )
+		if ( !gHUD.m_iNoConsolePrint )
 		{
 			// Draw the death notice
 			y = YRES(DEATHNOTICE_TOP) + 2 + (20 * i);  //!!!
@@ -245,6 +245,8 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	DEATHNOTICE_DISPLAY_TIME = CVAR_GET_FLOAT( "hud_deathnotice_time" );
 	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME;
+	if( gHUD.m_iNoConsolePrint )
+		return 1;
 
 	if (rgDeathNoticeList[i].iNonPlayerKill)
 	{

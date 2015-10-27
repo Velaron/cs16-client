@@ -62,6 +62,10 @@ void CHudMOTD :: Reset( void )
 #define ROW_RANGE_MAX ( ScreenHeight - 100 )
 int CHudMOTD :: Draw( float fTime )
 {
+	gHUD.m_iNoConsolePrint &= ~( 1 << 1 );
+	if( !m_bShow )
+		return 1;
+	gHUD.m_iNoConsolePrint |= 1 << 1;
 	bool bScroll;
 	// find the top of where the MOTD should be drawn,  so the whole thing is centered in the screen
 	int ypos = (ScreenHeight - LINE_HEIGHT * m_iLines)/2; // shift it up slightly

@@ -111,7 +111,8 @@ inline int ConsoleStringLen( const char *string )
 
 inline void ConsolePrint( const char *string )
 {
-	gEngfuncs.pfnConsolePrint( string );
+	if(!gHUD.m_iNoConsolePrint)
+		gEngfuncs.pfnConsolePrint( string );
 }
 
 inline void CenterPrint( const char *string )
