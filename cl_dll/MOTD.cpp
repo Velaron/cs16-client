@@ -77,11 +77,11 @@ int CHudMOTD :: Draw( float fTime )
 	int ypos_r=ypos;
 	if( height > ROW_RANGE_MAX )
 	{
-		ypos = ROW_RANGE_MIN + 3 + scroll;
-		if( ypos  > ROW_RANGE_MIN )
-			scroll-=7;
+		ypos = ROW_RANGE_MIN + 7 + scroll;
+		if( ypos  > ROW_RANGE_MIN + 4 )
+			scroll-= (ypos - ( ROW_RANGE_MIN + 4))/3.0;
 		if( ypos + height < ROW_RANGE_MAX )
-			scroll+=7;
+			scroll+= (ROW_RANGE_MAX - (ypos + height))/ 3.0;
 		ypos_r = ROW_RANGE_MIN;
 		height = ROW_RANGE_MAX;
 	}

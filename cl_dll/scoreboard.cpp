@@ -119,6 +119,7 @@ int CHudScoreboard :: Draw( float fTime )
 
 	if ( !m_iShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission )
 		return 1;
+	
 	gHUD.m_iNoConsolePrint |= 1 << 0;
 
 	GetAllPlayersInfo();
@@ -318,7 +319,7 @@ int CHudScoreboard :: Draw( float fTime )
 
 	return 1;
 }
-
+extern float *GetClientColor( int client );
 // returns the ypos where it finishes drawing
 int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset, char *team )
 {
@@ -377,6 +378,8 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 
 		int xpos = NAME_RANGE_MIN + xpos_rel;
 		int r = 255, g = 255, b = 255;
+		float *colors = GetClientColor( best_player );
+		r *= colors[0], g *= colors[1], b *= colors[2];
 		if ( best_player == m_iLastKilledBy && m_fLastKillTime && m_fLastKillTime > gHUD.m_flTime )
 		{
 			if ( pl_info->thisplayer )
