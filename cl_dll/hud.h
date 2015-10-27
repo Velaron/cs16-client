@@ -208,7 +208,7 @@ private:
 //
 // REMOVED: Vgui has replaced this.
 //
-/*
+
 class CHudMOTD : public CHudBase
 {
 public:
@@ -218,14 +218,18 @@ public:
 	void Reset( void );
 
 	int MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf );
+	void Scroll( int dir );
+	void Scroll( float amount );
+	float scroll;
+	bool m_bShow;
 
 protected:
 	static int MOTD_DISPLAY_TIME;
 	char m_szMOTD[ MAX_MOTD_LENGTH ];
-	float m_flActiveRemaining;
+	
 	int m_iLines;
 };
-*/
+
 
 class CHudScoreboard: public CHudBase
 {
@@ -645,6 +649,7 @@ public:
 	CHudTextMessage m_TextMessage;
 	CHudStatusIcons m_StatusIcons;
 	CHudScoreboard	m_Scoreboard;
+	CHudMOTD	m_MOTD;
 
 	void Init( void );
 	void VidInit( void );

@@ -683,8 +683,16 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 
 		if ( !(in_klook.state & 1 ) )
 		{	
-			cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
-			cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
+			if(gHUD.m_MOTD.m_bShow)
+			{
+				gHUD.m_MOTD.scroll -= CL_KeyState (&in_forward);
+				gHUD.m_MOTD.scroll += CL_KeyState (&in_back);
+			}
+			else
+			{
+				cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
+				cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
+			}
 		}	
 
 		// adjust for speed key
@@ -779,7 +787,10 @@ int CL_ButtonBits( int bResetState )
 
 	if ( in_attack.state & 3 )
 	{
-		bits |= IN_ATTACK;
+		if(gHUD.m_MOTD.m_bShow)
+			gHUD.m_MOTD.Reset();
+		else
+			bits |= IN_ATTACK;
 	}
 	
 	if (in_duck.state & 3)
