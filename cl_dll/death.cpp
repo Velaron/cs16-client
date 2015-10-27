@@ -21,7 +21,7 @@
 
 #include <string.h>
 #include <stdio.h>
-
+float color[3];
 
 DECLARE_MESSAGE( m_DeathNotice, DeathMsg );
 
@@ -112,7 +112,7 @@ int CHudDeathNotice :: Draw( float flTime )
 
 		// Hide when scoreboard drawing. It will break triapi
 		//if ( gViewPort && gViewPort->AllowedToPrintText() )
-		if ( !gHUD.m_iNoConsolePrint )
+		//if ( !gHUD.m_iNoConsolePrint )
 		{
 			// Draw the death notice
 			y = YRES(DEATHNOTICE_TOP) + 2 + (20 * i);  //!!!
@@ -126,7 +126,8 @@ int CHudDeathNotice :: Draw( float flTime )
 
 				// Draw killers name
 				if ( rgDeathNoticeList[i].KillerColor )
-					gEngfuncs.pfnDrawSetTextColor( rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2] );
+					//gEngfuncs.pfnDrawSetTextColor( rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2] );
+					DrawSetTextColor( rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2] );
 				x = 5 + DrawConsoleString( x, y, rgDeathNoticeList[i].szKiller );
 			}
 
@@ -146,7 +147,8 @@ int CHudDeathNotice :: Draw( float flTime )
 			if (rgDeathNoticeList[i].iNonPlayerKill == FALSE)
 			{
 				if ( rgDeathNoticeList[i].VictimColor )
-					gEngfuncs.pfnDrawSetTextColor( rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2] );
+					//gEngfuncs.pfnDrawSetTextColor( rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2] );
+					DrawSetTextColor( rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2] );
 				x = DrawConsoleString( x, y, rgDeathNoticeList[i].szVictim );
 			}
 		}
@@ -245,8 +247,8 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	DEATHNOTICE_DISPLAY_TIME = CVAR_GET_FLOAT( "hud_deathnotice_time" );
 	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME;
-	if( gHUD.m_iNoConsolePrint )
-		return 1;
+	//if( gHUD.m_iNoConsolePrint )
+		//return 1;
 
 	if (rgDeathNoticeList[i].iNonPlayerKill)
 	{

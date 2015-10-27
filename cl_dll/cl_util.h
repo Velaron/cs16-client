@@ -17,7 +17,6 @@
 //
 
 #include "cvardef.h"
-
 #ifndef TRUE
 #define TRUE 1
 #define FALSE 0
@@ -80,7 +79,7 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 #define ClientCmd (*gEngfuncs.pfnClientCmd)
 #define SetCrosshair (*gEngfuncs.pfnSetCrosshair)
 #define AngleVectors (*gEngfuncs.pfnAngleVectors)
-
+extern float color[3]; // hud.cpp
 
 // Gets the height & width of a sprite,  at the specified frame
 inline int SPR_Height( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Height(x, f); }
@@ -94,19 +93,26 @@ inline 	int						TextMessageDrawChar( int x, int y, int number, int r, int g, in
 
 inline int DrawConsoleString( int x, int y, const char *string )
 {
-	return gEngfuncs.pfnDrawConsoleString( x, y, (char*) string );
+	//return gEngfuncs.pfnDrawConsoleString( x, y, (char*) string );
+	return gHUD.DrawHudString( x, y, 9999, string, 255*color[0], 255*color[1], 255*color[2]);
 }
-
+inline int DrawSetTextColor(float r, float g, float b)
+{
+	color[0]=r, color[1] = g, color[2] = b;
+}
 inline void GetConsoleStringSize( const char *string, int *width, int *height )
 {
-	gEngfuncs.pfnDrawConsoleStringLen( string, width, height );
+	//gEngfuncs.pfnDrawConsoleStringLen( string, width, height );
+	*width =  gHUD.DrawHudStringLen(string);
+	*height = 13;
 }
 
 inline int ConsoleStringLen( const char *string )
 {
-	int _width, _height;
+	/*int _width, _height;
 	GetConsoleStringSize( string, &_width, &_height );
-	return _width;
+	return _width;*/
+	return gHUD.DrawHudStringLen(string);
 }
 
 inline void ConsolePrint( const char *string )
@@ -117,7 +123,8 @@ inline void ConsolePrint( const char *string )
 
 inline void CenterPrint( const char *string )
 {
-	gEngfuncs.pfnCenterPrint( string );
+	if(!gHUD.m_iNoConsolePrint)
+		gEngfuncs.pfnCenterPrint( string );
 }
 
 // returns the players name of entity no.

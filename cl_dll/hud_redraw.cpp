@@ -222,6 +222,17 @@ int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, char *szIt, int r, int 
 	return xpos;
 }
 
+int CHud :: DrawHudStringLen( char *szIt )
+{
+	int l = 0;
+		// draw the string until we hit the null character or a newline character
+	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
+	{
+		l += gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool	
+	}
+	return l;
+}
+
 int CHud :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b )
 {
 	char szString[32];
