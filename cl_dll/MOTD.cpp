@@ -28,9 +28,6 @@
 
 DECLARE_MESSAGE( m_MOTD, MOTD );
 
-float fStartTime;
-int iMaxLength;
-extern float scale;
 int CHudMOTD :: Init( void )
 {
 	gHUD.AddHudElem( this );
@@ -48,8 +45,6 @@ int CHudMOTD :: Init( void )
 int CHudMOTD :: VidInit( void )
 {
 	// Load sprites here
-	scale = gEngfuncs.pfnGetCvarFloat("hud_scale");
-	if(scale <= 0.01) scale = 1;
 	return 1;
 }
 
@@ -60,36 +55,35 @@ void CHudMOTD :: Reset( void )
 	m_iLines = 0;
 	m_bShow = 0;
 }
-void DarkSquare( int x, int y, int wide, int tall )
-{
-	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	gEngfuncs.pTriAPI->Color4f(0.0, 0.0, 0.0, 0.6);
-	gEngfuncs.pTriAPI->Vertex3f(x * scale, (y+tall)*scale, 0);
-	gEngfuncs.pTriAPI->Vertex3f(x * scale, y*scale, 0);
-	gEngfuncs.pTriAPI->Vertex3f((x + wide)*scale, y*scale, 0);
-	gEngfuncs.pTriAPI->Vertex3f((x + wide)*scale, (y+tall)*scale, 0);
-	gEngfuncs.pTriAPI->End();
-	FillRGBA( x+1, y, wide-1, 1, 255, 140, 0, 255 );
-	FillRGBA( x, y, 1, tall-1, 255, 140, 0, 255 );
-	FillRGBA( x+wide-1, y+1, 1, tall-1, 255, 140, 0, 255 );
-	FillRGBA( x, y+tall-1, wide-1, 1, 255, 140, 0, 255 );
-}
 
 #define LINE_HEIGHT  13
 #define ROW_GAP  13
-#define ROW_RANGE_MIN 15
-#define ROW_RANGE_MAX ( ScreenHeight - 50 )
+#define ROW_RANGE_MIN 30
+#define ROW_RANGE_MAX ( ScreenHeight - 100 )
 int CHudMOTD :: Draw( float fTime )
 {
+	bool bScroll;
 	// find the top of where the MOTD should be drawn,  so the whole thing is centered in the screen
-	int ypos = ROW_RANGE_MIN + 3 + scroll; // shift it up slightly
+	int ypos = (ScreenHeight - LINE_HEIGHT * m_iLines)/2; // shift it up slightly
 	char *ch = m_szMOTD;
-	int xpos = (ScreenWidth - gHUD.m_scrinfo.charWidths[ 'M' ] * iMaxLength) / 2;
+	int xpos = (ScreenWidth - gHUD.m_scrinfo.charWidths[ 'M' ] * m_iMaxLength) / 2;
 	if( xpos < 30 ) xpos = 30;
-	int xmax = xpos + gHUD.m_scrinfo.charWidths[ 'M' ] * iMaxLength;
+	int xmax = xpos + gHUD.m_scrinfo.charWidths[ 'M' ] * m_iMaxLength;
+	int height = LINE_HEIGHT * m_iLines;
+	int ypos_r=ypos;
+	if( height > ROW_RANGE_MAX )
+	{
+		ypos = ROW_RANGE_MIN + 3 + scroll;
+		if( ypos  > ROW_RANGE_MIN )
+			scroll-=7;
+		if( ypos + height < ROW_RANGE_MAX )
+			scroll+=7;
+		ypos_r = ROW_RANGE_MIN;
+		height = ROW_RANGE_MAX;
+	}
+	int ymax = ypos + height;
 	if( xmax > ScreenWidth - 30 ) xmax = ScreenWidth - 30;
-	DarkSquare(xpos-5, ROW_RANGE_MIN-5, xmax - xpos+10, ROW_RANGE_MAX + 23);
+	gHUD.DrawDarkRectangle(xpos-5, ypos_r - 5, xmax - xpos+10, height + 10);
 	while ( *ch )
 	{
 		int line_length = 0;  // count the length of the current line
@@ -102,7 +96,7 @@ int CHudMOTD :: Draw( float fTime )
 			top = NULL;
 
 		// find where to start drawing the line
-		if( ypos > ROW_RANGE_MIN && ypos < ROW_RANGE_MAX )
+		if( (ypos > ROW_RANGE_MIN) && (ypos + LINE_HEIGHT <= ypos_r + height) )
 			gHUD.DrawHudString( xpos, ypos, xmax, ch, 255, 180, 0 );
 
 		ypos += LINE_HEIGHT;
@@ -136,7 +130,7 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 	{
 		int length = 0;
 		
-		iMaxLength = 0;
+		m_iMaxLength = 0;
 		m_iFlags |= HUD_ACTIVE;
 
 
@@ -145,13 +139,20 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 			if ( *sz == '\n' )
 			{
 				m_iLines++;
-				if( length > iMaxLength )
+				if( length > m_iMaxLength )
 				{
-					iMaxLength = length;
+					m_iMaxLength = length;
 					length = 0;
 				}
 			}
 			length++;
+		}
+		
+		m_iLines++;
+		if( length > m_iMaxLength )
+		{
+			m_iMaxLength = length;
+			length = 0;
 		}
 		m_bShow = true;
 	}

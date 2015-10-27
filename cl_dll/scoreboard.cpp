@@ -36,8 +36,6 @@ int g_iUser3;
 int g_iTeamNumber;
 int g_iPlayerClass;
 
-float scale;
-
 //#include "vgui_TeamFortressViewport.h"
 
 DECLARE_COMMAND( m_Scoreboard, ShowScores );
@@ -70,8 +68,6 @@ int CHudScoreboard :: Init( void )
 int CHudScoreboard :: VidInit( void )
 {
 	// Load sprites here
-	scale = gEngfuncs.pfnGetCvarFloat("hud_scale");
-	if(scale <= 0.01) scale = 1;
 	return 1;
 }
 
@@ -147,19 +143,7 @@ int CHudScoreboard :: Draw( float fTime )
 
 	FAR_RIGHT = can_show_packetloss ? PL_RANGE_MAX : PING_RANGE_MAX;
 	FAR_RIGHT += 5;
-
-	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	gEngfuncs.pTriAPI->Color4f(0.0, 0.0, 0.0, 0.6);
-	gEngfuncs.pTriAPI->Vertex3f((xpos - 5)*scale, (ROW_RANGE_MAX - ypos)*scale, 0);
-	gEngfuncs.pTriAPI->Vertex3f((xpos - 5)*scale, (ypos - 5)*scale, 0);
-	gEngfuncs.pTriAPI->Vertex3f((FAR_RIGHT + xpos - 5)*scale, (ypos - 5)*scale, 0);
-	gEngfuncs.pTriAPI->Vertex3f((FAR_RIGHT + xpos - 5)*scale, (ROW_RANGE_MAX - ypos)*scale, 0);
-	gEngfuncs.pTriAPI->End();
-	FillRGBA( xpos - 5, ypos - 5, FAR_RIGHT, 1, 255, 140, 0, 255 );
-	FillRGBA( xpos - 5, ypos - 4, 1, ROW_RANGE_MAX - ypos * 2 + 3, 255, 140, 0, 255 );
-	FillRGBA( FAR_RIGHT + xpos - 6, ypos - 4, 1, ROW_RANGE_MAX - ypos * 2 + 3, 255, 140, 0, 255 );
-	FillRGBA( xpos - 5, ROW_RANGE_MAX - ypos - 1, FAR_RIGHT, 1, 255, 140, 0, 255 );
+	gHUD.DrawDarkRectangle(xpos - 5, ypos - 5, FAR_RIGHT, ROW_RANGE_MAX);
 	if ( !gHUD.m_Teamplay ) 
 		gHUD.DrawHudString( xpos, ypos, NAME_RANGE_MAX + xpos_rel, "Player", 255, 140, 0 );
 	else
@@ -201,8 +185,8 @@ int CHudScoreboard :: Draw( float fTime )
 	// recalc the team scores, then draw them
 	for ( i = 1; i < MAX_PLAYERS; i++ )
 	{
-		if ( g_PlayerInfoList[i].name == NULL )
-			continue; // empty player slot, skip
+		//if ( g_PlayerInfoList[i].name == NULL )
+		//	continue; // empty player slot, skip
 
 		if ( g_PlayerExtraInfo[i].teamname[0] == 0 )
 			continue; // skip over players who are not in a team
@@ -517,8 +501,8 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 	m_iNumTeams = 0;
 	for ( i = 1; i < MAX_PLAYERS; i++ )
 	{
-		if ( g_PlayerInfoList[i].name == NULL )
-			continue;
+		//if ( g_PlayerInfoList[i].name == NULL )
+		//	continue;
 
 		if ( g_PlayerExtraInfo[i].teamname[0] == 0 )
 			continue; // skip over players who are not in a team

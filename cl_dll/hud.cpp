@@ -400,6 +400,10 @@ void CHud :: VidInit( void )
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
 	m_HUD_number_0 = GetSpriteIndex( "number_0" );
 
+	m_flScale = gEngfuncs.pfnGetCvarFloat("hud_scale");
+	if(m_flScale < 0.01)
+		m_flScale = 1;
+
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
 
 	m_Ammo.VidInit();

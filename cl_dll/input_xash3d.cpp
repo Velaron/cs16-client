@@ -184,9 +184,10 @@ void IN_Move( float frametime, usercmd_t *cmd )
 				viewangles[YAW] -= ac_sidemove * 5;
 			ac_sidemove = 0;
 		}
-
+		if(gHUD.m_MOTD.m_bShow)
+			gHUD.m_MOTD.scroll += rel_pitch;
+		else
 		viewangles[PITCH] += rel_pitch;
-		//viewangles[PITCH] = bound( -cl_pitchup->value, viewangles[PITCH], cl_pitchdown->value );
 			if (viewangles[PITCH] > cl_pitchdown->value)
 				viewangles[PITCH] = cl_pitchdown->value;
 			if (viewangles[PITCH] < -cl_pitchup->value)

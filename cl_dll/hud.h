@@ -228,6 +228,7 @@ protected:
 	char m_szMOTD[ MAX_MOTD_LENGTH ];
 	
 	int m_iLines;
+	int m_iMaxLength;
 };
 
 
@@ -601,6 +602,7 @@ public:
 	int		m_iFOV;
 	int		m_Teamplay;
 	int		m_iRes;
+	float   m_flScale;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
 
@@ -610,6 +612,7 @@ public:
 	int DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b );
 	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
 	int GetNumWidth(int iNumber, int iFlags);
+	void DrawDarkRectangle( int x, int y, int wide, int tall);
 
 private:
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
