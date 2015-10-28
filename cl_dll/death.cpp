@@ -247,8 +247,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	DEATHNOTICE_DISPLAY_TIME = CVAR_GET_FLOAT( "hud_deathnotice_time" );
 	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME;
-	//if( gHUD.m_iNoConsolePrint )
-		//return 1;
+
 
 	if (rgDeathNoticeList[i].iNonPlayerKill)
 	{

@@ -360,6 +360,7 @@ int CHud::GetNumWidth( int iNumber, int iFlags )
 
 void CHud::DrawDarkRectangle( int x, int y, int wide, int tall )
 {
+	FillRGBA( x, y, wide, tall, 0, 0, 0, 0 );
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
 	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
 	gEngfuncs.pTriAPI->Color4f(0.0, 0.0, 0.0, 0.6);
