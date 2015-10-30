@@ -539,3 +539,4 @@ int UTIL_SharedRandomLong( unsigned int seed, int low, int high );
 float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 
 float UTIL_WeaponTimeBase( void );
+char UTIL_TextureHit(TraceResult *ptrHit, Vector vecSrc, Vector vecEnd);
