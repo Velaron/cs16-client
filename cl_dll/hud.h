@@ -383,6 +383,7 @@ public:
 	void Reset( void );
 	int Draw( float flTime );
 	int MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf );
 
 	void SelectMenuItem( int menu_item );
 
@@ -390,6 +391,7 @@ public:
 	int m_bitsValidSlots;
 	float m_flShutoffTime;
 	int m_fWaitingForMore;
+
 };
 
 //
@@ -571,6 +573,64 @@ private:
 
 };
 
+
+//
+//-----------------------------------------------------
+//
+class CHudMoney : public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+	int MsgFunc_Money( const char *pszName, int iSize, void *pbuf );
+
+private:
+	int m_iMoneyCount;
+	HSPRITE	m_hSprite;
+};
+//
+//-----------------------------------------------------
+//
+class CHudRadio: public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+	// play a sentence from a radio
+	// [byte] unknown (always 1)
+	// [string] sentence name
+	// [short] unknown. (always 100, it's a volume?)
+	int MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf );
+private:
+	int m_bFirst;
+	char m_sentence[64];
+	int m_sThird;
+	bool m_enableRadio;
+};
+
+//
+//-----------------------------------------------------
+//
+class CHudTimer: public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw(float fTime);
+	// set up the timer.
+	// [short]
+	int MsgFunc_RoundTime(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_KillTimer(const char *pszName, int iSize, void *pbuf);
+	// show the timer
+	// [empty]
+	int MsgFunc_ShowTimer(const char *pszName, int iSize, void *pbuf);
+	int m_HUD_timer;
+	bool ShowTimer;
+	int Time;
+	float StartTime;
+};
 //
 //-----------------------------------------------------
 //
@@ -602,12 +662,15 @@ public:
 	int		m_iFOV;
 	int		m_Teamplay;
 	int		m_iRes;
+	int		RealSize;
 	float   m_flScale;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
 
 	int m_iFontHeight;
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b );
+	int DrawHudNumber2( int x, int y, bool DrawZero, int iDigits, int iNumber, int r, int g, int b);
+	int DrawHudNumber2( int x, int y, int iNumber, int r, int g, int b);
 	int DrawHudString(int x, int y, int iMaxX, char *szString, int r, int g, int b );
 	int DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b );
 	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
@@ -653,6 +716,9 @@ public:
 	CHudStatusIcons m_StatusIcons;
 	CHudScoreboard	m_Scoreboard;
 	CHudMOTD	m_MOTD;
+	CHudMoney	m_Money;
+	CHudTimer	m_Timer;
+	CHudRadio	m_Radio;
 
 	void Init( void );
 	void VidInit( void );

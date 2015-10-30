@@ -363,3 +363,53 @@ void CHud::DrawDarkRectangle( int x, int y, int wide, int tall )
 	FillRGBA( x, y+tall-1, wide-1, 1, 255, 140, 0, 255 );
 }
 
+// TANKIST START
+int CHud :: DrawHudNumber2( int x, int y, bool DrawZero, int iDigits, int iNumber, int r, int g, int b)
+{
+	int iWidth = GetSpriteRect( m_HUD_number_0 ).right - GetSpriteRect( m_HUD_number_0 ).left;
+	x += ( iDigits - 1 ) * iWidth;
+
+	int ResX = x + iWidth;
+	do
+	{
+		int k = iNumber % 10;
+		iNumber /= 10;
+		SPR_Set( GetSprite( m_HUD_number_0 + k ), r, g, b );
+		SPR_DrawAdditive( 0, x, y, &GetSpriteRect( m_HUD_number_0 + k ) );
+		x -= iWidth;
+		iDigits--;
+	}
+	while( iNumber > 0 || ( iDigits > 0 && DrawZero ) );
+
+	return ResX;
+}
+
+int CHud :: DrawHudNumber2( int x, int y, int iNumber, int r, int g, int b)
+{
+	int iWidth = GetSpriteRect( m_HUD_number_0 ).right - GetSpriteRect( m_HUD_number_0 ).left;
+
+	int iDigits = 0;
+	int temp = iNumber;
+	do
+	{
+		iDigits++;
+		temp /= 10;
+	}
+	while( temp > 0 );
+
+	x += ( iDigits - 1 ) * iWidth;
+
+	int ResX = x + iWidth;
+	do
+	{
+		int k = iNumber % 10;
+		iNumber /= 10;
+		SPR_Set( GetSprite( m_HUD_number_0 + k ), r, g, b );
+		SPR_DrawAdditive( 0, x, y, &GetSpriteRect( m_HUD_number_0 + k ) );
+		x -= iWidth;
+	}
+	while( iNumber > 0 );
+
+	return ResX;
+}
+// TANKIST END

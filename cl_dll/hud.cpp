@@ -271,6 +271,9 @@ void CHud :: Init( void )
 	m_Scoreboard.Init();
 	m_Menu.Init();
 	m_MOTD.Init();
+	m_Radio.Init();
+	m_Timer.Init();
+	m_Money.Init();
 	
 	//ServersInit();
 
@@ -423,6 +426,8 @@ void CHud :: VidInit( void )
 	m_StatusIcons.VidInit();
 	m_Scoreboard.VidInit();
 	m_MOTD.VidInit();
+	m_Timer.VidInit();
+	m_Money.VidInit();
 }
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)
