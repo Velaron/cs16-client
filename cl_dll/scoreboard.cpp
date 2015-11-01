@@ -115,6 +115,7 @@ int CHudScoreboard :: Draw( float fTime )
 {
 	int can_show_packetloss = 0;
 	int FAR_RIGHT;
+	int j;
 
 	if ( !m_iShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission )
 		return 1;
@@ -183,7 +184,7 @@ int CHudScoreboard :: Draw( float fTime )
 	}
 
 	// recalc the team scores, then draw them
-	for ( i = 1; i < MAX_PLAYERS; i++ )
+	for ( int i = 1; i < MAX_PLAYERS; i++ )
 	{
 		//if ( g_PlayerInfoList[i].name == NULL )
 		//	continue; // empty player slot, skip
@@ -192,7 +193,7 @@ int CHudScoreboard :: Draw( float fTime )
 			continue; // skip over players who are not in a team
 
 		// find what team this player is in
-		for ( int j = 1; j <= m_iNumTeams; j++ )
+		for ( j = 1; j <= m_iNumTeams; j++ )
 		{
 			if ( !stricmp( g_PlayerExtraInfo[i].teamname, g_TeamInfo[j].name ) )
 				break;
@@ -216,7 +217,7 @@ int CHudScoreboard :: Draw( float fTime )
 	}
 
 	// find team ping/packetloss averages
-	for ( i = 1; i <= m_iNumTeams; i++ )
+	for ( int i = 1; i <= m_iNumTeams; i++ )
 	{
 		g_TeamInfo[i].already_drawn = FALSE;
 
@@ -233,7 +234,7 @@ int CHudScoreboard :: Draw( float fTime )
 		int highest_frags = -99999; int lowest_deaths = 99999;
 		int best_team = 0;
 
-		for ( i = 1; i <= m_iNumTeams; i++ )
+		for ( int i = 1; i <= m_iNumTeams; i++ )
 		{
 			if ( g_TeamInfo[i].players < 0 )
 				continue;
@@ -482,6 +483,7 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 {
 	BEGIN_READ( pbuf, iSize );
 	short cl = READ_BYTE();
+	int j;
 	
 	if ( cl > 0 && cl <= MAX_PLAYERS )
 	{  // set the players team
@@ -499,7 +501,7 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 	// rebuild the team list
 	GetAllPlayersInfo();
 	m_iNumTeams = 0;
-	for ( i = 1; i < MAX_PLAYERS; i++ )
+	for ( int i = 1; i < MAX_PLAYERS; i++ )
 	{
 		//if ( g_PlayerInfoList[i].name == NULL )
 		//	continue;
@@ -508,7 +510,7 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 			continue; // skip over players who are not in a team
 
 		// is this player in an existing team?
-		for ( int j = 1; j <= m_iNumTeams; j++ )
+		for ( j = 1; j <= m_iNumTeams; j++ )
 		{
 			if ( g_TeamInfo[j].name[0] == '\0' )
 				break;
@@ -535,7 +537,7 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 	}
 
 	// clear out any empty teams
-	for ( i = 1; i <= m_iNumTeams; i++ )
+	for ( int i = 1; i <= m_iNumTeams; i++ )
 	{
 		if ( g_TeamInfo[i].players < 1 )
 			memset( &g_TeamInfo[i], 0, sizeof(team_info_t) );
@@ -554,9 +556,10 @@ int CHudScoreboard :: MsgFunc_TeamScore( const char *pszName, int iSize, void *p
 {
 	BEGIN_READ( pbuf, iSize );
 	char *TeamName = READ_STRING();
+	int i;
 
 	// find the team matching the name
-	for ( int i = 1; i <= m_iNumTeams; i++ )
+	for ( i = 1; i <= m_iNumTeams; i++ )
 	{
 		if ( !stricmp( TeamName, g_TeamInfo[i].name ) )
 			break;

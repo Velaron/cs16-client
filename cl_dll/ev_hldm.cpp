@@ -68,7 +68,7 @@ void EV_EgonStop( struct event_args_s *args  );
 void EV_HornetGunFire( struct event_args_s *args  );
 void EV_TripmineFire( struct event_args_s *args  );
 void EV_SnarkFire( struct event_args_s *args  );
-
+void EV_Dummy( struct event_args_s *args );
 
 void EV_TrainPitchAdjust( struct event_args_s *args );
 }
@@ -1698,3 +1698,10 @@ int EV_TFC_IsAllyTeam( int iTeam1, int iTeam2 )
 {
 	return 0;
 }
+
+void EV_Dummy( struct event_args_s *args )
+{
+	gEngfuncs.pEventAPI->EV_WeaponAnimation( 1, 1 );
+	return;
+}
+

@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "parsemsg.h"
+#include "vgui_parser.h"
 
 DECLARE_MESSAGE( m_Message, HudText )
 DECLARE_MESSAGE( m_Message, GameTitle )
@@ -38,7 +39,6 @@ int CHudMessage::Init(void)
 	HOOK_MESSAGE( GameTitle );
 
 	gHUD.AddHudElem(this);
-
 	Reset();
 
 	return 1;
@@ -451,6 +451,16 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 				g_pCustomMessage.pMessage = g_pCustomText;
 
 				tempMessage = &g_pCustomMessage;
+			}
+			else
+			{
+				// we have found message in titles.txt, but it still need translating
+				if( tempMessage->pMessage[0] == '#' )
+				{
+					char *temp = (char *)tempMessage->pMessage;
+					tempMessage->pMessage = Localize(temp+1);
+					free( temp );
+				}
 			}
 
 			for ( j = 0; j < maxHUDMessages; j++ )

@@ -964,6 +964,11 @@ For debugging, print out state variables to log file
 	COM_Log( "c:\\hl.log", "%i ", m_iClip );
 }*/
 
+int RandomLong( int a, int b )
+{
+	return gEngfuncs.pfnRandomLong( a, b );
+}
+
 /*
 =====================
 HUD_InitClientWeapons
@@ -1000,7 +1005,7 @@ void HUD_InitClientWeapons( void )
 	// Pass through to engine
 	g_engfuncs.pfnPrecacheEvent		= gEngfuncs.pfnPrecacheEvent;
 	g_engfuncs.pfnRandomFloat		= gEngfuncs.pfnRandomFloat;
-	g_engfuncs.pfnRandomLong		= gEngfuncs.pfnRandomLong;
+	g_engfuncs.pfnRandomLong		= RandomLong;
 
 	// Allocate a slot for the local player
 	HUD_PrepEntity( &player		, NULL );

@@ -31,7 +31,6 @@
 							return gHUD.y.MsgFunc_##x(pszName, iSize, pbuf ); \
 							}
 
-
 #define HOOK_COMMAND(x, y) gEngfuncs.pfnAddCommand( x, __CmdFunc_##y );
 #define DECLARE_COMMAND(y, x) void __CmdFunc_##x( void ) \
 							{ \

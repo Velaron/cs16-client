@@ -1171,7 +1171,7 @@ public:
 	BOOL CanDeploy(void);
 	BOOL CanDrop(void) { return FALSE; }
 	BOOL Deploy(void);
-	BOOL CHEGrenade::CanHolster(void);
+	BOOL CanHolster(void);
 	void Holster(int skiplocal);
 	float GetMaxSpeed(void) { return m_fMaxSpeed; }
 	int iItemSlot(void) { return WPNSLOT_GRENADE; }

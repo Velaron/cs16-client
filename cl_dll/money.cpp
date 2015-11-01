@@ -6,6 +6,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include <string.h>
+#include "vgui_parser.h"
 DECLARE_MESSAGE( m_Money, Money )
 
 int CHudMoney::Init( )
