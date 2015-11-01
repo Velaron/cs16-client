@@ -33,12 +33,21 @@ char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 int KB_ConvertString( char *in, char **ppout );
 
 DECLARE_MESSAGE( m_Menu, ShowMenu );
+DECLARE_MESSAGE( m_Menu, VGUIMenu );
+DECLARE_MESSAGE( m_Menu, BuyClose );
+
+DECLARE_COMMAND( m_Menu, OldStyleMenuOpen );
+DECLARE_COMMAND( m_Menu, OldStyleMenuClose );
 
 int CHudMenu :: Init( void )
 {
 	gHUD.AddHudElem( this );
 
 	HOOK_MESSAGE( ShowMenu );
+	HOOK_MESSAGE( VGUIMenu );
+	HOOK_MESSAGE( BuyClose );
+	HOOK_COMMAND( "client_buy_open", OldStyleMenuOpen );
+	HOOK_COMMAND( "client_buy_close", OldStyleMenuClose );
 
 	InitHUDData();
 
@@ -185,4 +194,28 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 	m_fWaitingForMore = NeedMore;
 
 	return 1;
+}
+
+int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
+{
+	return 1;
+}
+
+int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
+{
+	UserCmd_OldStyleMenuClose();
+	return 1;
+}
+
+void CHudMenu::UserCmd_OldStyleMenuOpen()
+{
+	m_flShutoffTime = -1; // stay open until user will not close it
+	strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString("Buy"), MAX_MENU_STRING );
+
+}
+
+void CHudMenu::UserCmd_OldStyleMenuClose()
+{
+	m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
+	m_iFlags &= ~HUD_ACTIVE;
 }
