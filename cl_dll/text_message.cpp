@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "parsemsg.h"
+#include "vgui_parser.h"
 
 
 DECLARE_MESSAGE( m_TextMessage, TextMsg );
@@ -69,6 +70,8 @@ char *CHudTextMessage::LocaliseTextString( const char *msg, char *dst_buffer, in
 				continue;
 			}
 
+			if(clmsg->pMessage[0] == '#') strcpy(dst, Localize(clmsg->pMessage+1));
+
 			// copy string into message over the msg name
 			for ( char *wsrc = (char*)clmsg->pMessage; *wsrc != 0; wsrc++, dst++ )
 			{
@@ -110,7 +113,7 @@ char *CHudTextMessage::LookupString( const char *msg, int *msg_dest )
 
 		if ( !clmsg || !(clmsg->pMessage) )
 			return (char*)msg; // lookup failed, so return the original string
-		
+				
 		if ( msg_dest )
 		{
 			// check to see if titles.txt info overrides msg destination
@@ -118,6 +121,9 @@ char *CHudTextMessage::LookupString( const char *msg, int *msg_dest )
 			if ( clmsg->effect < 0 )  // 
 				*msg_dest = -clmsg->effect;
 		}
+
+		if( clmsg->pMessage[0] == '#')
+			return (char *)Localize( clmsg->pMessage + 1);
 
 		return (char*)clmsg->pMessage;
 	}
