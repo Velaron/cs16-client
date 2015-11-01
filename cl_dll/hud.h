@@ -384,6 +384,10 @@ public:
 	int Draw( float flTime );
 	int MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_BuyClose( const char *pszName, int iSize, void *pbuf );
+
+	void _cdecl UserCmd_OldStyleMenuClose( void );
+	void _cdecl UserCmd_OldStyleMenuOpen( void );
 
 	void SelectMenuItem( int menu_item );
 
@@ -425,15 +429,24 @@ public:
 	int VidInit( void );
 	int Draw(float flTime);
 	int MsgFunc_Battery(const char *pszName,  int iSize, void *pbuf );
+	int MsgFunc_ArmorType( const char *pszName, int iSize, void *pbuf );
 	
 private:
 	HSPRITE m_hSprite1;
 	HSPRITE m_hSprite2;
+	HSPRITE m_hSprite1Helmet;
+	HSPRITE m_hSprite2Helmet;
 	wrect_t *m_prc1;
 	wrect_t *m_prc2;
 	int	  m_iBat;	
 	float m_fFade;
 	int	  m_iHeight;		// width of the battery innards
+
+	enum armortype_t {
+		Vest = 0,
+		VestHelm
+	} m_enArmorType;
+
 };
 
 
@@ -671,8 +684,8 @@ public:
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b );
 	int DrawHudNumber2( int x, int y, bool DrawZero, int iDigits, int iNumber, int r, int g, int b);
 	int DrawHudNumber2( int x, int y, int iNumber, int r, int g, int b);
-	int DrawHudString(int x, int y, int iMaxX, char *szString, int r, int g, int b );
-	int DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b );
+	int DrawHudString(int x, int y, int iMaxX, char *szString, int r, int g, int b, bool drawing = false );
+	int DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b, bool drawing = false );
 	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
 	int GetNumWidth(int iNumber, int iFlags);
 	void DrawDarkRectangle( int x, int y, int wide, int tall);

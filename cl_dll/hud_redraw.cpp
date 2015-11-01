@@ -206,8 +206,9 @@ void ScaleColors( int &r, int &g, int &b, int a )
 	b = (int)(b * x);
 }
 
-int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, char *szIt, int r, int g, int b )
+int CHud :: DrawHudString( int xpos, int ypos, int iMaxX, char *szIt, int r, int g, int b, bool drawing )
 {
+	int first_xpos = xpos;
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
@@ -215,6 +216,26 @@ int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, char *szIt, int r, int 
 		if ( next > iMaxX )
 			return xpos;
 
+		if( *szIt == '\\' && *(szIt+1) != '\n' && *(szIt+1) != 0)
+		{
+			// an escape character
+
+			switch( *(++szIt) )
+			{
+			case 'y':
+				UnpackRGB( r, g, b, RGB_YELLOWISH );
+				break;
+			case 'w':
+				r = g = b = 255;
+				break;
+			case 'R':
+				if( drawing ) return xpos;
+				return DrawHudStringReverse( iMaxX, ypos, first_xpos, szIt, r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
+			case 'd':
+				break;
+			}
+			continue;
+		}
 		TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
 		xpos = next;		
 	}
@@ -231,21 +252,43 @@ int CHud :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int
 }
 
 // draws a string from right to left (right-aligned)
-int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b )
+int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b, bool drawing )
 {
+	int first_xpos = xpos;
 	char *szIt;
 	// find the end of the string
-	for ( szIt = szString; *szIt != 0; szIt++ )
+	for ( szIt = szString; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{ // we should count the length?		
 	}
 
 	// iterate throug the string in reverse
-	for ( szIt--;  szIt != (szString-1);  szIt-- )	
+	for ( szIt--;  *szIt != 0 && *szIt != '\n';  szIt-- )
 	{
 		int next = xpos - gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
 		if ( next < iMinX )
 			return xpos;
 		xpos = next;
+
+		if( *(szIt - 1) == '\\' )
+		{
+			// an escape character
+
+			switch( *szIt )
+			{
+			case 'y':
+				UnpackRGB( r, g, b, RGB_YELLOWISH );
+				break;
+			case 'w':
+				r = g = b = 255;
+				break;
+			case 'R':
+				if( drawing ) return xpos;
+				else return DrawHudString( iMinX, ypos, first_xpos, szIt, r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
+			case 'd':
+				break;
+			}
+			continue;
+		}
 
 		TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
 	}
