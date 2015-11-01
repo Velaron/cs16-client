@@ -24,8 +24,8 @@ cmake_minimum_required(VERSION 2.6.0)
 project (CLDLL)
 
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings -DLINUX -D_LINUX \
-     -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -fpermissive -w -Wl,--no-undefined -Og -g")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLINUX -D_LINUX \
+     -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -w -Wl,--no-undefined")
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Os")
@@ -119,6 +119,7 @@ set (CLDLL_SOURCES ./hl/hl_baseentity.cpp
     ./radio.cpp
     ./timer.cpp
     ./money.cpp
+    ./vgui_parser.cpp
 )
 
 include_directories (../common ../engine ../pm_shared ../dlls ../game_shared ../public)
@@ -127,5 +128,5 @@ target_link_libraries( ${CLDLL_LIBRARY} ${CMAKE_DL_LIBS} )
 
 
 set_target_properties (${CLDLL_SHARED} PROPERTIES
-	VERSION ${XASH3D_VERSION} SOVERSION ${XASH3D_VERSION}
+	VERSION 1.6 SOVERSION 1.6
 	POSITION_INDEPENDENT_CODE 1)

@@ -27,6 +27,7 @@
 
 #include "demo.h"
 #include "demo_api.h"
+#include "vgui_parser.h"
 
 
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
@@ -127,11 +128,6 @@ int __MsgFunc_Detpack(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
-int __MsgFunc_VGUIMenu(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
 /*
 int __MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 {
@@ -220,10 +216,13 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( Spectator );
 	HOOK_MESSAGE( AllowSpec );
 
-	// VGUI Menus
-	HOOK_MESSAGE( VGUIMenu );
-
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
+	// 1 << 16 -- READ ONLY CVAR.
+	CVAR_CREATE( "_vgui_menus", "0", FCVAR_ARCHIVE | FCVAR_USERINFO | 1<<16 ); // force client to use old style menus
+	CVAR_CREATE( "cl_lb", "0", FCVAR_ARCHIVE | FCVAR_USERINFO ); // force client to use old style menus
+	CVAR_CREATE( "lefthand", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	CVAR_CREATE( "_cl_autowepswitch", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	CVAR_CREATE( "_ah", "1", FCVAR_ARCHIVE| FCVAR_USERINFO);
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
 
 
@@ -274,7 +273,7 @@ void CHud :: Init( void )
 	m_Radio.Init();
 	m_Timer.Init();
 	m_Money.Init();
-	
+	Localize_Init();
 	//ServersInit();
 
 	MsgFunc_ResetHUD(0, 0, NULL );

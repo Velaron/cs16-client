@@ -83,11 +83,12 @@ int CHudMOTD :: Draw( float fTime )
 	}
 	int ymax = ypos + height;
 	if( xmax > ScreenWidth - 30 ) xmax = ScreenWidth - 30;
+	char *next_line;
 	gHUD.DrawDarkRectangle(xpos-5, ypos_r - 5, xmax - xpos+10, height + 10);
 	while ( *ch )
 	{
 		int line_length = 0;  // count the length of the current line
-		for ( char *next_line = ch; *next_line != '\n' && *next_line != 0; next_line++ )
+		for ( next_line = ch; *next_line != '\n' && *next_line != 0; next_line++ )
 			line_length += gHUD.m_scrinfo.charWidths[ *next_line ];
 		char *top = next_line;
 		if ( *top == '\n' )
