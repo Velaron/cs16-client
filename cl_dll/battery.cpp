@@ -19,29 +19,27 @@
 //
 
 #include "hud.h"
-#include "cl_util.h"
 #include "parsemsg.h"
+#include "cl_util.h"
 
-#include <string.h>
-#include <stdio.h>
+DECLARE_MESSAGE( m_Battery, Battery )
+DECLARE_MESSAGE( m_Battery, ArmorType )
 
-DECLARE_MESSAGE(m_Battery, Battery)
-
-int CHudBattery::Init(void)
+int CHudBattery::Init( void )
 {
 	m_iBat = 0;
 	m_fFade = 0;
 	m_iFlags = 0;
 
-	HOOK_MESSAGE(Battery);
+	HOOK_MESSAGE( Battery );
+	HOOK_MESSAGE( ArmorType )
 
-	gHUD.AddHudElem(this);
+	gHUD.AddHudElem( this );
 
 	return 1;
-};
+}
 
-
-int CHudBattery::VidInit(void)
+int CHudBattery::VidInit( void )
 {
 	int HUD_suit_empty = gHUD.GetSpriteIndex( "suit_empty" );
 	int HUD_suit_full = gHUD.GetSpriteIndex( "suit_full" );
@@ -51,18 +49,18 @@ int CHudBattery::VidInit(void)
 	m_prc2 = &gHUD.GetSpriteRect( HUD_suit_full );
 	m_iHeight = m_prc2->bottom - m_prc1->top;
 	m_fFade = 0;
+
 	return 1;
-};
+}
 
-int CHudBattery:: MsgFunc_Battery(const char *pszName,  int iSize, void *pbuf )
+int CHudBattery:: MsgFunc_Battery(const char *pszName, int iSize, void *pbuf )
 {
-	m_iFlags |= HUD_ACTIVE;
-
-	
 	BEGIN_READ( pbuf, iSize );
+
+	m_iFlags |= HUD_ACTIVE;
 	int x = READ_SHORT();
 
-	if (x != m_iBat)
+	if( x != m_iBat )
 	{
 		m_fFade = FADE_TIME;
 		m_iBat = x;
@@ -71,68 +69,93 @@ int CHudBattery:: MsgFunc_Battery(const char *pszName,  int iSize, void *pbuf )
 	return 1;
 }
 
-
-int CHudBattery::Draw(float flTime)
+int CHudBattery::Draw( float flTime )
 {
-	if ( gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH )
+	if( gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH )
+		return 1;
+
+	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
 		return 1;
 
 	int r, g, b, x, y, a;
 	wrect_t rc;
 
 	rc = *m_prc2;
-	rc.top  += m_iHeight * ((float)(100-(min(100,m_iBat))) * 0.01);	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 
-	UnpackRGB(r,g,b, RGB_YELLOWISH);
+	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
+	rc.top += m_iHeight * ((float)( 100 - ( min( 100, m_iBat ))) * 0.01f );
 
-	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
-		return 1;
+	UnpackRGB( r, g, b, RGB_YELLOWISH );
 
 	// Has health changed? Flash the health #
-	if (m_fFade)
+	if( m_fFade )
 	{
-		if (m_fFade > FADE_TIME)
+		if( m_fFade > FADE_TIME )
 			m_fFade = FADE_TIME;
 
 		m_fFade -= (gHUD.m_flTimeDelta * 20);
-		if (m_fFade <= 0)
+
+		if( m_fFade <= 0 )
 		{
 			a = 128;
 			m_fFade = 0;
 		}
 
 		// Fade the health number back to dim
-
-		a = MIN_ALPHA +  (m_fFade/FADE_TIME) * 128;
+		a = MIN_ALPHA +  (m_fFade / FADE_TIME) * 128;
 
 	}
 	else
+	{
 		a = MIN_ALPHA;
+	}
 
-	ScaleColors(r, g, b, a );
+	ScaleColors( r, g, b, a );
 	
-	int iOffset = (m_prc1->bottom - m_prc1->top)/6;
+	int iOffset = (m_prc1->bottom - m_prc1->top) / 6;
 
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-	x = ScreenWidth/5;
+	x = ScreenWidth / 5;
 
 	// make sure we have the right sprite handles
-	if ( !m_hSprite1 )
-		m_hSprite1 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_empty" ) );
-	if ( !m_hSprite2 )
-		m_hSprite2 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_full" ) );
+	if( !m_hSprite1 )
+		m_hSprite1 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_empty" ));
 
-	SPR_Set(m_hSprite1, r, g, b );
-	SPR_DrawAdditive( 0,  x, y - iOffset, m_prc1);
+	if( !m_hSprite2 )
+		m_hSprite2 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_full" ));
 
-	if (rc.bottom > rc.top)
+	if( !m_hSprite1Helmet )
+		m_hSprite1Helmet = gHUD.GetSprite( gHUD.GetSpriteIndex( "suithelmet_empty" ));
+
+	if( !m_hSprite2Helmet )
+		m_hSprite2Helmet = gHUD.GetSprite( gHUD.GetSpriteIndex( "suithelmet_full" ));
+
+	if( m_enArmorType == Vest )
+		SPR_Set( m_hSprite1, r, g, b );
+	else
+		SPR_Set( m_hSprite1Helmet, r, g, b );
+	SPR_DrawAdditive( 0,  x, y - iOffset, m_prc1 );
+
+	if( rc.bottom > rc.top )
 	{
-		SPR_Set(m_hSprite2, r, g, b );
-		SPR_DrawAdditive( 0, x, y - iOffset + (rc.top - m_prc2->top), &rc);
+		if( m_enArmorType == Vest )
+			SPR_Set( m_hSprite2, r, g, b );
+		else
+			SPR_Set( m_hSprite2Helmet, r, g, b );
+		SPR_DrawAdditive( 0, x, y - iOffset + (rc.top - m_prc2->top), &rc );
 	}
 
 	x += (m_prc1->right - m_prc1->left);
-	x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, r, g, b);
+	x = gHUD.DrawHudNumber( x, y, DHN_3DIGITS|DHN_DRAWZERO, m_iBat, r, g, b );
+
+	return 1;
+}
+
+int CHudBattery::MsgFunc_ArmorType(const char *pszName,  int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	m_enArmorType = (armortype_t)READ_BYTE();
 
 	return 1;
 }
