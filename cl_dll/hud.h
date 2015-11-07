@@ -22,7 +22,7 @@
 
 
 #define RGB_YELLOWISH 0x00FFA000 //255,160,0
-#define RGB_REDISH 0x00FF1010 //255,160,0
+#define RGB_REDISH 0x00FF1010 //255,16,16
 #define RGB_GREENISH 0x0000A000 //0,160,0
 
 #include "wrect.h"
@@ -602,8 +602,11 @@ public:
 
 private:
 	int m_iMoneyCount;
+	int m_iDelta;
 	float m_fFade;
-	HSPRITE	m_hSprite;
+	HSPRITE	m_HUD_dollar;
+	HSPRITE m_HUD_minus;
+	HSPRITE m_HUD_plus;
 };
 //
 //-----------------------------------------------------
@@ -644,8 +647,10 @@ public:
 	int MsgFunc_ShowTimer(const char *pszName, int iSize, void *pbuf);
 private:
 	int m_HUD_timer;
-	int Time;
-	float StartTime;
+	int m_iTime;
+	float m_fStartTime;
+	bool m_bPanicColorChange;
+	float m_flPanicTime;
 };
 //
 //-----------------------------------------------------
