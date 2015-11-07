@@ -39,6 +39,8 @@
 #define max(a,b)  (((a) > (b)) ? (a) : (b))
 #endif
 
+extern "C" char PM_FindTextureType( char *name );
+
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
 
@@ -373,16 +375,9 @@ void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal )
 
 Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, entvars_t *pevAttacker, bool bPistol, int shared_rand )
 {
-	/*int iOriginalPenetration = iPenetration;
 	int iPenetrationPower;
 	float flPenetrationDistance;
 	int iCurrentDamage = iDamage;
-	float flCurrentDistance;
-	TraceResult tr, tr2;
-	Vector vecRight = gpGlobals->v_right;
-	Vector vecUp = gpGlobals->v_up;
-	CBaseEntity *pEntity;
-	bool bHitMetal = false;
 	int iSparksAmount;
 
 	switch (iBulletType)
@@ -466,186 +461,7 @@ Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float f
 		break;
 	}
 	}
-
-	if (!pevAttacker)
-		pevAttacker = pev;
-
-	//gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
-
-	float x, y, z;
-
-	if (IsPlayer())
-	{
-		x = UTIL_SharedRandomFloat(shared_rand, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 1, -0.5, 0.5);
-		y = UTIL_SharedRandomFloat(shared_rand + 2, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 3, -0.5, 0.5);
-	}
-	else
-	{
-		do
-		{
-			x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
-			y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
-			z = x * x + y * y;
-		}
-		while (z > 1);
-	}
-
-	Vector vecDir = vecDirShooting + x * flSpread * vecRight + y * flSpread * vecUp;
-	Vector vecEnd = vecSrc + vecDir * flDistance;
-	Vector vecOldSrc;
-	Vector vecNewSrc;
-	float flDamageModifier = 0.5;
-
-	while (iPenetration != 0)
-	{
-		ClearMultiDamage();
-		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev), &tr);
-
-		char cTextureType = UTIL_TextureHit(&tr, vecSrc, vecEnd);
-		bool bSparks = false;
-
-		switch (cTextureType)
-		{
-		case CHAR_TEX_METAL:
-		{
-			bSparks = true;
-			bHitMetal = true;
-			iPenetrationPower *= 0.15;
-			flDamageModifier = 0.2;
-			break;
-		}
-
-		case CHAR_TEX_CONCRETE:
-		{
-			iPenetrationPower *= 0.25;
-			flDamageModifier = 0.25;
-			break;
-		}
-
-		case CHAR_TEX_GRATE:
-		{
-			bSparks = true;
-			bHitMetal = true;
-			iPenetrationPower *= 0.5;
-			flDamageModifier = 0.4;
-			break;
-		}
-
-		case CHAR_TEX_VENT:
-		{
-			bSparks = true;
-			bHitMetal = true;
-			iPenetrationPower *= 0.5;
-			flDamageModifier = 0.45;
-			break;
-		}
-
-		case CHAR_TEX_TILE:
-		{
-			iPenetrationPower *= 0.65;
-			flDamageModifier = 0.3;
-			break;
-		}
-
-		case CHAR_TEX_COMPUTER:
-		{
-			bSparks = true;
-			bHitMetal = true;
-			iPenetrationPower *= 0.4;
-			flDamageModifier = 0.45;
-			break;
-		}
-
-		case CHAR_TEX_WOOD:
-		{
-			iPenetrationPower *= 1;
-			flDamageModifier = 0.6;
-			break;
-		}
-
-		default:
-		{
-			bSparks = false;
-			break;
-		}
-		}
-
-		if (tr.flFraction != 1.0)
-		{
-			pEntity = CBaseEntity::Instance(tr.pHit);
-			iPenetration--;
-			flCurrentDistance = tr.flFraction * flDistance;
-			iCurrentDamage *= pow(flRangeModifier, flCurrentDistance / 500);
-
-			if (flCurrentDistance > flPenetrationDistance)
-				iPenetration = 0;
-
-			if (tr.iHitgroup == HITGROUP_SHIELD)
-			{
-				iPenetration = 0;
-
-				if (tr.flFraction != 1.0)
-				{
-					if (RANDOM_LONG(0, 1))
-						EMIT_SOUND(pEntity->edict(), CHAN_VOICE, "weapons/ric_metal-1.wav", 1, ATTN_NORM);
-					else
-						EMIT_SOUND(pEntity->edict(), CHAN_VOICE, "weapons/ric_metal-2.wav", 1, ATTN_NORM);
-
-					UTIL_Sparks(tr.vecEndPos);
-
-					pEntity->pev->punchangle.x = iCurrentDamage * RANDOM_FLOAT(-0.15, 0.15);
-					pEntity->pev->punchangle.z = iCurrentDamage * RANDOM_FLOAT(-0.15, 0.15);
-
-					if (pEntity->pev->punchangle.x < 4)
-						pEntity->pev->punchangle.x = 4;
-
-					if (pEntity->pev->punchangle.z < -5)
-						pEntity->pev->punchangle.z = -5;
-					else if (pEntity->pev->punchangle.z > 5)
-						pEntity->pev->punchangle.z = 5;
-				}
-
-				break;
-			}
-
-			if ((VARS(tr.pHit)->solid == SOLID_BSP) && (iPenetration != 0))
-			{
-				if (bPistol)
-					DecalGunshot(&tr, iBulletType, false, pev, bHitMetal);
-				else if (RANDOM_LONG(0, 3))
-					DecalGunshot(&tr, iBulletType, true, pev, bHitMetal);
-
-				vecSrc = tr.vecEndPos + (vecDir * iPenetrationPower);
-				flDistance = (flDistance - flCurrentDistance) * 0.5;
-				vecEnd = vecSrc + (vecDir * flDistance);
-
-				pEntity->TraceAttack(pevAttacker, iCurrentDamage, vecDir, &tr, DMG_BULLET | DMG_NEVERGIB);
-
-				iCurrentDamage *= flDamageModifier;
-			}
-			else
-			{
-				if (bPistol)
-					DecalGunshot(&tr, iBulletType, false, pev, bHitMetal);
-				else if (RANDOM_LONG(0, 3))
-					DecalGunshot(&tr, iBulletType, true, pev, bHitMetal);
-
-				vecSrc = tr.vecEndPos + (vecDir * 42);
-				flDistance = (flDistance - flCurrentDistance) * 0.75;
-				vecEnd = vecSrc + (vecDir * flDistance);
-
-				pEntity->TraceAttack(pevAttacker, iCurrentDamage, vecDir, &tr, DMG_BULLET | DMG_NEVERGIB);
-
-				iCurrentDamage *= 0.75;
-			}
-		}
-		else
-			iPenetration = 0;
-
-		ApplyMultiDamage(pev, pevAttacker);
-	}
-
-	return Vector(x * flSpread, y * flSpread, 0);*/
+	return Vector( flSpread, flSpread, 0);
 }
 /*
 =====================
@@ -895,13 +711,18 @@ void UTIL_ParticleLine( CBasePlayer *player, float *start, float *end, float lif
 	gEngfuncs.pEfxAPI->R_ParticleLine( start, end, r, g, b, life );
 }
 
-/*char UTIL_TextureHit(TraceResult *ptr, Vector vecSrc, Vector vecEnd)
+char UTIL_TextureHit(TraceResult *ptr, Vector vecSrc, Vector vecEnd)
 {
 		char chTextureType;
 		float rgfl1[3], rgfl2[3];
 		const char *pTextureName;
 		char szbuffer[64];
-		CBaseEntity *pEntity = CBaseEntity::Instance(ptr->pHit);
+		CBaseEntity *pEntity;
+
+		if( ptr->pHit == NULL )
+			return CHAR_TEX_FLESH;
+
+		pEntity = CBaseEntity::Instance(ptr->pHit);
 
 		if (pEntity && pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
 				return CHAR_TEX_FLESH;
@@ -924,13 +745,13 @@ void UTIL_ParticleLine( CBasePlayer *player, float *start, float *end, float lif
 
 				strcpy(szbuffer, pTextureName);
 				szbuffer[CBTEXTURENAMEMAX - 1] = 0;
-				chTextureType = TEXTURETYPE_Find(szbuffer);
+				chTextureType = PM_FindTextureType(szbuffer);
 		}
 		else
 				chTextureType = 0;
 
 		return chTextureType;
-}*/
+}
 
 CBaseEntity *UTIL_PlayerByIndex(int playerIndex)
 {
