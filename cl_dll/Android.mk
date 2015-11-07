@@ -23,7 +23,7 @@ endif
 
 LOCAL_CFLAGS += -fsigned-char -DCLIENT_DLL=1
 
-SRCS = ./hl/hl_baseentity.cpp \
+SRCS :=  hl/hl_baseentity.cpp \
         events/ev_cs16.cpp \
         events/event_ak47.cpp \
         events/event_aug.cpp \
