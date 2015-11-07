@@ -38,7 +38,7 @@ int CHudTimer::Draw( float fTime )
 	int minutes = max( 0, (int)( m_iTime + m_fStartTime - gHUD.m_flTime ) / 60);
 	int seconds = max( 0, (int)( m_iTime + m_fStartTime - gHUD.m_flTime ) - (minutes * 60));
 
-	if( m_iTime < 20) )
+	if( m_iTime > 20 )
 	{
 		UnpackRGB(r,g,b, RGB_YELLOWISH );
 	}
