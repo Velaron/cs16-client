@@ -48,7 +48,7 @@ void EV_FireXM1014(event_args_s *args)
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
-										   "weapons/glock18-2.wav",
+										   "weapons/xm1014-1.wav",
 										   1, ATTN_NORM, 0,
 										   94 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
 	EV_GetGunPosition( args, vecSrc, origin );
