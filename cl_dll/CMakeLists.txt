@@ -40,7 +40,39 @@ set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 set (CLDLL_LIBRARY client)
 
 set (CLDLL_SOURCES ./hl/hl_baseentity.cpp
-    ./hl/hl_events.cpp
+	./events/ev_cs16.cpp
+	./events/event_ak47.cpp
+	./events/event_aug.cpp
+	./events/event_awp.cpp
+	./events/event_createexplo.cpp
+	./events/event_createsmoke.cpp
+	./events/event_deagle.cpp
+	./events/event_decal_reset.cpp
+	./events/event_elite_left.cpp
+	./events/event_elite_right.cpp
+	./events/event_famas.cpp
+	./events/event_fiveseven.cpp
+	./events/event_g3sg1.cpp
+	./events/event_galil.cpp
+	./events/event_glock18.cpp
+	./events/event_knife.cpp
+	./events/event_m249.cpp
+	./events/event_m3.cpp
+	./events/event_m4a1.cpp
+	./events/event_mac10.cpp
+	./events/event_mp5n.cpp
+	./events/event_p228.cpp
+	./events/event_p90.cpp
+	./events/event_scout.cpp
+	./events/event_sg550.cpp
+	./events/event_sg552.cpp
+	./events/events.h
+	./events/event_tmp.cpp
+	./events/event_ump45.cpp
+	./events/event_usp.cpp
+	./events/event_vehicle.cpp
+	./events/event_xm1014.cpp
+	./events/hl_events.cpp
     ./hl/hl_objects.cpp
     ./hl/hl_weapons.cpp
     ../dlls/wpn_shared/wpn_ak47.cpp
@@ -83,7 +115,6 @@ set (CLDLL_SOURCES ./hl/hl_baseentity.cpp
     ./demo.cpp
     ./entity.cpp
     ./ev_common.cpp
-    ./ev_cs16.cpp
     ./events.cpp
     ./flashlight.cpp
     ./GameStudioModelRenderer.cpp
@@ -122,7 +153,7 @@ set (CLDLL_SOURCES ./hl/hl_baseentity.cpp
     ./vgui_parser.cpp
 )
 
-include_directories (../common ../engine ../pm_shared ../dlls ../game_shared ../public)
+include_directories (../cl_dll ../common ../engine ../pm_shared ../dlls ../game_shared ../public)
 add_library (${CLDLL_LIBRARY} SHARED ${CLDLL_SOURCES})
 target_link_libraries( ${CLDLL_LIBRARY} ${CMAKE_DL_LIBS} )
 
