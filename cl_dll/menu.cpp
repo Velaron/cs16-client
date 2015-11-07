@@ -108,7 +108,7 @@ int CHudMenu :: Draw( float flTime )
 	while ( i < MAX_MENU_STRING && g_szMenuString[i] != '\0' )
 	{
 		gHUD.DrawHudString( x, y, 320, g_szMenuString + i, 255, 255, 255 );
-		y += 12;
+		y += 24;
 
 		while ( i < MAX_MENU_STRING && g_szMenuString[i] != '\0' && g_szMenuString[i] != '\n' )
 			i++;

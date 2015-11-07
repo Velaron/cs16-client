@@ -590,6 +590,8 @@ private:
 //
 //-----------------------------------------------------
 //
+#define MONEY_YPOS ScreenHeight - 3 * gHUD.m_iFontHeight
+
 class CHudMoney : public CHudBase
 {
 public:
@@ -600,6 +602,7 @@ public:
 
 private:
 	int m_iMoneyCount;
+	float m_fFade;
 	HSPRITE	m_hSprite;
 };
 //
@@ -639,11 +642,35 @@ public:
 	// show the timer
 	// [empty]
 	int MsgFunc_ShowTimer(const char *pszName, int iSize, void *pbuf);
+private:
 	int m_HUD_timer;
-	bool ShowTimer;
 	int Time;
 	float StartTime;
 };
+//
+//-----------------------------------------------------
+//
+class CHudProgressBar: public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+
+	// start progress bar
+	// [short] Duration
+	int MsgFunc_BarTime( const char *pszName, int iSize, void *pbuf );
+
+	// [short] Duration
+	// [short] percent
+	int MsgFunc_BarTime2( const char *pszName, int iSize, void *pbuf );
+
+private:
+	int Duration;
+	float Percent;
+	float StartTime;
+};
+
 //
 //-----------------------------------------------------
 //
@@ -732,6 +759,7 @@ public:
 	CHudMoney	m_Money;
 	CHudTimer	m_Timer;
 	CHudRadio	m_Radio;
+	CHudProgressBar m_ProgressBar;
 
 	void Init( void );
 	void VidInit( void );
