@@ -720,6 +720,7 @@ public:
 	int DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b, bool drawing = false );
 	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
 	int GetNumWidth(int iNumber, int iFlags);
+	int DrawHudStringLen( char *szIt );
 	void DrawDarkRectangle( int x, int y, int wide, int tall);
 
 private:
@@ -791,6 +792,7 @@ public:
 	int	m_iWeaponBits;
 	int	m_fPlayerDead;
 	int m_iIntermission;
+	int m_iNoConsolePrint;
 
 	// sprite indexes
 	int m_HUD_number_0;

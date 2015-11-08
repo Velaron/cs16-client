@@ -33,6 +33,7 @@
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 
 extern cvar_t *sensitivity;
+cvar_t *hud_textmode;
 cvar_t *cl_lw = NULL;
 
 void ShutdownInput (void);
@@ -224,7 +225,7 @@ void CHud :: Init( void )
 	CVAR_CREATE( "_cl_autowepswitch", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_ah", "1", FCVAR_ARCHIVE| FCVAR_USERINFO);
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
-
+	hud_textmode = gEngfuncs.pfnRegisterVariable ( "hud_textmode", "0", FCVAR_ARCHIVE );
 
 	m_iLogo = 0;
 	m_iFOV = 0;
@@ -252,6 +253,7 @@ void CHud :: Init( void )
 
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;
+	m_iNoConsolePrint = 0;
 
 	m_Ammo.Init();
 	m_Health.Init();

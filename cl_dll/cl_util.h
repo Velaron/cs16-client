@@ -17,11 +17,12 @@
 //
 
 #include "cvardef.h"
-
 #ifndef TRUE
 #define TRUE 1
 #define FALSE 0
 #endif
+
+extern cvar_t *hud_textmode;
 
 // Macros to hook function calls into the HUD object
 #define HOOK_MESSAGE(x) gEngfuncs.pfnHookUserMsg(#x, __MsgFunc_##x );
@@ -79,7 +80,7 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 #define ClientCmd (*gEngfuncs.pfnClientCmd)
 #define SetCrosshair (*gEngfuncs.pfnSetCrosshair)
 #define AngleVectors (*gEngfuncs.pfnAngleVectors)
-
+extern float color[3]; // hud.cpp
 
 // Gets the height & width of a sprite,  at the specified frame
 inline int SPR_Height( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Height(x, f); }
@@ -93,19 +94,38 @@ inline 	int						TextMessageDrawChar( int x, int y, int number, int r, int g, in
 
 inline int DrawConsoleString( int x, int y, const char *string )
 {
-	return gEngfuncs.pfnDrawConsoleString( x, y, (char*) string );
+	if( hud_textmode->value )
+		return gHUD.DrawHudString( x, y, 9999, string, 255*color[0], 255*color[1], 255*color[2]);
+	else
+		return gEngfuncs.pfnDrawConsoleString( x, y, (char*) string );
+	
 }
-
+inline int DrawSetTextColor(float r, float g, float b)
+{
+	if( hud_textmode->value )
+		color[0]=r, color[1] = g, color[2] = b;
+	else
+		gEngfuncs.pfnDrawSetTextColor( r, g, b );
+		
+}
 inline void GetConsoleStringSize( const char *string, int *width, int *height )
 {
-	gEngfuncs.pfnDrawConsoleStringLen( string, width, height );
+	if( hud_textmode->value )
+		*height = 13, *width =  gHUD.DrawHudStringLen(string);
+	else
+		gEngfuncs.pfnDrawConsoleStringLen( string, width, height );
 }
 
 inline int ConsoleStringLen( const char *string )
 {
 	int _width, _height;
-	GetConsoleStringSize( string, &_width, &_height );
-	return _width;
+	if( hud_textmode->value )
+		return gHUD.DrawHudStringLen(string);
+	else
+	{
+		GetConsoleStringSize( string, &_width, &_height );
+		return _width;
+	}
 }
 
 inline void ConsolePrint( const char *string )

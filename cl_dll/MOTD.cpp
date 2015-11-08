@@ -62,6 +62,10 @@ void CHudMOTD :: Reset( void )
 #define ROW_RANGE_MAX ( ScreenHeight - 100 )
 int CHudMOTD :: Draw( float fTime )
 {
+	gHUD.m_iNoConsolePrint &= ~( 1 << 1 );
+	if( !m_bShow )
+		return 1;
+	gHUD.m_iNoConsolePrint |= 1 << 1;
 	bool bScroll;
 	// find the top of where the MOTD should be drawn,  so the whole thing is centered in the screen
 	int ypos = (ScreenHeight - LINE_HEIGHT * m_iLines)/2; // shift it up slightly
@@ -73,11 +77,11 @@ int CHudMOTD :: Draw( float fTime )
 	int ypos_r=ypos;
 	if( height > ROW_RANGE_MAX )
 	{
-		ypos = ROW_RANGE_MIN + 3 + scroll;
-		if( ypos  > ROW_RANGE_MIN )
-			scroll-=7;
+		ypos = ROW_RANGE_MIN + 7 + scroll;
+		if( ypos  > ROW_RANGE_MIN + 4 )
+			scroll-= (ypos - ( ROW_RANGE_MIN + 4))/3.0;
 		if( ypos + height < ROW_RANGE_MAX )
-			scroll+=7;
+			scroll+= (ROW_RANGE_MAX - (ypos + height))/ 3.0;
 		ypos_r = ROW_RANGE_MIN;
 		height = ROW_RANGE_MAX;
 	}
@@ -125,7 +129,7 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 
 	int is_finished = READ_BYTE();
-	strcat( m_szMOTD, READ_STRING() );
+	strncat( m_szMOTD, READ_STRING(), sizeof(m_szMOTD) );
 
 	if ( is_finished )
 	{
