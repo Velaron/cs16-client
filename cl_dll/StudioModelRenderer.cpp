@@ -43,10 +43,14 @@ Init
 */
 void CStudioModelRenderer::Init( void )
 {
+	CVAR_CREATE( "cl_righthand", "1", FCVAR_ARCHIVE );
+
 	// Set up some variables shared with engine
 	m_pCvarHiModels			= IEngineStudio.GetCvar( "cl_himodels" );
 	m_pCvarDeveloper		= IEngineStudio.GetCvar( "developer" );
 	m_pCvarDrawEntities		= IEngineStudio.GetCvar( "r_drawentities" );
+	m_pCvarRighthand        = IEngineStudio.GetCvar( "cl_righthand" );
+	
 
 	m_pChromeSprite			= IEngineStudio.GetChromeSprite();
 
@@ -883,7 +887,7 @@ void CStudioModelRenderer::StudioSetupBones ( void )
 	pbones = (mstudiobone_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex);
 
 	// calc gait animation
-	if (m_pPlayerInfo && m_pPlayerInfo->gaitsequence != 0)
+	/*if (m_pPlayerInfo && m_pPlayerInfo->gaitsequence != 0)
 	{
 		if (m_pPlayerInfo->gaitsequence >= m_pStudioHeader->numseq) 
 		{
@@ -902,8 +906,46 @@ void CStudioModelRenderer::StudioSetupBones ( void )
 			memcpy( pos[i], pos2[i], sizeof( pos[i] ));
 			memcpy( q[i], q2[i], sizeof( q[i] ));
 		}
-	}
+	}*/
+	
+	
+	// calc gait animation 
+	// death sequences are last in the list of sequences, and we don't do gait for those
+	// ANIM_FIRST_DEATH_SEQUENCE marks the first death sequence
 
+	if ( m_pPlayerInfo && m_pPlayerInfo->gaitsequence != 0 ) 
+	{
+		int copy = 1;
+
+		// bounds checking
+		if ( m_pPlayerInfo->gaitsequence >= m_pStudioHeader->numseq )
+		{
+			m_pPlayerInfo->gaitsequence = 0;
+		}
+
+		pseqdesc = (mstudioseqdesc_t *)( (byte *)m_pStudioHeader + m_pStudioHeader->seqindex ) + m_pPlayerInfo->gaitsequence;
+
+		panim = StudioGetAnim( m_pRenderModel, pseqdesc );
+		StudioCalcRotations( pos2, q2, pseqdesc, panim, m_pPlayerInfo->gaitframe );
+
+		for ( i = 0; i < m_pStudioHeader->numbones; i++ )
+		{
+			if ( !strcmp( pbones[i].name, "Bip01 Spine" ) )
+			{
+				copy = 0;
+			}
+			else if ( !strcmp( pbones[ pbones[i].parent ].name, "Bip01 Pelvis" ) )
+			{
+				copy = 1;
+			}
+				
+			if ( copy )
+			{
+				memcpy( pos[i], pos2[i], sizeof( pos[i] ) );
+				memcpy( q[i], q2[i], sizeof( q[i] ) );
+			}
+		}
+	}
 
 	for (i = 0; i < m_pStudioHeader->numbones; i++) 
 	{
@@ -1106,6 +1148,13 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 	IEngineStudio.SetRenderModel( m_pRenderModel );
 
 	StudioSetUpTransform( 0 );
+
+	if(m_pCurrentEntity == gEngfuncs.GetViewModel() && (m_pCvarRighthand->value))
+	{
+		(*m_protationmatrix)[0][1] *= -1;
+		(*m_protationmatrix)[1][1] *= -1;
+		(*m_protationmatrix)[2][1] *= -1;
+	}
 
 	if (flags & STUDIO_RENDER)
 	{
@@ -1642,7 +1691,15 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware( void )
 			}
 
 			IEngineStudio.GL_SetRenderMode( rendermode );
+
+			if(m_pCurrentEntity == gEngfuncs.GetViewModel() && (m_pCvarRighthand->value))
+				gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+
 			IEngineStudio.StudioDrawPoints();
+
+			if(m_pCurrentEntity == gEngfuncs.GetViewModel() && (m_pCvarRighthand->value))
+				gEngfuncs.pTriAPI->CullFace( TRI_FRONT );
+
 			IEngineStudio.GL_StudioDrawShadow();
 		}
 	}

@@ -121,6 +121,7 @@ public:
 	cvar_t			*m_pCvarDeveloper;
 	// Draw entities bone hit boxes, etc?
 	cvar_t			*m_pCvarDrawEntities;
+	cvar_t          *m_pCvarRighthand;
 
 	// The entity which we are currently rendering.
 	cl_entity_t		*m_pCurrentEntity;		
