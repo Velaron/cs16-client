@@ -54,8 +54,8 @@ float *GetClientColor( int clientIndex )
 {
 	switch ( g_PlayerExtraInfo[clientIndex].teamnumber )
 	{
-	case 1:	return g_ColorBlue;
-	case 2: return g_ColorRed;
+	case 2:	return g_ColorBlue;
+	case 1: return g_ColorRed;
 	case 3: return g_ColorYellow;
 	case 4: return g_ColorGreen;
 	case 0: return g_ColorYellow;
