@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Blue-Shift Launcher</string>
+    <string name="app_name">CS16Client Launcher</string>
 
     <string name="title_activity_launcher">LauncherActivity</string>
-    <string name="launch_button">Launch Blue-Shift!</string>
+    <string name="launch_button">Launch cs16-client!</string>
     <string name="cmd_args_text">Command line arguments(experts only)</string>
     <!--
 	<string name="text_shortcut">SoHL shortcut</string>
