@@ -77,7 +77,7 @@ static void UI_GameOptions_UpdateConfig( void )
 	sprintf( fpsText, "%.f", uiGameOptions.maxFPS.curValue );
 	uiGameOptions.maxFPS.generic.name = fpsText;
 
-	CVAR_SET_FLOAT( "hand", uiGameOptions.hand.enabled );
+	CVAR_SET_FLOAT( "cl_righthand", uiGameOptions.hand.enabled );
 	CVAR_SET_FLOAT( "sv_allow_download", uiGameOptions.allowDownload.enabled );
 	CVAR_SET_FLOAT( "fps_max", uiGameOptions.maxFPS.curValue );
 	CVAR_SET_FLOAT( "cl_run", uiGameOptions.alwaysRun.enabled );
@@ -90,7 +90,7 @@ UI_GameOptions_DiscardChanges
 */
 static void UI_GameOptions_DiscardChanges( void )
 {
-	CVAR_SET_FLOAT( "hand", uiGameInitial.hand );
+	CVAR_SET_FLOAT( "cl_righthand", uiGameInitial.hand );
 	CVAR_SET_FLOAT( "sv_allow_download", uiGameInitial.allowDownload );
 	CVAR_SET_FLOAT( "fps_max", uiGameInitial.maxFPS );
 	CVAR_SET_FLOAT( "cl_run", uiGameInitial.alwaysRun );

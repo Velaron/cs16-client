@@ -1351,10 +1351,6 @@ void UI_Precache( void )
 		return;
 
 	UI_Main_Precache();
-	UI_NewGame_Precache();
-	UI_LoadGame_Precache();
-	UI_SaveGame_Precache();
-	UI_SaveLoad_Precache();
 	UI_MultiPlayer_Precache();
 	UI_Options_Precache();
 	UI_InternetGames_Precache();
@@ -1363,12 +1359,13 @@ void UI_Precache( void )
 	UI_Controls_Precache();
 	UI_AdvControls_Precache();
 	UI_GameOptions_Precache();
+#ifndef __ANDROID__
 	UI_CreateGame_Precache();
+#endif
 	UI_Audio_Precache();
 	UI_Video_Precache();
 	UI_VidOptions_Precache();
 	UI_VidModes_Precache();
-	UI_CustomGame_Precache();
 	UI_Credits_Precache();
 }
 
@@ -1548,10 +1545,6 @@ void UI_Init( void )
 	ui_showmodels = CVAR_REGISTER( "ui_showmodels", "0", FCVAR_ARCHIVE );
 
 	Cmd_AddCommand( "menu_main", UI_Main_Menu );
-	Cmd_AddCommand( "menu_newgame", UI_NewGame_Menu );
-	Cmd_AddCommand( "menu_loadgame", UI_LoadGame_Menu );
-	Cmd_AddCommand( "menu_savegame", UI_SaveGame_Menu );
-	Cmd_AddCommand( "menu_saveload", UI_SaveLoad_Menu );
 	Cmd_AddCommand( "menu_multiplayer", UI_MultiPlayer_Menu );
 	Cmd_AddCommand( "menu_options", UI_Options_Menu );
 	Cmd_AddCommand( "menu_langame", UI_LanGame_Menu );
@@ -1560,7 +1553,9 @@ void UI_Init( void )
 	Cmd_AddCommand( "menu_controls", UI_Controls_Menu );
 	Cmd_AddCommand( "menu_advcontrols", UI_AdvControls_Menu );
 	Cmd_AddCommand( "menu_gameoptions", UI_GameOptions_Menu );
+#ifndef __ANDROID__
 	Cmd_AddCommand( "menu_creategame", UI_CreateGame_Menu );
+#endif
 	Cmd_AddCommand( "menu_audio", UI_Audio_Menu );
 	Cmd_AddCommand( "menu_video", UI_Video_Menu );
 	Cmd_AddCommand( "menu_vidoptions", UI_VidOptions_Menu );
@@ -1593,10 +1588,6 @@ void UI_Shutdown( void )
 		return;
 
 	Cmd_RemoveCommand( "menu_main" );
-	Cmd_RemoveCommand( "menu_newgame" );
-	Cmd_RemoveCommand( "menu_loadgame" );
-	Cmd_RemoveCommand( "menu_savegame" );
-	Cmd_RemoveCommand( "menu_saveload" );
 	Cmd_RemoveCommand( "menu_multiplayer" );
 	Cmd_RemoveCommand( "menu_options" );
 	Cmd_RemoveCommand( "menu_intenetgames" );
@@ -1605,7 +1596,9 @@ void UI_Shutdown( void )
 	Cmd_RemoveCommand( "menu_controls" );
 	Cmd_RemoveCommand( "menu_advcontrols" );
 	Cmd_RemoveCommand( "menu_gameoptions" );
+#ifndef __ANDROID__
 	Cmd_RemoveCommand( "menu_creategame" );
+#endif
 	Cmd_RemoveCommand( "menu_audio" );
 	Cmd_RemoveCommand( "menu_video" );
 	Cmd_RemoveCommand( "menu_vidoptions" );
