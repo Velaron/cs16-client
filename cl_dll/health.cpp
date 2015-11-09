@@ -27,14 +27,22 @@
 #include "parsemsg.h"
 #include <string.h>
 
+DECLARE_COMMAND( m_Health, ShowRadar );
+DECLARE_COMMAND( m_Health, HideRadar );
 
 DECLARE_MESSAGE(m_Health, Health )
 DECLARE_MESSAGE(m_Health, Damage )
+DECLARE_MESSAGE(m_Health, Radar )
+DECLARE_MESSAGE(m_Health, ScoreAttrib )
 
 #define PAIN_NAME "sprites/%d_pain.spr"
 #define DAMAGE_NAME "sprites/%d_dmg.spr"
 
+cvar_t *cl_radartype;
+
 int giDmgHeight, giDmgWidth;
+
+float g_LocationColor[3];
 
 int giDmgFlags[NUM_DMG_TYPES] = 
 {
@@ -56,6 +64,11 @@ int CHudHealth::Init(void)
 {
 	HOOK_MESSAGE(Health);
 	HOOK_MESSAGE(Damage);
+	HOOK_MESSAGE(Radar);
+	HOOK_MESSAGE(ScoreAttrib);
+	HOOK_COMMAND( "drawradar", ShowRadar );
+	HOOK_COMMAND( "hideradar", HideRadar );
+
 	m_iHealth = 100;
 	m_fFade = 0;
 	m_iFlags = 0;
@@ -66,6 +79,7 @@ int CHudHealth::Init(void)
 
 	memset(m_dmg, 0, sizeof(DAMAGE_IMAGE) * NUM_DMG_TYPES);
 
+	cl_radartype = CVAR_CREATE( "cl_radartype", "0", FCVAR_ARCHIVE );
 
 	gHUD.AddHudElem(this);
 	return 1;
@@ -94,6 +108,13 @@ int CHudHealth::VidInit(void)
 
 	giDmgHeight = gHUD.GetSpriteRect(m_HUD_dmg_bio).right - gHUD.GetSpriteRect(m_HUD_dmg_bio).left;
 	giDmgWidth = gHUD.GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD.GetSpriteRect(m_HUD_dmg_bio).top;
+
+	m_hRadar = gHUD.GetSprite( gHUD.GetSpriteIndex( "radar" ));
+	m_hRadaropaque = gHUD.GetSprite( gHUD.GetSpriteIndex( "radaropaque" ));
+	m_hrad = gHUD.GetSpriteRect( gHUD.GetSpriteIndex( "radar" ));
+	m_hradopaque = gHUD.GetSpriteRect( gHUD.GetSpriteIndex( "radaropaque" ));
+	m_bDrawRadar = false;
+
 	return 1;
 }
 
@@ -138,7 +159,28 @@ int CHudHealth:: MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf )
 	return 1;
 }
 
+int CHudHealth:: MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
 
+	int index = READ_BYTE();
+	g_PlayerExtraInfo[index].origin.x = READ_COORD();
+	g_PlayerExtraInfo[index].origin.y = READ_COORD();
+	g_PlayerExtraInfo[index].origin.z = READ_COORD();
+	return 1;
+}
+
+int CHudHealth:: MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	int index = READ_BYTE();
+	unsigned char flags = READ_BYTE();
+	g_PlayerExtraInfo[index].dead = (flags & 1<<0) != 0;
+	g_PlayerExtraInfo[index].has_c4 = (flags & 1<<1) != 0;
+	g_PlayerExtraInfo[index].vip = (flags & 1<<2) != 0;
+	return 1;
+}
 // Returns back a color from the
 // Green <-> Yellow <-> Red ramp
 void CHudHealth::GetPainColor( int &r, int &g, int &b )
@@ -175,6 +217,9 @@ int CHudHealth::Draw(float flTime)
 
 	if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly() )
 		return 1;
+
+	if ( !gHUD.m_fPlayerDead && m_bDrawRadar )
+		DrawRadar( flTime );
 
 	if ( !m_hSprite )
 		m_hSprite = LoadSprite(PAIN_NAME);
@@ -469,4 +514,28 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 
 	// damage bits are only turned on here;  they are turned off when the draw time has expired (in DrawDamage())
 	m_bitsDamage |= bitsDamage;
+}
+
+void CHudHealth :: DrawPlayerLocation( void )
+{
+	DrawConsoleString( 30, 30, g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].location );
+}
+
+void CHudHealth :: DrawRadarDot(int x, int y, int size, int r, int g, int b, int a)
+{
+	FillRGBA( x - size/2, y - size/2, size, size, r, g, b, a);
+}
+
+void CHudHealth :: DrawRadar( float flTime )
+{
+	if( cl_radartype->value )
+	{
+		SPR_Set(m_hRadaropaque, 200, 200, 200);
+		SPR_DrawHoles(0, 0, 0, &m_hradopaque);
+	}
+	else
+	{
+		SPR_Set( m_hRadar, 25, 75, 25 );
+		SPR_DrawAdditive( 0, 0, 0, &m_hrad );
+	}
 }

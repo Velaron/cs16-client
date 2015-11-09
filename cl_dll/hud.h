@@ -333,6 +333,13 @@ struct extra_player_info_t
 	short playerclass;
 	short teamnumber;
 	char teamname[MAX_TEAM_NAME];
+	bool has_c4;
+	bool vip;
+	bool dead;
+	Vector origin;
+	bool showhealth;
+	int health;
+	char location[32];
 };
 
 struct team_info_t 
