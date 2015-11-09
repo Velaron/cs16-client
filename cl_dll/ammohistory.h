@@ -17,7 +17,7 @@
 //
 
 // this is the max number of items in each bucket
-#define MAX_WEAPON_POSITIONS		17
+#define MAX_WEAPON_POSITIONS		18
 
 class WeaponsResource
 {
