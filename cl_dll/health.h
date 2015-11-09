@@ -118,11 +118,11 @@ public:
 	void GetPainColor( int &r, int &g, int &b );
 	float m_fFade;
 	bool m_bDrawRadar;
-	UserCmd_ShowRadar( void ) {
+	void UserCmd_ShowRadar( void ) {
 		m_bDrawRadar = true;
 	}
 
-	UserCmd_HideRadar( void ) {
+	void UserCmd_HideRadar( void ) {
 		m_bDrawRadar = false;
 	}
 

@@ -95,7 +95,7 @@ inline 	int						TextMessageDrawChar( int x, int y, int number, int r, int g, in
 inline int DrawConsoleString( int x, int y, const char *string )
 {
 	if( hud_textmode->value )
-		return gHUD.DrawHudString( x, y, 9999, string, 255*color[0], 255*color[1], 255*color[2]);
+		return gHUD.DrawHudString( x, y, 9999, (char*)string, 255*color[0], 255*color[1], 255*color[2]);
 	else
 		return gEngfuncs.pfnDrawConsoleString( x, y, (char*) string );
 	
@@ -111,7 +111,7 @@ inline int DrawSetTextColor(float r, float g, float b)
 inline void GetConsoleStringSize( const char *string, int *width, int *height )
 {
 	if( hud_textmode->value )
-		*height = 13, *width =  gHUD.DrawHudStringLen(string);
+		*height = 13, *width =  gHUD.DrawHudStringLen((char*)string);
 	else
 		gEngfuncs.pfnDrawConsoleStringLen( string, width, height );
 }
@@ -120,7 +120,7 @@ inline int ConsoleStringLen( const char *string )
 {
 	int _width, _height;
 	if( hud_textmode->value )
-		return gHUD.DrawHudStringLen(string);
+		return gHUD.DrawHudStringLen((char*)string);
 	else
 	{
 		GetConsoleStringSize( string, &_width, &_height );
