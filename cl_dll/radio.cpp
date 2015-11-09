@@ -5,10 +5,12 @@
 #include <string.h>
 
 DECLARE_MESSAGE( m_Radio, SendAudio )
+DECLARE_MESSAGE( m_Radio, ReloadSound )
 
 int CHudRadio::Init( )
 {
 	HOOK_MESSAGE( SendAudio );
+	HOOK_MESSAGE( ReloadSound );
 	gHUD.AddHudElem(this);
 	m_iFlags = HUD_ACTIVE;
 	m_enableRadio = false;
@@ -17,15 +19,6 @@ int CHudRadio::Init( )
 
 int CHudRadio::Draw(float flTime)
 {
-	if( !m_enableRadio ) return 1;
-
-	if( m_sentence[0] == '%' )
-		PlaySound( &m_sentence[1], 100.0 );
-	else
-		PlaySound( m_sentence, 100.0 );
-
-	m_enableRadio = false;
-
 	return 1;
 }
 
@@ -38,12 +31,26 @@ int CHudRadio::MsgFunc_SendAudio(const char *pszName, int iSize, void *pbuf)
 {
 	BEGIN_READ( pbuf, iSize );
 
-	m_bFirst = READ_BYTE( );
+	m_iSenderID = READ_BYTE( );
 	strcpy( m_sentence, READ_STRING( ));
-	m_sThird = READ_SHORT( );
-	m_enableRadio = true;
+	m_iPitch = READ_SHORT( );
+
+	if( m_sentence[0] == '%' )
+		PlaySound( &m_sentence[1], m_iPitch );
+	else
+		PlaySound( m_sentence, m_iPitch );
 
 	return 1;
+}
+
+void CHudRadio::MsgFunc_ReloadSound(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ( pbuf, iSize );
+
+	int volume = READ_BYTE();
+	int isNotShotgun = READ_BYTE();
+
+	PlaySound( IsNotShotgun? "weapons/generic_reload.wav" : "weapons/generic_shot_reload.wav", volume );
 }
 
 void Broadcast( const char *sentence )

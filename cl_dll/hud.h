@@ -631,11 +631,11 @@ public:
 	// [string] sentence name
 	// [short] unknown. (always 100, it's a volume?)
 	int MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_ReloadSound( const char *pszName, int iSize, void *pbuf );
 private:
-	int m_bFirst;
+	int m_iSenderID;
 	char m_sentence[64];
-	int m_sThird;
-	bool m_enableRadio;
+	int m_iPitch;
 };
 
 //
