@@ -113,6 +113,7 @@ public:
 	int MsgFunc_WeapPickup( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_ItemPickup( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_Crosshair( const char *pszName, int iSize, void *pbuf );
 
 	void SlotInput( int iSlot );
 	void _cdecl UserCmd_Slot1( void );
@@ -376,6 +377,7 @@ public:
 
 private:
 	int m_HUD_d_skull;  // sprite index of skull icon
+	int m_HUD_d_headshot;
 };
 
 //
