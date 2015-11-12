@@ -1560,7 +1560,6 @@ void UI_Init( void )
 	Cmd_AddCommand( "menu_video", UI_Video_Menu );
 	Cmd_AddCommand( "menu_vidoptions", UI_VidOptions_Menu );
 	Cmd_AddCommand( "menu_vidmodes", UI_VidModes_Menu );
-	Cmd_AddCommand( "menu_customgame", UI_CustomGame_Menu );
 
 	CHECK_MAP_LIST( TRUE );
 
@@ -1608,7 +1607,6 @@ void UI_Shutdown( void )
 	Cmd_RemoveCommand( "menu_network" );
 	Cmd_RemoveCommand( "menu_defaults" );
 	Cmd_RemoveCommand( "menu_cinematics" );
-	Cmd_RemoveCommand( "menu_customgame" );
 	Cmd_RemoveCommand( "menu_quit" );
 
 	memset( &uiStatic, 0, sizeof( uiStatic_t ));

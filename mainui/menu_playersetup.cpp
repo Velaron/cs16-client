@@ -346,8 +346,8 @@ static void UI_PlayerSetup_Init( void )
 	if( !stricmp( gMenu.m_gameinfo.gamefolder, "hlrally" ))
 		game_hlRally = TRUE;
 
-	if( gMenu.m_gameinfo.flags & GFL_NOMODELS )
-		addFlags |= QMF_INACTIVE;
+	//if( gMenu.m_gameinfo.flags & GFL_NOMODELS )
+	//	addFlags |= QMF_INACTIVE;
 
 	uiPlayerSetup.menu.vidInitFunc = UI_PlayerSetup_Init;
 
@@ -479,14 +479,14 @@ static void UI_PlayerSetup_Init( void )
 		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.view );
 	UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.name );
 
-	if( !gMenu.m_gameinfo.flags & GFL_NOMODELS )
-	{
+	//if( !gMenu.m_gameinfo.flags & GFL_NOMODELS )
+	//{
 		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.model );
 		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.topColor );
 		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.bottomColor );
 		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.showModels );
 		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.hiModels );
-	}
+	//}
 	// setup render and actor
 	uiPlayerSetup.refdef.fov_x = 40;
 
@@ -509,7 +509,7 @@ static void UI_PlayerSetup_Init( void )
 	uiPlayerSetup.ent->curstate.scale = 1.0f;
 	uiPlayerSetup.ent->curstate.frame = 0.0f;
 	uiPlayerSetup.ent->curstate.framerate = 1.0f;
-	uiPlayerSetup.ent->curstate.effects |= EF_FULLBRIGHT;
+	uiPlayerSetup.ent->curstate.effects |= EF_LIGHT;
 	uiPlayerSetup.ent->curstate.controller[0] = 127;
 	uiPlayerSetup.ent->curstate.controller[1] = 127;
 	uiPlayerSetup.ent->curstate.controller[2] = 127;

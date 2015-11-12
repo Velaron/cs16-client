@@ -20,6 +20,8 @@
 #endif /* not __MINGW32__ */
 #endif
 
+
+#ifndef CONST_H
 #define IN_ATTACK	(1 << 0)
 #define IN_JUMP		(1 << 1)
 #define IN_DUCK		(1 << 2)
@@ -36,5 +38,6 @@
 #define IN_RELOAD	(1 << 13)
 #define IN_ALT1		(1 << 14)
 #define IN_SCORE	(1 << 15)   // Used by client.dll for when scoreboard is held down
+#endif
 
 #endif // IN_BUTTONS_H

@@ -34,17 +34,12 @@ LOCAL_SRC_FILES := basemenu.cpp \
            menu_controls.cpp \
            menu_creategame.cpp \
            menu_credits.cpp \
-           menu_customgame.cpp \
            menu_gameoptions.cpp \
            menu_internetgames.cpp \
            menu_langame.cpp \
-           menu_loadgame.cpp \
            menu_main.cpp \
            menu_multiplayer.cpp \
-           menu_newgame.cpp \
            menu_playersetup.cpp \
-           menu_savegame.cpp \
-           menu_saveload.cpp \
            menu_strings.cpp \
            menu_video.cpp \
            menu_vidmodes.cpp \
