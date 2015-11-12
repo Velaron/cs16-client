@@ -177,12 +177,6 @@ int __MsgFunc_Spectator(const char *pszName, int iSize, void *pbuf)
 
 	return 0;
 }
-
-int __MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
  
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
@@ -215,7 +209,6 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( TeamInfo );*/
 
 	HOOK_MESSAGE( Spectator );
-	HOOK_MESSAGE( AllowSpec );
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	// 1 << 16 -- READ ONLY CVAR.

@@ -35,6 +35,7 @@ int KB_ConvertString( char *in, char **ppout );
 DECLARE_MESSAGE( m_Menu, ShowMenu );
 DECLARE_MESSAGE( m_Menu, VGUIMenu );
 DECLARE_MESSAGE( m_Menu, BuyClose );
+DECLARE_MESSAGE( m_Menu, AllowSpec );
 
 DECLARE_COMMAND( m_Menu, OldStyleMenuOpen );
 DECLARE_COMMAND( m_Menu, OldStyleMenuClose );
@@ -46,10 +47,13 @@ int CHudMenu :: Init( void )
 	HOOK_MESSAGE( ShowMenu );
 	HOOK_MESSAGE( VGUIMenu );
 	HOOK_MESSAGE( BuyClose );
+	HOOK_MESSAGE( AllowSpec );
 	HOOK_COMMAND( "client_buy_open", OldStyleMenuOpen );
 	HOOK_COMMAND( "client_buy_close", OldStyleMenuClose );
 
 	InitHUDData();
+
+	m_bAllowSpec = true; // by default, spectating is allowed
 
 	return 1;
 }
@@ -204,6 +208,15 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
 	UserCmd_OldStyleMenuClose();
+	return 1;
+}
+
+int CHudMenu::MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ( pbuf, iSize );
+
+	m_bAllowSpec = READ_BYTE();
+
 	return 1;
 }
 

@@ -395,12 +395,17 @@ public:
 	int MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_BuyClose( const char *pszName, int iSize, void *pbuf );
 
+	// server sends false when spectating is not allowed, and true when allowed
+	// but it's useless, unless we are using Old-Style Menu
+	int MsgFunc_AllowSpec( const char *pszName, int iSize, void *pbuf );
+
 	void _cdecl UserCmd_OldStyleMenuClose( void );
 	void _cdecl UserCmd_OldStyleMenuOpen( void );
 
 	void SelectMenuItem( int menu_item );
 
 	int m_fMenuDisplayed;
+	bool m_bAllowSpec;
 	int m_bitsValidSlots;
 	float m_flShutoffTime;
 	int m_fWaitingForMore;
@@ -608,10 +613,13 @@ public:
 	int VidInit( void );
 	int Draw( float flTime );
 	int MsgFunc_Money( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_BlinkAcct( const char *pszName, int iSize, void *pbuf );
 
 private:
 	int m_iMoneyCount;
 	int m_iDelta;
+	int m_iBlinkAmt;
+	float m_fBlinkTime;
 	float m_fFade;
 	HSPRITE	m_HUD_dollar;
 	HSPRITE m_HUD_minus;

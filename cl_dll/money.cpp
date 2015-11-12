@@ -8,10 +8,12 @@
 #include <string.h>
 #include "vgui_parser.h"
 DECLARE_MESSAGE( m_Money, Money )
+DECLARE_MESSAGE( m_Money, BlinkAcct )
 
 int CHudMoney::Init( )
 {
 	HOOK_MESSAGE( Money );
+	HOOK_MESSAGE( BlinkAcct );
 	gHUD.AddHudElem(this);
 	m_iFlags = HUD_ACTIVE;
 	m_fFade = 0;
@@ -40,22 +42,36 @@ int CHudMoney::Draw(float flTime)
 	int x = ScreenWidth - iDollarWidth * 7;
 	int y = MONEY_YPOS;
 
-	if( m_iDelta != 0 )
+	if( m_iBlinkAmt )
 	{
-		if( m_iDelta > 0 )
+		m_fBlinkTime += gHUD.m_flTimeDelta;
+		UnpackRGB( r, g, b, m_fBlinkTime > 0.5f? RGB_REDISH : RGB_YELLOWISH );
+
+		if( m_fBlinkTime > 1.0f )
 		{
-			r = interpolate * ((RGB_YELLOWISH & 0xFF0000) >> 16);
-			g = (RGB_GREENISH & 0xFF00) >> 8;
-			b = (RGB_GREENISH & 0xFF);
-		}
-		else if( m_iDelta < 0)
-		{
-			r = (RGB_REDISH & 0xFF0000) >> 16;
-			g = ((RGB_REDISH & 0xFF00) >> 8) + interpolate * (((RGB_YELLOWISH & 0xFF00) >> 8) - ((RGB_REDISH & 0xFF00) >> 8));
-			b = (RGB_REDISH & 0xFF) - interpolate * (RGB_REDISH & 0xFF);
+			m_fBlinkTime = 0.0f;
+			--m_iBlinkAmt;
 		}
 	}
-	else UnpackRGB(r, g, b, RGB_YELLOWISH );
+	else
+	{
+		if( m_iDelta != 0 )
+		{
+			if( m_iDelta > 0 )
+			{
+				r = interpolate * ((RGB_YELLOWISH & 0xFF0000) >> 16);
+				g = (RGB_GREENISH & 0xFF00) >> 8;
+				b = (RGB_GREENISH & 0xFF);
+			}
+			else if( m_iDelta < 0)
+			{
+				r = (RGB_REDISH & 0xFF0000) >> 16;
+				g = ((RGB_REDISH & 0xFF00) >> 8) + interpolate * (((RGB_YELLOWISH & 0xFF00) >> 8) - ((RGB_REDISH & 0xFF00) >> 8));
+				b = (RGB_REDISH & 0xFF) - interpolate * (RGB_REDISH & 0xFF);
+			}
+		}
+		else UnpackRGB(r, g, b, RGB_YELLOWISH );
+	}
 
 	alphaBalance = 128 - interpolate * (128 - MIN_ALPHA);
 
@@ -85,5 +101,14 @@ int CHudMoney::MsgFunc_Money(const char *pszName, int iSize, void *pbuf)
 	m_iMoneyCount = READ_LONG();
 	m_iDelta = m_iMoneyCount - iOldCount;
 	m_fFade = 5.0f; //fade for 5 seconds
+	return 1;
+}
+
+int CHudMoney::MsgFunc_BlinkAcct(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ( pbuf, iSize );
+
+	m_iBlinkAmt = READ_BYTE();
+	m_fBlinkTime = 0;
 	return 1;
 }
