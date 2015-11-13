@@ -13,7 +13,6 @@ int CHudRadio::Init( )
 	HOOK_MESSAGE( ReloadSound );
 	gHUD.AddHudElem(this);
 	m_iFlags = HUD_ACTIVE;
-	m_enableRadio = false;
 	return 1;
 }
 
@@ -43,14 +42,14 @@ int CHudRadio::MsgFunc_SendAudio(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 
-void CHudRadio::MsgFunc_ReloadSound(const char *pszName, int iSize, void *pbuf)
+int CHudRadio::MsgFunc_ReloadSound(const char *pszName, int iSize, void *pbuf)
 {
 	BEGIN_READ( pbuf, iSize );
 
 	int volume = READ_BYTE();
 	int isNotShotgun = READ_BYTE();
 
-	PlaySound( IsNotShotgun? "weapons/generic_reload.wav" : "weapons/generic_shot_reload.wav", volume );
+	PlaySound( (char*)(isNotShotgun? "weapons/generic_reload.wav" : "weapons/generic_shot_reload.wav"), volume );
 }
 
 void Broadcast( const char *sentence )
