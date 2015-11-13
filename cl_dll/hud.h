@@ -114,6 +114,8 @@ public:
 	int MsgFunc_ItemPickup( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_Crosshair( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_Brass( const char *pszName, int iSize, void *pbuf );
+
 
 	void SlotInput( int iSlot );
 	void _cdecl UserCmd_Slot1( void );
