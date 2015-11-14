@@ -38,8 +38,6 @@ void EV_FireScout(event_args_s *args)
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell_big.mdl");
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
-
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
 									   "weapons/scout_fire-1.wav",
 									   1, ATTN_NORM, 0,

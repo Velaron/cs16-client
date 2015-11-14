@@ -43,8 +43,6 @@ Init
 */
 void CStudioModelRenderer::Init( void )
 {
-	CVAR_CREATE( "cl_righthand", "1", FCVAR_ARCHIVE );
-
 	// Set up some variables shared with engine
 	m_pCvarHiModels			= IEngineStudio.GetCvar( "cl_himodels" );
 	m_pCvarDeveloper		= IEngineStudio.GetCvar( "developer" );

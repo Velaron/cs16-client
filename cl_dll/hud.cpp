@@ -34,6 +34,7 @@ extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, i
 
 extern cvar_t *sensitivity;
 cvar_t *hud_textmode;
+cvar_t *cl_righthand;
 cvar_t *cl_lw = NULL;
 
 void ShutdownInput (void);
@@ -110,13 +111,6 @@ int __MsgFunc_ValClass(const char *pszName, int iSize, void *pbuf)
 
 	return 0;
 }
-
-/*int __MsgFunc_TeamNames(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}*/
-
 int __MsgFunc_Feign(const char *pszName, int iSize, void *pbuf)
 {
 
@@ -129,13 +123,6 @@ int __MsgFunc_Detpack(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
-/*
-int __MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
-*/
 int __MsgFunc_BuildSt(const char *pszName, int iSize, void *pbuf)
 {
 
@@ -153,25 +140,6 @@ int __MsgFunc_ServerName(const char *pszName, int iSize, void *pbuf)
 
 	return 0;
 }
-
-/*int __MsgFunc_ScoreInfo(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
-
-int __MsgFunc_TeamScore(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
-
-int __MsgFunc_TeamInfo(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
-*/
 int __MsgFunc_Spectator(const char *pszName, int iSize, void *pbuf)
 {
 
@@ -197,16 +165,11 @@ void CHud :: Init( void )
 	HOOK_COMMAND( "togglebrowser", ToggleServerBrowser );
 
 	HOOK_MESSAGE( ValClass );
-	//HOOK_MESSAGE( TeamNames );
 	HOOK_MESSAGE( Feign );
 	HOOK_MESSAGE( Detpack );
-	//HOOK_MESSAGE( MOTD );
 	HOOK_MESSAGE( BuildSt );
 	HOOK_MESSAGE( RandomPC );
 	HOOK_MESSAGE( ServerName );
-/*	HOOK_MESSAGE( ScoreInfo );
-	HOOK_MESSAGE( TeamScore );
-	HOOK_MESSAGE( TeamInfo );*/
 
 	HOOK_MESSAGE( Spectator );
 
@@ -214,11 +177,12 @@ void CHud :: Init( void )
 	// 1 << 16 -- READ ONLY CVAR.
 	CVAR_CREATE( "_vgui_menus", "0", FCVAR_ARCHIVE | FCVAR_USERINFO | 1<<16 ); // force client to use old style menus
 	CVAR_CREATE( "cl_lb", "0", FCVAR_ARCHIVE | FCVAR_USERINFO ); // force client to use old style menus
-	CVAR_CREATE( "lefthand", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	//CVAR_CREATE( "lefthand", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_cl_autowepswitch", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_ah", "1", FCVAR_ARCHIVE| FCVAR_USERINFO);
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
-	hud_textmode = gEngfuncs.pfnRegisterVariable ( "hud_textmode", "0", FCVAR_ARCHIVE );
+	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
+	cl_righthand = CVAR_CREATE( "cl_righthand", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 
 	m_iLogo = 0;
 	m_iFOV = 0;

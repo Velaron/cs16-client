@@ -134,12 +134,12 @@ EV_EjectBrass
 Bullet shell casings
 =================
 */
-void EV_EjectBrass( float *origin, float *velocity, float rotation, int model, int soundtype )
+void EV_EjectBrass( float *origin, float *velocity, float rotation, int model, int soundtype, int life )
 {
 	vec3_t endpos;
 	VectorClear( endpos );
 	endpos[1] = rotation;
-	gEngfuncs.pEfxAPI->R_TempModel( origin, velocity, endpos, 2.5, model, soundtype );
+	gEngfuncs.pEfxAPI->R_TempModel( origin, velocity, endpos, life, model, soundtype );
 }
 
 /*

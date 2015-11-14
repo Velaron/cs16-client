@@ -52,6 +52,7 @@ typedef struct {
 } RGBA;
 
 typedef struct cvar_s cvar_t;
+extern cvar_t *cl_righthand;
 
 
 #define HUD_ACTIVE	1

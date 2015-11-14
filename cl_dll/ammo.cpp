@@ -27,6 +27,7 @@
 #include <stdio.h>
 
 #include "ammohistory.h"
+#include "eventscripts.h"
 //#include "vgui_TeamFortressViewport.h"
 
 WEAPON *gpActiveSel;	// NULL means off, 1 means just the menu bar, otherwise
@@ -681,25 +682,46 @@ int CHudAmmo::MsgFunc_Crosshair(const char *pszName, int iSize, void *pbuf)
 	BEGIN_READ( pbuf, iSize );
 }
 
-#include <r_efx.h>
-
 int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
 	int MessageID = READ_BYTE();
 
-	Vector start( READ_COORD(), READ_COORD(), READ_COORD() );
-	Vector unused( READ_COORD(), READ_COORD(), READ_COORD() );
-	Vector velocity( READ_COORD(), READ_COORD(), READ_COORD() );
+	Vector start, velocity;
+	start.x = READ_COORD();
+	start.y = READ_COORD();
+	start.z = READ_COORD();
+	READ_COORD();
+	READ_COORD(); // unused data
+	READ_COORD();
+	velocity.x = READ_COORD();
+	velocity.y = READ_COORD();
+	velocity.z = READ_COORD();
 
-	float Rotation = READ_ANGLE();
+	float Rotation = M_PI * READ_ANGLE() / 180.0f;
 	int ModelIndex = READ_SHORT();
 	int BounceSoundType = READ_BYTE();
 	int Life = READ_BYTE();
 	int PlayerID = READ_BYTE();
 
-	gEngfuncs.pEfxAPI->R_TempModel( start, velocity, endpos, Life, ModelIndex, BounceSoundType );
+	float sin, cos, x, y;
+	sincosf( Rotation, &sin, &cos );
+	x = -9.0 * sin;
+	y = 9.0 * cos;
+
+	if( floor(cl_righthand->value) )
+	{
+		velocity.x += sin * -120.0;
+		velocity.y += cos * 120.0;
+		x = 9.0 * sin;
+		y = -9.0 * cos;
+	}
+
+	start.x += x;
+	start.y += y;
+	EV_EjectBrass( start, velocity, Rotation, ModelIndex, BounceSoundType, Life );
+	return 1;
 }
 
 //------------------------------------------------------------------------
