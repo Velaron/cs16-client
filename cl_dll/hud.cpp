@@ -233,6 +233,9 @@ void CHud :: Init( void )
 	m_Timer.Init();
 	m_Money.Init();
 	m_ProgressBar.Init();
+	m_SniperScope.Init();
+	m_NVG.Init();
+
 	Localize_Init();
 	//ServersInit();
 

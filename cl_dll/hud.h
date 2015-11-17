@@ -699,6 +699,37 @@ private:
 //
 //-----------------------------------------------------
 //
+// class for drawing sniper scope
+class CHudSniperScope: public CHudBase
+{
+public:
+	int Init( void );
+	int Draw( float flTime );
+
+	bool m_bDrawSniperScope;
+private:
+	byte* m_iScopeArc[4];
+
+};
+
+class CHudNVG: public CHudBase
+{
+public:
+	int Init( void );
+	int Draw( float flTime );
+	int MsgFunc_NVGToggle( const char *pszName, int iSize, void *pbuf);
+	void UserCmd_NVGAdjustUp();
+	void UserCmd_NVGAdjustDown();
+
+private:
+	int m_iAlpha;
+	int m_iEnable;
+
+};
+
+//
+//-----------------------------------------------------
+//
 
 
 
@@ -786,6 +817,8 @@ public:
 	CHudTimer	m_Timer;
 	CHudRadio	m_Radio;
 	CHudProgressBar m_ProgressBar;
+	CHudSniperScope m_SniperScope;
+	CHudNVG			m_NVG;
 
 	void Init( void );
 	void VidInit( void );

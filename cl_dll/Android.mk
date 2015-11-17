@@ -94,7 +94,7 @@ SRCS :=  hl/hl_baseentity.cpp \
         battery.cpp \
         cdll_int.cpp \
         com_weapons.cpp \
-        death.cpp \
+	death.cpp \
         demo.cpp \
         entity.cpp \
         ev_common.cpp \
@@ -133,7 +133,9 @@ SRCS :=  hl/hl_baseentity.cpp \
         radio.cpp \
         timer.cpp \
         money.cpp \
-        vgui_parser.cpp
+        vgui_parser.cpp \
+	nvg.cpp \
+	sniperscope.cpp
 INCLUDES =  -I../common -I. -I../game_shared -I../pm_shared -I../engine -I../dlls -I../public
 DEFINES = -Wno-write-strings -DLINUX -D_LINUX -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -w -Wl,--no-undefined
 

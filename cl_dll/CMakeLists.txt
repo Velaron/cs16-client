@@ -125,6 +125,8 @@ set (CLDLL_SOURCES ./hl/hl_baseentity.cpp
     ./hud_redraw.cpp
     ./hud_spectator.cpp
     ./hud_update.cpp
+    ./sniperscope.cpp
+    ./nvg.cpp
     ./in_camera.cpp
     ./input.cpp
     ./menu.cpp
