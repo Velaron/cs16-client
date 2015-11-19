@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright Â© 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -1441,8 +1441,8 @@ bool CHudSpectator::AddOverviewEntity( int type, struct cl_entity_s *ent, const 
 			switch ( g_PlayerExtraInfo[ent->index].teamnumber )
 			{
 				// blue and red teams are swapped in CS and TFC
-				case 1 : hSprite = m_hsprPlayerBlue; break;
-				case 2 : hSprite = m_hsprPlayerRed; break;
+				case 1 : hSprite = m_hsprPlayerRed; break;
+				case 2 : hSprite = m_hsprPlayerBlue; break;
 				default : hSprite = m_hsprPlayer; break;
 			}
 		}
