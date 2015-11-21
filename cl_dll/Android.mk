@@ -117,7 +117,8 @@ SRCS :=  hl/hl_baseentity.cpp \
         ../pm_shared/pm_debug.c \
         ../pm_shared/pm_math.c \
         ../pm_shared/pm_shared.c \
-        saytext.cpp \
+        rain.cpp \
+	saytext.cpp \
         status_icons.cpp \
         statusbar.cpp \
         studio_util.cpp \

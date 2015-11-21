@@ -136,6 +136,7 @@ set (CLDLL_SOURCES ./hl/hl_baseentity.cpp
     ../pm_shared/pm_debug.c
     ../pm_shared/pm_math.c
     ../pm_shared/pm_shared.c
+    ./rain.cpp
     ./saytext.cpp
     ./status_icons.cpp
     ./statusbar.cpp
