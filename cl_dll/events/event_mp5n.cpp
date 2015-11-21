@@ -43,7 +43,7 @@ void EV_FireMP5( event_args_t *args )
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
-									   "weapons/mp5n-1.wav",
+									   gEngfuncs.pfnRandomLong( 0, 1 ) ? "weapons/mp5-1.wav" : "weapons/mp5-2.wav",
 									   1, ATTN_NORM, 0,
 									   94 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
 
