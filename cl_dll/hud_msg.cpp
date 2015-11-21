@@ -20,6 +20,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "r_efx.h"
+#include "rain.h"
 
 #define MAX_CLIENTS 32
 
@@ -118,3 +119,26 @@ int CHud :: MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )
 		this->m_StatusIcons.DisableIcon("dmg_concuss");
 	return 1;
 }
+
+int CHud::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	int iWeatherType = READ_BYTE();
+
+	if( iWeatherType == 0 )
+	{
+		ResetRain();
+		return 1;
+	}
+
+	Rain.distFromPlayer = 500;
+	Rain.dripsPerSecond = 1000;
+	Rain.windX = Rain.windY = 30;
+	Rain.randX = Rain.randY = 0;
+	Rain.weatherMode = iWeatherType - 1;
+	Rain.globalHeight = 100;
+
+	return 1;
+}
+

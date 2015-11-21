@@ -36,6 +36,7 @@ extern int g_iVisibleMouse;
 float HUD_GetFOV( void );
 
 extern cvar_t *sensitivity;
+#include "rain.h"
 
 // Think
 void CHud::Think(void)
@@ -79,6 +80,7 @@ void CHud::Think(void)
 	{  // only let players adjust up in fov,  and only if they are not overriden by something else
 		m_iFOV = max( default_fov->value, 90 );  
 	}
+
 }
 
 // Redraw

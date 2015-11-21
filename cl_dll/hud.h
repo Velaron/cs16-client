@@ -53,6 +53,7 @@ typedef struct {
 
 typedef struct cvar_s cvar_t;
 extern cvar_t *cl_righthand;
+extern cvar_t *cl_weather;
 
 
 #define HUD_ACTIVE	1
@@ -838,6 +839,7 @@ public:
 	void _cdecl MsgFunc_ViewMode( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf);
 	int  _cdecl MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf );
+	int  _cdecl MsgFunc_ReceiveW( const char *pszName, int iSize, void *pbuf );
 
 	// Screen information
 	SCREENINFO	m_scrinfo;

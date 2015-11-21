@@ -28,6 +28,7 @@
 #include "demo.h"
 #include "demo_api.h"
 #include "vgui_parser.h"
+#include "rain.h"
 
 
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
@@ -35,17 +36,16 @@ extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, i
 extern cvar_t *sensitivity;
 cvar_t *hud_textmode;
 cvar_t *cl_righthand;
+cvar_t *cl_weather;
 cvar_t *cl_lw = NULL;
 
 void ShutdownInput (void);
 
-//DECLARE_MESSAGE(m_Logo, Logo)
 int __MsgFunc_Logo(const char *pszName, int iSize, void *pbuf)
 {
 	return gHUD.MsgFunc_Logo(pszName, iSize, pbuf );
 }
 
-//DECLARE_MESSAGE(m_Logo, Logo)
 int __MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf)
 {
 	return gHUD.MsgFunc_ResetHUD(pszName, iSize, pbuf );
@@ -76,6 +76,11 @@ int __MsgFunc_Concuss(const char *pszName, int iSize, void *pbuf)
 int __MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 {
 	return gHUD.MsgFunc_GameMode( pszName, iSize, pbuf );
+}
+
+int __MsgFunc_ReceiveW( const char *pszName, int iSize, void *pbuf )
+{
+	return gHUD.MsgFunc_ReceiveW( pszName, iSize, pbuf );
 }
 
 // TFFree Command Menu
@@ -156,6 +161,7 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( ViewMode );
 	HOOK_MESSAGE( SetFOV );
 	HOOK_MESSAGE( Concuss );
+	HOOK_MESSAGE( ReceiveW );
 
 	// TFFree CommandMenu
 	HOOK_COMMAND( "+commandmenu", OpenCommandMenu );
@@ -183,6 +189,7 @@ void CHud :: Init( void )
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
 	cl_righthand = CVAR_CREATE( "cl_righthand", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	cl_weather = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 
 	m_iLogo = 0;
 	m_iFOV = 0;
@@ -237,6 +244,8 @@ void CHud :: Init( void )
 	m_NVG.Init();
 
 	Localize_Init();
+		InitRain();
+
 	//ServersInit();
 
 	MsgFunc_ResetHUD(0, 0, NULL );
@@ -535,7 +544,6 @@ int CHud::MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf)
 
 	return 1;
 }
-
 
 void CHud::AddHudElem(CHudBase *phudelem)
 {
