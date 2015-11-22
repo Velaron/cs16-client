@@ -31,7 +31,7 @@ int CHudNVG::Draw(float flTime)
 	{
 		return 1;
 	}
-	FillRGBA(0, 0, ScreenWidth, ScreenHeight, 50, 225, 50, m_iAlpha);
+	gEngfuncs.pfnFillRGBABlend(0, 0, ScreenWidth, ScreenHeight, 50, 225, 50, m_iAlpha);
 
 	// draw a dynamic light on player's origin
 	dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight ( 0 );

@@ -280,6 +280,17 @@ typedef struct cl_enginefuncs_s
 	void		(*pfnPlaySoundVoiceByName)( char *szSound, float volume, int pitch );
 	void		(*pfnPrimeMusicStream)( char *filename, int looping );
 	double		(*pfnSys_FloatTime)( void );
+
+	// decay funcs
+	void		(*pfnProcessTutorMessageDecayBuffer)( int *buffer, int buflen );
+	void		(*pfnConstructTutorMessageDecayBuffer)( int *buffer, int buflen );
+	void		(*pfnResetTutorMessageDecayData)( void );
+
+	void		(*pfnPlaySoundByNameAtPitch)( char *szSound, float volume, int pitch );
+	void		(*pfnFillRGBABlend)( int x, int y, int width, int height, int r, int g, int b, int a );
+	int		(*pfnGetAppID)( void );
+	void	*(*pfnGetAliases)( void );
+	void		(*pfnVguiWrap2_GetMouseDelta)( int *x, int *y );
 } cl_enginefunc_t;
 
 #ifndef IN_BUTTONS_H
