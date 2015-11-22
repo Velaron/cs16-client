@@ -85,13 +85,19 @@ int CHudTimer::MsgFunc_ShowTimer(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 
+#define UPDATE_BOTPROGRESS 0
+#define CREATE_BOTPROGRESS 1
+#define REMOVE_BOTPROGRESS 2
+
 DECLARE_MESSAGE( m_ProgressBar, BarTime )
 DECLARE_MESSAGE( m_ProgressBar, BarTime2 )
+DECLARE_MESSAGE( m_ProgressBar, BotProgress )
 
 int CHudProgressBar::Init()
 {
 	HOOK_MESSAGE( BarTime );
 	HOOK_MESSAGE( BarTime2 );
+	HOOK_MESSAGE( BotProgress );
 	m_iFlags = 0;
 
 	gHUD.AddHudElem(this);
@@ -105,16 +111,38 @@ int CHudProgressBar::VidInit()
 
 int CHudProgressBar::Draw( float flTime )
 {
-	if( Percent >= 1.0f )
+	// allow only 0.0..1.0
+	if( (m_fPercent < 0.0f) || (m_fPercent > 1.0f) )
 	{
 		m_iFlags = 0;
+		m_fPercent = 0.0f;
 		return 1;
-
 	}
-	Percent = ((flTime - StartTime) / Duration);
+	if( m_szHeader[0] )
+	{
+		int r, g, b;
+		UnpackRGB( r, g, b, RGB_YELLOWISH );
+		gHUD.DrawHudString( ScreenWidth / 4, ScreenHeight / 2, ScreenWidth, m_szHeader, r, g, b );
 
-	gHUD.DrawDarkRectangle( ScreenWidth/4, ScreenHeight*2/3, ScreenWidth/2, ScreenHeight/30 );
-	FillRGBA( ScreenWidth/4+2, ScreenHeight*2/3+2, Percent * (ScreenWidth/2-4), ScreenHeight/30-4, 255, 140, 0, 255 );
+		gHUD.DrawDarkRectangle( ScreenWidth/ 4, ScreenHeight / 2 + 20, ScreenWidth/2, ScreenHeight/30 );
+		FillRGBA( ScreenWidth/4+2, ScreenHeight/2 +22, m_fPercent * (ScreenWidth/2-4), ScreenHeight/30-4, 255, 140, 0, 255 );
+		return 1;
+	}
+
+	// prevent SIGFPE
+	if( m_iDuration != 0.0f )
+	{
+		m_fPercent = ((flTime - m_fStartTime) / m_iDuration);
+	}
+	else
+	{
+		m_fPercent = 0.0f;
+		m_iFlags = 0;
+		return 1;
+	}
+
+	gHUD.DrawDarkRectangle( ScreenWidth/4, ScreenHeight*2/3, ScreenWidth/2, 10 );
+	FillRGBA( ScreenWidth/4+2, ScreenHeight*2/3+2, m_fPercent * (ScreenWidth/2-4), 6, 255, 140, 0, 255 );
 
 	return 1;
 }
@@ -123,10 +151,10 @@ int CHudProgressBar::MsgFunc_BarTime(const char *pszName, int iSize, void *pbuf)
 {
 	BEGIN_READ( pbuf, iSize );
 
-	Duration = READ_SHORT();
-	Percent = 0.0f;
+	m_iDuration = READ_SHORT();
+	m_fPercent = 0.0f;
 
-	StartTime = gHUD.m_flTime;
+	m_fStartTime = gHUD.m_flTime;
 
 	m_iFlags = HUD_ACTIVE;
 	return 1;
@@ -136,11 +164,37 @@ int CHudProgressBar::MsgFunc_BarTime2(const char *pszName, int iSize, void *pbuf
 {
 	BEGIN_READ( pbuf, iSize );
 
-	Duration = READ_SHORT();
-	Percent = (float)READ_SHORT() / 100.0f;
+	m_iDuration = READ_SHORT();
+	m_fPercent = (float)READ_SHORT() / 100.0f;
 
-	StartTime = gHUD.m_flTime;
+	m_fStartTime = gHUD.m_flTime;
 
 	m_iFlags = HUD_ACTIVE;
+	return 1;
+}
+
+int CHudProgressBar::MsgFunc_BotProgress(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ( pbuf, iSize );
+	m_iDuration = 0.0f; // don't update our progress bar
+	m_iFlags = HUD_ACTIVE;
+
+	int flag = READ_BYTE();
+	switch( flag )
+	{
+	case UPDATE_BOTPROGRESS:
+		m_fPercent = (float)READ_BYTE() / 100.0f;
+		break;
+	case CREATE_BOTPROGRESS:
+		READ_BYTE();
+		strncpy(m_szHeader, READ_STRING(), sizeof(m_szHeader));
+		break;
+	case REMOVE_BOTPROGRESS:
+		m_fPercent = 0.0f;
+		m_szHeader[0] = '\0';
+		m_iFlags = 0;
+		break;
+	}
+
 	return 1;
 }

@@ -20,7 +20,6 @@
 #include "cl_util.h"
 #include "triangleapi.h"
 
-
 #define MAX_LOGO_FRAMES 56
 
 int grgLogoFrame[MAX_LOGO_FRAMES] = 
@@ -36,7 +35,6 @@ extern int g_iVisibleMouse;
 float HUD_GetFOV( void );
 
 extern cvar_t *sensitivity;
-#include "rain.h"
 
 // Think
 void CHud::Think(void)

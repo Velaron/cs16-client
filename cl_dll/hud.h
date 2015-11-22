@@ -691,10 +691,13 @@ public:
 	// [short] percent
 	int MsgFunc_BarTime2( const char *pszName, int iSize, void *pbuf );
 
+	int MsgFunc_BotProgress( const char *pszName, int iSize, void *pbuf );
+
 private:
-	int Duration;
-	float Percent;
-	float StartTime;
+	int m_iDuration;
+	float m_fPercent;
+	float m_fStartTime;
+	char m_szHeader[256];
 };
 
 //
