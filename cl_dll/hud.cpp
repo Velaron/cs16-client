@@ -244,7 +244,7 @@ void CHud :: Init( void )
 	m_NVG.Init();
 
 	Localize_Init();
-		InitRain();
+	InitRain();
 
 	//ServersInit();
 

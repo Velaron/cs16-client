@@ -72,7 +72,6 @@ void ProcessRain( void )
 	cl_drip* curDrip = FirstChainDrip.p_Next;
 	cl_drip* nextDrip = NULL;
 
-	cl_entity_t *player = gEngfuncs.GetLocalPlayer();
 
 	// save debug info
 	float debug_lifetime = 0;
@@ -139,8 +138,8 @@ void ProcessRain( void )
 			float deathHeight;
 			vec3_t vecStart, vecEnd;
 
-			vecStart[0] = gEngfuncs.pfnRandomFloat(player->origin.x - Rain.distFromPlayer, player->origin.x + Rain.distFromPlayer);
-			vecStart[1] = gEngfuncs.pfnRandomFloat(player->origin.y - Rain.distFromPlayer, player->origin.y + Rain.distFromPlayer);
+			vecStart[0] = gEngfuncs.pfnRandomFloat(gHUD.m_vecOrigin.x - Rain.distFromPlayer, gHUD.m_vecOrigin.x + Rain.distFromPlayer);
+			vecStart[1] = gEngfuncs.pfnRandomFloat(gHUD.m_vecOrigin.y - Rain.distFromPlayer, gHUD.m_vecOrigin.y + Rain.distFromPlayer);
 			vecStart[2] = Rain.globalHeight;
 
 			float xDelta = Rain.windX + gEngfuncs.pfnRandomFloat(Rain.randX * -1, Rain.randX);
@@ -344,7 +343,6 @@ void ResetRain( void )
 		delDrip = nextDrip; // restore pointer
 		dripcounter--;
 	}
-
 // delete all FX objects
 	cl_rainfx* delFX = FirstChainFX.p_Next;
 	FirstChainFX.p_Next = NULL;

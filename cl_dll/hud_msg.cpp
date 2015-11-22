@@ -133,7 +133,7 @@ int CHud::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
 	}
 
 	Rain.distFromPlayer = 500;
-	Rain.dripsPerSecond = 1000;
+	Rain.dripsPerSecond = 500;
 	Rain.windX = Rain.windY = 30;
 	Rain.randX = Rain.randY = 0;
 	Rain.weatherMode = iWeatherType - 1;
