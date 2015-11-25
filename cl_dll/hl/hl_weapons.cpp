@@ -31,6 +31,8 @@
 #include "../com_weapons.h"
 #include "../demo.h"
 
+#include "cl_entity.h"
+
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
 #endif
@@ -106,6 +108,13 @@ CTMP g_TMP;
 CUMP45 g_UMP45;
 CUSP g_USP;
 CXM1014 g_XM1014;
+
+int g_iWeaponFlags;
+bool g_bInBombZone;
+int g_iFreezeTimeOver;
+int g_bHoldingShield;
+vec3_t g_vPlayerVelocity;
+float g_flPlayerSpeed;
 
 /*
 ======================
@@ -487,6 +496,8 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		m_fInReload = FALSE;
 	}
 
+	assert(m_pPlayer);
+
 	if ((m_pPlayer->pev->button & IN_ATTACK2) && (m_flNextSecondaryAttack <= 0.0))
 	{
 		if ( pszAmmo2() && !m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] )
@@ -867,6 +878,7 @@ void HUD_InitClientWeapons( void )
 	HUD_PrepEntity( &g_MP5N, &player);
 	HUD_PrepEntity( &g_M249, &player);
 	HUD_PrepEntity( &g_M4A1, &player);
+	HUD_PrepEntity( &g_M3, &player );
 	HUD_PrepEntity( &g_TMP, &player);
 	HUD_PrepEntity( &g_G3SG1, &player);
 	HUD_PrepEntity( &g_Flashbang, &player);
@@ -913,6 +925,55 @@ void HUD_SetLastOrg( void )
 	}
 }
 
+int GetWeaponAccuracyFlags( int weaponid )
+{
+	int result;
+
+	if( weaponid <= 30 )
+	{
+		switch( weaponid )
+		{
+		case 8:
+		case 14:
+		case 20:
+		case 27:
+		case 28:
+		case 30:
+			result = 3;
+			break;
+		case 1:
+		case 11:
+		case 26:
+			result = 7;
+			break;
+		case 17:
+			result = (g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE) < 1 ? 7 : 23;
+			break;
+		case 7:
+		case 12:
+		case 19:
+		case 23:
+			result = 1;
+			break;
+		case 22:
+			result = (g_iWeaponFlags & WPNSTATE_USP_SILENCED) < 1 ? 3 : 11;
+			break;
+		case 15:
+			result = (g_iWeaponFlags & WPNSTATE_FAMAS_BURST_MODE) < 1 ? 3 : 19;
+			break;
+		case 16:
+			result = (g_iWeaponFlags & WPNSTATE_USP_SILENCED) < 1 ? 7 : 15;
+			break;
+		default:
+			result = 0;
+		}
+	}
+	else result = 0;
+
+	return result;
+}
+
+
 /*
 =====================
 HUD_WeaponsPostThink
@@ -928,6 +989,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	CBasePlayerWeapon *pCurrent;
 	weapon_data_t nulldata, *pfrom, *pto;
 	static int lasthealth;
+	int flags;
 
 	memset( &nulldata, 0, sizeof( nulldata ) );
 
@@ -1095,7 +1157,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		
 		pCurrent->m_fInReload			= pfrom->m_fInReload;
 		pCurrent->m_fInSpecialReload	= pfrom->m_fInSpecialReload;
-//		pCurrent->m_flPumpTime			= pfrom->m_flPumpTime;
 		pCurrent->m_iClip				= pfrom->m_iClip;
 		pCurrent->m_flNextPrimaryAttack	= pfrom->m_flNextPrimaryAttack;
 		pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;
@@ -1103,15 +1164,18 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pCurrent->pev->fuser1			= pfrom->fuser1;
 		pCurrent->m_flStartThrow		= pfrom->fuser2;
 		pCurrent->m_flReleaseThrow		= pfrom->fuser3;
-		/*pCurrent->m_chargeReady			= pfrom->iuser1;
-		pCurrent->m_fInAttack			= pfrom->iuser2;
-		pCurrent->m_fireState			= pfrom->iuser3;*/
-
+		pCurrent->m_iSwing				= pfrom->iuser1;
+		pCurrent->m_iWeaponState		= pfrom->m_iWeaponState;
+		pCurrent->m_flLastFire			= pfrom->m_fAimedDamage;
+		pCurrent->m_iShotsFired			= pfrom->m_fInZoom;
 		pCurrent->m_iSecondaryAmmoType		= (int)from->client.vuser3[ 2 ];
 		pCurrent->m_iPrimaryAmmoType		= (int)from->client.vuser4[ 0 ];
 		player.m_rgAmmo[ pCurrent->m_iPrimaryAmmoType ]	= (int)from->client.vuser4[ 1 ];
 		player.m_rgAmmo[ pCurrent->m_iSecondaryAmmoType ]	= (int)from->client.vuser4[ 2 ];
 	}
+
+	if( g_pWpns[ from->client.m_iId - 1])
+		g_iWeaponFlags = g_pWpns[ from->client.m_iId - 1 ]->m_iWeaponState;
 
 	// For random weapon events, use this seed to seed random # generator
 	player.random_seed = random_seed;
@@ -1137,35 +1201,45 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.pev->deadflag = from->client.deadflag;
 	player.pev->waterlevel = from->client.waterlevel;
 	player.pev->maxspeed    = from->client.maxspeed;
+	player.pev->punchangle = from->client.punchangle;
 	player.pev->fov = from->client.fov;
 	player.pev->weaponanim = from->client.weaponanim;
 	player.pev->viewmodel = from->client.viewmodel;
 	player.m_flNextAttack = from->client.m_flNextAttack;
-	//player.m_flNextAmmoBurn = from->client.fuser2;
-	//player.m_flAmmoStartCharge = from->client.fuser3;
+
+	g_vPlayerVelocity	= from->client.velocity;
+	g_flPlayerSpeed		= from->client.velocity.Length();
 
 	//Stores all our ammo info, so the client side weapons can use them.
-	player.ammo_9mm			= (int)from->client.vuser1[0];
-	//player.ammo_357			= (int)from->client.vuser1[1];
-	//player.ammo_argrens		= (int)from->client.vuser1[2];
-	//player.ammo_bolts		= (int)from->client.ammo_nails; //is an int anyways...
+	player.ammo_9mm			= (int)from->client.ammo_nails;
+	player.ammo_556nato		= (int)from->client.ammo_cells;
 	player.ammo_buckshot	= (int)from->client.ammo_shells; 
-	//player.ammo_uranium		= (int)from->client.ammo_cells;
-	//player.ammo_hornets		= (int)from->client.vuser2[0];
-	//player.ammo_rockets		= (int)from->client.ammo_rockets;
+	player.ammo_556natobox	= (int)from->client.ammo_rockets;
+	player.ammo_762nato		= (int)from->client.vuser2.x;
+	player.ammo_45acp		= (int)from->client.vuser2.y;
+	player.ammo_50ae		= (int)from->client.vuser2.z;
+	player.ammo_338mag		= (int)from->client.vuser3.x;
+	player.ammo_57mm		= (int)from->client.vuser3.y;
+	player.ammo_357sig		= (int)from->client.vuser3.z;
 
+	cl_entity_t *pplayer = gEngfuncs.GetLocalPlayer();
+	if( pplayer )
+	{
+		player.pev->origin = from->client.origin;
+		player.pev->angles	= pplayer->angles;
+	}
+
+	flags = from->client.iuser3;
+	player.m_bCanShoot	= flags & PLAYER_CAN_SHOOT;
+	g_iFreezeTimeOver	= flags & PLAYER_FREEZE_TIME_OVER;
+	g_bInBombZone		= flags & PLAYER_IN_BOMB_ZONE;
+	g_bHoldingShield	= flags & PLAYER_HOLDING_SHIELD;
 	
 	// Point to current weapon object
 	if ( from->client.m_iId )
 	{
 		player.m_pActiveItem = g_pWpns[ from->client.m_iId ];
 	}
-
-	/*if ( player.m_pActiveItem->m_iId == WEAPON_RPG )
-	{
-		 ( ( CRpg * )player.m_pActiveItem)->m_fSpotActive = (int)from->client.vuser2[ 1 ];
-		 ( ( CRpg * )player.m_pActiveItem)->m_cActiveRockets = (int)from->client.vuser2[ 2 ];
-	}*/
 	
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
@@ -1214,26 +1288,22 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	to->client.fov						= player.pev->fov;
 	to->client.weaponanim				= player.pev->weaponanim;
 	to->client.m_flNextAttack			= player.m_flNextAttack;
-	//to->client.fuser2					= player.m_flNextAmmoBurn;
-	//to->client.fuser3					= player.m_flAmmoStartCharge;
 	to->client.maxspeed					= player.pev->maxspeed;
+	to->client.punchangle				= player.pev->punchangle;
 
-	//HL Weapons
-	to->client.vuser1[0]				= player.ammo_9mm;
-	//to->client.vuser1[1]				= player.ammo_357;
-	//to->client.vuser1[2]				= player.ammo_argrens;
 
-	//to->client.ammo_nails				= player.ammo_bolts;
-	to->client.ammo_shells				= player.ammo_buckshot;
-	//to->client.ammo_cells				= player.ammo_uranium;
-	//to->client.vuser2[0]				= player.ammo_hornets;
-	//to->client.ammo_rockets				= player.ammo_rockets;
+	to->client.ammo_nails = player.ammo_9mm;
+	to->client.ammo_cells = player.ammo_556nato;
+	to->client.ammo_shells = player.ammo_buckshot;
+	to->client.ammo_rockets = player.ammo_556natobox;
+	to->client.vuser2.x = player.ammo_762nato;
+	to->client.vuser2.y = player.ammo_45acp;
+	to->client.vuser2.z = player.ammo_50ae;
+	to->client.vuser3.x = player.ammo_338mag;
+	to->client.vuser3.y = player.ammo_57mm;
+	to->client.vuser3.z = player.ammo_357sig;
+	to->client.iuser3 = flags;
 
-	/*if ( player.m_pActiveItem->m_iId == WEAPON_RPG )
-	{
-		 from->client.vuser2[ 1 ] = ( ( CRpg * )player.m_pActiveItem)->m_fSpotActive;
-		 from->client.vuser2[ 2 ] = ( ( CRpg * )player.m_pActiveItem)->m_cActiveRockets;
-	}*/
 
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
@@ -1267,7 +1337,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	
 		pto->m_fInReload				= pCurrent->m_fInReload;
 		pto->m_fInSpecialReload			= pCurrent->m_fInSpecialReload;
-//		pto->m_flPumpTime				= pCurrent->m_flPumpTime;
 		pto->m_iClip					= pCurrent->m_iClip; 
 		pto->m_flNextPrimaryAttack		= pCurrent->m_flNextPrimaryAttack;
 		pto->m_flNextSecondaryAttack	= pCurrent->m_flNextSecondaryAttack;
@@ -1275,9 +1344,9 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pto->fuser1						= pCurrent->pev->fuser1;
 		pto->fuser2						= pCurrent->m_flStartThrow;
 		pto->fuser3						= pCurrent->m_flReleaseThrow;
-		//pto->iuser1						= pCurrent->m_chargeReady;
-		//pto->iuser2						= pCurrent->m_fInAttack;
-		//pto->iuser3						= pCurrent->m_fireState;
+		pto->iuser1						= pCurrent->m_iSwing;
+		pto->m_iWeaponState				= pCurrent->m_iWeaponState;
+		pto->m_fAimedDamage				= pCurrent->m_flLastFire;
 
 		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
 		pto->m_flNextReload				-= cmd->msec / 1000.0;
@@ -1291,13 +1360,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		to->client.vuser4[0]				= pCurrent->m_iPrimaryAmmoType;
 		to->client.vuser4[1]				= player.m_rgAmmo[ pCurrent->m_iPrimaryAmmoType ];
 		to->client.vuser4[2]				= player.m_rgAmmo[ pCurrent->m_iSecondaryAmmoType ];
-
-/*		if ( pto->m_flPumpTime != -9999 )
-		{
-			pto->m_flPumpTime -= cmd->msec / 1000.0;
-			if ( pto->m_flPumpTime < -0.001 )
-				pto->m_flPumpTime = -0.001;
-		}*/
 
 		if ( pto->m_fNextAimBonus < -1.0 )
 		{

@@ -15,6 +15,11 @@
 
 #include "hud_iface.h"
 
+#define PLAYER_CAN_SHOOT (1 << 0)
+#define PLAYER_FREEZE_TIME_OVER ( 1 << 1 )
+#define PLAYER_IN_BOMB_ZONE (1 << 2)
+#define PLAYER_HOLDING_SHIELD (1 << 3)
+
 extern "C"
 {
 	void _DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed );
@@ -43,6 +48,12 @@ extern cvar_t *cl_lw;
 extern int g_runfuncs;
 extern vec3_t v_angles;
 extern float g_lastFOV;
+extern int g_iWeaponFlags;
+extern bool g_bInBombZone;
+extern int g_iFreezeTimeOver;
+extern int g_bHoldingShield;
+extern vec3_t g_vPlayerVelocity;
+extern float g_flPlayerSpeed;
 extern struct local_state_s *g_finalstate;
 
 #endif
