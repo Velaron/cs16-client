@@ -107,6 +107,12 @@ public:
 	int Draw(float flTime);
 	void Think(void);
 	void Reset(void);
+
+	void DrawCrosshair( float flTime, int weaponId );
+	void CalcCrosshairSize();
+	void CalcCrosshairDrawMode();
+	void CalcCrosshairColor();
+
 	int DrawWList(float flTime);
 	int MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf);
@@ -133,6 +139,7 @@ public:
 	void _cdecl UserCmd_Close( void );
 	void _cdecl UserCmd_NextWeapon( void );
 	void _cdecl UserCmd_PrevWeapon( void );
+	void _cdecl UserCmd_Adjust_Crosshair( void );
 
 private:
 	float m_fFade;
@@ -140,6 +147,20 @@ private:
 	WEAPON *m_pWeapon;
 	int	m_HUD_bucket0;
 	int m_HUD_selection;
+
+	int m_iAlpha;
+	int m_R, m_G, m_B;
+	int m_cvarR, m_cvarG, m_cvarB;
+	int m_iCurrentCrosshair;
+	int m_iCrosshairScaleBase;
+	float m_flCrosshairDistance;
+	bool m_bAdditive;
+	bool m_bObserverCrosshair ;
+	bool m_bDrawCrosshair;
+	int m_iAmmoLastCheck;
+
+	cvar_t *m_pClCrosshairColor, *m_pClCrosshairTranslucent, *m_pClCrosshairSize;
+	cvar_t *m_pClDynamicCrosshair;
 
 };
 
@@ -725,9 +746,9 @@ public:
 	void UserCmd_NVGAdjustUp();
 	void UserCmd_NVGAdjustDown();
 
+	int m_iEnable;
 private:
 	int m_iAlpha;
-	int m_iEnable;
 
 };
 
