@@ -451,7 +451,7 @@ void PM_PlayStepSound(int step, float fvol)
 	}
 }
 
-int PM_MapTextureTypeStepType(chTextureType)
+int PM_MapTextureTypeStepType( char chTextureType)
 {
 	switch (chTextureType)
 	{
