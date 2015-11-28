@@ -657,6 +657,11 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 			SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
 
 	}
+	else
+	{
+		wrect_t nullrc;
+		SetCrosshair( 0, nullrc, 0, 0, 0);
+	}
 
 
 	m_fFade = 200.0f; //!!!
@@ -1113,24 +1118,57 @@ int CHudAmmo::Draw(float flTime)
 #define SOUTH_YPOS (ScreenHeight / 2 + flCrosshairDistance)
 #define NORTH_SOUTH_XPOS (ScreenWidth / 2)
 
+int Distances[30][2] =
+{
+{ 8, 3 }, // 0
+{ 4, 3 }, // 1
+{ 5, 3 }, // 2
+{ 8, 3 }, // 3
+{ 9, 4 }, // 4
+{ 6, 3 }, // 5
+{ 9, 3 }, // 6
+{ 3, 3 }, // 7
+{ 8, 3 }, // 8
+{ 4, 3 }, // 9
+{ 8, 3 }, // 10
+{ 6, 3 }, // 11
+{ 5, 3 }, // 12
+{ 4, 3 }, // 13
+{ 4, 3 }, // 14
+{ 8, 3 }, // 15
+{ 8, 3 }, // 16
+{ 8, 3 }, // 17
+{ 6, 3 }, // 18
+{ 6, 3 }, // 19
+{ 8, 6 }, // 20
+{ 4, 3 }, // 21
+{ 7, 3 }, // 22
+{ 6, 4 }, // 23
+{ 8, 3 }, // 24
+{ 8, 3 }, // 25
+{ 5, 3 }, // 26
+{ 4, 4 }, // 27
+{ 7, 3 }, // 28
+{ 7, 3 }, // 29
+};
+
 void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
 {
-	long double flDynamicSpread;
 	int flags;
-	int flSpread;
+	int iDeltaDistance, iDistance;
 	int iLength;
 	float flCrosshairDistance;
 
 	if ( weaponid > 30 )
 	{
-		flDynamicSpread = 4;
-		flSpread = 3;
+		iDistance = 4;
+		iDeltaDistance = 3;
 	}
 	else
 	{
 		// TODO: Get an info about crosshair for weapon
-		flDynamicSpread = 4;
-		flSpread = 3;
+		iDistance = Distances[weaponid-1][0];
+		iDeltaDistance = Distances[weaponid-1][1];
 	}
 
 	iLength = 0;
@@ -1140,21 +1178,21 @@ void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
 		if ( g_iPlayerFlags & FL_ONGROUND || !(flags & ACCURACY_AIR) )
 		{
 			if ( (g_iPlayerFlags & FL_DUCKING) && (flags & ACCURACY_DUCK) )
-				flDynamicSpread *= 0.5;
+				iDistance *= 0.5;
 			else
 			{
 				// TODO: Get a weapon speed
-				int flWeaponSpeed = 0;
+				int iWeaponSpeed = 0;
 
-				if ( (g_flPlayerSpeed > flWeaponSpeed) && (flags & ACCURACY_SPEED) )
-					flDynamicSpread *= 1.5;
+				if ( (g_flPlayerSpeed > iWeaponSpeed) && (flags & ACCURACY_SPEED) )
+					iDistance *= 1.5;
 			}
 		}
-		else flDynamicSpread *= 2;
+		else iDistance *= 2;
 		if ( flags & ACCURACY_MULTIPLY_BY_14 )
-			flDynamicSpread *= 1.4;
+			iDistance *= 1.4;
 		if ( flags & ACCURACY_MULTIPLY_BY_14_2 )
-			flDynamicSpread *= 1.4;
+			iDistance *= 1.4;
 	}
 
 	if ( m_iAmmoLastCheck >= g_iShotsFired )
@@ -1164,7 +1202,7 @@ void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
 	}
 	else
 	{
-		m_flCrosshairDistance += flSpread;
+		m_flCrosshairDistance += iDeltaDistance;
 		m_iAlpha -= 40;
 
 		if ( m_flCrosshairDistance > 15.0 )
@@ -1181,11 +1219,11 @@ void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
 	CalcCrosshairSize();
 
 	m_iAmmoLastCheck = g_iShotsFired;
-	if ( flDynamicSpread > m_flCrosshairDistance )
-		m_flCrosshairDistance = flDynamicSpread;
+	if ( iDistance > m_flCrosshairDistance )
+		m_flCrosshairDistance = iDistance;
 	if ( m_iAlpha > 255 )
 		m_iAlpha = 255;
-	iLength = (m_flCrosshairDistance - flDynamicSpread) * 0.5 + 5;
+	iLength = (m_flCrosshairDistance - iDistance) * 0.5 + 5;
 	flCrosshairDistance = m_flCrosshairDistance;
 	if ( ScreenWidth != m_iCrosshairScaleBase )
 	{
