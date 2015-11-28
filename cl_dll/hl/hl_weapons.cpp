@@ -115,6 +115,7 @@ int g_iFreezeTimeOver;
 int g_bHoldingShield;
 vec3_t g_vPlayerVelocity;
 float g_flPlayerSpeed;
+int g_iPlayerFlags;
 
 /*
 ======================
@@ -1196,7 +1197,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.pev->button = cmd->buttons;
 
 	player.pev->velocity = from->client.velocity;
-	player.pev->flags = from->client.flags;
+	g_iPlayerFlags = player.pev->flags = from->client.flags;
 
 	player.pev->deadflag = from->client.deadflag;
 	player.pev->waterlevel = from->client.waterlevel;
@@ -1227,6 +1228,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	{
 		player.pev->origin = from->client.origin;
 		player.pev->angles	= pplayer->angles;
+		player.pev->v_angle = v_angles;
 	}
 
 	flags = from->client.iuser3;
@@ -1303,6 +1305,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	to->client.vuser3.y = player.ammo_57mm;
 	to->client.vuser3.z = player.ammo_357sig;
 	to->client.iuser3 = flags;
+
+
 
 
 	// Make sure that weapon animation matches what the game .dll is telling us
