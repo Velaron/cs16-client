@@ -32,6 +32,7 @@ void EV_FireSG550(event_args_s *args)
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation( gEngfuncs.pfnRandomLong(SG550_SHOOT, SG550_SHOOT2), 2 );
 	}

@@ -30,6 +30,7 @@ void EV_FireAK47( event_args_t *args )
 
 	if ( EV_IsLocal( args->entindex ) )
 	{
+		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(AK47_SHOOT1, AK47_SHOOT3), 2);
 		EV_MuzzleFlash();
 	}

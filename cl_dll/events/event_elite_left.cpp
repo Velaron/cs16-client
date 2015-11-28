@@ -43,6 +43,7 @@ void EV_FireElite( event_args_s *args, int sequence )
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(sequence, 2);
 	}

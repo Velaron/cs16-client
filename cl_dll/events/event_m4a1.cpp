@@ -41,6 +41,7 @@ void EV_FireM4A1( event_args_t *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		if( args->bparam1 )
 		{

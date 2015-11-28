@@ -33,6 +33,7 @@ void EV_FireUMP45(event_args_s *args)
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(UMP45_SHOOT1, UMP45_SHOOT3), 2);
 

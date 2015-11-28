@@ -30,6 +30,7 @@ void EV_FireMAC10(event_args_s *args)
 
 	if ( EV_IsLocal( args->entindex ) )
 	{
+		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(MAC10_SHOOT1, MAC10_SHOOT3), 2);
 		EV_MuzzleFlash();
 	}

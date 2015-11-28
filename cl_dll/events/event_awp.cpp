@@ -33,6 +33,7 @@ void EV_FireAWP( event_args_t *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation( gEngfuncs.pfnRandomLong(AWP_SHOOT1, AWP_SHOOT3), 2 );
 	}

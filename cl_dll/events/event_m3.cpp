@@ -34,6 +34,7 @@ void EV_FireM3( event_args_t *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(M3_SHOOT1 + gEngfuncs.pfnRandomLong(0,2), 2);
 	}

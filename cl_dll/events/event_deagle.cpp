@@ -33,6 +33,7 @@ void EV_FireDEAGLE( event_args_t *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(DEAGLE_SHOOT1, DEAGLE_SHOOT2), 2);
 	}

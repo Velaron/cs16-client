@@ -28,6 +28,7 @@ void EV_FireM249(event_args_s *args)
 
 	if ( EV_IsLocal( args->entindex ) )
 	{
+		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(M249_SHOOT1, M249_SHOOT2), 2);
 		EV_MuzzleFlash();
 	}

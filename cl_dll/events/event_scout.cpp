@@ -32,6 +32,7 @@ void EV_FireScout(event_args_s *args)
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation( gEngfuncs.pfnRandomLong(SCOUT_SHOOT, SCOUT_SHOOT2), 2 );
 	}

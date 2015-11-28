@@ -14,6 +14,7 @@
 #include "event_api.h"
 #include "pm_defs.h"
 #include "ev_hldm.h"
+#include "com_weapons.h"
 
 #ifndef PITCH
 // MOVEMENT INFO

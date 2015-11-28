@@ -34,6 +34,7 @@ void EV_Fire57(event_args_t *args)
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		if( args->bparam1 )
 		{

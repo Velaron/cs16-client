@@ -34,6 +34,7 @@ void EV_FireGALIL( event_args_t *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(GALIL_SHOOT1 + gEngfuncs.pfnRandomLong(0,2), 2);
 		gHUD.RealSize += 150;

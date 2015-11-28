@@ -28,6 +28,7 @@ void EV_FireAUG( struct event_args_s *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(AUG_SHOOT1, AUG_SHOOT3), 2);
 	}

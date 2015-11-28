@@ -34,6 +34,7 @@ void EV_FireXM1014(event_args_s *args)
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		if( args->bparam1 )
 		{

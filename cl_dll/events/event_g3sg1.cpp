@@ -28,6 +28,7 @@ vec3_t origin, angles, velocity;
 
 	if ( EV_IsLocal( args->entindex ) )
 	{
+		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(G3SG1_SHOOT, G3SG1_SHOOT2), 2);
 		EV_MuzzleFlash();
 	}

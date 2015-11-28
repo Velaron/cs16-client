@@ -20,6 +20,9 @@ void EV_Knife( struct event_args_s *args )
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
 
+	if( EV_IsLocal( idx ))
+		gEngfuncs.pEventAPI->EV_WeaponAnimation( args->iparam1, 2 );
+
 	//Play Swing sound
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/knife_miss1.wav", 1, ATTN_NORM, 0, PITCH_NORM);
 }

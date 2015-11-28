@@ -44,6 +44,7 @@ void EV_FireUSP( event_args_t *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		if( args->bparam2 )
 			gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(USP_SHOOT1,USP_SHOOT3), 2);

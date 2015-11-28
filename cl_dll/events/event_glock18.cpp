@@ -40,10 +40,11 @@ void EV_Fireglock18( event_args_t *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
+		++g_iShotsFired;
 		EV_MuzzleFlash();
 		if( args->bparam1 )
 		{
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(GLOCK18_SHOOT1, GLOCK18_SHOOT3), 2);
+			gEngfuncs.pEventAPI->EV_WeaponAnimation(GLOCK18_SHOOT3, 2);
 		}
 		else
 		{
