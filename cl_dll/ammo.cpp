@@ -301,7 +301,7 @@ int CHudAmmo::Init(void)
 	CVAR_CREATE( "cl_observercrosshair", "1", 0 );
 	m_pClCrosshairColor = CVAR_CREATE( "cl_crosshair_color", "50 250 50", FCVAR_ARCHIVE );
 	m_pClCrosshairTranslucent = CVAR_CREATE( "cl_crosshair_translucent", "1", FCVAR_ARCHIVE );
-	m_pClCrosshairSize = CVAR_CREATE( "cl_crosshair_size", "0", FCVAR_ARCHIVE );
+	m_pClCrosshairSize = CVAR_CREATE( "cl_crosshair_size", "auto", FCVAR_ARCHIVE );
 	m_pClDynamicCrosshair = CVAR_CREATE("cl_dynamiccrosshair", "1", FCVAR_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE; //!!!
