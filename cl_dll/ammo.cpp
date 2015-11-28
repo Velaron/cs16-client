@@ -28,6 +28,7 @@
 
 #include "ammohistory.h"
 #include "eventscripts.h"
+#include "com_weapons.h"
 //#include "vgui_TeamFortressViewport.h"
 
 WEAPON *gpActiveSel;	// NULL means off, 1 means just the menu bar, otherwise
@@ -39,6 +40,7 @@ client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes
 WeaponsResource gWR;
 
 int g_weaponselect = 0;
+int g_iShotsFired;
 
 void WeaponsResource :: LoadAllWeaponSprites( void )
 {
@@ -255,6 +257,7 @@ DECLARE_COMMAND(m_Ammo, Slot10);
 DECLARE_COMMAND(m_Ammo, Close);
 DECLARE_COMMAND(m_Ammo, NextWeapon);
 DECLARE_COMMAND(m_Ammo, PrevWeapon);
+DECLARE_COMMAND(m_Ammo, Adjust_Crosshair);
 
 // width of ammo fonts
 #define AMMO_SMALL_WIDTH 10
@@ -289,13 +292,29 @@ int CHudAmmo::Init(void)
 	HOOK_COMMAND("cancelselect", Close);
 	HOOK_COMMAND("invnext", NextWeapon);
 	HOOK_COMMAND("invprev", PrevWeapon);
+	HOOK_COMMAND("adjust_crosshair", Adjust_Crosshair);
 
 	Reset();
 
 	CVAR_CREATE( "hud_drawhistory_time", HISTORY_DRAW_TIME, 0 );
 	CVAR_CREATE( "hud_fastswitch", "0", FCVAR_ARCHIVE );		// controls whether or not weapons can be selected in one keypress
+	CVAR_CREATE( "cl_observercrosshair", "1", 0 );
+	m_pClCrosshairColor = CVAR_CREATE( "cl_crosshair_color", "50 250 50", FCVAR_ARCHIVE );
+	m_pClCrosshairTranslucent = CVAR_CREATE( "cl_crosshair_translucent", "1", FCVAR_ARCHIVE );
+	m_pClCrosshairSize = CVAR_CREATE( "cl_crosshair_size", "0", FCVAR_ARCHIVE );
+	m_pClDynamicCrosshair = CVAR_CREATE("cl_dynamiccrosshair", "1", FCVAR_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE; //!!!
+	m_R = 50;
+	m_G = 250;
+	m_B = 50;
+	m_iAlpha = 200;
+
+	m_cvarB = m_cvarR = m_cvarG = -1;
+	m_iCurrentCrosshair = 0;
+	m_bAdditive = 1;
+	m_iCrosshairScaleBase = 1024;
+	m_bDrawCrosshair = true;
 
 	gWR.Init();
 	gHR.Init();
@@ -622,14 +641,15 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 
 	m_pWeapon = pWeapon;
 
-	if ( gHUD.m_iFOV >= 90 )
+	/*if ( gHUD.m_iFOV >= 90 )
 	{ // normal crosshairs
 		if (fOnTarget && m_pWeapon->hAutoaim)
 			SetCrosshair(m_pWeapon->hAutoaim, m_pWeapon->rcAutoaim, 255, 255, 255);
 		else
 			SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
 	}
-	else
+	else*/
+	if( gHUD.m_iFOV <= 75 )
 	{ // zoomed crosshairs
 		if (fOnTarget && m_pWeapon->hZoomedAutoaim)
 			SetCrosshair(m_pWeapon->hZoomedAutoaim, m_pWeapon->rcZoomedAutoaim, 255, 255, 255);
@@ -637,6 +657,7 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 			SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
 
 	}
+
 
 	m_fFade = 200.0f; //!!!
 	m_iFlags |= HUD_ACTIVE;
@@ -680,6 +701,15 @@ int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )
 int CHudAmmo::MsgFunc_Crosshair(const char *pszName, int iSize, void *pbuf)
 {
 	BEGIN_READ( pbuf, iSize );
+
+	if( READ_BYTE() > 0)
+	{
+		m_bDrawCrosshair = true;
+	}
+	else
+	{
+		m_bDrawCrosshair = false;
+	}
 }
 
 int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
@@ -787,6 +817,73 @@ void CHudAmmo::UserCmd_Slot10(void)
 	SlotInput( 9 );
 }
 
+void CHudAmmo::UserCmd_Adjust_Crosshair()
+{
+	int newCrosshair;
+	int oldCrosshair = m_iCurrentCrosshair;
+
+	if ( gEngfuncs.Cmd_Argc() <= 1 )
+	{
+		newCrosshair = (oldCrosshair + 1) % 5;
+	}
+	else
+	{
+		const char *arg = gEngfuncs.Cmd_Argv(1);
+		newCrosshair = atoi(arg) % 10;
+	}
+
+	m_iCurrentCrosshair = newCrosshair;
+	if ( newCrosshair <= 9 )
+	{
+		switch ( newCrosshair )
+		{
+		case 1:
+		case 6:
+			m_R = 250;
+			m_G = 50;
+			m_B = 50;
+			break;
+		case 2:
+		case 7:
+			m_R = 50;
+			m_G = 50;
+			m_B = 250;
+			break;
+		case 3:
+		case 8:
+			m_R = 250;
+			m_G = 250;
+			m_B = 50;
+			break;
+		case 4:
+		case 9:
+			m_R = 50;
+			m_G = 250;
+			m_B = 250;
+			break;
+		case 5:
+		default:
+			m_R = 50;
+			m_G = 250;
+			m_B = 50;
+		}
+		m_bAdditive = newCrosshair < 5 ? true: false;
+	}
+	else
+	{
+		m_R = 50;
+		m_G = 250;
+		m_B = 50;
+		m_bAdditive = 1;
+	}
+
+	char s[16];
+	sprintf(s, "%d %d %d", m_R, m_G, m_B);
+	gEngfuncs.Cvar_Set("cl_crosshair_color", s);
+	gEngfuncs.Cvar_Set("cl_crosshair_translucent", (char*)(m_bAdditive ? "1" : "0"));
+}
+
+
 void CHudAmmo::UserCmd_Close(void)
 {
 	if (gpActiveSel)
@@ -890,6 +987,7 @@ void CHudAmmo::UserCmd_PrevWeapon(void)
 
 int CHudAmmo::Draw(float flTime)
 {
+	wrect_t nullrc;
 	int a, x, y, r, g, b;
 	int AmmoWidth;
 
@@ -1000,9 +1098,186 @@ int CHudAmmo::Draw(float flTime)
 			SPR_DrawAdditive(0, x, y - iOffset, &m_pWeapon->rcAmmo2);
 		}
 	}
+
+	if( gHUD.m_iFOV > 75 )
+		DrawCrosshair(flTime, m_pWeapon->iId);
+
 	return 1;
 }
 
+#define WEST_XPOS (ScreenWidth / 2 - flCrosshairDistance - iLength + 1)
+#define EAST_XPOS (flCrosshairDistance + ScreenWidth / 2)
+#define EAST_WEST_YPOS (ScreenHeight / 2)
+
+#define NORTH_YPOS (ScreenHeight / 2 - flCrosshairDistance - iLength + 1)
+#define SOUTH_YPOS (ScreenHeight / 2 + flCrosshairDistance)
+#define NORTH_SOUTH_XPOS (ScreenWidth / 2)
+
+void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
+{
+	long double flDynamicSpread;
+	int flags;
+	int flSpread;
+	int iLength;
+	float flCrosshairDistance;
+
+	if ( weaponid > 30 )
+	{
+		flDynamicSpread = 4;
+		flSpread = 3;
+	}
+	else
+	{
+		// TODO: Get an info about crosshair for weapon
+		flDynamicSpread = 4;
+		flSpread = 3;
+	}
+
+	iLength = 0;
+	flags = GetWeaponAccuracyFlags(weaponid);
+	if ( flags && m_pClDynamicCrosshair->value && !(gHUD.m_iHideHUDDisplay & 1) )
+	{
+		if ( g_iPlayerFlags & FL_ONGROUND || !(flags & ACCURACY_AIR) )
+		{
+			if ( (g_iPlayerFlags & FL_DUCKING) && (flags & ACCURACY_DUCK) )
+				flDynamicSpread *= 0.5;
+			else
+			{
+				// TODO: Get a weapon speed
+				int flWeaponSpeed = 0;
+
+				if ( (g_flPlayerSpeed > flWeaponSpeed) && (flags & ACCURACY_SPEED) )
+					flDynamicSpread *= 1.5;
+			}
+		}
+		else flDynamicSpread *= 2;
+		if ( flags & ACCURACY_MULTIPLY_BY_14 )
+			flDynamicSpread *= 1.4;
+		if ( flags & ACCURACY_MULTIPLY_BY_14_2 )
+			flDynamicSpread *= 1.4;
+	}
+
+	if ( m_iAmmoLastCheck >= g_iShotsFired )
+	{
+		m_flCrosshairDistance -= (m_flCrosshairDistance * 0.013 + 0.1 );
+		m_iAlpha += 2;
+	}
+	else
+	{
+		m_flCrosshairDistance += flSpread;
+		m_iAlpha -= 40;
+
+		if ( m_flCrosshairDistance > 15.0 )
+			m_flCrosshairDistance = 15.0;
+		if ( m_iAlpha < 120 )
+			m_iAlpha = 120;
+	}
+
+	if ( g_iShotsFired > 600 )
+		g_iShotsFired = 1;
+
+	CalcCrosshairColor();
+	CalcCrosshairDrawMode();
+	CalcCrosshairSize();
+
+	m_iAmmoLastCheck = g_iShotsFired;
+	if ( flDynamicSpread > m_flCrosshairDistance )
+		m_flCrosshairDistance = flDynamicSpread;
+	if ( m_iAlpha > 255 )
+		m_iAlpha = 255;
+	iLength = (m_flCrosshairDistance - flDynamicSpread) * 0.5 + 5;
+	flCrosshairDistance = m_flCrosshairDistance;
+	if ( ScreenWidth != m_iCrosshairScaleBase )
+	{
+		flCrosshairDistance = ScreenWidth * flCrosshairDistance / m_iCrosshairScaleBase;
+		iLength = ScreenWidth * iLength / m_iCrosshairScaleBase;
+	}
+
+
+	// drawing
+	if ( gHUD.m_NVG.m_iEnable )
+	{
+		gEngfuncs.pfnFillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	 iLength, 1, 250, 50, 50, m_iAlpha);
+		gEngfuncs.pfnFillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	 iLength, 1, 250, 50, 50, m_iAlpha);
+		gEngfuncs.pfnFillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, 250, 50, 50, m_iAlpha);
+		gEngfuncs.pfnFillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, 250, 50, 50, m_iAlpha);
+	}
+	else if ( !m_bAdditive )
+	{
+		gEngfuncs.pfnFillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	 iLength, 1, m_R, m_G, m_B, m_iAlpha);
+		gEngfuncs.pfnFillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	 iLength, 1, m_R, m_G, m_B, m_iAlpha);
+		gEngfuncs.pfnFillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
+		gEngfuncs.pfnFillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
+	}
+	else
+	{
+		gEngfuncs.pfnFillRGBA(WEST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
+		gEngfuncs.pfnFillRGBA(EAST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
+		gEngfuncs.pfnFillRGBA(NORTH_SOUTH_XPOS,	NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
+		gEngfuncs.pfnFillRGBA(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
+	}
+	return;
+}
+
+void CHudAmmo::CalcCrosshairSize()
+{
+	const char *size = m_pClCrosshairSize->string;
+
+	if( !strcasecmp(size, "auto") )
+	{
+		if( ScreenWidth < 640 )
+			m_iCrosshairScaleBase = 1024;
+		else if( ScreenWidth < 1024 )
+			m_iCrosshairScaleBase = 800;
+		else m_iCrosshairScaleBase = 640;
+		return;
+	}
+
+	if( !strcasecmp( size, "large" ))
+		m_iCrosshairScaleBase = 640;
+	else if( !strcasecmp( size, "medium" ))
+		m_iCrosshairScaleBase = 800;
+	else if( !strcasecmp( size, "large" ))
+		m_iCrosshairScaleBase = 1024;
+
+	return;
+}
+
+void CHudAmmo::CalcCrosshairDrawMode()
+{
+	float drawMode = m_pClCrosshairTranslucent->value;
+	if ( drawMode == 0.0f )
+	{
+		m_bAdditive = 0;
+	}
+	else if ( drawMode == 1.0f )
+	{
+		m_bAdditive = 1;
+	}
+	else
+	{
+		gEngfuncs.Con_Printf("usage: cl_crosshair_translucent <1|0>\n");
+	}
+}
+
+void CHudAmmo::CalcCrosshairColor()
+{
+	const char *colors = m_pClCrosshairColor->string;
+
+	int tempR;
+	int tempG;
+	int tempB;
+
+	sscanf( colors, "%d %d %d", &tempR, &tempG, &tempB);
+
+	m_cvarR = tempR <= 255? tempR > 0? tempR: 0: 255;
+	m_cvarG = tempG <= 255? tempG > 0? tempG: 0: 255;
+	m_cvarB = tempB <= 255? tempB > 0? tempB: 0: 255;
+
+	m_R = m_cvarR;
+	m_G = m_cvarG;
+	m_B = m_cvarB;
+}
 
 //
 // Draws the ammo bar on the hud

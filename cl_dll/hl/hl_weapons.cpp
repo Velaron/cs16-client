@@ -928,7 +928,7 @@ void HUD_SetLastOrg( void )
 
 int GetWeaponAccuracyFlags( int weaponid )
 {
-	int result;
+	int result = 0;
 
 	if( weaponid <= 30 )
 	{
@@ -940,36 +940,61 @@ int GetWeaponAccuracyFlags( int weaponid )
 		case 27:
 		case 28:
 		case 30:
-			result = 3;
+			result = ACCURACY_AIR | ACCURACY_SPEED;
 			break;
 		case 1:
 		case 11:
 		case 26:
-			result = 7;
+			result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_DUCK;
 			break;
 		case 17:
-			result = (g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE) < 1 ? 7 : 23;
+			if( g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE)
+			{
+				result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_DUCK;
+			}
+			else
+			{
+				result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_DUCK | ACCURACY_MULTIPLY_BY_14_2;
+			}
 			break;
 		case 7:
 		case 12:
 		case 19:
 		case 23:
-			result = 1;
+			result = ACCURACY_AIR;
 			break;
 		case 22:
-			result = (g_iWeaponFlags & WPNSTATE_USP_SILENCED) < 1 ? 3 : 11;
+			if(g_iWeaponFlags & WPNSTATE_USP_SILENCED)
+			{
+				result = ACCURACY_AIR | ACCURACY_SPEED;
+			}
+			else
+			{
+				result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_MULTIPLY_BY_14;
+			}
 			break;
 		case 15:
-			result = (g_iWeaponFlags & WPNSTATE_FAMAS_BURST_MODE) < 1 ? 3 : 19;
+			if(g_iWeaponFlags & WPNSTATE_FAMAS_BURST_MODE)
+			{
+				result = ACCURACY_AIR | ACCURACY_SPEED;
+			}
+			else
+			{
+				result = ACCURACY_AIR | ACCURACY_SPEED | (1<<4);
+			}
 			break;
 		case 16:
-			result = (g_iWeaponFlags & WPNSTATE_USP_SILENCED) < 1 ? 7 : 15;
+			if(g_iWeaponFlags & WPNSTATE_USP_SILENCED)
+			{
+				result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_DUCK;
+			}
+			else
+			{
+				result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_DUCK | ACCURACY_MULTIPLY_BY_14;
+			}
 			break;
-		default:
-			result = 0;
 		}
 	}
-	else result = 0;
 
 	return result;
 }
@@ -1433,9 +1458,10 @@ runfuncs is 1 if this is the first time we've predicted this command.  If so, so
 be ignored
 =====================
 */
-void _DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed )
+void _DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed )
 {
 	g_runfuncs = runfuncs;
+	//g_curstate = from;
 
 #if defined( CLIENT_WEAPONS )
 	if ( cl_lw && cl_lw->value )
@@ -1446,6 +1472,11 @@ void _DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s
 #endif
 	{
 		to->client.fov = g_lastFOV;
+		g_iWeaponFlags = from->weapondata[ from->client.m_iId - 1].m_iWeaponState;
+		g_iPlayerFlags = from->client.flags;
+		g_iFreezeTimeOver	= from->client.iuser3 & PLAYER_FREEZE_TIME_OVER;
+		g_bInBombZone		= from->client.iuser3 & PLAYER_IN_BOMB_ZONE;
+		g_bHoldingShield	= from->client.iuser3 & PLAYER_HOLDING_SHIELD;
 	}
 
 	if ( g_irunninggausspred == 1 )

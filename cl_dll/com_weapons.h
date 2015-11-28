@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -19,6 +19,15 @@
 #define PLAYER_FREEZE_TIME_OVER ( 1 << 1 )
 #define PLAYER_IN_BOMB_ZONE (1 << 2)
 #define PLAYER_HOLDING_SHIELD (1 << 3)
+
+#define CROSSHAIR_
+#define ACCURACY_AIR (1 << 0) // accuracy depends on FL_ONGROUND
+#define ACCURACY_SPEED (1 << 1)
+#define ACCURACY_DUCK (1 << 2) // more accurate when ducking
+#define ACCURACY_MULTIPLY_BY_14 (1 << 3) // accuracy multiply to 1.4
+#define ACCURACY_MULTIPLY_BY_14_2 (1 << 4) // accuracy multiply to 1.4
+
+
 
 extern "C"
 {
@@ -41,7 +50,7 @@ int				stub_PrecacheSound( char* s );
 unsigned short	stub_PrecacheEvent( int type, const char *s );
 const char		*stub_NameForFunction	( u_int32_t function );
 void			stub_SetModel			( struct edict_s *e, const char *m );
-
+int				GetWeaponAccuracyFlags( int weaponid );
 
 extern cvar_t *cl_lw;
 
@@ -52,8 +61,11 @@ extern int g_iWeaponFlags;
 extern bool g_bInBombZone;
 extern int g_iFreezeTimeOver;
 extern int g_bHoldingShield;
+extern int g_iPlayerFlags;
 extern vec3_t g_vPlayerVelocity;
 extern float g_flPlayerSpeed;
+extern struct local_state_s *g_curstate;
 extern struct local_state_s *g_finalstate;
+extern int g_iShotsFired;
 
 #endif
