@@ -892,7 +892,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 		(*m_protationmatrix)[1][1] *= -1;
 		(*m_protationmatrix)[2][1] *= -1;
 
-		IEngineStudio.StudioSetCullState(true);
+		//IEngineStudio.StudioSetCullState(true);
 	}
 
 	if (flags & STUDIO_RENDER)

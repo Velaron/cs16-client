@@ -797,8 +797,6 @@ bool WeaponHasAttachments(entity_state_t *pplayer)
 
 int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplayer)
 {
-	g_bRenderPlayerWeapon = 0;
-
 	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 
 	IEngineStudio.GetTimes(&m_nFrameCount, &m_clTime, &m_clOldTime);
@@ -937,7 +935,6 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 
 			m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(pweaponmodel);
 			IEngineStudio.StudioSetHeader(m_pStudioHeader);
-			g_bRenderPlayerWeapon = 1;
 
 			StudioMergeBones(pweaponmodel);
 
@@ -958,7 +955,6 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 				IEngineStudio.StudioClientEvents();
 		}
 	}
-	g_bRenderPlayerWeapon = 0;
 
 	return 1;
 }

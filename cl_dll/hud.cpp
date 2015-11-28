@@ -183,12 +183,12 @@ void CHud :: Init( void )
 	// 1 << 16 -- READ ONLY CVAR.
 	CVAR_CREATE( "_vgui_menus", "0", FCVAR_ARCHIVE | FCVAR_USERINFO | 1<<16 ); // force client to use old style menus
 	CVAR_CREATE( "cl_lb", "0", FCVAR_ARCHIVE | FCVAR_USERINFO ); // force client to use old style menus
-	//CVAR_CREATE( "lefthand", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	CVAR_CREATE( "lefthand", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_cl_autowepswitch", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_ah", "1", FCVAR_ARCHIVE| FCVAR_USERINFO);
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
-	cl_righthand = CVAR_CREATE( "cl_righthand", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	cl_righthand = CVAR_CREATE( "hand", "1", FCVAR_ARCHIVE );
 	cl_weather = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 
 	m_iLogo = 0;
