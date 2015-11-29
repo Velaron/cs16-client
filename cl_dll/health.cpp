@@ -523,11 +523,17 @@ void CHudHealth :: DrawPlayerLocation( void )
 
 void CHudHealth :: DrawRadarDot(int x, int y, int size, int r, int g, int b, int a)
 {
-	FillRGBA( x - size/2, y - size/2, size, size, r, g, b, a);
+	FillRGBA(62.5+ x - size/2,62.5+ y - size/2, size, size, r, g, b, a);
 }
 
 void CHudHealth :: DrawRadar( float flTime )
 {
+	char szTeamName[16];
+	if( g_PlayerExtraInfo[ gHUD.m_Scoreboard.m_iPlayerNum ].dead )
+		return;
+
+	strncpy( szTeamName, g_PlayerExtraInfo[ gHUD.m_Scoreboard.m_iPlayerNum ].teamname, 16 );
+
 	if( cl_radartype->value )
 	{
 		SPR_Set(m_hRadaropaque, 200, 200, 200);
@@ -537,5 +543,25 @@ void CHudHealth :: DrawRadar( float flTime )
 	{
 		SPR_Set( m_hRadar, 25, 75, 25 );
 		SPR_DrawAdditive( 0, 0, 0, &m_hrad );
+	}
+	for(int i=0; i<35;i++)
+	{
+		char debuginfo[1024];
+		if( i == gHUD.m_Scoreboard.m_iPlayerNum || strncmp( szTeamName, g_PlayerExtraInfo[i].teamname, 16 ) || g_PlayerExtraInfo[i].dead )
+			continue;
+		float rel_x = gHUD.m_vecOrigin.x - g_PlayerExtraInfo[i].origin.x;
+		float rel_y = gHUD.m_vecOrigin.y - g_PlayerExtraInfo[i].origin.y;
+		float plAngle =  atanf( rel_x/rel_y ) * 180.0 / 3.141592654;\
+		//plAngle = fmod( plAngle, 360 );
+		//if(plAngle < 0)
+			//plAngle += 360;
+		float azim = ( plAngle - gHUD.m_vecAngles.y ) * 3.141592654 / 180.0;
+		//azim= fmod( azim, 3.141592654 );
+		//if( azim < 0 )
+			//azim += 3.141592654;
+		float relabs = sqrtf( rel_x*rel_x + rel_y*rel_y );
+		sprintf(debuginfo, "rx%f ry%f pa%f a%f ra%f\n", rel_x, rel_y, plAngle, azim, relabs );
+		ConsolePrint( debuginfo );
+		DrawRadarDot( cos(azim)*relabs * 0.03125, sin(azim)*relabs * 0.03125, 5, 0, 255, 0, 255 );
 	}
 }
