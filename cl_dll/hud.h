@@ -28,6 +28,7 @@
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
+#include "mobility_int.h"
 
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
@@ -844,6 +845,10 @@ public:
 	CHudProgressBar m_ProgressBar;
 	CHudSniperScope m_SniperScope;
 	CHudNVG			m_NVG;
+
+	touchbutton_t *m_pBuyButton;
+	touchbutton_t *m_pChat;
+	touchbutton_t *m_pRadio;
 
 	void Init( void );
 	void VidInit( void );
