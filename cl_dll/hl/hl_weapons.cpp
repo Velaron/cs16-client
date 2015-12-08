@@ -930,7 +930,7 @@ int GetWeaponAccuracyFlags( int weaponid )
 {
 	int result = 0;
 
-	if( weaponid <= 30 )
+	if( weaponid <= WEAPON_P90 )
 	{
 		switch( weaponid )
 		{
