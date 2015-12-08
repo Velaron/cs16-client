@@ -24,8 +24,9 @@ cmake_minimum_required(VERSION 2.6.0)
 project (CLDLL)
 
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLINUX -D_LINUX \
-     -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -Wno-write-strings -Wl,--no-undefined")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLINUX -D_LINUX -DCLIENT_WEAPONS -DCLIENT_DLL")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings -Wl,--no-undefined")
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Os")
@@ -36,6 +37,16 @@ set (CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 set (CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL}")
 set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+
+# force build 32bit libraries
+if(CMAKE_SIZEOF_VOID_P MATCHES "8")
+    if(APPLE)
+        SET(CMAKE_OSX_ARCHITECTURES "i386")
+    else()
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+    endif()
+endif()
 
 set (CLDLL_LIBRARY client)
 
