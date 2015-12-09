@@ -211,7 +211,7 @@ int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, char *szIt, int r, int 
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		int next = xpos + gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = xpos + gHUD.m_scrinfo.charWidths[ (unsigned char)*szIt ]; // variable-width fonts look cool
 		if ( next > iMaxX )
 			return xpos;
 
@@ -228,7 +228,7 @@ int CHud :: DrawHudStringLen( char *szIt )
 		// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		l += gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool	
+		l += gHUD.m_scrinfo.charWidths[ (unsigned char)*szIt ]; // variable-width fonts look cool	
 	}
 	return l;
 }
@@ -244,7 +244,7 @@ int CHud :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int
 // draws a string from right to left (right-aligned)
 int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b )
 {
-	char *szIt;
+	unsigned char *szIt;
 	// find the end of the string
 	for ( szIt = szString; *szIt != 0; szIt++ )
 	{ // we should count the length?		
