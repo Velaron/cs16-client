@@ -215,8 +215,7 @@ int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, char *szIt, int r, int 
 		if ( next > iMaxX )
 			return xpos;
 
-		TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
-		xpos = next;		
+		xpos += TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );		
 	}
 
 	return xpos;
