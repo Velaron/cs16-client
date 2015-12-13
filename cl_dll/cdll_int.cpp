@@ -25,7 +25,6 @@
 extern "C"
 {
 #include "pm_shared.h"
-#include "mobility_int.h"
 }
 
 #include <string.h>
@@ -39,7 +38,6 @@ extern "C"
 #endif
 
 cl_enginefunc_t gEngfuncs;
-mobile_engfuncs_t *gMobileEngfuncs;
 CHud gHUD;
 
 void InitInput (void);
@@ -69,7 +67,6 @@ int		DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
 void	DLLEXPORT HUD_Frame( double time );
 void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
 void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
-void	DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs );
 }
 
 /*
@@ -286,7 +283,4 @@ void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 	 gHUD.m_Spectator.DirectorMessage( iSize, pbuf );
 }
 
-void	DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs )
-{
-	gMobileEngfuncs = gpMobileEngfuncs;
-}
+

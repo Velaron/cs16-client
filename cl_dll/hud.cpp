@@ -29,7 +29,7 @@
 #include "demo_api.h"
 #include "vgui_parser.h"
 #include "rain.h"
-#include "mobility_int.h"
+
 
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 
@@ -246,12 +246,6 @@ void CHud :: Init( void )
 	Localize_Init();
 	InitRain();
 
-	if( gMobileEngfuncs )
-	{
-		int buymenuID = gMobileEngfuncs->Touch_RegisterButton( "buy" );
-		gMobileEngfuncs->Touch_AddCustomButton( ScreenWidth / 3, ScreenHeight / 3, ScreenWidth / 3 + 50, ScreenHeight / 3 + 50,
-			buymenuID, "look_arrow");
-	}
 	//ServersInit();
 
 	MsgFunc_ResetHUD(0, 0, NULL );
