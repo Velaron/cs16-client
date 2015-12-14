@@ -37,5 +37,15 @@
 		android:layout_alignParentTop="true"
 		android:layout_alignParentRight="true"/>
 	
+        <CheckBox
+                android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:textAppearance="?android:attr/textAppearanceMedium"
+		android:text="@string/use_cs16nd"
+		android:id="@+id/usecs16nd"
+		android:layout_below="@+id/cmdArgs"
+                android:layout_alignParentLeft="true"
+		android:layout_alignRight="@+id/cmdArgs"/>
+	
 </RelativeLayout>
 

@@ -6,6 +6,7 @@
     <string name="title_activity_launcher">LauncherActivity</string>
     <string name="launch_button">Launch cs16-client!</string>
     <string name="cmd_args_text">Command line arguments(experts only)</string>
+    <string name="use_cs16nd">Use CS16ND server(may differ from CS 1.6)</string>
     <!--
 	<string name="text_shortcut">SoHL shortcut</string>
 	<string name="shortcut_button_save">Save shortcut</string>

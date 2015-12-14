@@ -26,6 +26,7 @@ public class LauncherActivity extends Activity {
 		mPref = getSharedPreferences("mod", 0);
 		cmdArgs = (EditText)findViewById(R.id.cmdArgs);
 		cmdArgs.setText(mPref.getString("argv","-dev 5 -log"));
+                
 	}
 
     public void startXash(View view)
@@ -35,10 +36,17 @@ public class LauncherActivity extends Activity {
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		SharedPreferences.Editor editor = mPref.edit();
-		editor.putString("argv", cmdArgs.getText().toString());
+		String argv = cmdArgs.getText().toString();
+		CheckBox enableCs16nd = (CheckBox) findViewById(R.id.usecs16nd);
+		
+		editor.putString("argv", argv);
 		editor.commit();
 		editor.apply();
-		if(cmdArgs.length() != 0) intent.putExtra("argv", cmdArgs.getText().toString());
+		
+		if(!(enableCs16nd.isChecked()))
+                    argv = argv + " -dll censored";
+		
+		if(cmdArgs.length() != 0) intent.putExtra("argv", argv);
 		intent.putExtra("gamedir", "cstrike");
 		intent.putExtra("gamelibdir", getFilesDir().getAbsolutePath().replace("/files","/lib"));
 		startActivity(intent);
