@@ -22,6 +22,8 @@
 #include "r_efx.h"
 #include "rain.h"
 
+#include <cstring>
+
 #define MAX_CLIENTS 32
 
 extern BEAM *pBeam;
@@ -138,6 +140,71 @@ int CHud::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
 	Rain.randX = Rain.randY = 0;
 	Rain.weatherMode = iWeatherType - 1;
 	Rain.globalHeight = 100;
+
+	return 1;
+}
+
+int CHud::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	g_PlayerExtraInfo[33].origin.x = READ_COORD();
+	g_PlayerExtraInfo[33].origin.y = READ_COORD();
+	g_PlayerExtraInfo[33].origin.z = READ_COORD();
+	g_PlayerExtraInfo[33].playerclass = READ_BYTE();;
+	g_PlayerExtraInfo[33].radarflashon = 1;
+	g_PlayerExtraInfo[33].radarflashes = 99999;
+	g_PlayerExtraInfo[33].dead = 0;
+	g_PlayerExtraInfo[33].radarflash = gHUD.m_flTime;
+	strcpy(g_PlayerExtraInfo[33].teamname, "TERRORIST");
+
+	if ( g_PlayerExtraInfo[33].playerclass == 1 )
+		m_Timer.m_iFlags = 0;
+}
+
+int CHud::MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf)
+{
+	g_PlayerExtraInfo[33].radarflashon = 0;
+	g_PlayerExtraInfo[33].radarflash = 0.0f;
+	g_PlayerExtraInfo[33].radarflashes = 0;
+
+	return 1;
+}
+
+int CHud::MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf)
+{
+
+	BEGIN_READ(pbuf, iSize);
+	int Flag = READ_BYTE();
+	int idx = READ_BYTE();
+	if ( idx <= MAX_HOSTAGES )
+	{
+		g_HostageInfo[idx].origin.x = READ_COORD();
+		g_HostageInfo[idx].origin.y = READ_COORD();
+		g_HostageInfo[idx].origin.z = READ_COORD();
+		if ( Flag == 1 )
+		{
+			g_HostageInfo[idx].radarflash = gHUD.m_flTime;
+			g_HostageInfo[idx].radarflashon = 1;
+			g_HostageInfo[idx].radarflashes = 99999;
+		}
+		strcpy(g_HostageInfo[idx].teamname, "CT");
+		g_HostageInfo[idx].dead = 0;
+	}
+
+	return 1;
+}
+
+int CHud::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+	int idx = READ_BYTE();
+	if ( idx <= MAX_HOSTAGES )
+	{
+		g_HostageInfo[idx].dead = 1;
+		g_HostageInfo[idx].radarflash = gHUD.m_flTime;
+		g_HostageInfo[idx].radarflashes = 15;
+	}
 
 	return 1;
 }

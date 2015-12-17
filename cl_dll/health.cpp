@@ -26,6 +26,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include <string.h>
+#include "eventscripts.h"
 
 DECLARE_COMMAND( m_Health, ShowRadar );
 DECLARE_COMMAND( m_Health, HideRadar );
@@ -34,6 +35,7 @@ DECLARE_MESSAGE(m_Health, Health )
 DECLARE_MESSAGE(m_Health, Damage )
 DECLARE_MESSAGE(m_Health, Radar )
 DECLARE_MESSAGE(m_Health, ScoreAttrib )
+DECLARE_MESSAGE(m_Health, ClCorpse )
 
 #define PAIN_NAME "sprites/%d_pain.spr"
 #define DAMAGE_NAME "sprites/%d_dmg.spr"
@@ -66,6 +68,7 @@ int CHudHealth::Init(void)
 	HOOK_MESSAGE(Damage);
 	HOOK_MESSAGE(Radar);
 	HOOK_MESSAGE(ScoreAttrib);
+	HOOK_MESSAGE(ClCorpse);
 	HOOK_COMMAND( "drawradar", ShowRadar );
 	HOOK_COMMAND( "hideradar", HideRadar );
 
@@ -74,6 +77,7 @@ int CHudHealth::Init(void)
 	m_iFlags = 0;
 	m_bitsDamage = 0;
 	m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
+	m_bDrawRadar = true;
 	giDmgHeight = 0;
 	giDmgWidth = 0;
 
@@ -538,4 +542,54 @@ void CHudHealth :: DrawRadar( float flTime )
 		SPR_Set( m_hRadar, 25, 75, 25 );
 		SPR_DrawAdditive( 0, 0, 0, &m_hrad );
 	}
+}
+
+int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	char szModel[64];
+
+	char *pModel = READ_STRING();
+	Vector origin;
+	origin.x = READ_LONG() / 128.0f;
+	origin.y = READ_LONG() / 128.0f;
+	origin.z = READ_LONG() / 128.0f;
+	Vector angles;
+	angles.x = READ_COORD();
+	angles.y = READ_COORD();
+	angles.z = READ_COORD();
+	float delay = angles[2] * READ_LONG() / 100.0f;
+	int sequence = READ_BYTE();
+	int classID = READ_BYTE();
+	int teamID = READ_BYTE();
+	int playerID = READ_BYTE();
+
+	if( !cl_minmodels->value )
+	{
+		if( !strstr(pModel, "models/") )
+		{
+			snprintf(szModel, sizeof(szModel), "models/player/%s/%s.mdl", pModel, pModel );
+		}
+	}
+	else if( teamID == 1 ) // terrorists
+	{
+		int modelidx = cl_min_t->value;
+		if( BIsValidTModelIndex(modelidx) )
+			strncpy(szModel, sPlayerModelFiles[modelidx], sizeof(szModel));
+		else strncpy(szModel, sPlayerModelFiles[1], sizeof(szModel) ); // set leet.mdl
+	}
+	else if( teamID == 2 ) // ct
+	{
+		int modelidx = cl_min_ct->value;
+
+		if( g_PlayerExtraInfo[playerID].vip )
+			strncpy( szModel, sPlayerModelFiles[3], sizeof(szModel) ); // vip.mdl
+		else if( BIsValidCTModelIndex( modelidx ) )
+			strncpy( szModel, sPlayerModelFiles[ modelidx ], sizeof(szModel));
+		else strncpy( szModel, sPlayerModelFiles[2], sizeof(szModel) ); // gign.mdl
+	}
+	else strncpy( szModel, sPlayerModelFiles[0], sizeof(szModel) ); // player.mdl
+
+	CreateCorpse( &origin, &angles, szModel, delay, sequence, classID );
 }

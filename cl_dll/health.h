@@ -110,6 +110,8 @@ public:
 	int MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf);
+	int MsgFunc_ClCorpse(const char *pszName,  int iSize, void *pbuf);
+
 
 	int m_iHealth;
 	int m_HUD_dmg_bio;
@@ -126,13 +128,14 @@ public:
 		m_bDrawRadar = false;
 	}
 
+	wrect_t m_hrad;
+	wrect_t m_hradopaque;
+
 private:
 	HSPRITE m_hSprite;
 	HSPRITE m_hDamage;
 	HSPRITE m_hRadar;
 	HSPRITE m_hRadaropaque;
-	wrect_t m_hrad;
-	wrect_t m_hradopaque;
 	
 	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
 	int	m_bitsDamage;

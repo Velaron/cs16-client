@@ -487,3 +487,42 @@ void EV_Dummy( struct event_args_s *args )
 	return;
 }
 
+void RemoveBody(TEMPENTITY *te, float frametime, float current_time)
+{
+  // go underground...
+  if ( current_time >= 2 * te->entity.curstate.fuser2 + 5.0 )
+	te->entity.origin.z -= 5.0 * frametime;
+}
+
+void HitBody(TEMPENTITY *ent, pmtrace_s *ptr)
+{
+  /*if ( ptr->plane.normal.z > 0.0 )
+	ent->flags |= FTENT_IGNOREGRAVITY;*/
+}
+
+
+void CreateCorpse(Vector *p_vOrigin, Vector *p_vAngles, const char *pModel, float flAnimTime, int iSequence, int iBody)
+{
+	int modelIdx = gEngfuncs.pEventAPI->EV_FindModelIndex(pModel);
+	vec3_t null(0, 0, 0);
+	TEMPENTITY *model = gEngfuncs.pEfxAPI->R_TempModel( (float*)p_vOrigin,
+		null,
+		(float*)p_vAngles,
+		6000000,
+		modelIdx,
+		0 );
+
+	if(model)
+	{
+		//model->frameMax = -1;
+		model->entity.curstate.animtime = flAnimTime;
+		model->entity.curstate.framerate = 1.0;
+		model->entity.curstate.frame = 0;
+		model->entity.curstate.sequence = iSequence;
+		model->entity.curstate.body = iBody;
+		model->entity.curstate.fuser1 = gHUD.m_flTime + 1.0;
+		model->entity.curstate.fuser2 = 600 + gHUD.m_flTime;
+		model->hitcallback = HitBody;
+		model->callback = RemoveBody;
+	}
+}

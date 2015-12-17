@@ -30,6 +30,7 @@ cvar_t *cl_showpacketloss;
 hud_player_info_t		g_PlayerInfoList[MAX_PLAYERS+1];	// player info from the engine
 extra_player_info_t		g_PlayerExtraInfo[MAX_PLAYERS+1];	// additional player info sent directly to the client dll
 team_info_t		g_TeamInfo[MAX_TEAMS+1];
+hostage_info_t	g_HostageInfo[MAX_HOSTAGES+1];
 int g_iUser1;
 int g_iUser2;
 int g_iUser3;
@@ -93,17 +94,18 @@ We have a minimum width of 1-320 - we could have the field widths scale with it?
 // relative to the side of the scoreboard
 #define NAME_RANGE_MIN  20
 #define NAME_RANGE_MAX  145
-#define KILLS_RANGE_MIN 130
-#define KILLS_RANGE_MAX 170
-#define DIVIDER_POS		180
-#define DEATHS_RANGE_MIN  185
-#define DEATHS_RANGE_MAX  210
-#define PING_RANGE_MIN	245
-#define PING_RANGE_MAX	295
-#define PL_RANGE_MIN 315
-#define PL_RANGE_MAX 375
+#define BOMB_POS		145
+#define KILLS_RANGE_MIN 150
+#define KILLS_RANGE_MAX 190
+#define DIVIDER_POS		200
+#define DEATHS_RANGE_MIN  205
+#define DEATHS_RANGE_MAX  230
+#define PING_RANGE_MIN	265
+#define PING_RANGE_MAX	315
+#define PL_RANGE_MIN 335
+#define PL_RANGE_MAX 395
 
-int SCOREBOARD_WIDTH = 320;
+int SCOREBOARD_WIDTH = 340;
 		
 
 // Y positions
@@ -327,11 +329,11 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 	if ( cl_showpacketloss && cl_showpacketloss->value && ( ScreenWidth >= 400 ) )
 	{
 		can_show_packetloss = 1;
-		SCOREBOARD_WIDTH = 400;
+		SCOREBOARD_WIDTH = 420;
 	}
 	else
 	{
-		SCOREBOARD_WIDTH = 320;
+		SCOREBOARD_WIDTH = 340;
 	}
 
 	FAR_RIGHT = can_show_packetloss ? PL_RANGE_MAX : PING_RANGE_MAX;
@@ -396,6 +398,13 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 
 		// draw their name (left to right)
 		gHUD.DrawHudString( xpos + nameoffset, ypos, NAME_RANGE_MAX + xpos_rel, pl_info->name, r, g, b );
+
+		// draw bomb( if player have the bomb )
+		if( g_PlayerExtraInfo[best_player].has_c4 )
+		{
+			xpos = BOMB_POS + xpos_rel;
+			gHUD.DrawHudString(xpos, ypos, KILLS_RANGE_MIN + xpos_rel, "Bomb", r, g, b );
+		}
 
 		// draw kills (right to left)
 		xpos = KILLS_RANGE_MAX + xpos_rel;

@@ -73,4 +73,5 @@ DECLARE_EVENT(TrainPitchAdjust);
 void Game_HookEvents( void );
 void EV_HLDM_SmokeGrenade( float x, float y, float z );
 
+
 #endif

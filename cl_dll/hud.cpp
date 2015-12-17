@@ -37,7 +37,25 @@ extern cvar_t *sensitivity;
 cvar_t *hud_textmode;
 cvar_t *cl_righthand;
 cvar_t *cl_weather;
+cvar_t *cl_min_t;
+cvar_t *cl_min_ct;
+cvar_t *cl_minmodels;
 cvar_t *cl_lw = NULL;
+char *sPlayerModelFiles[12] =
+{
+  "models/player.mdl",
+  "models/player/leet/leet.mdl", // t
+  "models/player/gign/gign.mdl", // ct
+  "models/player/vip/vip.mdl", //ct
+  "models/player/gsg9/gsg9.mdl", // ct
+  "models/player/guerilla/guerilla.mdl", // t
+  "models/player/arctic/arctic.mdl", // t
+  "models/player/sas/sas.mdl", // ct
+  "models/player/terror/terror.mdl", // t
+  "models/player/urban/urban.mdl", // ct
+  "models/player/spetsnaz/spetsnaz.mdl", // ct
+  "models/player/militia/militia.mdl" // t
+};
 
 void ShutdownInput (void);
 
@@ -151,6 +169,11 @@ int __MsgFunc_Spectator(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
  
+int __MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
+{
+	return gHUD.MsgFunc_BombDrop(pszName, iSize, pbuf);
+}
+
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
@@ -176,6 +199,7 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( BuildSt );
 	HOOK_MESSAGE( RandomPC );
 	HOOK_MESSAGE( ServerName );
+	HOOK_MESSAGE( BombDrop );
 
 	HOOK_MESSAGE( Spectator );
 
@@ -184,12 +208,16 @@ void CHud :: Init( void )
 	CVAR_CREATE( "_vgui_menus", "0", FCVAR_ARCHIVE | FCVAR_USERINFO | 1<<16 ); // force client to use old style menus
 	CVAR_CREATE( "cl_lb", "0", FCVAR_ARCHIVE | FCVAR_USERINFO ); // force client to use old style menus
 	CVAR_CREATE( "lefthand", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
-	CVAR_CREATE( "_cl_autowepswitch", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	CVAR_CREATE( "_cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_ah", "1", FCVAR_ARCHIVE| FCVAR_USERINFO);
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
 	cl_righthand = CVAR_CREATE( "hand", "1", FCVAR_ARCHIVE );
 	cl_weather = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	cl_minmodels = CVAR_CREATE( "cl_minmodels", "1", FCVAR_ARCHIVE );
+	cl_min_t = CVAR_CREATE( "cl_min_t", "1", FCVAR_ARCHIVE );
+	cl_min_ct = CVAR_CREATE( "cl_min_ct", "1", FCVAR_ARCHIVE );
+
 
 	m_iLogo = 0;
 	m_iFOV = 0;
@@ -579,5 +607,3 @@ float CHud::GetSensitivity( void )
 {
 	return m_flMouseSensitivity;
 }
-
-

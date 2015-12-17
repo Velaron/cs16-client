@@ -780,7 +780,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 				VectorCopy( pTemp->entity.angles, pTemp->entity.latched.prevangles );
 			}
 
-			if ( pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD) )
+			if ( pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD) && !(pTemp->flags & FTENT_IGNOREGRAVITY))
 			{
 				vec3_t	traceNormal;
 				float	traceFraction = 1;
@@ -916,10 +916,13 @@ void DLLEXPORT HUD_TempEntUpdate (
 				gEngfuncs.pEfxAPI->R_RocketTrail (pTemp->entity.prevstate.origin, pTemp->entity.origin, 1);
 			}
 
-			if ( pTemp->flags & FTENT_GRAVITY )
-				pTemp->entity.baseline.origin[2] += gravity;
-			else if ( pTemp->flags & FTENT_SLOWGRAVITY )
-				pTemp->entity.baseline.origin[2] += gravitySlow;
+			if( !(pTemp->flags & FTENT_IGNOREGRAVITY) )
+			{
+				if ( pTemp->flags & FTENT_GRAVITY )
+					pTemp->entity.baseline.origin[2] += gravity;
+				else if ( pTemp->flags & FTENT_SLOWGRAVITY )
+					pTemp->entity.baseline.origin[2] += gravitySlow;
+			}
 
 			if ( pTemp->flags & FTENT_CLIENTCUSTOM )
 			{

@@ -65,6 +65,8 @@ void EV_GetDefaultShellInfo( struct event_args_s *args, float *origin, float *ve
 qboolean EV_IsLocal( int idx );
 qboolean EV_IsPlayer( int idx );
 void EV_CreateTracer( float *start, float *end );
+void CreateCorpse(Vector *p_vOrigin, Vector *p_vAngles, const char *pModel, float flAnimTime, int iSequence, int iBody);
+
 
 struct cl_entity_s *GetEntity( int idx );
 struct cl_entity_s *GetViewEntity( void );

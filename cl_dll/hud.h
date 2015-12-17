@@ -45,6 +45,7 @@ enum
 	MAX_PLAYERS = 64,
 	MAX_TEAMS = 64,
 	MAX_TEAM_NAME = 16,
+	MAX_HOSTAGES = 24,
 };
 
 typedef struct {
@@ -54,7 +55,26 @@ typedef struct {
 typedef struct cvar_s cvar_t;
 extern cvar_t *cl_righthand;
 extern cvar_t *cl_weather;
+extern cvar_t *cl_minmodels;
+extern cvar_t *cl_min_t;
+extern cvar_t *cl_min_ct;
+extern char *sPlayerModelFiles[];
 
+inline bool BIsValidTModelIndex( int i )
+{
+	if ( i == 1 || i == 5 || i == 6 || i == 8 || i == 11 )
+		return true;
+	else
+		return false;
+}
+
+inline bool BIsValidCTModelIndex( int i )
+{
+	if ( i == 7 || i == 2 || i == 10 || i == 4 || i == 9)
+		return true;
+	else
+		return false;
+}
 
 #define HUD_ACTIVE	1
 #define HUD_INTERMISSION 2
@@ -365,6 +385,9 @@ struct extra_player_info_t
 	Vector origin;
 	bool showhealth;
 	int health;
+	int radarflashon;
+	int radarflashes;
+	float radarflash;
 	char location[32];
 };
 
@@ -382,9 +405,20 @@ struct team_info_t
 	int teamnumber;
 };
 
+struct hostage_info_t
+{
+	char teamname[MAX_TEAM_NAME];
+	vec3_t origin;
+	float radarflash;
+	int radarflashon;
+	int radarflashes;
+	int dead;
+};
+
 extern hud_player_info_t	g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine
 extern extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];   // additional player info sent directly to the client dll
 extern team_info_t			g_TeamInfo[MAX_TEAMS+1];
+extern hostage_info_t		g_HostageInfo[MAX_HOSTAGES+1];
 extern int					g_IsSpectator[MAX_PLAYERS+1];
 
 
@@ -864,6 +898,11 @@ public:
 	int _cdecl MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf);
 	int  _cdecl MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf );
 	int  _cdecl MsgFunc_ReceiveW( const char *pszName, int iSize, void *pbuf );
+	int  _cdecl MsgFunc_BombDrop( const char *pszName, int iSize, void *pbuf );
+	int  _cdecl MsgFunc_BombPickup( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf);
+	int _cdecl MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf);
+
 
 	// Screen information
 	SCREENINFO	m_scrinfo;
