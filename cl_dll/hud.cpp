@@ -59,120 +59,20 @@ char *sPlayerModelFiles[12] =
 
 void ShutdownInput (void);
 
-int __MsgFunc_Logo(const char *pszName, int iSize, void *pbuf)
-{
-	return gHUD.MsgFunc_Logo(pszName, iSize, pbuf );
-}
+#define GHUD_DECLARE_MESSAGE(x) int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf ) { return gHUD.MsgFunc_##x(pszName, iSize, pbuf); }
 
-int __MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf)
-{
-	return gHUD.MsgFunc_ResetHUD(pszName, iSize, pbuf );
-}
-
-int __MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
-{
-	gHUD.MsgFunc_InitHUD( pszName, iSize, pbuf );
-	return 1;
-}
-
-int __MsgFunc_ViewMode(const char *pszName, int iSize, void *pbuf)
-{
-	gHUD.MsgFunc_ViewMode( pszName, iSize, pbuf );
-	return 1;
-}
-
-int __MsgFunc_SetFOV(const char *pszName, int iSize, void *pbuf)
-{
-	return gHUD.MsgFunc_SetFOV( pszName, iSize, pbuf );
-}
-
-int __MsgFunc_Concuss(const char *pszName, int iSize, void *pbuf)
-{
-	return gHUD.MsgFunc_Concuss( pszName, iSize, pbuf );
-}
-
-int __MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
-{
-	return gHUD.MsgFunc_GameMode( pszName, iSize, pbuf );
-}
-
-int __MsgFunc_ReceiveW( const char *pszName, int iSize, void *pbuf )
-{
-	return gHUD.MsgFunc_ReceiveW( pszName, iSize, pbuf );
-}
-
-// TFFree Command Menu
-void __CmdFunc_OpenCommandMenu(void)
-{
-
-}
-
-// TFC "special" command
-void __CmdFunc_InputPlayerSpecial(void)
-{
-
-}
-
-void __CmdFunc_CloseCommandMenu(void)
-{
-
-}
-
-void __CmdFunc_ForceCloseCommandMenu( void )
-{
-
-}
-
-void __CmdFunc_ToggleServerBrowser( void )
-{
-
-}
-
-// TFFree Command Menu Message Handlers
-int __MsgFunc_ValClass(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
-int __MsgFunc_Feign(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
-
-int __MsgFunc_Detpack(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
-
-int __MsgFunc_BuildSt(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
-
-int __MsgFunc_RandomPC(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
- 
-int __MsgFunc_ServerName(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
-int __MsgFunc_Spectator(const char *pszName, int iSize, void *pbuf)
-{
-
-	return 0;
-}
- 
-int __MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
-{
-	return gHUD.MsgFunc_BombDrop(pszName, iSize, pbuf);
-}
+GHUD_DECLARE_MESSAGE(Logo)
+GHUD_DECLARE_MESSAGE(SetFOV)
+GHUD_DECLARE_MESSAGE(InitHUD)
+GHUD_DECLARE_MESSAGE(Concuss)
+GHUD_DECLARE_MESSAGE(ResetHUD)
+GHUD_DECLARE_MESSAGE(ViewMode)
+GHUD_DECLARE_MESSAGE(GameMode)
+GHUD_DECLARE_MESSAGE(ReceiveW)
+GHUD_DECLARE_MESSAGE(BombDrop)
+GHUD_DECLARE_MESSAGE(HostageK)
+GHUD_DECLARE_MESSAGE(BombPickup)
+GHUD_DECLARE_MESSAGE(HostagePos)
 
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
@@ -186,47 +86,35 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( Concuss );
 	HOOK_MESSAGE( ReceiveW );
 
-	// TFFree CommandMenu
-	HOOK_COMMAND( "+commandmenu", OpenCommandMenu );
-	HOOK_COMMAND( "-commandmenu", CloseCommandMenu );
-	HOOK_COMMAND( "ForceCloseCommandMenu", ForceCloseCommandMenu );
-	HOOK_COMMAND( "special", InputPlayerSpecial );
-	HOOK_COMMAND( "togglebrowser", ToggleServerBrowser );
-
-	HOOK_MESSAGE( ValClass );
-	HOOK_MESSAGE( Feign );
-	HOOK_MESSAGE( Detpack );
-	HOOK_MESSAGE( BuildSt );
-	HOOK_MESSAGE( RandomPC );
-	HOOK_MESSAGE( ServerName );
 	HOOK_MESSAGE( BombDrop );
-
-	HOOK_MESSAGE( Spectator );
+	HOOK_MESSAGE( BombPickup );
+	HOOK_MESSAGE( HostagePos );
+	HOOK_MESSAGE( HostageK );
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
-	// 1 << 16 -- READ ONLY CVAR.
-	CVAR_CREATE( "_vgui_menus", "0", FCVAR_ARCHIVE | FCVAR_USERINFO | 1<<16 ); // force client to use old style menus
+	CVAR_CREATE( "_vgui_menus", "0", FCVAR_ARCHIVE | FCVAR_USERINFO ); // force client to use old style menus
 	CVAR_CREATE( "cl_lb", "0", FCVAR_ARCHIVE | FCVAR_USERINFO ); // force client to use old style menus
 	CVAR_CREATE( "lefthand", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_ah", "1", FCVAR_ARCHIVE| FCVAR_USERINFO);
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
+	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
+
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
 	cl_righthand = CVAR_CREATE( "hand", "1", FCVAR_ARCHIVE );
-	cl_weather = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	cl_weather   = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	cl_minmodels = CVAR_CREATE( "cl_minmodels", "1", FCVAR_ARCHIVE );
-	cl_min_t = CVAR_CREATE( "cl_min_t", "1", FCVAR_ARCHIVE );
-	cl_min_ct = CVAR_CREATE( "cl_min_ct", "1", FCVAR_ARCHIVE );
+	cl_min_t     = CVAR_CREATE( "cl_min_t", "1", FCVAR_ARCHIVE );
+	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "1", FCVAR_ARCHIVE );
+	cl_lw        = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
+	default_fov  = CVAR_CREATE( "default_fov", "90", 0 );
+	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
+	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 
 
 	m_iLogo = 0;
 	m_iFOV = 0;
 
-	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
-	default_fov = CVAR_CREATE( "default_fov", "90", 0 );
-	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
-	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
-	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 
 	m_pSpriteList = NULL;
 
@@ -428,6 +316,7 @@ void CHud :: VidInit( void )
 	m_Timer.VidInit();
 	m_Money.VidInit();
 	m_ProgressBar.VidInit();
+	m_SniperScope.VidInit();
 }
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)

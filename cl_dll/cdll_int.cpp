@@ -30,6 +30,7 @@ extern "C"
 #include <string.h>
 #include "hud_servers.h"
 #include "interface.h"
+#include "render_api.h"
 
 #ifdef _WIN32
 #define DLLEXPORT __declspec( dllexport )
@@ -38,6 +39,7 @@ extern "C"
 #endif
 
 cl_enginefunc_t gEngfuncs;
+render_api_t gRenderAPI;
 CHud gHUD;
 
 void InitInput (void);
@@ -67,6 +69,7 @@ int		DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
 void	DLLEXPORT HUD_Frame( double time );
 void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
 void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
+int 	DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback );
 }
 
 /*
@@ -283,4 +286,25 @@ void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 	 gHUD.m_Spectator.DirectorMessage( iSize, pbuf );
 }
 
+/*
+==========================
+HUD_GetRenderInterface
 
+Called when Xash3D sends render api to us
+==========================
+*/
+
+int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback )
+{
+	if( version != CL_RENDER_INTERFACE_VERSION )
+	{
+		return false;
+	}
+
+	gRenderAPI = *renderfuncs;
+
+	// we didn't send callbacks to engine, because we don't use it
+	// *callback = renderInterface;
+
+	return true;
+}

@@ -20,6 +20,7 @@
 #include "cl_util.h"
 #include "triangleapi.h"
 
+#include <string.h>
 #define MAX_LOGO_FRAMES 56
 
 int grgLogoFrame[MAX_LOGO_FRAMES] = 
@@ -128,9 +129,12 @@ int CHud :: Redraw( float flTime, int intermission )
 
 	m_iIntermission = intermission;
 
-	// if no redrawing is necessary
-	// return 0;
-	
+	if( m_iFOV <= 80 )
+	{
+		m_SniperScope.Draw(flTime);
+		return 0;
+	}
+
 	if ( m_pCvarDraw->value )
 	{
 		HUDLIST *pList = m_pHudList;
@@ -266,25 +270,20 @@ int CHud :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int
 int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b, bool drawing )
 {
 	int first_xpos = xpos;
-	char *szIt;
-	// find the end of the string
-	for ( szIt = szString; *szIt != 0 && *szIt != '\n'; szIt++ )
-	{ // we should count the length?		
-	}
 
 	// iterate throug the string in reverse
-	for ( szIt--;  *szIt != 0 && *szIt != '\n';  szIt-- )
+	for ( signed int i = strlen(szString); i >= 0; i-- )
 	{
-		int next = xpos - gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = xpos - gHUD.m_scrinfo.charWidths[ szString[i] ]; // variable-width fonts look cool
 		if ( next < iMinX )
 			return xpos;
 		xpos = next;
 
-		if( *(szIt - 1) == '\\' )
+		if( szString[i + 1] == '\\' )
 		{
 			// an escape character
 
-			switch( *szIt )
+			switch( szString[i] )
 			{
 			case 'y':
 				UnpackRGB( r, g, b, RGB_YELLOWISH );
@@ -294,14 +293,14 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
 				break;
 			case 'R':
 				if( drawing ) return xpos;
-				else return DrawHudString( iMinX, ypos, first_xpos, szIt, r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
+				else return DrawHudString( iMinX, ypos, first_xpos, &szString[i], r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
 			case 'd':
 				break;
 			}
 			continue;
 		}
 
-		TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
+		TextMessageDrawChar( xpos, ypos, szString[i], r, g, b );
 	}
 
 	return xpos;
