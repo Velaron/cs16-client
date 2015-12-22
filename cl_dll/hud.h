@@ -396,8 +396,6 @@ struct team_info_t
 	char name[MAX_TEAM_NAME];
 	short frags;
 	short deaths;
-	short ping;
-	short packetloss;
 	short ownteam;
 	short players;
 	int already_drawn;
@@ -645,6 +643,8 @@ public:
 	void EnableIcon( char *pszIconName, unsigned char red, unsigned char green, unsigned char blue );
 	void DisableIcon( char *pszIconName );
 
+	friend class CHudScoreboard;
+
 private:
 
 	typedef struct
@@ -653,6 +653,8 @@ private:
 		HSPRITE spr;
 		wrect_t rc;
 		unsigned char r, g, b;
+		unsigned char secR, secG, secB;
+		float flTimeToChange;
 	} icon_sprite_t;
 
 	icon_sprite_t m_IconList[MAX_ICONSPRITES];
@@ -763,11 +765,14 @@ class CHudSniperScope: public CHudBase
 {
 public:
 	int Init( void );
+	int VidInit( void );
 	int Draw( float flTime );
 
 	bool m_bDrawSniperScope;
 private:
-	byte* m_iScopeArc[4];
+	float left, right, centerx, centery;
+	int m_iScopeArc[4];
+	int blackTex;
 
 };
 
@@ -803,6 +808,9 @@ private:
 	int							m_iSpriteCountAllRes;
 	float						m_flMouseSensitivity;
 	int							m_iConcussionEffect; 
+	int	m_iForceCamera;
+	int m_iForceChaseCam;
+	int m_iFadeToBlack;
 
 public:
 
@@ -893,13 +901,13 @@ public:
 	int _cdecl MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf);
 	int _cdecl MsgFunc_ResetHUD(const char *pszName,  int iSize, void *pbuf);
-	void _cdecl MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf );
-	void _cdecl MsgFunc_ViewMode( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_ViewMode( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf);
-	int  _cdecl MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf );
-	int  _cdecl MsgFunc_ReceiveW( const char *pszName, int iSize, void *pbuf );
-	int  _cdecl MsgFunc_BombDrop( const char *pszName, int iSize, void *pbuf );
-	int  _cdecl MsgFunc_BombPickup( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_ReceiveW( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_BombDrop( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_BombPickup( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf);
 	int _cdecl MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf);
 
