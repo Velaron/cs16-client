@@ -27,6 +27,22 @@
 //#include "vgui_TeamFortressViewport.h"
 
 #define MAX_MENU_STRING	512
+
+enum vguimenutype_t
+{
+	MENU_TEAM = 2,
+	MENU_MAPBRIEFING = 4,
+	MENU_CLASS_T = 26,
+	MENU_CLASS_CT,
+	MENU_BUY,
+	MENU_BUY_PISTOL,
+	MENU_BUY_SHOTGUN,
+	MENU_BUY_RIFLE,
+	MENU_BUY_SUBMACHINEGUN,
+	MENU_BUY_MACHINEGUN,
+	MENU_BUY_ITEM,
+};
+
 char g_szMenuString[MAX_MENU_STRING];
 char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 
@@ -149,7 +165,7 @@ void CHudMenu :: SelectMenuItem( int menu_item )
 // if this message is never received, then scores will simply be the combined totals of the players.
 int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 {
-	char *temp = NULL;
+	char *temp = NULL, *menustring;
 
 	BEGIN_READ( pbuf, iSize );
 
@@ -162,38 +178,68 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 	else
 		m_flShutoffTime = -1;
 
-	if ( m_bitsValidSlots )
-	{
-		if ( !m_fWaitingForMore ) // this is the start of a new menu
-		{
-			strncpy( g_szPrelocalisedMenuString, READ_STRING(), MAX_MENU_STRING );
-		}
-		else
-		{  // append to the current menu string
-			strncat( g_szPrelocalisedMenuString, READ_STRING(), MAX_MENU_STRING - strlen(g_szPrelocalisedMenuString) );
-		}
-		g_szPrelocalisedMenuString[MAX_MENU_STRING-1] = 0;  // ensure null termination (strncat/strncpy does not)
-
-		if ( !NeedMore )
-		{  // we have the whole string, so we can localise it now
-			strcpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ) );
-
-			// Swap in characters
-			if ( KB_ConvertString( g_szMenuString, &temp ) )
-			{
-				strcpy( g_szMenuString, temp );
-				free( temp );
-			}
-		}
-
-		m_fMenuDisplayed = 1;
-		m_iFlags |= HUD_ACTIVE;
-	}
-	else
+	if ( !m_bitsValidSlots )
 	{
 		m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
 		m_iFlags &= ~HUD_ACTIVE;
+		ClientCmd("touch_removebutton _menu_*");
+		return 1;
 	}
+
+	menustring = READ_STRING();
+
+	/*// find touch config
+	if( gEngfuncs.pfnGetCvarFloat("_touch_menus") != 0.0f )
+	{
+		const char *szCmd = NULL;
+
+		if( strstr(menustring, "Team_Select") )
+			szCmd = "exec touch/chooseteam.cfg";
+		else if( strstr( menustring, "Terrorist_Select" ))
+			szCmd = "exec touch/chooseteam_tr.cfg";
+		else if( strstr( menustring, "CT_Select"))
+			szCmd = "exec touch/chooseteam_ct.cfg";
+
+		// menu will be replaced by scripted touch config
+		// so execute it and exit
+		if( szCmd )
+		{
+			m_fMenuDisplayed = 1;
+			m_iFlags |= HUD_ACTIVE;
+
+			ClientCmd(szCmd);
+
+			m_fWaitingForMore = NeedMore;
+
+			return 1;
+		}
+
+	}*/
+
+	if ( !m_fWaitingForMore ) // this is the start of a new menu
+	{
+		strncpy( g_szPrelocalisedMenuString, menustring, MAX_MENU_STRING );
+	}
+	else
+	{  // append to the current menu string
+		strncat( g_szPrelocalisedMenuString, menustring, MAX_MENU_STRING - strlen(g_szPrelocalisedMenuString) );
+	}
+	g_szPrelocalisedMenuString[MAX_MENU_STRING-1] = 0;  // ensure null termination (strncat/strncpy does not)
+
+	if ( !NeedMore )
+	{  // we have the whole string, so we can localise it now
+		strcpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ) );
+
+		// Swap in characters
+		if ( KB_ConvertString( g_szMenuString, &temp ) )
+		{
+			strcpy( g_szMenuString, temp );
+			free( temp );
+		}
+	}
+
+	m_fMenuDisplayed = 1;
+	m_iFlags |= HUD_ACTIVE;
 
 	m_fWaitingForMore = NeedMore;
 
@@ -202,6 +248,69 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 
 int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 {
+	BEGIN_READ(pbuf, iSize);
+
+	vguimenutype_t menuType = (vguimenutype_t)READ_BYTE();
+	m_bitsValidSlots = READ_SHORT(); // is ignored
+
+	char *szCmd;
+
+	m_fMenuDisplayed = 1;
+
+	switch(menuType)
+	{
+	case MENU_TEAM:
+		szCmd = "exec touch/chooseteam.cfg";
+		break;
+	/*case MENU_MAPBRIEFING:
+		break;*/
+	case MENU_CLASS_T:
+		szCmd = "exec touch/chooseteam_tr.cfg";
+		break;
+	case MENU_CLASS_CT:
+		szCmd = "exec touch/chooseteam_ct.cfg";
+		break;
+	case MENU_BUY:
+		szCmd = "exec touch/buy.cfg";
+		break;
+	case MENU_BUY_PISTOL:
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+			szCmd = "exec touch/buy_pistol_t.cfg";
+		else szCmd = "exec touch/buy_pistol_ct.cfg";
+		break;
+	case MENU_BUY_SHOTGUN:
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+			szCmd = "exec touch/buy_shotgun_t.cfg";
+		else szCmd = "exec touch/buy_shotgun_ct.cfg";
+		break;
+	case MENU_BUY_RIFLE:
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+			szCmd = "exec touch/buy_rifle_t.cfg";
+		else szCmd ="exec touch/buy_rifle_ct.cfg";
+		break;
+	case MENU_BUY_SUBMACHINEGUN:
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+			szCmd = "exec touch/buy_submachinegun_t.cfg";
+		else szCmd = "exec touch/buy_submachinegun_ct.cfg";
+		break;
+	case MENU_BUY_MACHINEGUN:
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+			szCmd = "exec touch/buy_machinegun_t.cfg";
+		else szCmd = "exec touch/buy_machinegun_ct.cfg";
+		break;
+	case MENU_BUY_ITEM:
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+			szCmd = "exec touch/buy_item_t.cfg";
+		else szCmd = "exec touch/buy_item_ct.cfg";
+		break;
+	default:
+		szCmd = "touch_removebutton _menu_*"; // back to the default touch page
+		m_fMenuDisplayed = 0;
+		break;
+	}
+
+	gEngfuncs.pfnClientCmd(szCmd);
+
 	return 1;
 }
 
