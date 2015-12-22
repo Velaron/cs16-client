@@ -71,15 +71,18 @@ void EV_HLDM_SmokeGrenade( float x, float y, float z )
 {
 	static bool init = false;
 
-	for( int i = 1; i <= 10; i++ )
+	/*for( int i = 1; i <= 10; i++ )
 	{
-		int iSmokeSprite = SPR_Load( "sprites/gas_puff_01.spr" );
-		TEMPENTITY *pTemp = gEngfuncs.pEfxAPI->R_TempSprite( Vector( x, y, z ),
-			Vector( (int)gEngfuncs.pfnRandomLong( -10, 10 ), (int)gEngfuncs.pfnRandomLong( -10, 10 ), (int)gEngfuncs.pfnRandomLong( -10, 10 ) ),
-			10,iSmokeSprite, kRenderGlow, kRenderFxNone, 1.0, 0.5, FTENT_PERSIST | FTENT_COLLIDEWORLD | FTENT_FADEOUT );
+		int iSmokeSprite = SPR_Load( "sprites/ballsmoke.spr" );
+		vec3_t origin;
+		origin[0] = x;
+		origin[1] = y;
+		origin[2] = z;
+		TEMPENTITY *pTemp = gEngfuncs.pEfxAPI->R_TempSprite( origin,
+			Vector( 0, 0, 0 ),
+			10,iSmokeSprite, kRenderNormal, kRenderFxNone, 1.0, 10000, FTENT_PERSIST | FTENT_COLLIDEWORLD | FTENT_FADEOUT );
 
-		gEngfuncs.pEfxAPI->R_RunParticleEffect( Vector( x, y, z), Vector( (int)gEngfuncs.pfnRandomLong( -10, 10 ), (int)gEngfuncs.pfnRandomLong( -10, 10 ), (int)gEngfuncs.pfnRandomLong( -10, 10 ) )
-			, 0xFFFFFF, 50);
+		gEngfuncs.pEfxAPI->R_RunParticleEffect( origin, Vector( 0, 0, 0 ), 0xFFFFFF, 50);
 
 		/*if(pTemp)
 		{
@@ -90,8 +93,10 @@ void EV_HLDM_SmokeGrenade( float x, float y, float z )
 			pTemp->entity.curstate.rendercolor.r = 255;
 			pTemp->entity.curstate.rendercolor.g = 255;
 			pTemp->entity.curstate.rendercolor.b = 255;
-		}*/
-	}
+		}
+	}*/
+
+	// TODO: Find a way to draw smoke0
 }
 
 void EV_HLDM_NewExplode( float x, float y, float z, float ScaleExplode1 )
@@ -489,15 +494,15 @@ void EV_Dummy( struct event_args_s *args )
 
 void RemoveBody(TEMPENTITY *te, float frametime, float current_time)
 {
-  // go underground...
-  if ( current_time >= 2 * te->entity.curstate.fuser2 + 5.0 )
-	te->entity.origin.z -= 5.0 * frametime;
+	 // go underground...
+	if ( current_time >= 2 * te->entity.curstate.fuser2 + 5.0 )
+		te->entity.origin.z -= 5.0 * frametime;
 }
 
 void HitBody(TEMPENTITY *ent, pmtrace_s *ptr)
 {
-  /*if ( ptr->plane.normal.z > 0.0 )
-	ent->flags |= FTENT_IGNOREGRAVITY;*/
+	if ( ptr->plane.normal.z > 0.0 )
+		ent->flags |= FTENT_NONE;
 }
 
 
@@ -508,7 +513,7 @@ void CreateCorpse(Vector *p_vOrigin, Vector *p_vAngles, const char *pModel, floa
 	TEMPENTITY *model = gEngfuncs.pEfxAPI->R_TempModel( (float*)p_vOrigin,
 		null,
 		(float*)p_vAngles,
-		6000000,
+		gEngfuncs.pfnGetCvarFloat("cl_corpsestay"),
 		modelIdx,
 		0 );
 
@@ -521,7 +526,7 @@ void CreateCorpse(Vector *p_vOrigin, Vector *p_vAngles, const char *pModel, floa
 		model->entity.curstate.sequence = iSequence;
 		model->entity.curstate.body = iBody;
 		model->entity.curstate.fuser1 = gHUD.m_flTime + 1.0;
-		model->entity.curstate.fuser2 = 600 + gHUD.m_flTime;
+		model->entity.curstate.fuser2 = gEngfuncs.pfnGetCvarFloat("cl_corpsestay") + gHUD.m_flTime;
 		model->hitcallback = HitBody;
 		model->callback = RemoveBody;
 	}

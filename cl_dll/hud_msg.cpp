@@ -56,12 +56,13 @@ int CHud :: MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf )
 
 void CAM_ToFirstPerson(void);
 
-void CHud :: MsgFunc_ViewMode( const char *pszName, int iSize, void *pbuf )
+int CHud :: MsgFunc_ViewMode( const char *pszName, int iSize, void *pbuf )
 {
 	CAM_ToFirstPerson();
+	return 1;
 }
 
-void CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
+int CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 {
 	// prepare all hud data
 	HUDLIST *pList = m_pHudList;
@@ -75,6 +76,8 @@ void CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 
 	//Probably not a good place to put this.
 	pBeam = pBeam2 = NULL;
+
+	return 1;
 }
 
 
@@ -208,4 +211,3 @@ int CHud::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 
 	return 1;
 }
-

@@ -77,14 +77,13 @@ int CHudHealth::Init(void)
 	m_iFlags = 0;
 	m_bitsDamage = 0;
 	m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
-	m_bDrawRadar = true;
 	giDmgHeight = 0;
 	giDmgWidth = 0;
 
 	memset(m_dmg, 0, sizeof(DAMAGE_IMAGE) * NUM_DMG_TYPES);
 
 	cl_radartype = CVAR_CREATE( "cl_radartype", "0", FCVAR_ARCHIVE );
-
+	CVAR_CREATE("cl_corpsestay", "600", FCVAR_ARCHIVE);
 	gHUD.AddHudElem(this);
 	return 1;
 }
@@ -117,7 +116,7 @@ int CHudHealth::VidInit(void)
 	m_hRadaropaque = gHUD.GetSprite( gHUD.GetSpriteIndex( "radaropaque" ));
 	m_hrad = gHUD.GetSpriteRect( gHUD.GetSpriteIndex( "radar" ));
 	m_hradopaque = gHUD.GetSpriteRect( gHUD.GetSpriteIndex( "radaropaque" ));
-	m_bDrawRadar = false;
+	m_bDrawRadar = true;
 
 	return 1;
 }
@@ -532,6 +531,12 @@ void CHudHealth :: DrawRadarDot(int x, int y, int size, int r, int g, int b, int
 
 void CHudHealth :: DrawRadar( float flTime )
 {
+	char szTeamName[16];
+	int localPlayer = gHUD.m_Scoreboard.m_iPlayerNum;
+	vec3_t localPlayerOrigin = gHUD.m_vecOrigin;
+
+	strncpy(szTeamName, g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamname, sizeof(szTeamName) );
+
 	if( cl_radartype->value )
 	{
 		SPR_Set(m_hRadaropaque, 200, 200, 200);
@@ -541,6 +546,24 @@ void CHudHealth :: DrawRadar( float flTime )
 	{
 		SPR_Set( m_hRadar, 25, 75, 25 );
 		SPR_DrawAdditive( 0, 0, 0, &m_hrad );
+	}
+
+	// players + bomb
+	for( int i = 0; i < 34; i++ )
+	{
+		// skip other players and local client
+		if( strcmp(g_PlayerExtraInfo[i].teamname, szTeamName) || gHUD.m_Scoreboard.m_iPlayerNum == i )
+			continue;
+
+		vec3_t pOrigin = g_PlayerExtraInfo[i].origin;
+		Vector2D delta( pOrigin.x - gHUD.m_vecOrigin.x, pOrigin.y - gHUD.m_vecOrigin.y );
+		float rotateangle = atan(-delta.y / delta.x) * 180.0f / M_PI;
+
+		rotateangle += gHUD.m_vecAngles.y;
+		double x, y;
+		sincos( rotateangle * M_PI / 180.0f, &x, &y );
+
+		DrawRadarDot( (m_hrad.right - m_hrad.left) / 2 + delta.x * x, (m_hrad.bottom - m_hrad.top) / 2 + delta.y * y, 10, 255, 255, 255, 120);
 	}
 }
 
@@ -559,7 +582,7 @@ int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 	angles.x = READ_COORD();
 	angles.y = READ_COORD();
 	angles.z = READ_COORD();
-	float delay = angles[2] * READ_LONG() / 100.0f;
+	float delay = READ_LONG() / 100.0f;
 	int sequence = READ_BYTE();
 	int classID = READ_BYTE();
 	int teamID = READ_BYTE();
