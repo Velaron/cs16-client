@@ -170,6 +170,7 @@ int CHud::MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf)
 	g_PlayerExtraInfo[33].radarflashon = 0;
 	g_PlayerExtraInfo[33].radarflash = 0.0f;
 	g_PlayerExtraInfo[33].radarflashes = 0;
+	g_PlayerExtraInfo[33].dead = 1;
 
 	return 1;
 }

@@ -138,6 +138,7 @@ private:
 	HSPRITE m_hRadaropaque;
 	
 	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
+	float m_flTimeFlash;
 	int	m_bitsDamage;
 	int DrawPain(float fTime);
 	int DrawDamage(float fTime);
@@ -146,5 +147,5 @@ private:
 	void DrawPlayerLocation( void );
 	void DrawRadar( float flTime );
 	void DrawRadarDot(int x, int y, int size, int r, int g, int b, int a);
-
-};	
+	Vector2D WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles );
+};

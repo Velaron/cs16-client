@@ -529,14 +529,48 @@ void CHudHealth :: DrawRadarDot(int x, int y, int size, int r, int g, int b, int
 	FillRGBA(62.5+ x - size/2,62.5+ y - size/2, size, size, r, g, b, a);
 }
 
+Vector2D CHudHealth :: WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles  )
+{
+	Vector2D diff = vObjectOrigin.Make2D() - vPlayerOrigin.Make2D();
+
+	// Supply epsilon values to avoid divide-by-zero
+	if(diff.x == 0)
+		diff.x = 0.00001f;
+	if(diff.y == 0)
+		diff.y = 0.00001f;
+
+	int iMaxRadius = (m_hrad.right - m_hrad.left) / 2.0f;
+
+	float flOffset = atan(diff.y / diff.x) * 180.0f / M_PI;
+
+	if ((diff.x < 0) && (diff.y >= 0))
+		flOffset += 180;
+	else if ((diff.x < 0) && (diff.y < 0))
+		flOffset += 180;
+	else if ((diff.x >= 0) && (diff.y < 0))
+		flOffset += 360;
+
+	// this magic 32.0f just scales position on radar
+	float iRadius = -diff.Length() / 32.0f;
+	if( -iRadius > iMaxRadius)
+		iRadius = -iMaxRadius;
+
+	flOffset = (vAngles.y - flOffset) * M_PI / 180.0f;
+
+	// transform origin difference to radar source
+	Vector2D new_diff;
+	new_diff.x = -iRadius * sin(flOffset);
+	new_diff.y =  iRadius * cos(flOffset);
+
+	return new_diff;
+}
+
 void CHudHealth :: DrawRadar( float flTime )
 {
-	char szTeamName[16];
+	int iTeamNumber = g_PlayerExtraInfo[ gHUD.m_Scoreboard.m_iPlayerNum ].teamnumber;
 
 	if( g_PlayerExtraInfo[ gHUD.m_Scoreboard.m_iPlayerNum ].dead )
 		return;
-
-	strncpy( szTeamName, g_PlayerExtraInfo[ gHUD.m_Scoreboard.m_iPlayerNum ].teamname, 16 );
 
 	if( cl_radartype->value )
 	{
@@ -548,25 +582,44 @@ void CHudHealth :: DrawRadar( float flTime )
 		SPR_Set( m_hRadar, 25, 75, 25 );
 		SPR_DrawAdditive( 0, 0, 0, &m_hrad );
 	}
-	for(int i=0; i<35;i++)
+	for(int i = 0; i < 33; i++)
 	{
-		char debuginfo[1024];
-		if( i == gHUD.m_Scoreboard.m_iPlayerNum || strncmp( szTeamName, g_PlayerExtraInfo[i].teamname, 16 ) || g_PlayerExtraInfo[i].dead )
+		if( i == gHUD.m_Scoreboard.m_iPlayerNum || g_PlayerExtraInfo[i].dead)
 			continue;
-		float rel_x = gHUD.m_vecOrigin.x - g_PlayerExtraInfo[i].origin.x;
-		float rel_y = gHUD.m_vecOrigin.y - g_PlayerExtraInfo[i].origin.y;
-		float plAngle =  atanf( rel_x/rel_y ) * 180.0 / 3.141592654;\
-		//plAngle = fmod( plAngle, 360 );
-		//if(plAngle < 0)
-			//plAngle += 360;
-		float azim = ( plAngle - gHUD.m_vecAngles.y ) * 3.141592654 / 180.0;
-		//azim= fmod( azim, 3.141592654 );
-		//if( azim < 0 )
-			//azim += 3.141592654;
-		float relabs = sqrtf( rel_x*rel_x + rel_y*rel_y );
-		sprintf(debuginfo, "rx%f ry%f pa%f a%f ra%f\n", rel_x, rel_y, plAngle, azim, relabs );
-		ConsolePrint( debuginfo );
-		DrawRadarDot( cos(azim)*relabs * 0.03125, sin(azim)*relabs * 0.03125, 5, 0, 255, 0, 255 );
+
+		if( g_PlayerExtraInfo[i].teamnumber != iTeamNumber )
+			continue;
+
+		Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
+		DrawRadarDot( pos.x, pos.y, 1, 0, 255, 0, 255 );
+	}
+
+	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1)
+	// draw bomb for T
+	{
+		if( g_PlayerExtraInfo[33].radarflashon )
+		{
+			Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
+
+			// TODO: make it flash
+			DrawRadarDot( pos.x, pos.y, 2, 255, 0, 0, 255 );
+		}
+	}
+	else
+	// draw hostages for CT
+	{
+		for( int i = 0; i < MAX_HOSTAGES; i++ )
+		{
+			if( g_HostageInfo[i].dead )
+				continue;
+			if( !g_HostageInfo[i].radarflashon )
+				continue;
+
+			Vector2D pos = WorldToRadar( gHUD.m_vecOrigin, g_HostageInfo[i].origin, gHUD.m_vecAngles );
+
+			// TODO: make it flash
+			DrawRadarDot( pos.x, pos.y, 2, 250, 0, 0, 255 );
+		}
 	}
 }
 
