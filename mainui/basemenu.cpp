@@ -275,6 +275,9 @@ void UI_DrawString( int x, int y, int w, int h, const char *string, const int co
 			if( ch == 0xB8 ) ch = (byte)'�';
 			if( ch == 0xA8 ) ch = (byte)'�';
 #endif
+			ch = UtfProcessChar( (unsigned char) ch );
+			if(!ch)
+				continue;
 			if( ch != ' ' )
 			{
 				if( shadow ) TextMessageDrawChar( xx + ofsX, yy + ofsY, charW, charH, ch, shadowModulate, uiStatic.hFont );
@@ -510,7 +513,7 @@ void UI_CursorMoved( menuFramework_s *menu )
 		if( callback ) callback( (void *)curItem, QM_LOSTFOCUS );
 
 		// Disable text editing
-		if( curItem->type == QMTYPE_FIELD ) g_engfuncs.pfnEnableTextInput( false );
+		if( curItem->type == QMTYPE_FIELD ) EnableTextInput( false );
 	}
 
 	if( menu->cursor >= 0 && menu->cursor < menu->numItems )
@@ -521,7 +524,7 @@ void UI_CursorMoved( menuFramework_s *menu )
 		if( callback ) callback( (void *)curItem, QM_GOTFOCUS );
 
 		// Enable text editing. It will open keyboard on Android.
-		if( curItem->type == QMTYPE_FIELD ) g_engfuncs.pfnEnableTextInput( true );
+		if( curItem->type == QMTYPE_FIELD ) EnableTextInput( true );
 	}
 }
 

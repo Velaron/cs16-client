@@ -58,6 +58,7 @@ typedef struct
 	menuPicButton_s	console;
 	menuPicButton_s	resumeGame;
 	menuPicButton_s	configuration;
+        menuPicButton_s credits;
 	menuPicButton_s	multiPlayer;
 	menuPicButton_s	quit;
 
@@ -193,7 +194,7 @@ static void UI_Main_ActivateFunc( void )
 
 	if( gpGlobals->developer )
 	{
-		uiMain.console.generic.y = CL_IsActive() ? 430 : 480;
+		uiMain.console.generic.y = CL_IsActive() ? 480 : 430;
 		UI_ScaleCoords( NULL, &uiMain.console.generic.y, NULL, NULL );
 	}
 }
@@ -261,7 +262,7 @@ static void UI_Main_Callback( void *self, int event )
 		UI_Options_Menu();
 		break;
 	case ID_PREVIEWS:
-		SHELL_EXECUTE( MenuStrings[HINT_PREVIEWS_CMD], NULL, false );
+		UI_Credits_Menu( );
 		break;
 	case ID_QUIT:
 	case ID_QUIT_BUTTON:
@@ -320,7 +321,7 @@ static void UI_Main_Init( void )
 	uiMain.console.generic.name = "Console";
 	uiMain.console.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
 	uiMain.console.generic.x = 72;
-	uiMain.console.generic.y = CL_IsActive() ? 430 : 480;
+	uiMain.console.generic.y = CL_IsActive() ? 330 : 380;
 	uiMain.console.generic.callback = UI_Main_Callback;
 
 	UI_UtilSetupPicButton( &uiMain.console, PC_CONSOLE );
@@ -331,7 +332,7 @@ static void UI_Main_Init( void )
 	uiMain.resumeGame.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
 	uiMain.resumeGame.generic.statusText = MenuStrings[HINT_RESUME_GAME];
 	uiMain.resumeGame.generic.x = 72;
-	uiMain.resumeGame.generic.y = 480;
+	uiMain.resumeGame.generic.y = 430;
 	uiMain.resumeGame.generic.callback = UI_Main_Callback;
 
 	UI_UtilSetupPicButton( &uiMain.resumeGame, PC_RESUME_GAME );
@@ -347,7 +348,7 @@ static void UI_Main_Init( void )
 	uiMain.multiPlayer.generic.name = "Multiplayer";
 	uiMain.multiPlayer.generic.statusText = MenuStrings[HINT_MULTIPLAYER];
 	uiMain.multiPlayer.generic.x = 72;
-	uiMain.multiPlayer.generic.y = 530 ;
+	uiMain.multiPlayer.generic.y = 480 ;
 	uiMain.multiPlayer.generic.callback = UI_Main_Callback;
 
 	UI_UtilSetupPicButton( &uiMain.multiPlayer, PC_MULTIPLAYER );
@@ -358,10 +359,21 @@ static void UI_Main_Init( void )
 	uiMain.configuration.generic.name = "Configuration";
 	uiMain.configuration.generic.statusText = MenuStrings[HINT_CONFIGURATION];
 	uiMain.configuration.generic.x = 72;
-	uiMain.configuration.generic.y = 580;
+	uiMain.configuration.generic.y = 530;
 	uiMain.configuration.generic.callback = UI_Main_Callback;
 
 	UI_UtilSetupPicButton( &uiMain.configuration, PC_CONFIG );
+        
+        uiMain.credits.generic.id = ID_PREVIEWS;
+	uiMain.credits.generic.type = QMTYPE_BM_BUTTON;
+	uiMain.credits.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
+	uiMain.credits.generic.name = "Credits";
+	uiMain.credits.generic.statusText = "Developer credits";
+	uiMain.credits.generic.x = 72;
+	uiMain.credits.generic.y = 580;
+	uiMain.credits.generic.callback = UI_Main_Callback;
+
+	UI_UtilSetupPicButton( &uiMain.credits, PC_VIEW_README );
 
 	if ( gMenu.m_gameinfo.gamemode == GAME_SINGLEPLAYER_ONLY )
 		uiMain.multiPlayer.generic.flags |= QMF_GRAYED;
@@ -455,6 +467,7 @@ static void UI_Main_Init( void )
 
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.configuration );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.multiPlayer );
+        UI_AddItem( &uiMain.menu, (void *)&uiMain.credits );
 
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.quit );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.minimizeBtn );

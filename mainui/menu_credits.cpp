@@ -27,8 +27,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static const char *uiCreditsDefault[] = 
 {
+	"Developers: ",
+	"a1batross and mittorn",
+        "",
+	"Beta-testers:",
+	"ahsim, SergioPoverony, 1.kirill, Messi",
+        "GFOXSH, Romka_ZVO, cerg2010cerg2010, MakcuM56",
+        "akhmamir, valera0141, konnor512, Pho[en]ix",
+	"bayan47, mars873, art-sorokin, lewa_j",
+	"ANIME_lover, yaruhkincssv34, kakashka99, THE_Swank",
+	"namotrasnik, artslay, Se Android 2.2, Smoke-Bomb",
 	"",
-	"Copyright XashXT Group 2014 (C)",
+        "Big thanks to Valve Corporation for Counter-Strike",
+        "Uncle Mike for this powerful engine",
+        "and Nagist for cs16nd",
+        "",
+	"Copyright SDLash3D Team 2015 (C)",
+	"SDLash3D is not affiliated with Valve or any of their partners.",
+	"All copyrights reserved to their respective owners.",
 	0
 };
 
@@ -41,8 +57,6 @@ typedef struct
 	int		numLines;
 	int		active;
 	int		finalCredits;
-	char		*index[UI_CREDITS_MAXLINES];
-	char		*buffer;
 
 	menuFramework_s	menu;
 } uiCredits_t;
@@ -61,12 +75,12 @@ static void UI_Credits_DrawFunc( void )
 	float	speed = 40.0f;
 	int	w = UI_MED_CHAR_WIDTH;
 	int	h = UI_MED_CHAR_HEIGHT;
-	int	color = 0;
+	int	color = 0x00FFA000;
 
 	// draw the background first
-	if( !uiCredits.finalCredits && !CVAR_GET_FLOAT( "cl_background" ))
+	/*if( !uiCredits.finalCredits && !CVAR_GET_FLOAT( "cl_background" ))
 		UI_DrawPic( 0, 0, 1024 * uiStatic.scaleX, 768 * uiStatic.scaleY, uiColorWhite, ART_BACKGROUND );
-	else speed = 45.0f;	// syncronize with final background track :-)
+	else speed = 45.0f;	// syncronize with final background track :-)*/
 
 	// otherwise running on cutscene
 	speed = 32.0f * (768.0f / ScreenHeight);
@@ -130,56 +144,9 @@ static void UI_Credits_Init( void )
 	uiCredits.menu.drawFunc = UI_Credits_DrawFunc;
 	uiCredits.menu.keyFunc = UI_Credits_KeyFunc;
 
-	if( !uiCredits.buffer )
-	{
-		int	count;
-		char	*p;
-
-		// load credits if needed
-		uiCredits.buffer = (char *)LOAD_FILE( UI_CREDITS_PATH, &count );
-		if( count )
-		{
-			if( uiCredits.buffer[count - 1] != '\n' && uiCredits.buffer[count - 1] != '\r' )
-			{
-				char *tmp = (char *)MALLOC( count + 2 );
-				memcpy( tmp, uiCredits.buffer, count ); 
-				FREE_FILE( uiCredits.buffer );
-				uiCredits.buffer = tmp; 
-				strncpy( uiCredits.buffer + count, "\r", 1 ); // add terminator
-				count += 2; // added "\r\0"
-                    	}
-			p = uiCredits.buffer;
-
-			// convert customs credits to 'ideal' strings array
-			for ( uiCredits.numLines = 0; uiCredits.numLines < UI_CREDITS_MAXLINES; uiCredits.numLines++ )
-			{
-				uiCredits.index[uiCredits.numLines] = p;
-				while ( *p != '\r' && *p != '\n' )
-				{
-					p++;
-					if ( --count == 0 )
-						break;
-				}
-
-				if ( *p == '\r' )
-				{
-					*p++ = 0;
-					if( --count == 0 ) break;
-				}
-
-				*p++ = 0;
-				if( --count == 0 ) break;
-			}
-			uiCredits.index[++uiCredits.numLines] = 0;
-			uiCredits.credits = (const char **)uiCredits.index;
-		}
-		else
-		{
-			// use built-in credits
-			uiCredits.credits =  uiCreditsDefault;
-			uiCredits.numLines = ( sizeof( uiCreditsDefault ) / sizeof( uiCreditsDefault[0] )) - 1; // skip term
-		}
-	}
+	// use built-in credits
+	uiCredits.credits =  uiCreditsDefault;
+	uiCredits.numLines = ( sizeof( uiCreditsDefault ) / sizeof( uiCreditsDefault[0] )) - 1; // skip term
 
 	// run credits
 	uiCredits.startTime = (gpGlobals->time * 1000) + 500; // make half-seconds delay
