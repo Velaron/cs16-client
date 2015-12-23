@@ -591,7 +591,10 @@ void CHudHealth :: DrawRadar( float flTime )
 			continue;
 
 		Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
-		DrawRadarDot( pos.x, pos.y, 1, 0, 255, 0, 255 );
+		if( g_PlayerExtraInfo[i].has_c4 )
+			DrawRadarDot( pos.x, pos.y, 1, 255, 0, 0, 255 );
+		else
+			DrawRadarDot( pos.x, pos.y, 1, 0, 255, 0, 255 );
 	}
 
 	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1)
@@ -599,7 +602,7 @@ void CHudHealth :: DrawRadar( float flTime )
 	{
 		if( g_PlayerExtraInfo[33].radarflashon )
 		{
-			Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
+			Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[33].origin, gHUD.m_vecAngles);
 
 			// TODO: make it flash
 			DrawRadarDot( pos.x, pos.y, 2, 255, 0, 0, 255 );
