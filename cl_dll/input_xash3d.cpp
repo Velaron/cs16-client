@@ -164,19 +164,26 @@ void IN_Move( float frametime, usercmd_t *cmd )
 		V_StopPitchDrift();
 	}
 #endif
-	if( !gHUD.m_iIntermission )
-	{
-		if( gHUD.GetSensitivity() != 0 )
-		{
-			rel_yaw *= gHUD.GetSensitivity();
-			rel_pitch *= gHUD.GetSensitivity();
-		}
-		else
-		{
-			rel_yaw *= sensitivity->value;
-			rel_pitch *= sensitivity->value;
-		}
+	if( gHUD.m_iIntermission )
+		return;
 
+	if( gHUD.GetSensitivity() != 0 )
+	{
+		rel_yaw *= gHUD.GetSensitivity();
+		rel_pitch *= gHUD.GetSensitivity();
+	}
+	else
+	{
+		rel_yaw *= sensitivity->value;
+		rel_pitch *= sensitivity->value;
+	}
+	if(gHUD.m_MOTD.m_bShow)
+	{
+		gHUD.m_MOTD.scroll += rel_pitch;
+	}
+	else
+	{
+		viewangles[PITCH] += rel_pitch;
 		viewangles[YAW] += rel_yaw;
 		if( fLadder )
 		{
@@ -184,15 +191,11 @@ void IN_Move( float frametime, usercmd_t *cmd )
 				viewangles[YAW] -= ac_sidemove * 5;
 			ac_sidemove = 0;
 		}
-		if(gHUD.m_MOTD.m_bShow)
-			gHUD.m_MOTD.scroll += rel_pitch;
-		else
-		viewangles[PITCH] += rel_pitch;
-			if (viewangles[PITCH] > cl_pitchdown->value)
-				viewangles[PITCH] = cl_pitchdown->value;
-			if (viewangles[PITCH] < -cl_pitchup->value)
-				viewangles[PITCH] = -cl_pitchup->value;
 	}
+	if (viewangles[PITCH] > cl_pitchdown->value)
+		viewangles[PITCH] = cl_pitchdown->value;
+	if (viewangles[PITCH] < -cl_pitchup->value)
+		viewangles[PITCH] = -cl_pitchup->value;
 	float rgfl[3];
 	viewangles.CopyToArray( rgfl );
 	gEngfuncs.SetViewAngles( rgfl );
