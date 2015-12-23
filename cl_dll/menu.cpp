@@ -55,6 +55,7 @@ DECLARE_MESSAGE( m_Menu, AllowSpec );
 
 DECLARE_COMMAND( m_Menu, OldStyleMenuOpen );
 DECLARE_COMMAND( m_Menu, OldStyleMenuClose );
+DECLARE_COMMAND( m_Menu, ShowVGUIMenu );
 
 int CHudMenu :: Init( void )
 {
@@ -66,6 +67,7 @@ int CHudMenu :: Init( void )
 	HOOK_MESSAGE( AllowSpec );
 	HOOK_COMMAND( "client_buy_open", OldStyleMenuOpen );
 	HOOK_COMMAND( "client_buy_close", OldStyleMenuClose );
+	HOOK_COMMAND( "showvguimenu", ShowVGUIMenu );
 
 	InitHUDData();
 
@@ -250,20 +252,52 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ(pbuf, iSize);
 
-	vguimenutype_t menuType = (vguimenutype_t)READ_BYTE();
+	int menuType = READ_BYTE();
 	m_bitsValidSlots = READ_SHORT(); // is ignored
 
-	char *szCmd;
+	ShowVGUIMenu(menuType);
+	return 1;
+}
 
-	m_fMenuDisplayed = 1;
+int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
+{
+	UserCmd_OldStyleMenuClose();
+	return 1;
+}
+
+int CHudMenu::MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ( pbuf, iSize );
+
+	m_bAllowSpec = READ_BYTE();
+
+	return 1;
+}
+
+void CHudMenu::UserCmd_OldStyleMenuOpen()
+{
+	m_flShutoffTime = -1; // stay open until user will not close it
+	strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString("Buy"), MAX_MENU_STRING );
+
+}
+
+void CHudMenu::UserCmd_OldStyleMenuClose()
+{
+	m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
+	m_iFlags &= ~HUD_ACTIVE;
+}
+
+// lol, no real VGUI here
+// it's really good only for touchscreens
+void CHudMenu::ShowVGUIMenu( int menuType )
+{
+	char *szCmd;
 
 	switch(menuType)
 	{
 	case MENU_TEAM:
 		szCmd = "exec touch/chooseteam.cfg";
 		break;
-	/*case MENU_MAPBRIEFING:
-		break;*/
 	case MENU_CLASS_T:
 		szCmd = "exec touch/chooseteam_tr.cfg";
 		break;
@@ -309,35 +343,20 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 		break;
 	}
 
+	m_fMenuDisplayed = 1;
 	gEngfuncs.pfnClientCmd(szCmd);
-
-	return 1;
 }
 
-int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
+void CHudMenu::UserCmd_ShowVGUIMenu()
 {
-	UserCmd_OldStyleMenuClose();
-	return 1;
-}
+	if( gEngfuncs.Cmd_Argc() != 1 )
+	{
+		ConsolePrint("usage: showvguimenu <menuType>\n");
+	}
 
-int CHudMenu::MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
-{
-	BEGIN_READ( pbuf, iSize );
+	if( gEngfuncs.pfnGetCvarFloat("_vgui_menus") == 0.0f )
+		return;
 
-	m_bAllowSpec = READ_BYTE();
-
-	return 1;
-}
-
-void CHudMenu::UserCmd_OldStyleMenuOpen()
-{
-	m_flShutoffTime = -1; // stay open until user will not close it
-	strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString("Buy"), MAX_MENU_STRING );
-
-}
-
-void CHudMenu::UserCmd_OldStyleMenuClose()
-{
-	m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
-	m_iFlags &= ~HUD_ACTIVE;
+	int menuType = atoi(gEngfuncs.Cmd_Argv(1));
+	ShowVGUIMenu(menuType);
 }

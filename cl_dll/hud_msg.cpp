@@ -217,3 +217,11 @@ int CHud::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 
 	return 1;
 }
+
+int CHud::MsgFunc_ShadowIdx(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	int idx = READ_BYTE();
+	return 1;
+}

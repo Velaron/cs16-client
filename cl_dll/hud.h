@@ -458,6 +458,8 @@ public:
 
 	void _cdecl UserCmd_OldStyleMenuClose( void );
 	void _cdecl UserCmd_OldStyleMenuOpen( void );
+	void _cdecl UserCmd_ShowVGUIMenu( void );
+	void ShowVGUIMenu( int menuType ); // cs16client extension
 
 	void SelectMenuItem( int menu_item );
 
@@ -910,6 +912,7 @@ public:
 	int _cdecl MsgFunc_BombPickup( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf);
 	int _cdecl MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf);
+	int _cdecl MsgFunc_ShadowIdx(const char *pszName, int iSize, void *pbuf);
 
 
 	// Screen information

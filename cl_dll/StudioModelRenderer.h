@@ -88,6 +88,7 @@ public:
 	float (*m_paliastransform)[3][4];
 	float (*m_pbonetransform)[MAXSTUDIOBONES][3][4];
 	float (*m_plighttransform)[MAXSTUDIOBONES][3][4];
+	int m_iShadowSprite;
 };
 
 #endif
