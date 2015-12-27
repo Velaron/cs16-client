@@ -18,6 +18,11 @@ class CBasePlayer;
 class CItem;
 class CBasePlayerAmmo;
 
+#define MAX_MOTD_CHUNK 60
+#define MAX_MOTD_LENGTH 1536
+
+#define STARTMONEY_MAX 32000
+#define STARTMONEY_MIN 800
 enum
 {
 	GR_NONE = 0,
@@ -264,7 +269,8 @@ public:
 	virtual void GiveC4(void);
 	virtual void ChangeLevel(void);
 	virtual void GoToIntermission(void);
-
+	virtual void SetRestartServerAtRoundEnd();
+	virtual BOOL ShouldRestart();
 public:
 	void SendMOTDToClient(edict_t *client);
 	void InitializePlayerCounts(int &NumAliveTerrorist, int &NumAliveCT, int &NumDeadTerrorist, int &NumDeadCT);
@@ -339,7 +345,7 @@ public:
 	bool m_bMapHasRescueZone;
 	bool m_bMapHasEscapeZone;
 	int m_iMapHasVIPSafetyZone;
-	bool m_bMapHasCameras;
+	int m_bMapHasCameras;
 	int m_iC4Timer;
 	int m_iC4Guy;
 	int m_iLoserBonus;
@@ -385,6 +391,7 @@ public:
 	int m_iRoundWinDifference;
 	float m_fCareerMatchMenuTime;
 	bool m_bSkipSpawn;
+	BOOL m_bShouldRestart;
 };
 
 extern DLL_GLOBAL CHalfLifeMultiplay *g_pGameRules;

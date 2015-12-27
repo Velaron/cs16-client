@@ -13,8 +13,7 @@
 *
 ****/
 
-#include "extdll.h"
-#include "util.h"
+#include "stdafx.h"
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
@@ -98,7 +97,7 @@ void CTMP::TMPFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 {
 	m_bDelayFire = true;
 	m_iShotsFired++;
-	m_flAccuracy = ((m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200) + 0.55;
+	m_flAccuracy = ((float)(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200) + 0.55;
 
 	if (m_flAccuracy > 1.4)
 		m_flAccuracy = 1.4;

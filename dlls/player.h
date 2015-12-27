@@ -16,6 +16,7 @@
 #define PLAYER_H
 
 #include "pm_materials.h"
+#include "hintmessage.h"
 #include "weapons.h"
 
 #define MAX_PLAYER_NAME_LENGTH 32
@@ -252,7 +253,7 @@ public:
 	virtual int Restore(CRestore &restore);
 	virtual int ObjectCaps(void) { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	virtual int Classify(void);
-	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, const Vector &vecDir, TraceResult *ptr, int bitsDamageType);
 	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	virtual int TakeHealth(float flHealth, int bitsDamageType);
 	virtual void Killed(entvars_t *pevAttacker, int iGib);
@@ -303,7 +304,7 @@ public:
 	void SetWeaponAnimType(const char *szExtention);
 	void CheatImpulseCommands(int iImpulse);
 	void StartDeathCam(void);
-	void StartObserver(Vector vecPosition, Vector vecViewAngle);
+	void StartObserver(const Vector &vecPosition, const Vector &vecViewAngle);
 	CBaseEntity *Observer_IsValidTarget(int iTarget, bool bOnlyTeam);
 	void Observer_FindNextPlayer(bool bReverse, char *name = NULL);
 	void Observer_HandleButtons(void);
@@ -475,6 +476,7 @@ public:
 	bool m_bKilledByBomb;
 	Vector m_vBlastVector;
 	bool m_bKilledByGrenade;
+	CHintMessageQueue m_hintMessageQueue;
 	int m_flDisplayHistory;
 	int m_iMenu;
 	int m_iChaseTarget;

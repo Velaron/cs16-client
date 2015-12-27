@@ -13,8 +13,7 @@
 *
 ****/
 
-#include "extdll.h"
-#include "util.h"
+#include "stdafx.h"
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
@@ -129,7 +128,7 @@ void CFamas::PrimaryAttack(void)
 
 void CFamas::FamasFire(float flSpread, float flCycleTime, BOOL fUseAutoAim, BOOL bFireBurst)
 {
-	if (bFireBurst == TRUE)
+	if (bFireBurst != FALSE)
 	{
 		m_iFamasShotsFired = 0;
 		flCycleTime = 0.55;
@@ -139,7 +138,7 @@ void CFamas::FamasFire(float flSpread, float flCycleTime, BOOL fUseAutoAim, BOOL
 
 	m_bDelayFire = true;
 	m_iShotsFired++;
-	m_flAccuracy = (m_iShotsFired * m_iShotsFired * m_iShotsFired / 215) + 0.3;
+	m_flAccuracy = ((float)(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 215.0) + 0.3;
 
 	if (m_flAccuracy > 1)
 		m_flAccuracy = 1;
@@ -191,7 +190,7 @@ void CFamas::FamasFire(float flSpread, float flCycleTime, BOOL fUseAutoAim, BOOL
 	else
 		KickBack(0.625, 0.375, 0.25, 0.0125, 3.5, 2.25, 8);
 
-	if (bFireBurst == TRUE)
+	if (bFireBurst != FALSE)
 	{
 		m_fBurstSpread = flSpread;
 		m_iFamasShotsFired++;

@@ -72,6 +72,7 @@ extern enginefuncs_t g_engfuncs;
 #define RANDOM_LONG		(*g_engfuncs.pfnRandomLong)
 #define RANDOM_FLOAT	(*g_engfuncs.pfnRandomFloat)
 #define GETPLAYERAUTHID	(*g_engfuncs.pfnGetPlayerAuthId)
+#define GAME_TIME		(*g_engfuncs.pfnTime)
 
 inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin = NULL, edict_t *ed = NULL ) {
 	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed);
@@ -158,5 +159,10 @@ inline void *GET_PRIVATE( edict_t *pent )
 #define ENGINE_FORCE_UNMODIFIED	( *g_engfuncs.pfnForceUnmodified )
 
 #define PLAYER_CNX_STATS		( *g_engfuncs.pfnGetPlayerStats )
-
+#define CREATE_FAKE_CLIENT  ( *g_engfuncs.pfnCreateFakeClient )
+#define GET_USERINFO   ( *g_engfuncs.pfnGetInfoKeyBuffer )
+#define SET_KEY_VALUE   ( *g_engfuncs.pfnSetKeyValue )
+#define SET_CLIENT_KEY_VALUE ( *g_engfuncs.pfnSetClientKeyValue )
+#define GET_INFO_BUFFER   (*g_engfuncs.pfnGetInfoKeyBuffer)
+#define GET_KEY_VALUE   (*g_engfuncs.pfnInfoKeyValue)
 #endif		//ENGINECALLBACK_H
