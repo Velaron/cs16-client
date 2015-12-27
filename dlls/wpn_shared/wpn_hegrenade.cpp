@@ -13,8 +13,7 @@
 *
 ****/
 
-#include "extdll.h"
-#include "util.h"
+#include "stdafx.h"
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
@@ -165,7 +164,7 @@ bool CHEGrenade::ShieldSecondaryFire(int up_anim, int down_anim)
 		m_pPlayer->m_bShieldDrawn = true;
 	}
 
-	m_pPlayer->UpdateShieldCrosshair(m_iWeaponState & WPNSTATE_SHIELD_DRAWN ? true : false);
+   m_pPlayer->UpdateShieldCrosshair((m_iWeaponState & WPNSTATE_SHIELD_DRAWN) == 0);
 	m_pPlayer->ResetMaxSpeed();
 
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.4;

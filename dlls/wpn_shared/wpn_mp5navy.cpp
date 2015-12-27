@@ -13,8 +13,7 @@
 *
 ****/
 
-#include "extdll.h"
-#include "util.h"
+#include "stdafx.h"
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
@@ -99,7 +98,7 @@ void CMP5N::MP5NFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 {
 	m_bDelayFire = true;
 	m_iShotsFired++;
-	m_flAccuracy = ((m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220) + 0.45;
+	m_flAccuracy = ((float)(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0) + 0.45;
 
 	if (m_flAccuracy > 0.75)
 		m_flAccuracy = 0.75;

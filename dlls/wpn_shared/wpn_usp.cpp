@@ -13,8 +13,7 @@
 *
 ****/
 
-#include "extdll.h"
-#include "util.h"
+#include "stdafx.h"
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
@@ -108,15 +107,19 @@ int CUSP::GetItemInfo(ItemInfo *p)
 
 BOOL CUSP::Deploy(void)
 {
-	m_flAccuracy = 0.92;
-	m_fMaxSpeed = 250;
-	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
-	m_pPlayer->m_bShieldDrawn = false;
+   m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
+   m_flAccuracy = 0.92f;
+   m_fMaxSpeed = 250.0f;
+   m_pPlayer->m_bShieldDrawn = false;
 
-	if (m_pPlayer->HasShield() != false)
-		return DefaultDeploy("models/shield/v_shield_usp.mdl", "models/shield/p_shield_usp.mdl", USP_SHIELD_DRAW, "shieldgun", UseDecrement() != FALSE);
-	else
-		return DefaultDeploy("models/v_usp.mdl", "models/p_usp.mdl", (m_iWeaponState & WPNSTATE_USP_SILENCED) ? USP_DRAW : USP_UNSIL_DRAW, "onehanded", UseDecrement() != FALSE);
+   if (m_pPlayer->HasShield())
+   {
+      m_iWeaponState &= ~WPNSTATE_USP_SILENCED;
+      return DefaultDeploy("models/shield/v_shield_usp.mdl", "models/shield/p_shield_usp.mdl", USP_SHIELD_DRAW, "shieldgun", UseDecrement() != FALSE);
+   }
+   else if (m_iWeaponState & WPNSTATE_USP_SILENCED)
+      return DefaultDeploy("models/v_usp.mdl", "models/p_usp.mdl", USP_DRAW, "onehanded", UseDecrement() != FALSE);
+   return DefaultDeploy("models/v_usp.mdl", "models/p_usp.mdl", USP_UNSIL_DRAW, "onehanded", UseDecrement() != FALSE);
 }
 
 void CUSP::SecondaryAttack(void)

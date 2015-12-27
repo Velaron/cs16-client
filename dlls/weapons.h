@@ -609,13 +609,7 @@ public:
 	virtual void RetireWeapon(void);
 	virtual BOOL ShouldWeaponIdle(void) { return FALSE; }
 	virtual void Holster(int skiplocal = 0);
-	virtual BOOL UseDecrement(void) {
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	    }
+	virtual BOOL UseDecrement(void) { return FALSE; }
 	virtual CBasePlayerItem *GetWeaponPtr(void) { return (CBasePlayerItem *)this; }
 
 public:
@@ -790,7 +784,7 @@ public:
 	float m_flTimeToIgnoreTouches;
 };
 
-#if defined(PLAYER_H) || defined(CLIENT_WEAPONS)
+#ifdef PLAYER_H
 
 class CAK47 : public CBasePlayerWeapon
 {
@@ -1231,7 +1225,7 @@ public:
 	int Stab(int fFirst);
 
 private:
-	int m_iSwing;
+	//int m_iSwing; //Already exists in CBaseDelay
 	TraceResult m_trHit;
 	unsigned short m_usKnife;
 };

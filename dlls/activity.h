@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -12,32 +12,31 @@
 *   without written permission from Valve LLC.
 *
 ****/
+#ifndef ACTIVITY_H
+#define ACTIVITY_H
 
-#ifndef	ACTIVITY_H
-#define	ACTIVITY_H
-
-
-typedef enum {
-	ACT_RESET = 0,		// Set m_Activity to this invalid value to force a reset to m_IdealActivity
-	ACT_IDLE = 1,
+typedef enum
+{
+	ACT_RESET,
+	ACT_IDLE,
 	ACT_GUARD,
 	ACT_WALK,
 	ACT_RUN,
-	ACT_FLY,				// Fly (and flap if appropriate)
+	ACT_FLY,
 	ACT_SWIM,
-	ACT_HOP,				// vertical jump
-	ACT_LEAP,				// long forward jump
+	ACT_HOP,
+	ACT_LEAP,
 	ACT_FALL,
 	ACT_LAND,
 	ACT_STRAFE_LEFT,
 	ACT_STRAFE_RIGHT,
-	ACT_ROLL_LEFT,			// tuck and roll, left
-	ACT_ROLL_RIGHT,			// tuck and roll, right
-	ACT_TURN_LEFT,			// turn quickly left (stationary)
-	ACT_TURN_RIGHT,			// turn quickly right (stationary)
-	ACT_CROUCH,				// the act of crouching down from a standing position
-	ACT_CROUCHIDLE,			// holding body in crouched position (loops)
-	ACT_STAND,				// the act of standing from a crouched position
+	ACT_ROLL_LEFT,
+	ACT_ROLL_RIGHT,
+	ACT_TURN_LEFT,
+	ACT_TURN_RIGHT,
+	ACT_CROUCH,
+	ACT_CROUCHIDLE,
+	ACT_STAND,
 	ACT_USE,
 	ACT_SIGNAL1,
 	ACT_SIGNAL2,
@@ -51,43 +50,43 @@ typedef enum {
 	ACT_MELEE_ATTACK1,
 	ACT_MELEE_ATTACK2,
 	ACT_RELOAD,
-	ACT_ARM,				// pull out gun, for instance
-	ACT_DISARM,				// reholster gun
-	ACT_EAT,				// monster chowing on a large food item (loop)
+	ACT_ARM,
+	ACT_DISARM,
+	ACT_EAT,
 	ACT_DIESIMPLE,
 	ACT_DIEBACKWARD,
 	ACT_DIEFORWARD,
 	ACT_DIEVIOLENT,
-	ACT_BARNACLE_HIT,		// barnacle tongue hits a monster
-	ACT_BARNACLE_PULL,		// barnacle is lifting the monster ( loop )
-	ACT_BARNACLE_CHOMP,		// barnacle latches on to the monster
-	ACT_BARNACLE_CHEW,		// barnacle is holding the monster in its mouth ( loop )
+	ACT_BARNACLE_HIT,
+	ACT_BARNACLE_PULL,
+	ACT_BARNACLE_CHOMP,
+	ACT_BARNACLE_CHEW,
 	ACT_SLEEP,
-	ACT_INSPECT_FLOOR,		// for active idles, look at something on or near the floor
-	ACT_INSPECT_WALL,		// for active idles, look at something directly ahead of you ( doesn't HAVE to be a wall or on a wall )
-	ACT_IDLE_ANGRY,			// alternate idle animation in which the monster is clearly agitated. (loop)
-	ACT_WALK_HURT,			// limp  (loop)
-	ACT_RUN_HURT,			// limp  (loop)
-	ACT_HOVER,				// Idle while in flight
-	ACT_GLIDE,				// Fly (don't flap)
-	ACT_FLY_LEFT,			// Turn left in flight
-	ACT_FLY_RIGHT,			// Turn right in flight
-	ACT_DETECT_SCENT,		// this means the monster smells a scent carried by the air
-	ACT_SNIFF,				// this is the act of actually sniffing an item in front of the monster
-	ACT_BITE,				// some large monsters can eat small things in one bite. This plays one time, EAT loops.
-	ACT_THREAT_DISPLAY,		// without attacking, monster demonstrates that it is angry. (Yell, stick out chest, etc )
-	ACT_FEAR_DISPLAY,		// monster just saw something that it is afraid of
-	ACT_EXCITED,			// for some reason, monster is excited. Sees something he really likes to eat, or whatever.
-	ACT_SPECIAL_ATTACK1,	// very monster specific special attacks.
-	ACT_SPECIAL_ATTACK2,	
-	ACT_COMBAT_IDLE,		// agitated idle.
+	ACT_INSPECT_FLOOR,
+	ACT_INSPECT_WALL,
+	ACT_IDLE_ANGRY,
+	ACT_WALK_HURT,
+	ACT_RUN_HURT,
+	ACT_HOVER,
+	ACT_GLIDE,
+	ACT_FLY_LEFT,
+	ACT_FLY_RIGHT,
+	ACT_DETECT_SCENT,
+	ACT_SNIFF,
+	ACT_BITE,
+	ACT_THREAT_DISPLAY,
+	ACT_FEAR_DISPLAY,
+	ACT_EXCITED,
+	ACT_SPECIAL_ATTACK1,
+	ACT_SPECIAL_ATTACK2,
+	ACT_COMBAT_IDLE,
 	ACT_WALK_SCARED,
 	ACT_RUN_SCARED,
-	ACT_VICTORY_DANCE,		// killed a player, do a victory dance.
-	ACT_DIE_HEADSHOT,		// die, hit in head. 
-	ACT_DIE_CHESTSHOT,		// die, hit in chest
-	ACT_DIE_GUTSHOT,		// die, hit in gut
-	ACT_DIE_BACKSHOT,		// die, hit in back
+	ACT_VICTORY_DANCE,
+	ACT_DIE_HEADSHOT,
+	ACT_DIE_CHESTSHOT,
+	ACT_DIE_GUTSHOT,
+	ACT_DIE_BACKSHOT,
 	ACT_FLINCH_HEAD,
 	ACT_FLINCH_CHEST,
 	ACT_FLINCH_STOMACH,
@@ -95,15 +94,39 @@ typedef enum {
 	ACT_FLINCH_RIGHTARM,
 	ACT_FLINCH_LEFTLEG,
 	ACT_FLINCH_RIGHTLEG,
-} Activity;
+	ACT_FLINCH,
+	ACT_LARGE_FLINCH,
+	ACT_HOLDBOMB,
+	ACT_IDLE_FIDGET,
+	ACT_IDLE_SCARED,
+	ACT_IDLE_SCARED_FIDGET,
+	ACT_FOLLOW_IDLE,
+	ACT_FOLLOW_IDLE_FIDGET,
+	ACT_FOLLOW_IDLE_SCARED,
+	ACT_FOLLOW_IDLE_SCARED_FIDGET,
+	ACT_CROUCH_IDLE,
+	ACT_CROUCH_IDLE_FIDGET,
+	ACT_CROUCH_IDLE_SCARED,
+	ACT_CROUCH_IDLE_SCARED_FIDGET,
+	ACT_CROUCH_WALK,
+	ACT_CROUCH_WALK_SCARED,
+	ACT_CROUCH_DIE,
+	ACT_WALK_BACK,
+	ACT_IDLE_SNEAKY,
+	ACT_IDLE_SNEAKY_FIDGET,
+	ACT_WALK_SNEAKY,
+	ACT_WAVE,
+	ACT_YES,
+	ACT_NO
+}
+Activity;
 
-
-typedef struct {
-	int	type;
+typedef struct
+{
+	int type;
 	char *name;
-} activity_map_t;
+}
+activity_map_t;
 
 extern activity_map_t activity_map[];
-
-
-#endif	//ACTIVITY_H
+#endif
