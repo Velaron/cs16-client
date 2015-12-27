@@ -21,7 +21,7 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a-hard)
 LOCAL_MODULE_FILENAME = libclient_hardfp
 endif
 
-LOCAL_CFLAGS += -fsigned-char -DCLIENT_DLL=1
+LOCAL_CFLAGS += -fsigned-char -DCLIENT_DLL=1 -DCLIENT_WEAPONS=1
 
 SRCS :=  hl/hl_baseentity.cpp \
         events/ev_cs16.cpp \

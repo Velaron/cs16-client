@@ -1579,7 +1579,6 @@ CSaveRestoreBuffer::CSaveRestoreBuffer(SAVERESTOREDATA *pdata)
 
 CSaveRestoreBuffer::~CSaveRestoreBuffer(void)
 {
-	BINTRACE
 
 }
 
