@@ -205,7 +205,7 @@ WEAPON *WeaponsResource :: GetFirstPos( int iSlot )
 
 	for (int i = 0; i < MAX_WEAPON_POSITIONS; i++)
 	{
-		if ( rgSlots[iSlot][i] && HasAmmo( rgSlots[iSlot][i] ) )
+		if ( rgSlots[iSlot][i] /*&& HasAmmo( rgSlots[iSlot][i] )*/ )
 		{
 			pret = rgSlots[iSlot][i];
 			break;
@@ -931,7 +931,7 @@ void CHudAmmo::UserCmd_NextWeapon(void)
 			{
 				WEAPON *wsp = gWR.GetWeaponSlot( slot, pos );
 
-				if ( wsp && gWR.HasAmmo(wsp) )
+				if ( wsp /*&& gWR.HasAmmo(wsp)*/ )
 				{
 					gpActiveSel = wsp;
 					return;
@@ -972,7 +972,7 @@ void CHudAmmo::UserCmd_PrevWeapon(void)
 			{
 				WEAPON *wsp = gWR.GetWeaponSlot( slot, pos );
 
-				if ( wsp && gWR.HasAmmo(wsp) )
+				if ( wsp /*&& gWR.HasAmmo(wsp)*/ )
 				{
 					gpActiveSel = wsp;
 					return;
@@ -1529,9 +1529,19 @@ int CHudAmmo::DrawWList(float flTime)
 				if ( !p || !p->iId )
 					continue;
 
-				UnpackRGB( r,g,b, RGB_YELLOWISH );
 			
 				// if active, then we must have ammo.
+				if ( gWR.HasAmmo(p) )
+				{
+					UnpackRGB(r,g,b, RGB_YELLOWISH );
+					ScaleColors(r, g, b, 192);
+				}
+				else
+				{
+					UnpackRGB(r,g,b, RGB_REDISH);
+					ScaleColors(r, g, b, 128);
+				}
+
 
 				if ( gpActiveSel == p )
 				{
@@ -1544,15 +1554,6 @@ int CHudAmmo::DrawWList(float flTime)
 				else
 				{
 					// Draw Weapon if Red if no ammo
-
-					if ( gWR.HasAmmo(p) )
-						ScaleColors(r, g, b, 192);
-					else
-					{
-						UnpackRGB(r,g,b, RGB_REDISH);
-						ScaleColors(r, g, b, 128);
-					}
-
 					SPR_Set( p->hInactive, r, g, b );
 					SPR_DrawAdditive( 0, x, y, &p->rcInactive );
 				}
