@@ -13,14 +13,14 @@
 *
 ****/
 
-#include "extdll.h"
-#include "util.h"
+#include "stdafx.h"
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
 #include "hltv.h"
 #include "gamerules.h"
 
+//#define C4MADNESS
 enum c4_e
 {
 	C4_IDLE1,
@@ -125,6 +125,7 @@ void CC4::PrimaryAttack(void)
 
 	if (!m_bStartedArming)
 	{
+#ifndef C4MADNESS
 		if (!onBombZone)
 		{
 			ClientPrint(m_pPlayer->pev, HUD_PRINTCENTER, "#C4_Plant_At_Bomb_Spot");
@@ -138,12 +139,12 @@ void CC4::PrimaryAttack(void)
 			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1;
 			return;
 		}
-
+		g_engfuncs.pfnSetClientMaxspeed(ENT(m_pPlayer->pev), 1);
+#endif
 		m_bStartedArming = true;
 		m_bBombPlacedAnimation = false;
 		m_fArmedTime = gpGlobals->time + 3;
-		SendWeaponAnim(C4_ARM, UseDecrement() != FALSE);
-		g_engfuncs.pfnSetClientMaxspeed(ENT(m_pPlayer->pev), 1);
+		SendWeaponAnim(C4_ARM, UseDecrement() != FALSE);	
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 		m_pPlayer->SetProgressBarTime(3);
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.3;
@@ -151,6 +152,7 @@ void CC4::PrimaryAttack(void)
 	}
 	else
 	{
+#ifndef C4MADNESS
 		if (!onGround || !onBombZone)
 		{
 			if (onBombZone)
@@ -171,7 +173,7 @@ void CC4::PrimaryAttack(void)
 
 			return;
 		}
-
+#endif
 		if (gpGlobals->time > m_fArmedTime)
 		{
 			if (m_bStartedArming == true)
@@ -182,10 +184,9 @@ void CC4::PrimaryAttack(void)
 				m_pPlayer->m_bHasC4 = false;
 
 #ifndef CLIENT_WEAPONS
-				if (pev->speed != 0 && g_pGameRules)
-					g_pGameRules->m_iC4Timer = (int)pev->speed;
+		if (pev->speed != 0 && g_pGameRules)
+			g_pGameRules->m_iC4Timer = (int)pev->speed;
 #endif
-
 				CGrenade *pGrenade = CGrenade::ShootSatchelCharge(m_pPlayer->pev, m_pPlayer->pev->origin, Vector(0, 0, 0));
 
 				MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
@@ -204,21 +205,13 @@ void CC4::PrimaryAttack(void)
 				WRITE_BYTE(1);
 				MESSAGE_END();
 #endif
-
 				UTIL_ClientPrintAll(HUD_PRINTCENTER, "#Bomb_Planted");
 
-#ifndef CLIENT_WEAPONS
-				if (g_pGameRules->IsCareer() && !m_pPlayer->IsBot())
-				{
-				}
-#endif
-
 				UTIL_LogPrintf("\"%s<%i><%s><TERRORIST>\" triggered \"Planted_The_Bomb\"\n", STRING(m_pPlayer->pev->netname), GETPLAYERUSERID(m_pPlayer->edict()), GETPLAYERAUTHID(m_pPlayer->edict()));
-
 #ifndef CLIENT_WEAPONS
 				g_pGameRules->m_bBombDropped = false;
-#endif
-				EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/c4_plant.wav", VOL_NORM, ATTN_NORM);
+#endif		
+		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/c4_plant.wav", VOL_NORM, ATTN_NORM);
 
 				m_pPlayer->pev->body = 0;
 				m_pPlayer->ResetMaxSpeed();
@@ -315,6 +308,7 @@ void CC4::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, f
 		if (pev->speed != 0 && g_pGameRules)
 			g_pGameRules->m_iC4Timer = (int)pev->speed;
 #endif
+
 		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/c4_plant.wav", VOL_NORM, ATTN_NORM);
 		CGrenade::ShootSatchelCharge(m_pPlayer->pev, m_pPlayer->pev->origin, Vector(0, 0, 0));
 		CGrenade *pGrenade = NULL;

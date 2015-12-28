@@ -13,8 +13,7 @@
 *
 ****/
 
-#include "extdll.h"
-#include "util.h"
+#include "stdafx.h"
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
@@ -218,7 +217,7 @@ bool CKnife::ShieldSecondaryFire(int up_anim, int down_anim)
 		m_pPlayer->m_bShieldDrawn = true;
 	}
 
-	m_pPlayer->UpdateShieldCrosshair(m_iWeaponState & WPNSTATE_SHIELD_DRAWN ? true : false);
+   m_pPlayer->UpdateShieldCrosshair((m_iWeaponState & WPNSTATE_SHIELD_DRAWN) == 0);
 	m_pPlayer->ResetMaxSpeed();
 
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.4;
@@ -348,12 +347,13 @@ int CKnife::Swing(int fFirst)
 		SetPlayerShieldAnim();
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 		ClearMultiDamage();
-
-		if (m_flNextPrimaryAttack + 0.4 < UTIL_WeaponTimeBase())
-			pEntity->TraceAttack(m_pPlayer->pev, 20, gpGlobals->v_forward, &tr, DMG_NEVERGIB | DMG_BULLET);
-		else
-			pEntity->TraceAttack(m_pPlayer->pev, 15, gpGlobals->v_forward, &tr, DMG_NEVERGIB | DMG_BULLET);
-
+		if (pEntity)
+		{
+			if (m_flNextPrimaryAttack + 0.4 < UTIL_WeaponTimeBase())
+				pEntity->TraceAttack(m_pPlayer->pev, 20, gpGlobals->v_forward, &tr, DMG_NEVERGIB | DMG_BULLET);
+			else
+				pEntity->TraceAttack(m_pPlayer->pev, 15, gpGlobals->v_forward, &tr, DMG_NEVERGIB | DMG_BULLET);
+		}
 		ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
 		float flVol = 1;
@@ -469,8 +469,8 @@ int CKnife::Stab(int fFirst)
 
 		UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 		ClearMultiDamage();
-
-		pEntity->TraceAttack(m_pPlayer->pev, flDamage, gpGlobals->v_forward, &tr, DMG_NEVERGIB | DMG_BULLET);
+		if (pEntity)
+			pEntity->TraceAttack(m_pPlayer->pev, flDamage, gpGlobals->v_forward, &tr, DMG_NEVERGIB | DMG_BULLET);
 		ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
 		float flVol = 1;

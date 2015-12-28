@@ -12,11 +12,16 @@
 *   without written permission from Valve LLC.
 *
 ****/
+
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
 #include "monsters.h"
+
+#define PLAYER_H
 #include "weapons.h"
+#undef PLAYER_H
+
 #include "nodes.h"
 #include "player.h"
 

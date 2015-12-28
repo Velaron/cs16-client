@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -12,7 +12,6 @@
 *   without written permission from Valve LLC.
 *
 ****/
-
 #ifndef TALKMONSTER_H
 #define TALKMONSTER_H
 
@@ -20,7 +19,6 @@ class CTalkMonster : public CBaseMonster
 {
 public:
 	static float g_talkWaitTime;
-
 };
 
-#endif		//TALKMONSTER_H
+#endif

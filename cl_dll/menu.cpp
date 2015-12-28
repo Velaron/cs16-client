@@ -27,7 +27,7 @@
 //#include "vgui_TeamFortressViewport.h"
 
 #define MAX_MENU_STRING	512
-
+/*
 enum vguimenutype_t
 {
 	MENU_TEAM = 2,
@@ -42,7 +42,7 @@ enum vguimenutype_t
 	MENU_BUY_MACHINEGUN,
 	MENU_BUY_ITEM,
 };
-
+*/
 char g_szMenuString[MAX_MENU_STRING];
 char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 

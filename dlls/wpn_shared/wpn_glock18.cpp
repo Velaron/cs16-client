@@ -13,8 +13,7 @@
 *
 ****/
 
-#include "extdll.h"
-#include "util.h"
+#include "stdafx.h"
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
@@ -126,6 +125,7 @@ void CGLOCK18::SecondaryAttack(void)
 {
 	if (ShieldSecondaryFire(GLOCK18_SHIELD_UP, GLOCK18_SHIELD_DOWN) == true)
 		return;
+	//return;
 
 	if (m_iWeaponState & WPNSTATE_GLOCK18_BURST_MODE)
 	{
@@ -169,7 +169,7 @@ void CGLOCK18::PrimaryAttack(void)
 
 void CGLOCK18::GLOCK18Fire(float flSpread, float flCycleTime, BOOL fUseBurstMode)
 {
-	if (fUseBurstMode == TRUE)
+	if (fUseBurstMode != FALSE)
 	{
 		m_iGlock18ShotsFired = 0;
 	}
@@ -233,7 +233,7 @@ void CGLOCK18::GLOCK18Fire(float flSpread, float flCycleTime, BOOL fUseBurstMode
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5;
 
-	if (fUseBurstMode == TRUE)
+	if (fUseBurstMode != FALSE)
 	{
 		m_iGlock18ShotsFired++;
 		m_flGlock18Shoot = gpGlobals->time + 0.1;

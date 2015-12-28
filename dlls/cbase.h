@@ -160,7 +160,7 @@ public:
 	virtual void SetObjectCollisionBox(void);
 	virtual int Classify(void) { return CLASS_NONE; }
 	virtual void DeathNotice(entvars_t *pevChild) {}
-	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, const Vector &vecDir, TraceResult *ptr, int bitsDamageType);
 	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	virtual int TakeHealth(float flHealth, int bitsDamageType);
 	virtual void Killed(entvars_t *pevAttacker, int iGib);
@@ -255,7 +255,15 @@ public:
 	void FunctionCheck(void *pFunction, char *name)
 	{
 		if (pFunction && !NAME_FOR_FUNCTION((unsigned long)(pFunction)))
+		{ 
 			ALERT(at_error, "No EXPORT: %s:%s (%08lx)\n", STRING(pev->classname), name, (unsigned long)pFunction);
+			UTIL_LogPrintf("No EXPORT: %s:%s (%08lx)\n", STRING(pev->classname), name, (unsigned long)pFunction);
+		}
+		else
+		{
+			if (pFunction)
+				UTIL_LogPrintf("Has EXPORT: %s:%s (%08lx)\n", STRING(pev->classname), name, (unsigned long)pFunction);
+		}
 	}
 
 	BASEPTR ThinkSet(BASEPTR func, char *name)
