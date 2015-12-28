@@ -823,6 +823,16 @@ void CBasePlayer::Spawn( void )
 	g_irunninggausspred = false;
 }
 
+Vector CBasePlayer::GetGunPosition()
+{
+	Vector origin = pev->origin;
+	Vector view_ofs;
+
+	gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(view_ofs);
+
+	return origin + view_ofs;
+}
+
 /*
 =====================
 UTIL_TraceLine
@@ -965,6 +975,11 @@ CBaseEntity *UTIL_PlayerByIndex(int playerIndex)
 	}
 
 	return pPlayer;
+}
+
+void UTIL_MakeVectors( const Vector &vec )
+{
+	gEngfuncs.pfnAngleVectors( vec, gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up );
 }
 
 
