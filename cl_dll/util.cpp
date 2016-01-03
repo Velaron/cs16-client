@@ -131,3 +131,53 @@ HSPRITE LoadSprite(const char *pszName)
 	return SPR_Load(sz);
 }
 
+float g_ColorBlue[3]	= { 0.6, 0.8, 1.0 };
+float g_ColorRed[3]		= { 1.0, 0.25, 0.25 };
+float g_ColorGreen[3]	= { 0.6, 1.0, 0.6 };
+float g_ColorYellow[3]	= { 1.0, 0.7, 0.0 };
+float g_ColorGrey[3]	= { 0.8, 0.8, 0.8 };
+
+float *GetClientColor( int clientIndex )
+{
+	switch ( g_PlayerExtraInfo[clientIndex].teamnumber )
+	{
+	case TEAM_TERRORIST:  return g_ColorRed;
+	case TEAM_CT:         return g_ColorBlue;
+	case TEAM_SPECTATOR:
+	case TEAM_UNASSIGNED: return g_ColorYellow;
+	case 4:               return g_ColorGreen;
+	default:              return g_ColorGrey;
+	}
+}
+
+void GetTeamColor(int &r, int &g, int &b, int teamIndex)
+{
+	r = 255;
+	g = 255;
+	b = 255;
+	switch( teamIndex )
+	{
+	case TEAM_TERRORIST:
+		r *= g_ColorRed[0];
+		g *= g_ColorRed[1];
+		b *= g_ColorRed[2];
+		break;
+	case TEAM_CT:
+		r *= g_ColorBlue[0];
+		g *= g_ColorBlue[1];
+		b *= g_ColorBlue[2];
+		break;
+	case TEAM_SPECTATOR:
+	case TEAM_UNASSIGNED:
+		r *= g_ColorYellow[0];
+		g *= g_ColorYellow[1];
+		b *= g_ColorYellow[2];
+		break;
+	default:
+		r *= g_ColorGrey[0];
+		g *= g_ColorGrey[1];
+		b *= g_ColorGrey[2];
+		break;
+	}
+}
+

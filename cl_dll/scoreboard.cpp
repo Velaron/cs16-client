@@ -92,7 +92,7 @@ int CHudScoreboard :: Init( void )
 
 int CHudScoreboard :: VidInit( void )
 {
-	xstart = 100;
+	xstart = ScreenWidth * 0.125f;
 	xend = ScreenWidth - xstart;
 
 	// Load sprites here
@@ -149,12 +149,6 @@ int CHudScoreboard :: Draw( float fTime )
 	gHUD.DrawHudStringReverse( KILLS_POS_END(), ypos, 0, "KILLS", 255, 140, 0 );
 	gHUD.DrawHudString(	DEATHS_POS_START(), ypos, DEATHS_POS_END(), "DEATHS", 255, 140, 0 );
 	gHUD.DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), "PING", 255, 140, 0 );
-
-//	if ( can_show_packetloss )
-//	{
-//		gHUD.DrawHudString( PL_POS + xpos - 35, ypos, ScreenWidth, "pkt loss", 255, 140, 0 );
-//	}
-
 
 	list_slot += 2;
 	ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP);
@@ -243,34 +237,19 @@ int CHudScoreboard :: Draw( float fTime )
 		//if ( ypos > ROW_RANGE_MAX )  // don't draw to close to the lower border
 		//	break;
 
-		int r = 255, g = 225, b = 55; // draw the stuff kinda yellowish
-		
-		if ( team_info->ownteam ) // if it is their team, draw the background different color
-		{
-			// overlay the background in blue,  then draw the score text over it
-			FillRGBA( xstart, ypos, xend - xstart, ROW_GAP, 0, 0, 255, 70 );
-		}
+		int r, g, b;
+		//GetTeamColor(r, g, b, team_info->teamnumber);
+		if( !strcmp(team_info->name, "TERRORIST"))
+			GetTeamColor( r, g, b, TEAM_TERRORIST );
+		else if( !strcmp(team_info->name, "CT"))
+			GetTeamColor( r, g, b, TEAM_CT );
+		else GetTeamColor( r, g, b, TEAM_UNASSIGNED );
+
 
 		// draw their name (left to right)
 		gHUD.DrawHudString(       NAME_POS_START(),   ypos, NAME_POS_END(),   team_info->name,   r, g, b );
 		gHUD.DrawHudNumberString( KILLS_POS_START(),  ypos, KILLS_POS_END(),  team_info->frags,  r, g, b );
 		gHUD.DrawHudNumberString( DEATHS_POS_START(), ypos, DEATHS_POS_END(), team_info->deaths, r, g, b );
-
-		// draw ping
-		// draw ping & packetloss
-//		static char buf[64];
-//		sprintf( buf, "%d", team_info->ping );
-//		xpos = ((PING_RANGE_MAX - PING_RANGE_MIN) / 2) + PING_RANGE_MIN + xpos + 25;
-//		UnpackRGB( r, g, b, RGB_YELLOWISH );
-//		gHUD.DrawHudStringReverse( xpos, ypos, xpos - 50, buf, r, g, b );
-
-		//  Packetloss removed on Kelly 'shipping nazi' Bailey's orders
-//		if ( can_show_packetloss )
-//		{
-//			xpos = ((PL_RANGE_MAX - PL_RANGE_MIN) / 2) + PL_RANGE_MIN + xpos + 25;
-//			sprintf( buf, "  %d", team_info->packetloss );
-//			gHUD.DrawHudString( xpos, ypos, xpos+50, buf, r, g, b );
-//		}
 
 		team_info->already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get drawn again
 
@@ -286,18 +265,10 @@ int CHudScoreboard :: Draw( float fTime )
 
 	return 1;
 }
-extern float *GetClientColor( int client );
+
 // returns the ypos where it finishes drawing
 int CHudScoreboard :: DrawPlayers( int xpos, float list_slot, int nameoffset, char *team )
 {
-	int can_show_packetloss = 0;
-
-	//  Packetloss removed on Kelly 'shipping nazi' Bailey's orders
-//	if ( cl_showpacketloss && cl_showpacketloss->value && ( ScreenWidth >= 400 ) )
-//	{
-//		can_show_packetloss = 1;
-//	}
-
 	// draw the players, in order,  and restricted to team if set
 	while ( 1 )
 	{
@@ -337,22 +308,7 @@ int CHudScoreboard :: DrawPlayers( int xpos, float list_slot, int nameoffset, ch
 		int r = 255, g = 255, b = 255;
 		float *colors = GetClientColor( best_player );
 		r *= colors[0], g *= colors[1], b *= colors[2];
-		if ( best_player == m_iLastKilledBy && m_fLastKillTime && m_fLastKillTime > gHUD.m_flTime )
-		{
-			if ( pl_info->thisplayer )
-			{  // green is the suicide color? i wish this could do grey...
-				FillRGBA( xstart, ypos, xend - xstart, ROW_GAP, 80, 155, 0, 70 );
-			}
-			else
-			{  // Highlight the killers name - overlay the background in red,  then draw the score text over it
-				FillRGBA( xstart, ypos, xend - xstart, ROW_GAP, 255, 0, 0, (15.0f * (float)(m_fLastKillTime - gHUD.m_flTime)) );
-			}
-		}
-		else if ( pl_info->thisplayer ) // if it is their name, draw it a different color
-		{
-			// overlay the background in blue,  then draw the score text over it
-			FillRGBA( xstart, ypos, xend - xstart, ROW_GAP, 0, 0, 255, 70 );
-		}
+		FillRGBA( xstart, ypos, xend - xstart, ROW_GAP, 200, 200, 200, 25 );
 
 
 		gHUD.DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), pl_info->name, r, g, b );
@@ -375,24 +331,6 @@ int CHudScoreboard :: DrawPlayers( int xpos, float list_slot, int nameoffset, ch
 		static char buf[64];
 		sprintf( buf, "%d", g_PlayerInfoList[best_player].ping );
 		gHUD.DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), buf, r, g, b );
-
-//		//  Packetloss removed on Kelly 'shipping nazi' Bailey's orders
-//		if ( can_show_packetloss )
-//		{
-//			if ( g_PlayerInfoList[best_player].packetloss >= 63 )
-//			{
-//				UnpackRGB( r, g, b, RGB_REDISH );
-//				sprintf( buf, " !!!!" );
-//			}
-//			else
-//			{
-//				sprintf( buf, "  %d", g_PlayerInfoList[best_player].packetloss );
-//			}
-
-//			xpos = ((PL_RANGE_MAX - PL_RANGE_MIN) / 2) + PL_RANGE_MIN + xpos + 25;
-
-//			gHUD.DrawHudString( xpos, ypos, xpos+50, buf, r, g, b );
-//		}
 	
 		pl_info->name = NULL;  // set the name to be NULL, so this client won't get drawn again
 		list_slot++;

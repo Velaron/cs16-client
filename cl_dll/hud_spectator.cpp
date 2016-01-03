@@ -1441,9 +1441,9 @@ bool CHudSpectator::AddOverviewEntity( int type, struct cl_entity_s *ent, const 
 			switch ( g_PlayerExtraInfo[ent->index].teamnumber )
 			{
 				// blue and red teams are swapped in CS and TFC
-				case 1 : hSprite = m_hsprPlayerRed; break;
-				case 2 : hSprite = m_hsprPlayerBlue; break;
-				default : hSprite = m_hsprPlayer; break;
+				case TEAM_TERRORIST: hSprite = m_hsprPlayerRed; break;
+				case TEAM_CT: hSprite = m_hsprPlayerBlue; break;
+				default: hSprite = m_hsprPlayer; break;
 			}
 		}
 		else

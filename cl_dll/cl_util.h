@@ -60,6 +60,7 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 #define SPR_DisableScissor (*gEngfuncs.pfnSPR_DisableScissor)
 //
 #define FillRGBA (*gEngfuncs.pfnFillRGBA)
+#define FillRGBABlend (*gEngfuncs.pfnFillRGBABlend)
 
 
 // ScreenHeight returns the height of the screen, in pixels
@@ -177,3 +178,5 @@ inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)\
 }
 
 HSPRITE LoadSprite(const char *pszName);
+float *GetClientColor( int clientIndex );
+void GetTeamColor( int &r, int &g, int &b, int teamIndex );

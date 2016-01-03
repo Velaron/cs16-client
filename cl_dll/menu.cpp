@@ -27,22 +27,7 @@
 //#include "vgui_TeamFortressViewport.h"
 
 #define MAX_MENU_STRING	512
-/*
-enum vguimenutype_t
-{
-	MENU_TEAM = 2,
-	MENU_MAPBRIEFING = 4,
-	MENU_CLASS_T = 26,
-	MENU_CLASS_CT,
-	MENU_BUY,
-	MENU_BUY_PISTOL,
-	MENU_BUY_SHOTGUN,
-	MENU_BUY_RIFLE,
-	MENU_BUY_SUBMACHINEGUN,
-	MENU_BUY_MACHINEGUN,
-	MENU_BUY_ITEM,
-};
-*/
+
 char g_szMenuString[MAX_MENU_STRING];
 char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 
@@ -196,17 +181,17 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 	// so execute it and exit
 	if( _extended_menus->value != 0.0f )
 	{
-		if( strcmp(menustring, "#RadioA") )
+		if( !strcmp(menustring, "#RadioA") )
 		{
 			ShowVGUIMenu(MENU_RADIOA);
 			return 1;
 		}
-		else if( strcmp(menustring, "#RadioB"))
+		else if( !strcmp(menustring, "#RadioB"))
 		{
 			ShowVGUIMenu(MENU_RADIOB);
 			return 1;
 		}
-		else if( strcmp(menustring, "#RadioC"))
+		else if( !strcmp(menustring, "#RadioC"))
 		{
 			ShowVGUIMenu(MENU_RADIOC);
 			return 1;
@@ -257,6 +242,7 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
 	UserCmd_OldStyleMenuClose();
+	ClientCmd("touch_removebutton _menu_*");
 	return 1;
 }
 
@@ -273,13 +259,13 @@ void CHudMenu::UserCmd_OldStyleMenuOpen()
 {
 	m_flShutoffTime = -1; // stay open until user will not close it
 	strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString("Buy"), MAX_MENU_STRING );
-
 }
 
 void CHudMenu::UserCmd_OldStyleMenuClose()
 {
 	m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
 	m_iFlags &= ~HUD_ACTIVE;
+	ClientCmd("touch_removebutton _menu_*");
 }
 
 // lol, no real VGUI here
@@ -304,22 +290,22 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 		szCmd = "exec touch/buy.cfg";
 		break;
 	case MENU_BUY_PISTOL:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
 			szCmd = "exec touch/buy_pistol_t.cfg";
 		else szCmd = "exec touch/buy_pistol_ct.cfg";
 		break;
 	case MENU_BUY_SHOTGUN:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
 			szCmd = "exec touch/buy_shotgun_t.cfg";
 		else szCmd = "exec touch/buy_shotgun_ct.cfg";
 		break;
 	case MENU_BUY_RIFLE:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
 			szCmd = "exec touch/buy_rifle_t.cfg";
 		else szCmd ="exec touch/buy_rifle_ct.cfg";
 		break;
 	case MENU_BUY_SUBMACHINEGUN:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
 			szCmd = "exec touch/buy_submachinegun_t.cfg";
 		else szCmd = "exec touch/buy_submachinegun_ct.cfg";
 		break;
@@ -352,7 +338,7 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 	}
 
 	m_fMenuDisplayed = 1;
-	gEngfuncs.pfnClientCmd(szCmd);
+	ClientCmd(szCmd);
 }
 
 void CHudMenu::UserCmd_ShowVGUIMenu()

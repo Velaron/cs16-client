@@ -402,7 +402,7 @@ struct team_info_t
 	short players;
 	int already_drawn;
 	int scores_overriden;
-	int teamnumber;
+	//int teamnumber; not used
 };
 
 struct hostage_info_t
