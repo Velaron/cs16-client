@@ -29,10 +29,19 @@
 DECLARE_MESSAGE( m_StatusBar, StatusText );
 DECLARE_MESSAGE( m_StatusBar, StatusValue );
 
-#define STATUSBAR_ID_LINE		1
-
-float *GetClientColor( int clientIndex );
 extern float g_ColorYellow[3];
+
+#define STATUSBAR_ID_LINE		0
+
+inline void InsertTextMsg( char *szDst, size_t sLen, const char *szMsgName)
+{
+	client_textmessage_t *msg = TextMessageGet(szMsgName);
+	if( msg )
+	{
+		strncpy( szDst, msg->pMessage, sLen );
+	}
+	else strncpy( szDst, szMsgName, sLen );
+}
 
 int CHudStatusBar :: Init( void )
 {
@@ -153,6 +162,24 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 						case 'i':  // number
 							sprintf( szRepString, "%d", indexval );
 							break;
+						case 'h':  // health
+							InsertTextMsg(szRepString, MAX_PLAYER_NAME_LENGTH, "Health");
+							break;
+						case 'c':
+							if( indexval == 1 )
+							{
+								InsertTextMsg(szRepString, MAX_PLAYER_NAME_LENGTH, "Friend");
+							}
+							else if( indexval == 2 )
+							{
+								InsertTextMsg(szRepString, MAX_PLAYER_NAME_LENGTH, "Enemy");
+							}
+							else if( indexval == 3 )
+							{
+								InsertTextMsg(szRepString, MAX_PLAYER_NAME_LENGTH, "Hostage");
+							}
+							else szRepString[0] = 0;
+							break;
 						default:
 							szRepString[0] = 0;
 						}
@@ -196,7 +223,7 @@ int CHudStatusBar :: Draw( float fTime )
 		int y = Y_START - ( 4 + TextHeight * i ); // draw along bottom of screen
 
 		// let user set status ID bar centering
-		if ( (i == STATUSBAR_ID_LINE) && CVAR_GET_FLOAT("hud_centerid") )
+		if ( (i == STATUSBAR_ID_LINE) && (CVAR_GET_FLOAT("hud_centerid") != 0.0f) )
 		{
 			x = max( 0, max(2, (ScreenWidth - TextWidth)) / 2 );
 			y = (ScreenHeight / 2) + (TextHeight*CVAR_GET_FLOAT("hud_centerid"));
