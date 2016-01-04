@@ -45,6 +45,7 @@ int g_iPlayerClass;
 // X positions
 
 int xstart, xend;
+int ystart, yend;
 // relative to the side of the scoreboard
 inline int NAME_POS_START()		{ return xstart + 15; }
 inline int NAME_POS_END()		{ return xend - 210; }
@@ -65,6 +66,8 @@ inline int PING_POS_END()		{ return xend - 10; }
 
 DECLARE_COMMAND( m_Scoreboard, ShowScores );
 DECLARE_COMMAND( m_Scoreboard, HideScores );
+DECLARE_COMMAND( m_Scoreboard, ShowScoreboard2 );
+DECLARE_COMMAND( m_Scoreboard, HideScoreboard2 );
 
 DECLARE_MESSAGE( m_Scoreboard, ScoreInfo );
 DECLARE_MESSAGE( m_Scoreboard, TeamInfo );
@@ -77,6 +80,8 @@ int CHudScoreboard :: Init( void )
 	// Hook messages & commands here
 	HOOK_COMMAND( "+showscores", ShowScores );
 	HOOK_COMMAND( "-showscores", HideScores );
+	HOOK_COMMAND( "showscoreboard2", ShowScoreboard2 );
+	HOOK_COMMAND( "hidescoreboard2", HideScoreboard2 );
 
 	HOOK_MESSAGE( ScoreInfo );
 	HOOK_MESSAGE( TeamScore );
@@ -94,6 +99,9 @@ int CHudScoreboard :: VidInit( void )
 {
 	xstart = ScreenWidth * 0.125f;
 	xend = ScreenWidth - xstart;
+	ystart = 100;
+	yend = ScreenHeight - ystart;
+	m_bForceDraw = false;
 
 	// Load sprites here
 	return 1;
@@ -113,20 +121,25 @@ void CHudScoreboard :: InitHUDData( void )
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 }
 
-/* The scoreboard
-We have a minimum width of 1-320 - we could have the field widths scale with it?
-*/
-
 // Y positions
 #define ROW_GAP  15
-#define ROW_RANGE_MIN 100
-#define ROW_RANGE_MAX ( ScreenHeight - 150 )
 
-int CHudScoreboard :: Draw( float fTime )
+int CHudScoreboard :: Draw( float flTime )
+{
+	if( !m_bForceDraw )
+	{
+		if ( (!m_iShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission) )
+			return 1;
+	}
+
+
+
+	DrawScoreboard(flTime);
+}
+
+int CHudScoreboard :: DrawScoreboard( float fTime )
 {
 	int j;
-	if ( !m_iShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission )
-		return 1;
 
 	GetAllPlayersInfo();
 
@@ -141,9 +154,11 @@ int CHudScoreboard :: Draw( float fTime )
 	float list_slot = 0;
 
 	// print the heading line
-	int ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP);
 
-	gHUD.DrawDarkRectangle(xstart, ypos - 5, xend - xstart, ROW_RANGE_MAX);
+	gHUD.DrawDarkRectangle(xstart, ystart, xend - xstart, yend - ystart,
+		m_colors.r, m_colors.g, m_colors.b, m_colors.a, m_bDrawStroke);
+
+	int ypos = ystart + (list_slot * ROW_GAP) + 5;
 
 	gHUD.DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), (char*)(gHUD.m_Teamplay? "TEAMS":"PLAYERS"), 255, 140, 0 );
 	gHUD.DrawHudStringReverse( KILLS_POS_END(), ypos, 0, "KILLS", 255, 140, 0 );
@@ -151,8 +166,8 @@ int CHudScoreboard :: Draw( float fTime )
 	gHUD.DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), "PING", 255, 140, 0 );
 
 	list_slot += 2;
-	ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP);
-	FillRGBA( xstart, ypos, xend - xstart, 1, 255, 140, 0, 255);  // draw the seperator line
+	ypos = ystart + (list_slot * ROW_GAP);
+	FillRGBA( xstart, ypos, xend - xstart, 1, 255, 140, 0, 255);  // draw the separator line
 	
 	//list_slot += 0.8;
 
@@ -231,7 +246,7 @@ int CHudScoreboard :: Draw( float fTime )
 		// draw out the best team
 		team_info_t *team_info = &g_TeamInfo[best_team];
 
-		ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP);
+		ypos = ystart + (list_slot * ROW_GAP);
 
 		// check we haven't drawn too far down
 		//if ( ypos > ROW_RANGE_MAX )  // don't draw to close to the lower border
@@ -299,10 +314,10 @@ int CHudScoreboard :: DrawPlayers( int xpos, float list_slot, int nameoffset, ch
 		// draw out the best player
 		hud_player_info_t *pl_info = &g_PlayerInfoList[best_player];
 
-		int ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP);
+		int ypos = ystart + (list_slot * ROW_GAP);
 
 		// check we haven't drawn too far down
-		if ( ypos > ROW_RANGE_MAX )  // don't draw to close to the lower border
+		if ( ypos > yend )  // don't draw to close to the lower border
 			break;
 
 		int r = 255, g = 255, b = 255;
@@ -494,10 +509,44 @@ void CHudScoreboard :: DeathMsg( int killer, int victim )
 
 void CHudScoreboard :: UserCmd_ShowScores( void )
 {
+	xstart     = 0.125f * ScreenWidth;
+	xend       = ScreenWidth - xstart;
+	ystart     = 100;
+	yend       = ScreenHeight - ystart;
+	m_colors.r = 0;
+	m_colors.g = 0;
+	m_colors.b = 0;
+	m_colors.a = 153;
+	m_bDrawStroke = true;
 	m_iShowscoresHeld = TRUE;
 }
 
 void CHudScoreboard :: UserCmd_HideScores( void )
 {
 	m_iShowscoresHeld = FALSE;
+}
+
+
+void CHudScoreboard	:: UserCmd_ShowScoreboard2()
+{
+	if( gEngfuncs.Cmd_Argc() != 9 )
+	{
+		ConsolePrint("showscoreboard2 <xstart> <xend> <ystart> <yend> <r> <g> <b> <a>");
+	}
+
+	xstart     = atof(gEngfuncs.Cmd_Argv(1)) * ScreenWidth;
+	xend       = atof(gEngfuncs.Cmd_Argv(2)) * ScreenWidth;
+	ystart     = atof(gEngfuncs.Cmd_Argv(3)) * ScreenHeight;
+	yend       = atof(gEngfuncs.Cmd_Argv(4)) * ScreenHeight;
+	m_colors.r = atoi(gEngfuncs.Cmd_Argv(5));
+	m_colors.b = atoi(gEngfuncs.Cmd_Argv(6));
+	m_colors.b = atoi(gEngfuncs.Cmd_Argv(7));
+	m_colors.a = atoi(gEngfuncs.Cmd_Argv(8));
+	m_bDrawStroke = false;
+	m_bForceDraw = true;
+}
+
+void CHudScoreboard :: UserCmd_HideScoreboard2()
+{
+	m_bForceDraw = false;
 }

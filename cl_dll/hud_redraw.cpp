@@ -401,21 +401,27 @@ int CHud::GetNumWidth( int iNumber, int iFlags )
 
 }	
 
-void CHud::DrawDarkRectangle( int x, int y, int wide, int tall )
+void CHud::DrawDarkRectangle(int x, int y, int wide, int tall , int r, int g, int b, int a, bool drawStroke)
 {
-	FillRGBA( x, y, wide, tall, 0, 0, 0, 0 );
+	FillRGBA( x, y, wide, tall, r, g, b, a );
+
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
 	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	gEngfuncs.pTriAPI->Color4f(0.0, 0.0, 0.0, 0.6);
+	gEngfuncs.pTriAPI->Color4f(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
 	gEngfuncs.pTriAPI->Vertex3f(x * m_flScale, (y+tall)*m_flScale, 0);
 	gEngfuncs.pTriAPI->Vertex3f(x * m_flScale, y*m_flScale, 0);
 	gEngfuncs.pTriAPI->Vertex3f((x + wide)*m_flScale, y*m_flScale, 0);
 	gEngfuncs.pTriAPI->Vertex3f((x + wide)*m_flScale, (y+tall)*m_flScale, 0);
 	gEngfuncs.pTriAPI->End();
-	FillRGBA( x+1, y, wide-1, 1, 255, 140, 0, 255 );
-	FillRGBA( x, y, 1, tall-1, 255, 140, 0, 255 );
-	FillRGBA( x+wide-1, y+1, 1, tall-1, 255, 140, 0, 255 );
-	FillRGBA( x, y+tall-1, wide-1, 1, 255, 140, 0, 255 );
+
+	if(drawStroke)
+	{
+		// TODO: remove this hardcoded hardcore
+		FillRGBA( x+1, y, wide-1, 1, 255, 140, 0, 255 );
+		FillRGBA( x, y, 1, tall-1, 255, 140, 0, 255 );
+		FillRGBA( x+wide-1, y+1, 1, tall-1, 255, 140, 0, 255 );
+		FillRGBA( x, y+tall-1, wide-1, 1, 255, 140, 0, 255 );
+	}
 }
 
 // TANKIST START

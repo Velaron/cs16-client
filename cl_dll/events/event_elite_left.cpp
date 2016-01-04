@@ -61,8 +61,8 @@ void EV_FireElite( event_args_s *args, int sequence )
 	// don't draw Bullets and decals of elite
 	// TODO: fix it
 
-	/*EV_GetGunPosition( args, vecSrc, origin );
-	VectorCopy( Vector(forward, right, up), vecAiming );
+	EV_GetGunPosition( args, vecSrc, origin );
+	VectorCopy( forward, vecAiming );
 	EV_HLDM_FireBullets( idx,
 						 forward,
 						 right,
@@ -75,7 +75,7 @@ void EV_FireElite( event_args_s *args, int sequence )
 						 0,
 						 0,
 						 args->fparam1,
-						 args->fparam2 );*/
+						 args->fparam2 );
 }
 
 void EV_FireEliteLeft(event_args_s *args)

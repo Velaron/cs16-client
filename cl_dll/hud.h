@@ -274,6 +274,7 @@ public:
 protected:
 	static int MOTD_DISPLAY_TIME;
 	char m_szMOTD[ MAX_MOTD_LENGTH ];
+	cvar_t *cl_hide_motd;
 	
 	int m_iLines;
 	int m_iMaxLength;
@@ -287,9 +288,12 @@ public:
 	void InitHUDData( void );
 	int VidInit( void );
 	int Draw( float flTime );
+	int DrawScoreboard( float flTime );
 	int DrawPlayers( int xoffset, float listslot, int nameoffset = 0, char *team = NULL ); // returns the ypos where it finishes drawing
 	void UserCmd_ShowScores( void );
 	void UserCmd_HideScores( void );
+	void UserCmd_ShowScoreboard2( void );
+	void UserCmd_HideScoreboard2( void );
 	int MsgFunc_ScoreInfo( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_TeamInfo( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_TeamScore( const char *pszName, int iSize, void *pbuf );
@@ -303,6 +307,9 @@ public:
 	int m_fLastKillTime;
 	int m_iPlayerNum;
 	int m_iShowscoresHeld;
+	RGBA m_colors;
+	bool m_bDrawStroke;
+	bool m_bForceDraw; // if called by showscoreboard2
 
 	void GetAllPlayersInfo( void );
 };
@@ -843,7 +850,7 @@ public:
 	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
 	int GetNumWidth(int iNumber, int iFlags);
 	int DrawHudStringLen( char *szIt );
-	void DrawDarkRectangle( int x, int y, int wide, int tall);
+	void DrawDarkRectangle( int x, int y, int wide, int tall, int r = 0, int g = 0, int b = 0, int a = 153, bool drawStroke = true );
 
 private:
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.

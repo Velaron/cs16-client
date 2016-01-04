@@ -38,6 +38,7 @@ int CHudMOTD :: Init( void )
 
 	m_iFlags &= ~HUD_ACTIVE;  // start out inactive
 	m_szMOTD[0] = 0;
+	cl_hide_motd = CVAR_CREATE("cl_hide_motd", "1", FCVAR_ARCHIVE); // hide motd
 
 	return 1;
 }
@@ -63,8 +64,9 @@ void CHudMOTD :: Reset( void )
 int CHudMOTD :: Draw( float fTime )
 {
 	gHUD.m_iNoConsolePrint &= ~( 1 << 1 );
-	if( !m_bShow )
+	if( !m_bShow && cl_hide_motd->value != 0.0f )
 		return 1;
+
 	gHUD.m_iNoConsolePrint |= 1 << 1;
 	bool bScroll;
 	// find the top of where the MOTD should be drawn,  so the whole thing is centered in the screen
