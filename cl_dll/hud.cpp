@@ -22,6 +22,7 @@
 #include "cl_util.h"
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include "parsemsg.h"
 #include "hud_servers.h"
 
@@ -41,6 +42,7 @@ cvar_t *cl_min_t;
 cvar_t *cl_min_ct;
 cvar_t *cl_minmodels;
 cvar_t *cl_lw = NULL;
+wrect_t nullrc = { 0, 0, 0, 0 };
 char *sPlayerModelFiles[12] =
 {
   "models/player.mdl",
@@ -135,6 +137,8 @@ void CHud :: Init( void )
 	m_flTime = 1.0;
 	m_iNoConsolePrint = 0;
 
+	m_SniperScope.Init();
+	m_NVG.Init();
 	m_Ammo.Init();
 	m_Health.Init();
 	m_SayText.Init();
@@ -156,8 +160,7 @@ void CHud :: Init( void )
 	m_Timer.Init();
 	m_Money.Init();
 	m_ProgressBar.Init();
-	m_SniperScope.Init();
-	m_NVG.Init();
+
 
 	Localize_Init();
 	InitRain();
@@ -193,7 +196,7 @@ CHud :: ~CHud()
 // GetSpriteIndex()
 // searches through the sprite list loaded from hud.txt for a name matching SpriteName
 // returns an index into the gHUD.m_rghSprites[] array
-// returns 0 if sprite not found
+// returns -1 if sprite not found
 int CHud :: GetSpriteIndex( const char *SpriteName )
 {
 	// look through the loaded sprite name list for SpriteName
@@ -204,6 +207,20 @@ int CHud :: GetSpriteIndex( const char *SpriteName )
 	}
 
 	return -1; // invalid sprite
+}
+
+HSPRITE CHud :: GetSprite( int index )
+{
+	assert( index >= -1 && index <= m_iSpriteCount );
+
+	return (index >= 0) ? m_rghSprites[index] : 0;
+}
+
+wrect_t& CHud :: GetSpriteRect( int index )
+{
+	assert( index >= -1 && index <= m_iSpriteCount );
+
+	return (index >= 0) ? m_rgrcRects[index] : nullrc;
 }
 
 void CHud :: VidInit( void )

@@ -31,6 +31,7 @@ void Game_AddObjects( void );
 extern vec3_t v_origin;
 
 int g_iAlive = 1;
+int iOnTrain[MAX_PLAYERS];
 
 extern "C" 
 {
@@ -56,6 +57,12 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *mode
 	{
 	case ET_NORMAL:
 	case ET_PLAYER:
+		if(ent->player && iOnTrain[ent->index])
+		{
+			VectorCopy(ent->curstate.origin, ent->origin);
+			VectorCopy(ent->curstate.angles, ent->angles);
+		}
+		break;
 	case ET_BEAM:
 	case ET_TEMPENTITY:
 	case ET_FRAGMENTED:
@@ -160,12 +167,14 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 	if ( dst->number == player->index )
 	{
 		g_iPlayerClass = dst->playerclass;
-		g_iTeamNumber = dst->team;
+		g_iTeamNumber = g_PlayerExtraInfo[dst->number].teamnumber;
 
 		g_iUser1 = src->iuser1;
 		g_iUser2 = src->iuser2;
 		g_iUser3 = src->iuser3;
 	}
+	dst->fuser2					= src->fuser2;
+	iOnTrain[src->number]		= src->iuser4;
 }
 
 /*
@@ -184,6 +193,7 @@ void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct
 	ps->flFallVelocity			= pps->flFallVelocity;
 	ps->iStepLeft				= pps->iStepLeft;
 	ps->playerclass				= pps->playerclass;
+	ps->iuser4					= pps->iuser4;
 
 	pcd->viewmodel				= ppcd->viewmodel;
 	pcd->m_iId					= ppcd->m_iId;

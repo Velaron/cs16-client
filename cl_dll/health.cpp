@@ -628,6 +628,7 @@ void CHudHealth :: DrawRadar( float flTime )
 
 int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 {
+#if 0
 	BEGIN_READ(pbuf, iSize);
 
 	char szModel[64];
@@ -674,4 +675,5 @@ int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 	else strncpy( szModel, sPlayerModelFiles[0], sizeof(szModel) ); // player.mdl
 
 	CreateCorpse( &origin, &angles, szModel, delay, sequence, classID );
+#endif
 }

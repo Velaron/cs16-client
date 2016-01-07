@@ -129,12 +129,6 @@ int CHud :: Redraw( float flTime, int intermission )
 
 	m_iIntermission = intermission;
 
-	if( m_iFOV <= 40 )
-	{
-		m_SniperScope.Draw(flTime);
-		return 0;
-	}
-
 	if ( m_pCvarDraw->value )
 	{
 		HUDLIST *pList = m_pHudList;

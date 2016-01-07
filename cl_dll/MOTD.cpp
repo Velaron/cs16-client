@@ -63,8 +63,13 @@ void CHudMOTD :: Reset( void )
 #define ROW_RANGE_MAX ( ScreenHeight - 100 )
 int CHudMOTD :: Draw( float fTime )
 {
+	if( cl_hide_motd->value != 0.0f )
+	{
+		return 1;
+	}
+
 	gHUD.m_iNoConsolePrint &= ~( 1 << 1 );
-	if( !m_bShow && cl_hide_motd->value != 0.0f )
+	if( !m_bShow )
 		return 1;
 
 	gHUD.m_iNoConsolePrint |= 1 << 1;

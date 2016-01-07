@@ -645,15 +645,7 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 
 	m_pWeapon = pWeapon;
 
-	/*if ( gHUD.m_iFOV >= 90 )
-	{ // normal crosshairs
-		if (fOnTarget && m_pWeapon->hAutoaim)
-			SetCrosshair(m_pWeapon->hAutoaim, m_pWeapon->rcAutoaim, 255, 255, 255);
-		else
-			SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
-	}
-	else*/
-	if( gHUD.m_iFOV <= 75 )
+	if( gHUD.m_iFOV <= 40 )
 	{ // zoomed crosshairs
 		if (fOnTarget && m_pWeapon->hZoomedAutoaim)
 			SetCrosshair(m_pWeapon->hZoomedAutoaim, m_pWeapon->rcZoomedAutoaim, 255, 255, 255);
@@ -663,7 +655,6 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 	}
 	else
 	{
-		wrect_t nullrc;
 		SetCrosshair( 0, nullrc, 0, 0, 0);
 	}
 
@@ -1163,8 +1154,8 @@ int CHudAmmo::Draw(float flTime)
 		}
 	}
 
-	if( gHUD.m_iFOV > 75 )
-		DrawCrosshair(flTime, m_pWeapon->iId);
+	if( gHUD.m_iFOV > 40 )
+		DrawCrosshair(flTime, m_pWeapon->iId); // draw a dynamic crosshair
 
 	return 1;
 }

@@ -128,11 +128,21 @@ int CHudScoreboard :: Draw( float flTime )
 {
 	if( !m_bForceDraw )
 	{
-		if ( (!m_iShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission) )
+		if ( (!m_bShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission) )
 			return 1;
+		else
+		{
+			xstart     = 0.125f * ScreenWidth;
+			xend       = ScreenWidth - xstart;
+			ystart     = 100;
+			yend       = ScreenHeight - ystart;
+			m_colors.r = 0;
+			m_colors.g = 0;
+			m_colors.b = 0;
+			m_colors.a = 153;
+			m_bDrawStroke = true;
+		}
 	}
-
-
 
 	DrawScoreboard(flTime);
 }
@@ -320,10 +330,18 @@ int CHudScoreboard :: DrawPlayers( int xpos, float list_slot, int nameoffset, ch
 		if ( ypos > yend )  // don't draw to close to the lower border
 			break;
 
-		int r = 255, g = 255, b = 255;
-		float *colors = GetClientColor( best_player );
-		r *= colors[0], g *= colors[1], b *= colors[2];
-		FillRGBA( xstart, ypos, xend - xstart, ROW_GAP, 200, 200, 200, 25 );
+			int r, g, b;
+			r = g = b = 255;
+			float *colors = GetClientColor( best_player );
+			r *= colors[0];
+			g *= colors[1];
+			b *= colors[2];
+
+
+		if(pl_info->thisplayer) // hey, it's me!
+		{
+			FillRGBABlend( xstart, ypos, xend - xstart, ROW_GAP, 255, 255, 255, 240 );
+		}
 
 
 		gHUD.DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), pl_info->name, r, g, b );
@@ -509,21 +527,13 @@ void CHudScoreboard :: DeathMsg( int killer, int victim )
 
 void CHudScoreboard :: UserCmd_ShowScores( void )
 {
-	xstart     = 0.125f * ScreenWidth;
-	xend       = ScreenWidth - xstart;
-	ystart     = 100;
-	yend       = ScreenHeight - ystart;
-	m_colors.r = 0;
-	m_colors.g = 0;
-	m_colors.b = 0;
-	m_colors.a = 153;
-	m_bDrawStroke = true;
-	m_iShowscoresHeld = TRUE;
+	m_bForceDraw = false;
+	m_bShowscoresHeld = true;
 }
 
 void CHudScoreboard :: UserCmd_HideScores( void )
 {
-	m_iShowscoresHeld = FALSE;
+	m_bForceDraw = m_bShowscoresHeld = false;
 }
 
 
@@ -548,5 +558,5 @@ void CHudScoreboard	:: UserCmd_ShowScoreboard2()
 
 void CHudScoreboard :: UserCmd_HideScoreboard2()
 {
-	m_bForceDraw = false;
+	m_bForceDraw = m_bShowscoresHeld = false; // and disable it
 }

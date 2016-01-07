@@ -28,6 +28,7 @@ int CHudSniperScope::Init()
 {
 	gHUD.AddHudElem(this);
 	m_iFlags = HUD_ACTIVE;
+	return 1;
 }
 
 int CHudSniperScope::VidInit()
@@ -41,12 +42,12 @@ int CHudSniperScope::VidInit()
 	right = left + ScreenHeight;
 	centerx = ScreenWidth/2;
 	centery = ScreenHeight/2;
-
+	return 1;
 }
 
 int CHudSniperScope::Draw(float flTime)
 {
-	if(gHUD.m_iFOV > 80)
+	if(gHUD.m_iFOV > 40)
 		return 1;
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
 	gEngfuncs.pTriAPI->Brightness(1.0);
@@ -75,10 +76,10 @@ int CHudSniperScope::Draw(float flTime)
 
 	gRenderAPI.GL_Bind(0, blackTex);
 	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(0, 0, left, ScreenHeight);
+	Quad(0, 0, left + 1.0f / ScreenWidth, ScreenHeight);
 	gEngfuncs.pTriAPI->End();
 
 	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(right, 0, ScreenWidth, ScreenHeight);
+	Quad(right - 1.0f / ScreenWidth, 0, ScreenWidth, ScreenHeight);
 	gEngfuncs.pTriAPI->End();
 }

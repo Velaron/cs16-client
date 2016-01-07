@@ -23,6 +23,7 @@
 #include "rain.h"
 
 #include <cstring>
+#include "GameStudioModelRenderer.h"
 
 #define MAX_CLIENTS 32
 
@@ -223,5 +224,6 @@ int CHud::MsgFunc_ShadowIdx(const char *pszName, int iSize, void *pbuf)
 	BEGIN_READ(pbuf, iSize);
 
 	int idx = READ_BYTE();
+	g_StudioRenderer.StudioSetShadowSprite(idx);
 	return 1;
 }

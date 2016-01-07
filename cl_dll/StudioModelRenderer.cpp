@@ -77,7 +77,6 @@ CStudioModelRenderer::CStudioModelRenderer(void)
 	m_pSubModel = NULL;
 	m_pPlayerInfo = NULL;
 	m_pRenderModel = NULL;
-	m_iShadowSprite = NULL;
 }
 
 CStudioModelRenderer::~CStudioModelRenderer(void)

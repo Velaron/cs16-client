@@ -36,6 +36,8 @@
 
 #include "StudioModelRenderer.h"
 #include "GameStudioModelRenderer.h"
+#include "event_api.h"
+#include "pm_defs.h"
 
 #define ANIM_WALK_SEQUENCE 3
 #define ANIM_JUMP_SEQUENCE 6
@@ -955,10 +957,37 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 				IEngineStudio.StudioClientEvents();
 		}
 	}
+	if( cl_shadows->value != 0.0f )
+	{
+		StudioDrawShadow(m_pCurrentEntity->origin, 20.0f);
+	}
 
 	return 1;
 }
 
+void CGameStudioModelRenderer::StudioDrawShadow(Vector origin, float scale)
+{
+	Vector endPoint;
+	pmtrace_t pmTrace;
+
+	endPoint.x = origin.x;
+	endPoint.y = origin.y - 150.0f;
+	endPoint.z = origin.z;
+	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+	gEngfuncs.pEventAPI->EV_PlayerTrace(origin, endPoint, PM_STUDIO_BOX | PM_GLASS_IGNORE, -1, &pmTrace);
+
+	if( pmTrace.startsolid )
+		return;
+
+	if( pmTrace.fraction > 1.0)
+		return;
+
+	VectorNormalize(pmTrace.plane.normal);
+
+	if( pmTrace.plane.normal.z <= 0.7 )
+		return;
+
+}
 void CGameStudioModelRenderer::StudioFxTransform(cl_entity_t *ent, float transform[3][4])
 {
 	switch (ent->curstate.renderfx)
@@ -1017,6 +1046,11 @@ void CGameStudioModelRenderer::StudioFxTransform(cl_entity_t *ent, float transfo
 	}
 	}
 }
+void CGameStudioModelRenderer::StudioSetShadowSprite(int idx)
+{
+	m_iShadowSprite = idx;
+}
+
 void R_StudioInit(void)
 {
 	g_StudioRenderer.Init();
