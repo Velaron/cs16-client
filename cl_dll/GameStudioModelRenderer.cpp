@@ -75,6 +75,7 @@ engine_studio_api_t IEngineStudio;
 
 static client_anim_state_t g_state;
 static client_anim_state_t g_clientstate;
+cvar_t *cl_shadows;
 
 CGameStudioModelRenderer::CGameStudioModelRenderer(void)
 {
@@ -957,17 +958,17 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 				IEngineStudio.StudioClientEvents();
 		}
 	}
-	if( cl_shadows->value != 0.0f )
+	/*if( cl_shadows->value != 0.0f )
 	{
 		StudioDrawShadow(m_pCurrentEntity->origin, 20.0f);
-	}
+	}*/
 
 	return 1;
 }
 
 void CGameStudioModelRenderer::StudioDrawShadow(Vector origin, float scale)
 {
-	Vector endPoint;
+	/*Vector endPoint;
 	pmtrace_t pmTrace;
 
 	endPoint.x = origin.x;
@@ -986,6 +987,12 @@ void CGameStudioModelRenderer::StudioDrawShadow(Vector origin, float scale)
 
 	if( pmTrace.plane.normal.z <= 0.7 )
 		return;
+
+	Vector p1, p2, p3, p4;
+
+	p1.x = (1.0 - pmTrace.fraction) * scale * - pmTrace.plane.normal.z;
+
+	IEngineStudio.StudioRenderShadow(m_iShadowSprite, )*/
 
 }
 void CGameStudioModelRenderer::StudioFxTransform(cl_entity_t *ent, float transform[3][4])

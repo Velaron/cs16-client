@@ -21,9 +21,14 @@
 #include "parsemsg.h"
 #include "r_efx.h"
 #include "rain.h"
+#include "com_model.h"
+#include "studio.h"
+#include "studio_util.h"
+#include "StudioModelRenderer.h"
+#include "GameStudioModelRenderer.h"
+
 
 #include <cstring>
-#include "GameStudioModelRenderer.h"
 
 #define MAX_CLIENTS 32
 

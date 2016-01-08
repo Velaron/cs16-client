@@ -137,30 +137,36 @@ void CHud :: Init( void )
 	m_flTime = 1.0;
 	m_iNoConsolePrint = 0;
 
+        // fullscreen overlays
 	m_SniperScope.Init();
 	m_NVG.Init();
+        
+        // Game HUD things
 	m_Ammo.Init();
 	m_Health.Init();
-	m_SayText.Init();
-	m_Spectator.Init();
-	m_Geiger.Init();
+        m_Radio.Init();
+	m_Timer.Init();
+	m_Money.Init();
+	m_AmmoSecondary.Init();
 	m_Train.Init();
 	m_Battery.Init();
+	m_StatusIcons.Init();
+        
+        // chat, death notice, status bars and other
+        m_SayText.Init();
+	m_Spectator.Init();
+	m_Geiger.Init();
 	m_Flash.Init();
 	m_Message.Init();
 	m_StatusBar.Init();
 	m_DeathNotice.Init();
-	m_AmmoSecondary.Init();
 	m_TextMessage.Init();
-	m_StatusIcons.Init();
-	m_Scoreboard.Init();
-	m_Menu.Init();
 	m_MOTD.Init();
-	m_Radio.Init();
-	m_Timer.Init();
-	m_Money.Init();
+        
+        // all things that have own background and must be drawn last
 	m_ProgressBar.Init();
-
+	m_Menu.Init();
+	m_Scoreboard.Init();
 
 	Localize_Init();
 	InitRain();
