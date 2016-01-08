@@ -1,3 +1,4 @@
+
 #Xash3d mainui port for android
 #Copyright (c) nicknekit
 
@@ -34,6 +35,7 @@ LOCAL_SRC_FILES := basemenu.cpp \
            menu_controls.cpp \
            menu_creategame.cpp \
            menu_credits.cpp \
+	   menu_filedialog.cpp \
            menu_gameoptions.cpp \
            menu_internetgames.cpp \
            menu_langame.cpp \
@@ -44,10 +46,14 @@ LOCAL_SRC_FILES := basemenu.cpp \
            menu_video.cpp \
            menu_vidmodes.cpp \
            menu_vidoptions.cpp \
+	   menu_touchoptions.cpp \
+	   menu_touch.cpp \
+	   menu_touchedit.cpp \
+	   menu_touchbuttons.cpp \
            udll_int.cpp \
            ui_title_anim.cpp \
 	   utils.cpp
-ifeq ($(XASH_SDL),1)
-LOCAL_SHARED_LIBRARIES += SDL2
-endif
+#ifeq ($(XASH_SDL),1)
+#LOCAL_SHARED_LIBRARIES += SDL2
+#endif
 include $(BUILD_SHARED_LIBRARY)
