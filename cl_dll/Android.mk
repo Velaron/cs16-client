@@ -136,7 +136,9 @@ SRCS :=  hl/hl_baseentity.cpp \
         money.cpp \
         vgui_parser.cpp \
 	nvg.cpp \
-	sniperscope.cpp
+	sniperscope.cpp \
+	unicode_strtools.cpp 
+
 INCLUDES =  -I../common -I. -I../game_shared -I../pm_shared -I../engine -I../dlls -I../public
 DEFINES = -Wno-write-strings -DLINUX -D_LINUX -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -w -Wl,--no-undefined
 

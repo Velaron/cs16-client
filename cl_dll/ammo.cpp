@@ -740,7 +740,7 @@ int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
 	x = -9.0 * sin;
 	y = 9.0 * cos;
 
-	if( floor(cl_righthand->value) )
+	if( cl_righthand->value != 0.0f )
 	{
 		velocity.x += sin * -120.0;
 		velocity.y += cos * 120.0;

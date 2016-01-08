@@ -17,22 +17,23 @@ GNU General Public License for more details.
 #include "wrect.h" // need for cl_dll.h
 #include "cl_dll.h"
 #include "vgui_parser.h"
+#include "unicode_strtools.h"
 
-#define MAX_LOCALIZED_TITLES 512
+#define MAX_LOCALIZED_TITLES 2048
 
 struct locString
 {
 	char toLocalize[256];
-	char localizedString[512];
+	char localizedString[2048];
 };
 
 locString gTitlesTXT[MAX_LOCALIZED_TITLES]; // for localized titles.txt strings
 //locString gCstrikeMsgs[1024]; // for another
-int giLastTitlesTXT;
+int giLastTitlesTXT = 0;
 const char* Localize( const char* string )
 {
 	StripEndNewlineFromString( (char*)string );
-
+        
 	for( int i = 0; i < giLastTitlesTXT; ++i )
 	{
 		if( !stricmp(gTitlesTXT[i].toLocalize, string))
@@ -42,47 +43,63 @@ const char* Localize( const char* string )
 	return string;
 }
 
-void Localize_Init(  )
+void Localize_Init ()
 {
-	char *filename = "resource/cstrike_english.txt";
-	char *pfile;
-	char token[1024];
-	giLastTitlesTXT = 0;
-
-	char *afile = (char *)gEngfuncs.COM_LoadFile( filename, 5, NULL );
-
-	pfile = afile;
-
-	if (!pfile)
+	char filename[64];
+	const char *gamedir = gEngfuncs.pfnGetGameDirectory();
+	snprintf( filename, 64, "%s/resource/%s_english.txt", gamedir, gamedir );
+#ifndef OPENBINARY
+	FILE *wf = fopen( filename, "r" );
+#else
+	FILE *wf = fopen( filename, "rb" );
+#endif
+	
+	if (!wf)
 	{
-		gEngfuncs.Con_Printf("Couldn't open file %s. Strings will not be localized!.\n", filename );
+		gEngfuncs.Con_Printf ("Couldn't open file %s. Strings will not be localized!.\n", filename);
 		return;
 	}
 
-	while( true )
+	fseek (wf, 0L, SEEK_END);
+	int unicodeLength = ftell (wf);
+	fseek (wf, 0L, SEEK_SET);
+
+	uchar16 *unicodeBuf = new uchar16[unicodeLength];
+	fread (unicodeBuf, 1, unicodeLength, wf);
+	fclose (wf);
+	unicodeBuf++;
+
+	int ansiLength = unicodeLength / 2;
+
+	char *afile = new char[ansiLength]; // save original pointer, so we can free it later
+	char *pfile = afile;
+	Q_UTF16ToUTF8 (unicodeBuf, afile, ansiLength, STRINGCONVERT_ASSERT_REPLACE);
+
+	char token[2048];
+	while (true)
 	{
-		pfile = gEngfuncs.COM_ParseFile( pfile, token );
-
-		if( !pfile) break;
-
-		if( strstr(token, "TitlesTXT") )
+		if (giLastTitlesTXT > MAX_LOCALIZED_TITLES)
 		{
-			if( giLastTitlesTXT > MAX_LOCALIZED_TITLES )
-			{
-				gEngfuncs.Con_Printf( "Too many localized titles.txt strings\n");
-				break;
-			}
+			gEngfuncs.Con_Printf ("Too many localized titles.txt strings\n");
+			break;
+		}
 
-			strcpy(gTitlesTXT[giLastTitlesTXT].toLocalize, token);
-			pfile = gEngfuncs.COM_ParseFile( pfile, gTitlesTXT[giLastTitlesTXT].localizedString );
+		pfile = gEngfuncs.COM_ParseFile (pfile, token);
+		if(!pfile) break;
 
-			if( !pfile ) break;
+		if (strlen (token) > 5)
+		{
+			strcpy (gTitlesTXT[giLastTitlesTXT].toLocalize, token);
 
+			pfile = gEngfuncs.COM_ParseFile (pfile, gTitlesTXT[giLastTitlesTXT].localizedString);
+		
+			if(!pfile) break;
 			giLastTitlesTXT++;
 		}
 	}
 
-	gEngfuncs.COM_FreeFile( afile );
+	delete [] --unicodeBuf;
+	delete [] afile;
 }
 
 void Localize_Free( )

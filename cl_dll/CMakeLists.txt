@@ -165,6 +165,7 @@ set (CLDLL_SOURCES ./hl/hl_baseentity.cpp
     ./timer.cpp
     ./money.cpp
     ./vgui_parser.cpp
+    ./unicode_strtools.cpp
 )
 
 include_directories (../cl_dll ../common ../engine ../pm_shared ../dlls ../game_shared ../public)
