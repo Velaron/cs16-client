@@ -49,15 +49,19 @@ void EV_FireP228(event_args_s *args)
 	{
 		++g_iShotsFired;
 		EV_MuzzleFlash();
+		int seq;
 		if( args->bparam1 )
 		{
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(P228_SHOOT1, P228_SHOOT3), 2);
+			if( g_bHoldingShield )
+				seq = gEngfuncs.pfnRandomLong(P228_SHIELD_SHOOT1, P228_SHIELD_SHOOT2);
+			else
+				seq = gEngfuncs.pfnRandomLong(P228_SHOOT1, P228_SHOOT3);
 		}
 		else
 		{
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(P228_SHOOT_EMPTY, 2);
+			seq = g_bHoldingShield ? P228_SHIELD_SHOOT_EMPTY : P228_SHOOT_EMPTY;
 		}
-
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
 	}
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");

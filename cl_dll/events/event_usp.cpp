@@ -20,6 +20,19 @@ enum usp_e
 	USP_DETACH_SILENCER
 };
 
+enum usp_shield_e
+{
+	USP_SHIELD_IDLE,
+	USP_SHIELD_SHOOT1,
+	USP_SHIELD_SHOOT2,
+	USP_SHIELD_SHOOT_EMPTY,
+	USP_SHIELD_RELOAD,
+	USP_SHIELD_DRAW,
+	USP_SHIELD_UP_IDLE,
+	USP_SHIELD_UP,
+	USP_SHIELD_DOWN
+};
+
 void EV_FireUSP( event_args_t *args )
 {
 	int idx;
@@ -46,10 +59,50 @@ void EV_FireUSP( event_args_t *args )
 	{
 		++g_iShotsFired;
 		EV_MuzzleFlash();
-		if( args->bparam2 )
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(USP_SHOOT1,USP_SHOOT3), 2);
+		int seq;
+		if( !args->bparam2 ) // check for silenser
+		{
+			seq = gEngfuncs.pfnRandomLong(USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
+		}
 		else
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3), 2);
+		{
+			if( g_bHoldingShield )
+			{
+				if( args->bparam1 ) // is empty
+				{
+					seq = USP_SHIELD_SHOOT_EMPTY;
+				}
+				else
+				{
+					seq = gEngfuncs.pfnRandomLong(USP_SHIELD_SHOOT1, USP_SHIELD_SHOOT2);
+				}
+			}
+			else
+			{
+				if( args->bparam1 ) // is empty
+				{
+					seq = USP_SHOOT_EMPTY;
+				}
+				else
+				{
+					seq = gEngfuncs.pfnRandomLong(USP_SHOOT1, USP_SHOOT3);
+				}
+			}
+		}
+
+		if( args->bparam2 )
+		{
+			if( args->bparam1 )
+				seq = g_bHoldingShield ? (int)USP_SHIELD_SHOOT_EMPTY : (int)USP_SHOOT_EMPTY;
+			else if( g_bHoldingShield )
+
+			else
+				seq = gEngfuncs.pfnRandomLong(USP_SHOOT1, USP_SHOOT3);
+		}
+		else
+		{
+		}
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
 	}
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");

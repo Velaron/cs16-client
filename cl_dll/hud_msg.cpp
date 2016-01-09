@@ -26,7 +26,7 @@
 #include "studio_util.h"
 #include "StudioModelRenderer.h"
 #include "GameStudioModelRenderer.h"
-
+#include "com_weapons.h"
 
 #include <cstring>
 
@@ -82,6 +82,7 @@ int CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 
 	//Probably not a good place to put this.
 	pBeam = pBeam2 = NULL;
+	g_iFreezeTimeOver = 0;
 
 	return 1;
 }

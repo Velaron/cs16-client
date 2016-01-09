@@ -215,13 +215,8 @@ void CBasePlayer::Restart( ) { }
 void CBasePlayer::ResetMaxSpeed() { }
 void CBasePlayer::RoundRespawn() { }
 void CBasePlayer::Blind(float flUntilTime, float flHoldTime, float flFadeTime, int iAlpha) { }
-bool CBasePlayer::HasShield() { return FALSE; }
-void CBasePlayerWeapon::KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change) { }
 void CBasePlayer::SetProgressBarTime( int iTime ) { }
 void CBasePlayer::SetBombIcon( int ) { }
-bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim) { return 0; }
-void CBasePlayerWeapon::SetPlayerShieldAnim() { }
-void CBasePlayerWeapon::ResetPlayerShieldAnim() { }
 void CBasePlayer::UpdateShieldCrosshair(bool bShieldDrawn) { }
 void CBasePlayer::Radio(const char *msg_id, const char *msg_verbose, int pitch, bool showIcon) { }
 

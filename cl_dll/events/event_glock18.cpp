@@ -17,6 +17,19 @@ enum glock18_e
 	GLOCK18_RELOAD2
 };
 
+enum glock18_shield_e
+{
+	GLOCK18_SHIELD_IDLE1,
+	GLOCK18_SHIELD_SHOOT,
+	GLOCK18_SHIELD_SHOOT2,
+	GLOCK18_SHIELD_SHOOT_EMPTY,
+	GLOCK18_SHIELD_RELOAD,
+	GLOCK18_SHIELD_DRAW,
+	GLOCK18_SHIELD_IDLE,
+	GLOCK18_SHIELD_UP,
+	GLOCK18_SHIELD_DOWN
+};
+
 void EV_Fireglock18( event_args_t *args )
 {
 	int idx;
@@ -42,14 +55,22 @@ void EV_Fireglock18( event_args_t *args )
 	{
 		++g_iShotsFired;
 		EV_MuzzleFlash();
+		int seq;
 		if( args->bparam1 )
 		{
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(GLOCK18_SHOOT3, 2);
+			if( g_bHoldingShield )
+				seq = GLOCK18_SHIELD_SHOOT;
+			else
+				seq = GLOCK18_SHOOT3;
 		}
 		else
 		{
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(GLOCK18_SHOOT_EMPTY, 2);
+			if( g_bHoldingShield )
+				seq = GLOCK18_SHIELD_SHOOT_EMPTY;
+			else
+				seq = GLOCK18_SHOOT_EMPTY;
 		}
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
 	}
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");

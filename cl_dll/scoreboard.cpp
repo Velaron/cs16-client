@@ -340,6 +340,8 @@ int CHudScoreboard :: DrawPlayers( int xpos, float list_slot, int nameoffset, ch
 
 		if(pl_info->thisplayer) // hey, it's me!
 		{
+			// HACKHACK:
+			// FillRGBABlend have inverted alpha on Xash3D. Change alpha to normal, when Xash3D's FillRGBA will be fixed
 			FillRGBABlend( xstart, ypos, xend - xstart, ROW_GAP, 255, 255, 255, 240 );
 		}
 

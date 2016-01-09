@@ -60,7 +60,7 @@ extern float g_lastFOV;
 extern int g_iWeaponFlags;
 extern bool g_bInBombZone;
 extern int g_iFreezeTimeOver;
-extern int g_bHoldingShield;
+extern bool g_bHoldingShield;
 extern int g_iPlayerFlags;
 extern vec3_t g_vPlayerVelocity;
 extern float g_flPlayerSpeed;
