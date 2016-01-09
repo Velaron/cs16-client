@@ -69,7 +69,7 @@ typedef struct mobile_engfuncs_s
 	// To be continued...
 } mobile_engfuncs_t;
 
-extern mobile_engfuncs_t *gMobileEngfuncs;
+//extern mobile_engfuncs_t *gMobileEngfuncs;
 
 // function exported from client
 // returns 0 on no error otherwise error

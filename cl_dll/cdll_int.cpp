@@ -30,6 +30,7 @@ extern "C"
 #include <string.h>
 #include "interface.h"
 #include "render_api.h"
+#include "mobility_int.h"
 
 #ifdef _WIN32
 #define DLLEXPORT __declspec( dllexport )
@@ -39,6 +40,7 @@ extern "C"
 
 cl_enginefunc_t gEngfuncs;
 render_api_t gRenderAPI;
+mobile_engfuncs_t gMobileAPI;
 CHud gHUD;
 
 void InitInput (void);
@@ -69,6 +71,7 @@ void	DLLEXPORT HUD_Frame( double time );
 void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
 void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
 int 	DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback );
+int    DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi );
 }
 
 /*
@@ -306,4 +309,22 @@ int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, re
 	// *callback = renderInterface;
 
 	return true;
+}
+
+/*
+========================
+HUD_MobilityInterface
+========================
+*/
+int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
+{
+	if( mobileapi->version != MOBILITY_API_VERSION )
+	{
+		gEngfuncs.Con_Printf("Client Error: Mobile API version mismatch. Got: %i, want: %i\n", mobileapi->version, MOBILITY_API_VERSION);
+		return 1;
+	}
+
+	gMobileAPI = *mobileapi;
+
+	return 0;
 }
