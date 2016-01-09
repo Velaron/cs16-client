@@ -36,7 +36,6 @@ cvar_t		*ui_showmodels;
 
 uiStatic_t	uiStatic;
 
-char		uiEmptyString[256];
 const char	*uiSoundIn	= "media/launch_upmenu1.wav";
 const char	*uiSoundOut	= "media/launch_dnmenu1.wav";
 const char	*uiSoundLaunch	= "media/launch_select2.wav";
@@ -1181,11 +1180,11 @@ void UI_MouseMove( int x, int y )
 			prevDown = true, cursorDY = 0;
 		else
 			if( y - uiStatic.cursorY )
-				cursorDY = y - uiStatic.cursorY;
+				cursorDY += y - uiStatic.cursorY;
 	}
 	else
 		cursorDY = 0;
-
+	//Con_Printf("%d %d %f\n",x, y, cursorDY);
 	if( !uiStatic.menuActive )
 		return;
 
@@ -1593,7 +1592,6 @@ void UI_Init( void )
 
 	CHECK_MAP_LIST( TRUE );
 
-	memset( uiEmptyString, ' ', sizeof( uiEmptyString ));	// HACKHACK
 	uiStatic.initialized = true;
 
 	// setup game info
