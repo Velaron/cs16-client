@@ -28,7 +28,7 @@
 #include <extdll.h>
 #include "unicode_strtools.h"
 #ifndef _WIN32
-#include <cwctype>
+#include <wctype.h>
 #endif
 
 /* <f2fc1> ../engine/unicode_strtools.cpp:23 */
