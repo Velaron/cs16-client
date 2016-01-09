@@ -67,38 +67,6 @@ BEAM *pBeam2;
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
 // returns volume of strike instrument (crowbar) to play
-void EV_HLDM_SmokeGrenade( float x, float y, float z )
-{
-	static bool init = false;
-
-	/*for( int i = 1; i <= 10; i++ )
-	{
-		int iSmokeSprite = SPR_Load( "sprites/ballsmoke.spr" );
-		vec3_t origin;
-		origin[0] = x;
-		origin[1] = y;
-		origin[2] = z;
-		TEMPENTITY *pTemp = gEngfuncs.pEfxAPI->R_TempSprite( origin,
-			Vector( 0, 0, 0 ),
-			10,iSmokeSprite, kRenderNormal, kRenderFxNone, 1.0, 10000, FTENT_PERSIST | FTENT_COLLIDEWORLD | FTENT_FADEOUT );
-
-		gEngfuncs.pEfxAPI->R_RunParticleEffect( origin, Vector( 0, 0, 0 ), 0xFFFFFF, 50);
-
-		/*if(pTemp)
-		{
-			pTemp->fadeSpeed = 0.02;
-			pTemp->entity.curstate.framerate = 1;
-			pTemp->entity.curstate.renderamt = 255;
-			int Color = gEngfuncs.pfnRandomLong( 0, 140 );
-			pTemp->entity.curstate.rendercolor.r = 255;
-			pTemp->entity.curstate.rendercolor.g = 255;
-			pTemp->entity.curstate.rendercolor.b = 255;
-		}
-	}*/
-
-	// TODO: Find a way to draw smoke0
-}
-
 void EV_HLDM_NewExplode( float x, float y, float z, float ScaleExplode1 )
 {
 
