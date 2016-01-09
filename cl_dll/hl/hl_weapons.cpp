@@ -1766,8 +1766,8 @@ void _DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct u
 		g_iWeaponFlags = from->weapondata[ from->client.m_iId - 1].m_iWeaponState;
 		g_iPlayerFlags = from->client.flags;
 		g_iFreezeTimeOver	= !(from->client.iuser3 & PLAYER_FREEZE_TIME_OVER);
-		g_bInBombZone		= from->client.iuser3 & PLAYER_IN_BOMB_ZONE;
-		g_bHoldingShield	= from->client.iuser3 & PLAYER_HOLDING_SHIELD;
+		g_bInBombZone		= (from->client.iuser3 & PLAYER_IN_BOMB_ZONE) != 0;
+		g_bHoldingShield	= (from->client.iuser3 & PLAYER_HOLDING_SHIELD) != 0;
 	}
 
 	if ( g_irunninggausspred == 1 )

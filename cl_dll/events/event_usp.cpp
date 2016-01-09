@@ -90,18 +90,6 @@ void EV_FireUSP( event_args_t *args )
 			}
 		}
 
-		if( args->bparam2 )
-		{
-			if( args->bparam1 )
-				seq = g_bHoldingShield ? (int)USP_SHIELD_SHOOT_EMPTY : (int)USP_SHOOT_EMPTY;
-			else if( g_bHoldingShield )
-
-			else
-				seq = gEngfuncs.pfnRandomLong(USP_SHOOT1, USP_SHOOT3);
-		}
-		else
-		{
-		}
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
 	}
 
