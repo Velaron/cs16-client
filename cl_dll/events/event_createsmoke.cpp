@@ -26,7 +26,7 @@ void EV_CreateSmoke(event_args_s *args)
 			org = args->origin;
 			org.x += gEngfuncs.pfnRandomFloat(-100.0f, 100.0f);
 			org.y += gEngfuncs.pfnRandomFloat(-100.0f, 100.0f);
-			org.z += 30; =
+			org.z += 30; 
 
 			pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( org, (model_s*)pGasModel );
 			if( pTemp )
