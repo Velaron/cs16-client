@@ -88,7 +88,7 @@ void EV_FireUSP( event_args_t *args )
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 
-	if( silencer_on )
+	if( !silencer_on )
 	{
 		szSoundName = gEngfuncs.pfnRandomLong( 0, 1 ) ? "weapons/usp1.wav" : "weapons/usp2.wav";
 	}
