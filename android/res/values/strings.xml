@@ -6,10 +6,22 @@
     <string name="title_activity_launcher">LauncherActivity</string>
     <string name="launch_button">Launch cs16-client!</string>
     <string name="cmd_args_text">Command line arguments(experts only)</string>
-    <string name="use_cs16nd">Use CS16ND server(may differ from CS 1.6)</string>
+    <string name="server_spinner_description">Choose libserver implementation:</string>
+    <string name="not_found_msg">Nothing was found. Check your APK or choose another server</string>
+    <string name="not_found_title">Something got wrong...</string>
+    <string name="not_implemented_msg">This feature is not implemented yet</string>
+    <string name="not_implemented_title">Not implemented!</string>
+    <string name="ad_unit_id"></string> <!-- Не дам :P -->
     <!--
 	<string name="text_shortcut">SoHL shortcut</string>
 	<string name="shortcut_button_save">Save shortcut</string>
 	<string name="gamedir">Mod directory</string>
 	<string name="shortcut_name">Shortcut name</string>-->
+    <string-array name="avail_servers">
+        <item>Nothing</item>
+        <item>cs16nd</item>
+        <item>YaPB over cs16nd</item>
+	<item>ReGameDLL_CS</item>
+	<item>YaPB over ReGameDLL_CS</item>
+    </string-array>
 </resources>
