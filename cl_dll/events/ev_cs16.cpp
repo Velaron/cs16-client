@@ -280,6 +280,7 @@ void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName )
 
 	gEngfuncs.pEfxAPI->R_BulletImpactParticles( pTrace->endpos );
 
+
 	iRand = gEngfuncs.pfnRandomLong(0,0x7FFF);
 	if ( iRand < (0x7fff/2) )// not every bullet makes a sound.
 	{
@@ -291,6 +292,25 @@ void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName )
 		case 3:	gEngfuncs.pEventAPI->EV_PlaySound( -1, pTrace->endpos, 0, "weapons/ric4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM ); break;
 		case 4:	gEngfuncs.pEventAPI->EV_PlaySound( -1, pTrace->endpos, 0, "weapons/ric5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM ); break;
 		}
+	}
+
+	int wallPuffSprite;
+	switch( iRand % 4 ) // but every bullet makes a wall puff
+	{
+		case 0: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff1.spr"); break;
+		case 1: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff2.spr"); break;
+		case 2: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff3.spr"); break;
+		case 3: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff4.spr"); break;
+	}
+	TEMPENTITY *te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos, wallPuffSprite, 20.0f );
+	if( te )
+	{
+		te->entity.baseline.origin = 15 * pTrace->plane.normal;
+		te->flags = FTENT_SPRANIMATE | FTENT_FADEOUT;
+		te->entity.curstate.rendermode = kRenderTransAdd;
+		te->entity.curstate.renderamt = 60;
+		te->entity.angles[ROLL] = gEngfuncs.pfnRandomLong( 0, 359 );
+		te->entity.curstate.scale = 0.25;
 	}
 
 	pe = gEngfuncs.pEventAPI->EV_GetPhysent( pTrace->ent );

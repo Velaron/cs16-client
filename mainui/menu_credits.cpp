@@ -27,6 +27,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static const char *uiCreditsDefault[] = 
 {
+	"CS16Client v0.1",
+	"Build Date:" __DATE__ " " __TIME__ ,
+	"",
 	"Developers: ",
 	"a1batross and mittorn",
         "",
