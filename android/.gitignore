@@ -1,6 +1,7 @@
 # Built application files
 *.apk
 *.ap_
+*.bin
 
 # Files for the Dalvik VM
 *.dex
@@ -29,3 +30,7 @@ proguard/
 
 # Log Files
 *.log
+
+*.swp
+*.save
+*.kate-swp
