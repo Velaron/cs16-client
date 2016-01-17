@@ -80,7 +80,7 @@ void EV_FireM3( event_args_t *args )
 						 forward,
 						 right,
 						 up,
-						 1,
+						 9,
 						 vecSrc,
 						 vecAiming,
 						 8192,

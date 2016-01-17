@@ -79,7 +79,7 @@ void EV_FireXM1014(event_args_s *args)
 						 forward,
 						 right,
 						 up,
-						 1,
+						 6,
 						 vecSrc,
 						 vecAiming,
 						 8192,

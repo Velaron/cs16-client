@@ -27,6 +27,14 @@
 #define ACCURACY_MULTIPLY_BY_14 (1 << 3) // accuracy multiply to 1.4
 #define ACCURACY_MULTIPLY_BY_14_2 (1 << 4) // accuracy multiply to 1.4
 
+#ifndef WPNSTATE_USP_SILENCED
+#define WPNSTATE_USP_SILENCED (1<<0)
+#define WPNSTATE_GLOCK18_BURST_MODE (1<<1)
+#define WPNSTATE_M4A1_SILENCED (1<<2)
+#define WPNSTATE_ELITE_LEFT (1<<3)
+#define WPNSTATE_FAMAS_BURST_MODE (1<<4)
+#define WPNSTATE_SHIELD_DRAWN (1<<5)
+#endif
 
 
 extern "C"

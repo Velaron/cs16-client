@@ -64,8 +64,6 @@ static globalvars_t	Globals;
 static CBasePlayerWeapon *g_pWpns[ 32 ];
 
 float g_flApplyVel = 0.0;
-int   g_irunninggausspred = 0;
-
 vec3_t previousorigin;
 
 // HLDM Weapon placeholder entities
@@ -340,41 +338,7 @@ bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim)
 
 void CBasePlayerWeapon::KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change)
 {
-	float flFront, flSide;
 
-	if (m_iShotsFired == 1)
-	{
-		flFront = up_base;
-		flSide = lateral_base;
-	}
-	else
-	{
-		flFront = m_iShotsFired * up_modifier + up_base;
-		flSide = m_iShotsFired * lateral_modifier + lateral_base;
-	}
-
-	m_pPlayer->pev->punchangle.x -= flFront;
-
-	if (m_pPlayer->pev->punchangle.x < -up_max)
-		m_pPlayer->pev->punchangle.x = -up_max;
-
-	if (m_iDirection == 1)
-	{
-		m_pPlayer->pev->punchangle.y += flSide;
-
-		if (m_pPlayer->pev->punchangle.y > lateral_max)
-			m_pPlayer->pev->punchangle.y = lateral_max;
-	}
-	else
-	{
-		m_pPlayer->pev->punchangle.y -= flSide;
-
-		if (m_pPlayer->pev->punchangle.y < -lateral_max)
-			m_pPlayer->pev->punchangle.y = -lateral_max;
-	}
-
-	if (!RANDOM_LONG(0, direction_change))
-		m_iDirection = !m_iDirection;
 }
 
 void CBasePlayerWeapon::SetPlayerShieldAnim(void)
@@ -412,7 +376,6 @@ BOOL CBasePlayerWeapon :: DefaultDeploy( char *szViewModel, char *szWeaponModel,
 
 	SendWeaponAnim( iAnim, skiplocal );
 
-	g_irunninggausspred = false;
 	m_pPlayer->m_flNextAttack = 0.5;
 	m_flTimeWeaponIdle = 1.0;
 	return TRUE;
@@ -456,7 +419,6 @@ Put away weapon
 void CBasePlayerWeapon::Holster( int skiplocal /* = 0 */ )
 {
 	m_fInReload = FALSE; // cancel any reload in progress.
-	g_irunninggausspred = false;
 	m_pPlayer->pev->viewmodel = 0;
 }
 
@@ -894,8 +856,6 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 	// Holster weapon immediately, to allow it to cleanup
 	if ( m_pActiveItem )
 		 m_pActiveItem->Holster( );
-
-	g_irunninggausspred = false;
 }
 
 /*
@@ -908,8 +868,6 @@ void CBasePlayer::Spawn( void )
 {
 	if (m_pActiveItem)
 		m_pActiveItem->Deploy( );
-
-	g_irunninggausspred = false;
 }
 
 Vector CBasePlayer::GetGunPosition()
@@ -1491,8 +1449,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		player.m_rgAmmo[ pCurrent->m_iSecondaryAmmoType ]	= (int)from->client.vuser4[ 2 ];
 	}
 
-	if( g_pWpns[ from->client.m_iId - 1])
-		g_iWeaponFlags = g_pWpns[ from->client.m_iId - 1 ]->m_iWeaponState;
+	g_iWeaponFlags = from->weapondata[ from->client.m_iId - 1 ].m_iWeaponState;
 
 	// For random weapon events, use this seed to seed random # generator
 	player.random_seed = random_seed;
@@ -1768,14 +1725,6 @@ void _DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct u
 		g_iFreezeTimeOver	= !(from->client.iuser3 & PLAYER_FREEZE_TIME_OVER);
 		g_bInBombZone		= (from->client.iuser3 & PLAYER_IN_BOMB_ZONE) != 0;
 		g_bHoldingShield	= (from->client.iuser3 & PLAYER_HOLDING_SHIELD) != 0;
-	}
-
-	if ( g_irunninggausspred == 1 )
-	{
-		Vector forward;
-		gEngfuncs.pfnAngleVectors( v_angles, forward, NULL, NULL );
-		to->client.velocity = to->client.velocity - forward * g_flApplyVel * 5;
-		g_irunninggausspred = false;
 	}
 
 	// All games can use FOV state
