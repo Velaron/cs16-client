@@ -34,6 +34,8 @@
 #define max(a,b)  (((a) > (b)) ? (a) : (b))
 #endif
 
+bool g_bGlockBurstMode;
+
 DLL_GLOBAL short g_sModelIndexLaser;
 DLL_GLOBAL const char *g_pModelNameLaser = "sprites/laserbeam.spr";
 DLL_GLOBAL short g_sModelIndexLaserDot;

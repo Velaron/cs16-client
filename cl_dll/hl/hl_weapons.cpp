@@ -50,6 +50,7 @@ extern "C" char PM_FindTextureType( char *name );
 
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
+extern bool g_bGlockBurstMode;
 
 // Pool of client side entities/entvars_t
 static entvars_t	ev[ 32 ];
@@ -1449,7 +1450,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		player.m_rgAmmo[ pCurrent->m_iSecondaryAmmoType ]	= (int)from->client.vuser4[ 2 ];
 	}
 
-	g_iWeaponFlags = from->weapondata[ from->client.m_iId - 1 ].m_iWeaponState;
+	if( g_pWpns[ from->client.m_iId - 1 ] )
+		g_iWeaponFlags = g_pWpns[ from->client.m_iId - 1 ]->m_iWeaponState;
 
 	// For random weapon events, use this seed to seed random # generator
 	player.random_seed = random_seed;
@@ -1725,6 +1727,7 @@ void _DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct u
 		g_iFreezeTimeOver	= !(from->client.iuser3 & PLAYER_FREEZE_TIME_OVER);
 		g_bInBombZone		= (from->client.iuser3 & PLAYER_IN_BOMB_ZONE) != 0;
 		g_bHoldingShield	= (from->client.iuser3 & PLAYER_HOLDING_SHIELD) != 0;
+		g_bGlockBurstMode   = false; // will be taken from g_iWeaponFlags
 	}
 
 	// All games can use FOV state

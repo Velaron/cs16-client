@@ -90,7 +90,7 @@ float VectorNormalize (float *v)
 		v[1] *= ilength;
 		v[2] *= ilength;
 	}
-		
+
 	return length;
 
 }
@@ -119,7 +119,7 @@ void VectorMA (const float *veca, float scale, const float *vecb, float *vecc)
 HSPRITE LoadSprite(const char *pszName)
 {
 	int i;
-	char sz[256]; 
+	char sz[256];
 
 	if (ScreenWidth < 640)
 		i = 320;

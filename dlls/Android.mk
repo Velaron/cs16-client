@@ -6,6 +6,9 @@ LOCAL_MODULE := server
 
 include $(XASH3D_CONFIG)
 
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a-hard)
+LOCAL_MODULE_FILENAME = libserver_hardfp
+endif
 
 LOCAL_CFLAGS += -w -D_LINUX -DCLIENT_WEAPONS -Dstricmp=strcasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf \
 	-fno-exceptions

@@ -169,9 +169,9 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 		g_iPlayerClass = dst->playerclass;
 		g_iTeamNumber = g_PlayerExtraInfo[dst->number].teamnumber;
 
-		g_iUser1 = src->iuser1;
-		g_iUser2 = src->iuser2;
-		g_iUser3 = src->iuser3;
+		dst->iuser1 = g_iUser1 = src->iuser1;
+		dst->iuser2 = g_iUser2 = src->iuser2;
+		dst->iuser3 = g_iUser3 = src->iuser3;
 	}
 	dst->fuser2					= src->fuser2;
 	iOnTrain[src->number]		= src->iuser4;

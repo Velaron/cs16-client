@@ -18,6 +18,10 @@
 #include "player.h"
 #include "weapons.h"
 
+#ifdef CLIENT_WEAPONS
+extern bool g_bGlockBurstMode;
+#endif
+
 enum glock18_e
 {
 	GLOCK18_IDLE1,
@@ -131,11 +135,17 @@ void CGLOCK18::SecondaryAttack(void)
 	{
 		ClientPrint(m_pPlayer->pev, HUD_PRINTCENTER, "#Switch_To_SemiAuto");
 		m_iWeaponState &= ~WPNSTATE_GLOCK18_BURST_MODE;
+#ifdef CLIENT_WEAPONS
+		g_bGlockBurstMode = false;
+#endif
 	}
 	else
 	{
 		ClientPrint(m_pPlayer->pev, HUD_PRINTCENTER, "#Switch_To_BurstFire");
 		m_iWeaponState |= WPNSTATE_GLOCK18_BURST_MODE;
+#ifdef CLIENT_WEAPONS
+		g_bGlockBurstMode = true;
+#endif
 	}
 
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3;

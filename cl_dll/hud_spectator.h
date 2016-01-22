@@ -10,7 +10,7 @@
 #pragma once
 
 #include "cl_entity.h"
-
+#include "hud.h"
 
 
 #define INSET_OFF				0
@@ -78,6 +78,7 @@ public:
 	void FindNextPlayer( bool bReverse );
 	void DirectorMessage( int iSize, void *pbuf );
 	void SetSpectatorStartPosition();
+	CHudMsgFunc(Spectator);
 	int Init();
 	int VidInit();
 
@@ -95,9 +96,11 @@ public:
 	float				m_mapZoom;		// zoom the user currently uses
 	vec3_t				m_mapOrigin;	// origin where user rotates around
 	cvar_t *			m_drawnames;
+	cvar_t *            m_specmode;
 	cvar_t *			m_drawcone;
 	cvar_t *			m_drawstatus;
 	cvar_t *			m_autoDirector;
+	float				m_lastAutoDirector;
 	cvar_t *			m_pip;
 	
 

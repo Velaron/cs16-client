@@ -19,7 +19,7 @@
 //
 // CHud handles the message, calculation, and drawing the HUD
 //
-
+#pragma once
 
 #define RGB_YELLOWISH 0x00FFA000 //255,160,0
 #define RGB_REDISH 0x00FF1010 //255,16,16
@@ -94,7 +94,7 @@ class CHudBase
 public:
 	POSITION  m_pos;
 	int   m_type;
-	int	  m_iFlags; // active, moving, 
+	int	  m_iFlags; // active, moving,
 	virtual		~CHudBase() {}
 	virtual int Init( void ) {return 0;}
 	virtual int VidInit( void ) {return 0;}
@@ -338,7 +338,7 @@ public:
 	CHudMsgFunc(StatusValue);
 
 protected:
-	enum { 
+	enum {
 		MAX_STATUSTEXT_LENGTH = 128,
 		MAX_STATUSBAR_VALUES = 8,
 		MAX_STATUSBAR_LINES = 2,
@@ -468,7 +468,7 @@ public:
 	CHudMsgFunc(SayText);
 	void SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex = -1 );
 	void EnsureTextFitsInOneLineAndWrapIfHaveTo( int line );
-friend class CHudSpectator;
+	friend class CHudSpectator;
 
 private:
 
@@ -495,7 +495,7 @@ private:
 	HSPRITE m_hSprite2Helmet;
 	wrect_t *m_prc1;
 	wrect_t *m_prc2;
-	int	  m_iBat;	
+	int	  m_iBat;
 	float m_fFade;
 	int	  m_iHeight;		// width of the battery innards
 
@@ -527,8 +527,8 @@ private:
 	wrect_t *m_prc1;
 	wrect_t *m_prc2;
 	wrect_t *m_prcBeam;
-	float m_flBat;	
-	int	  m_iBat;	
+	float m_flBat;
+	int	  m_iBat;
 	int	  m_fOn;
 	float m_fFade;
 	int	  m_iWidth;		// width of the battery innards
@@ -618,7 +618,7 @@ public:
 	int Draw(float flTime);
 	CHudMsgFunc(StatusIcon);
 
-	enum { 
+	enum {
 		MAX_ICONSPRITENAME_LENGTH = MAX_SPRITE_NAME_LENGTH,
 		MAX_ICONSPRITES = 4,
 	};

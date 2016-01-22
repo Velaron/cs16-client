@@ -53,7 +53,7 @@ int giDmgFlags[NUM_DMG_TYPES] =
 	DMG_FREEZE|DMG_SLOWFREEZE,
 	DMG_DROWN,
 	DMG_BURN|DMG_SLOWBURN,
-	DMG_NERVEGAS, 
+	DMG_NERVEGAS,
 	DMG_RADIATION,
 	DMG_SHOCK,
 	DMG_CALTROP,
@@ -248,7 +248,7 @@ int CHudHealth::Draw(float flTime)
 	// If health is getting low, make it bright red
 	if (m_iHealth <= 15)
 		a = 255;
-		
+
 	GetPainColor( r, g, b );
 	ScaleColors(r, g, b, a );
 
@@ -310,7 +310,7 @@ void CHudHealth::CalcDamageDirection(vec3_t vecFrom)
 	{
 		m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 1;
 	}
-	else 
+	else
 	{
 		if (side > 0)
 		{
@@ -448,7 +448,7 @@ int CHudHealth::DrawDamage(float flTime)
 			pdmg->fExpire = min( flTime + DMG_IMAGE_LIFE, pdmg->fExpire );
 
 			if ( pdmg->fExpire <= flTime		// when the time has expired
-				&& a < 40 )						// and the flash is at the low point of the cycle
+				 && a < 40 )						// and the flash is at the low point of the cycle
 			{
 				pdmg->fExpire = 0;
 
@@ -471,7 +471,7 @@ int CHudHealth::DrawDamage(float flTime)
 
 	return 1;
 }
- 
+
 
 void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 {	
@@ -512,8 +512,8 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 
 			}
 			pdmg = &m_dmg[i];
-		}	
-	}	
+		}
+	}
 
 	// damage bits are only turned on here;  they are turned off when the draw time has expired (in DrawDamage())
 	m_bitsDamage |= bitsDamage;
@@ -598,7 +598,7 @@ void CHudHealth :: DrawRadar( float flTime )
 	}
 
 	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1)
-	// draw bomb for T
+		// draw bomb for T
 	{
 		if( g_PlayerExtraInfo[33].radarflashon )
 		{
@@ -609,7 +609,7 @@ void CHudHealth :: DrawRadar( float flTime )
 		}
 	}
 	else
-	// draw hostages for CT
+		// draw hostages for CT
 	{
 		for( int i = 0; i < MAX_HOSTAGES; i++ )
 		{

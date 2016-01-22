@@ -44,18 +44,18 @@ cvar_t *cl_lw = NULL;
 wrect_t nullrc = { 0, 0, 0, 0 };
 char *sPlayerModelFiles[12] =
 {
-  "models/player.mdl",
-  "models/player/leet/leet.mdl", // t
-  "models/player/gign/gign.mdl", // ct
-  "models/player/vip/vip.mdl", //ct
-  "models/player/gsg9/gsg9.mdl", // ct
-  "models/player/guerilla/guerilla.mdl", // t
-  "models/player/arctic/arctic.mdl", // t
-  "models/player/sas/sas.mdl", // ct
-  "models/player/terror/terror.mdl", // t
-  "models/player/urban/urban.mdl", // ct
-  "models/player/spetsnaz/spetsnaz.mdl", // ct
-  "models/player/militia/militia.mdl" // t
+	"models/player.mdl",
+	"models/player/leet/leet.mdl", // t
+	"models/player/gign/gign.mdl", // ct
+	"models/player/vip/vip.mdl", //ct
+	"models/player/gsg9/gsg9.mdl", // ct
+	"models/player/guerilla/guerilla.mdl", // t
+	"models/player/arctic/arctic.mdl", // t
+	"models/player/sas/sas.mdl", // ct
+	"models/player/terror/terror.mdl", // t
+	"models/player/urban/urban.mdl", // ct
+	"models/player/spetsnaz/spetsnaz.mdl", // ct
+	"models/player/militia/militia.mdl" // t
 };
 
 void ShutdownInput (void);
@@ -136,23 +136,23 @@ void CHud :: Init( void )
 	m_flTime = 1.0;
 	m_iNoConsolePrint = 0;
 
-        // fullscreen overlays
+	// fullscreen overlays
 	m_SniperScope.Init();
 	m_NVG.Init();
-        
-        // Game HUD things
+
+	// Game HUD things
 	m_Ammo.Init();
 	m_Health.Init();
-        m_Radio.Init();
+	m_Radio.Init();
 	m_Timer.Init();
 	m_Money.Init();
 	m_AmmoSecondary.Init();
 	m_Train.Init();
 	m_Battery.Init();
 	m_StatusIcons.Init();
-        
-        // chat, death notice, status bars and other
-        m_SayText.Init();
+
+	// chat, death notice, status bars and other
+	m_SayText.Init();
 	m_Spectator.Init();
 	m_Geiger.Init();
 	m_Flash.Init();
@@ -161,8 +161,8 @@ void CHud :: Init( void )
 	m_DeathNotice.Init();
 	m_TextMessage.Init();
 	m_MOTD.Init();
-        
-        // all things that have own background and must be drawn last
+
+	// all things that have own background and must be drawn last
 	m_ProgressBar.Init();
 	m_Menu.Init();
 	m_Scoreboard.Init();
@@ -236,9 +236,9 @@ void CHud :: VidInit( void )
 	// ----------
 	// Load Sprites
 	// ---------
-//	m_hsprFont = LoadSprite("sprites/%d_font.spr");
+	//	m_hsprFont = LoadSprite("sprites/%d_font.spr");
 	
-	m_hsprLogo = 0;	
+	m_hsprLogo = 0;
 	m_hsprCursor = 0;
 
 	if (ScreenWidth < 640)
@@ -266,7 +266,7 @@ void CHud :: VidInit( void )
 			}
 
 			// allocated memory for sprite handle arrays
- 			m_rghSprites = new HSPRITE[m_iSpriteCount];
+			m_rghSprites = new HSPRITE[m_iSpriteCount];
 			m_rgrcRects = new wrect_t[m_iSpriteCount];
 			m_rgszSpriteNames = new char[m_iSpriteCount * MAX_SPRITE_NAME_LENGTH];
 
@@ -372,7 +372,7 @@ void COM_FileBase ( const char *in, char *out)
 	
 	if ( in[end] != '.' )		// no '.', copy to end
 		end = len-1;
-	else 
+	else
 		end--;					// Found ',', copy to left of '.'
 
 
@@ -383,7 +383,7 @@ void COM_FileBase ( const char *in, char *out)
 
 	if ( in[start] != '/' && in[start] != '\\' )
 		start = 0;
-	else 
+	else
 		start++;
 
 	// Length of new sting
@@ -471,12 +471,12 @@ int CHud::MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf)
 
 	// Set a new sensitivity
 	if ( m_iFOV == def_fov )
-	{  
+	{
 		// reset to saved sensitivity
 		m_flMouseSensitivity = 0;
 	}
 	else
-	{  
+	{
 		// set a new sensitivity that is proportional to the change from the FOV default
 		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)def_fov) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
 	}
@@ -488,7 +488,7 @@ void CHud::AddHudElem(CHudBase *phudelem)
 {
 	HUDLIST *pdl, *ptemp;
 
-//phudelem->Think();
+	//phudelem->Think();
 
 	if (!phudelem)
 		return;

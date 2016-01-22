@@ -60,7 +60,7 @@ void EV_CreateSmoke(event_args_s *args)
 			{
 				// don't die when animation is ended
 				pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD);
-				pTemp->die = 80.0f;
+				pTemp->die = gEngfuncs.GetClientTime() + 10.0f;
 				pTemp->entity.curstate.framerate = 4.0f;
 				pTemp->entity.curstate.rendermode = kRenderTransTexture;
 				pTemp->entity.curstate.renderfx = kRenderFxNone;

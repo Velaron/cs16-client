@@ -297,10 +297,10 @@ void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName )
 	int wallPuffSprite;
 	switch( iRand % 4 ) // but every bullet makes a wall puff
 	{
-		case 0: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff1.spr"); break;
-		case 1: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff2.spr"); break;
-		case 2: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff3.spr"); break;
-		case 3: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff4.spr"); break;
+	case 0: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff1.spr"); break;
+	case 1: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff2.spr"); break;
+	case 2: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff3.spr"); break;
+	case 3: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff4.spr"); break;
 	}
 	TEMPENTITY *te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos, wallPuffSprite, 20.0f );
 	if( te )
@@ -482,15 +482,15 @@ void EV_Dummy( struct event_args_s *args )
 
 void RemoveBody(TEMPENTITY *te, float frametime, float current_time)
 {
-	 // go underground...
-	if ( current_time >= 2 * te->entity.curstate.fuser2 + 5.0 )
-		te->entity.origin.z -= 5.0 * frametime;
+	// go underground...
+	/*if ( current_time >= 2 * te->entity.curstate.fuser2 + 5.0 )
+		te->entity.origin.z -= 5.0 * frametime;*/
 }
 
 void HitBody(TEMPENTITY *ent, pmtrace_s *ptr)
 {
-	if ( ptr->plane.normal.z > 0.0 )
-		ent->flags |= FTENT_NONE;
+	/*if ( ptr->plane.normal.z > 0.0 )
+		ent->flags |= FTENT_NONE;*/
 }
 
 
@@ -499,11 +499,11 @@ void CreateCorpse(Vector *p_vOrigin, Vector *p_vAngles, const char *pModel, floa
 	int modelIdx = gEngfuncs.pEventAPI->EV_FindModelIndex(pModel);
 	vec3_t null(0, 0, 0);
 	TEMPENTITY *model = gEngfuncs.pEfxAPI->R_TempModel( (float*)p_vOrigin,
-		null,
-		(float*)p_vAngles,
-		gEngfuncs.pfnGetCvarFloat("cl_corpsestay"),
-		modelIdx,
-		0 );
+														null,
+														(float*)p_vAngles,
+														gEngfuncs.pfnGetCvarFloat("cl_corpsestay"),
+														modelIdx,
+														0 );
 
 	if(model)
 	{

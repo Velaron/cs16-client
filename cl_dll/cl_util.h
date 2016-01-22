@@ -28,15 +28,15 @@ extern cvar_t *hud_textmode;
 #define HOOK_MESSAGE(x) gEngfuncs.pfnHookUserMsg(#x, __MsgFunc_##x );
 
 #define DECLARE_MESSAGE(y, x) int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf) \
-							{ \
-							return gHUD.y.MsgFunc_##x(pszName, iSize, pbuf ); \
-							}
+{ \
+	return gHUD.y.MsgFunc_##x(pszName, iSize, pbuf ); \
+	}
 
 #define HOOK_COMMAND(x, y) gEngfuncs.pfnAddCommand( x, __CmdFunc_##y );
 #define DECLARE_COMMAND(y, x) void __CmdFunc_##x( void ) \
-							{ \
-								gHUD.y.UserCmd_##x( ); \
-							}
+{ \
+	gHUD.y.UserCmd_##x( ); \
+	}
 
 inline float CVAR_GET_FLOAT( const char *x ) {	return gEngfuncs.pfnGetCvarFloat( (char*)x ); }
 inline char* CVAR_GET_STRING( const char *x ) {	return gEngfuncs.pfnGetCvarString( (char*)x ); }
@@ -90,7 +90,7 @@ inline int SPR_Width( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Width(x, f); 
 inline 	client_textmessage_t	*TextMessageGet( const char *pName ) { return gEngfuncs.pfnTextMessageGet( pName ); }
 inline 	int						TextMessageDrawChar( int x, int y, int number, int r, int g, int b ) 
 { 
-	return gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b ); 
+	return gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b );
 }
 
 inline int DrawConsoleString( int x, int y, const char *string )
@@ -107,7 +107,7 @@ inline int DrawSetTextColor(float r, float g, float b)
 		color[0]=r, color[1] = g, color[2] = b;
 	else
 		gEngfuncs.pfnDrawSetTextColor( r, g, b );
-		
+
 }
 inline void GetConsoleStringSize( const char *string, int *width, int *height )
 {
