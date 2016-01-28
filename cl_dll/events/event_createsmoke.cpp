@@ -59,15 +59,15 @@ void EV_CreateSmoke(event_args_s *args)
 			if( pTemp )
 			{
 				// don't die when animation is ended
-				pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD);
-				pTemp->die = gEngfuncs.GetClientTime() + 10.0f;
+				pTemp->flags |= (FTENT_FADEOUT | FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD);
+				pTemp->die = gEngfuncs.GetClientTime() + 40.0f;
 				pTemp->entity.curstate.framerate = 4.0f;
 				pTemp->entity.curstate.rendermode = kRenderTransTexture;
 				pTemp->entity.curstate.renderfx = kRenderFxNone;
-				pTemp->entity.curstate.scale = 7.0f;
+				pTemp->entity.curstate.scale = 5.0f;
 				// make it move slowly
-				pTemp->entity.baseline.origin.x = gEngfuncs.pfnRandomLong(-10, 10);
-				pTemp->entity.baseline.origin.y = gEngfuncs.pfnRandomLong(-10, 10);
+				pTemp->entity.baseline.origin.x = gEngfuncs.pfnRandomLong(-5, 5);
+				pTemp->entity.baseline.origin.y = gEngfuncs.pfnRandomLong(-5, 5);
 			}
 		}
 	}
