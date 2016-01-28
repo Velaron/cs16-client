@@ -30,6 +30,8 @@ private:
 	void DrawPlayerLocation();
 	void DrawRadarDot(int x, int y, int size, int r, int g, int b, int a);
 	void DrawCross(int x, int y, int size, int r, int g, int b, int a );
+	void DrawT( int x, int y, int size, int r, int g, int b, int a );
+	void DrawFlippedT( int x, int y, int size, int r, int g, int b, int a );
 	Vector2D WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles );
 
 };

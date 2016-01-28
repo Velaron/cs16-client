@@ -78,6 +78,7 @@ int CHudRadar::Draw(float flTime)
 		return 1;
 
 	int iTeamNumber = g_PlayerExtraInfo[ gHUD.m_Scoreboard.m_iPlayerNum ].teamnumber;
+	int r, g, b;
 
 	if( cl_radartype->value )
 	{
@@ -98,13 +99,24 @@ int CHudRadar::Draw(float flTime)
 		if( g_PlayerExtraInfo[i].teamnumber != iTeamNumber )
 			continue;
 
+		if( g_PlayerExtraInfo[i].has_c4 )
+		{
+			UnpackRGB( r, g, b, RGB_REDISH );
+		}
+		else
+		{
+			// white
+			UnpackRGB( r, g, b, 0x00FFFFFF );
+		}
 		Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
+		float zdiff = gHUD.m_vecOrigin.z - g_PlayerExtraInfo[i].origin.z;
 		if( !g_PlayerExtraInfo[i].radarflashon )
 		{
-			if( g_PlayerExtraInfo[i].has_c4 )
-				DrawRadarDot( pos.x, pos.y, 4, 255, 0, 0, 255 );
-			else
-				DrawRadarDot( pos.x, pos.y, 4, 0, 255, 0, 255 );
+			if( zdiff < 20 && zdiff > -20 )
+				DrawRadarDot( pos.x, pos.y, 4, r, g, b, 255 );
+			else if( gHUD.m_vecOrigin.z > g_PlayerExtraInfo[i].origin.z )
+				DrawFlippedT( pos.x, pos.y, 2, r, g, b, 255);
+			else DrawT( pos.x, pos.y, 2, r, g, b, 255 );
 		}
 		else
 		{
@@ -122,10 +134,11 @@ int CHudRadar::Draw(float flTime)
 
 			if( g_PlayerExtraInfo[i].nextflash )
 			{
-				if( g_PlayerExtraInfo[i].has_c4 )
-					DrawRadarDot( pos.x, pos.y, 4, 255, 0, 0, 255 );
-				else
-					DrawRadarDot( pos.x, pos.y, 4, 0, 255, 0, 255 );
+				if( zdiff < 20 && zdiff > -20 )
+					DrawRadarDot( pos.x, pos.y, 4, r, g, b, 255 );
+				else if( gHUD.m_vecOrigin.z > g_PlayerExtraInfo[i].origin.z )
+					DrawFlippedT( pos.x, pos.y, 2, r, g, b, 255);
+				else DrawT( pos.x, pos.y, 2, r, g, b, 255 );
 			}
 		}
 	}
@@ -198,6 +211,18 @@ void CHudRadar::DrawCross(int x, int y, int size, int r, int g, int b, int a)
 	FillRGBA(62.5f + x + size, 62.5f + y - size, size, size, r, g, b, a);
 	FillRGBA(62.5f + x + size, 62.5f + y + size, size, size, r, g, b, a);
 
+}
+
+void CHudRadar::DrawT(int x, int y, int size, int r, int g, int b, int a)
+{
+	FillRGBA( 62.5f + x - size, 62.5 + y - size, 3*size, size, r, g, b, a);
+	FillRGBA( 62.5f + x, 62.5 + y, size, 2*size, r, g, b, a);
+}
+
+void CHudRadar::DrawFlippedT(int x, int y, int size, int r, int g, int b, int a)
+{
+	FillRGBA( 62.5f + x, 62.5 + y - size, size, 2*size, r, g, b, a);
+	FillRGBA( 62.5f + x - size, 62.5 + y + size, 3*size, size, r, g, b, a);
 }
 
 Vector2D CHudRadar::WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles  )
