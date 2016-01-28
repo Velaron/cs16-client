@@ -1124,6 +1124,8 @@ void CHudSpectator::DrawOverviewLayer()
 	gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, 1.0 );
 
 	frame = 0;
+
+	gEngfuncs.pfnFillRGBA(0, 0, ScreenWidth, ScreenHeight, 0, 0, 0, 0);
 	
 
 	// rotated view ?
