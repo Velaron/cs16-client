@@ -1,6 +1,6 @@
 /*
 nvg.cpp - Night Vision Googles
-Copyright (C) 2015 a1batross
+Copyright (C) 2015-2016 a1batross
 */
 
 #include "hud.h"

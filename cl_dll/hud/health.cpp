@@ -28,12 +28,8 @@
 #include <string.h>
 #include "eventscripts.h"
 
-DECLARE_COMMAND( m_Health, ShowRadar );
-DECLARE_COMMAND( m_Health, HideRadar );
-
 DECLARE_MESSAGE(m_Health, Health )
 DECLARE_MESSAGE(m_Health, Damage )
-DECLARE_MESSAGE(m_Health, Radar )
 DECLARE_MESSAGE(m_Health, ScoreAttrib )
 DECLARE_MESSAGE(m_Health, ClCorpse )
 
@@ -66,11 +62,8 @@ int CHudHealth::Init(void)
 {
 	HOOK_MESSAGE(Health);
 	HOOK_MESSAGE(Damage);
-	HOOK_MESSAGE(Radar);
 	HOOK_MESSAGE(ScoreAttrib);
 	HOOK_MESSAGE(ClCorpse);
-	HOOK_COMMAND( "drawradar", ShowRadar );
-	HOOK_COMMAND( "hideradar", HideRadar );
 
 	m_iHealth = 100;
 	m_fFade = 0;
@@ -82,7 +75,6 @@ int CHudHealth::Init(void)
 
 	memset(m_dmg, 0, sizeof(DAMAGE_IMAGE) * NUM_DMG_TYPES);
 
-	cl_radartype = CVAR_CREATE( "cl_radartype", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE("cl_corpsestay", "600", FCVAR_ARCHIVE);
 	gHUD.AddHudElem(this);
 	return 1;
@@ -111,12 +103,6 @@ int CHudHealth::VidInit(void)
 
 	giDmgHeight = gHUD.GetSpriteRect(m_HUD_dmg_bio).right - gHUD.GetSpriteRect(m_HUD_dmg_bio).left;
 	giDmgWidth = gHUD.GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD.GetSpriteRect(m_HUD_dmg_bio).top;
-
-	m_hRadar = gHUD.GetSprite( gHUD.GetSpriteIndex( "radar" ));
-	m_hRadaropaque = gHUD.GetSprite( gHUD.GetSpriteIndex( "radaropaque" ));
-	m_hrad = gHUD.GetSpriteRect( gHUD.GetSpriteIndex( "radar" ));
-	m_hradopaque = gHUD.GetSpriteRect( gHUD.GetSpriteIndex( "radaropaque" ));
-	m_bDrawRadar = true;
 
 	return 1;
 }
@@ -159,17 +145,6 @@ int CHudHealth:: MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf )
 	if ( damageTaken > 0 || armor > 0 )
 		CalcDamageDirection(vecFrom);
 
-	return 1;
-}
-
-int CHudHealth:: MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf )
-{
-	BEGIN_READ( pbuf, iSize );
-
-	int index = READ_BYTE();
-	g_PlayerExtraInfo[index].origin.x = READ_COORD();
-	g_PlayerExtraInfo[index].origin.y = READ_COORD();
-	g_PlayerExtraInfo[index].origin.z = READ_COORD();
 	return 1;
 }
 
@@ -220,9 +195,6 @@ int CHudHealth::Draw(float flTime)
 
 	if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly() )
 		return 1;
-
-	if ( !gHUD.m_fPlayerDead && m_bDrawRadar )
-		DrawRadar( flTime );
 
 	if ( !m_hSprite )
 		m_hSprite = LoadSprite(PAIN_NAME);
@@ -519,112 +491,6 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 	m_bitsDamage |= bitsDamage;
 }
 
-void CHudHealth :: DrawPlayerLocation( void )
-{
-	DrawConsoleString( 30, 30, g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].location );
-}
-
-void CHudHealth :: DrawRadarDot(int x, int y, int size, int r, int g, int b, int a)
-{
-	FillRGBA(62.5f + x - size/2.0f, 62.5f + y - size/2.0f, size, size, r, g, b, a);
-}
-
-Vector2D CHudHealth :: WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles  )
-{
-	Vector2D diff = vObjectOrigin.Make2D() - vPlayerOrigin.Make2D();
-
-	// Supply epsilon values to avoid divide-by-zero
-	if(diff.x == 0)
-		diff.x = 0.00001f;
-	if(diff.y == 0)
-		diff.y = 0.00001f;
-
-	int iMaxRadius = (m_hrad.right - m_hrad.left) / 2.0f;
-
-	float flOffset = atan(diff.y / diff.x) * 180.0f / M_PI;
-
-	if ((diff.x < 0) && (diff.y >= 0))
-		flOffset += 180;
-	else if ((diff.x < 0) && (diff.y < 0))
-		flOffset += 180;
-	else if ((diff.x >= 0) && (diff.y < 0))
-		flOffset += 360;
-
-	// this magic 32.0f just scales position on radar
-	float iRadius = -diff.Length() / 32.0f;
-	if( -iRadius > iMaxRadius)
-		iRadius = -iMaxRadius;
-
-	flOffset = (vAngles.y - flOffset) * M_PI / 180.0f;
-
-	// transform origin difference to radar source
-	Vector2D new_diff;
-	new_diff.x = -iRadius * sin(flOffset);
-	new_diff.y =  iRadius * cos(flOffset);
-
-	return new_diff;
-}
-
-void CHudHealth :: DrawRadar( float flTime )
-{
-	int iTeamNumber = g_PlayerExtraInfo[ gHUD.m_Scoreboard.m_iPlayerNum ].teamnumber;
-
-	if( g_PlayerExtraInfo[ gHUD.m_Scoreboard.m_iPlayerNum ].dead )
-		return;
-
-	if( cl_radartype->value )
-	{
-		SPR_Set(m_hRadaropaque, 200, 200, 200);
-		SPR_DrawHoles(0, 0, 0, &m_hradopaque);
-	}
-	else
-	{
-		SPR_Set( m_hRadar, 25, 75, 25 );
-		SPR_DrawAdditive( 0, 0, 0, &m_hrad );
-	}
-	for(int i = 0; i < 33; i++)
-	{
-		if( i == gHUD.m_Scoreboard.m_iPlayerNum || g_PlayerExtraInfo[i].dead)
-			continue;
-
-		if( g_PlayerExtraInfo[i].teamnumber != iTeamNumber )
-			continue;
-
-		Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
-		if( g_PlayerExtraInfo[i].has_c4 )
-			DrawRadarDot( pos.x, pos.y, 2, 255, 0, 0, 255 );
-		else
-			DrawRadarDot( pos.x, pos.y, 2, 0, 255, 0, 255 );
-	}
-
-	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1)
-		// draw bomb for T
-	{
-		if( g_PlayerExtraInfo[33].radarflashon )
-		{
-			Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[33].origin, gHUD.m_vecAngles);
-
-			// TODO: make it flash
-			DrawRadarDot( pos.x, pos.y, 4, 255, 0, 0, 255 );
-		}
-	}
-	else
-		// draw hostages for CT
-	{
-		for( int i = 0; i < MAX_HOSTAGES; i++ )
-		{
-			if( g_HostageInfo[i].dead )
-				continue;
-			if( !g_HostageInfo[i].radarflashon )
-				continue;
-
-			Vector2D pos = WorldToRadar( gHUD.m_vecOrigin, g_HostageInfo[i].origin, gHUD.m_vecAngles );
-
-			// TODO: make it flash
-			DrawRadarDot( pos.x, pos.y, 4, 250, 0, 0, 255 );
-		}
-	}
-}
 
 int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 {

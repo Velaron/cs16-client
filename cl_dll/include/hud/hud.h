@@ -216,7 +216,7 @@ private:
 
 
 #include "health.h"
-
+#include "radar.h"
 
 #define FADE_TIME 100
 
@@ -365,8 +365,9 @@ struct extra_player_info_t
 	bool has_c4;
 	bool vip;
 	bool dead;
-	Vector origin;
 	bool showhealth;
+	bool nextflash;
+	Vector origin;
 	int health;
 	int radarflashon;
 	int radarflashes;
@@ -394,6 +395,7 @@ struct hostage_info_t
 	int radarflashon;
 	int radarflashes;
 	int dead;
+	bool nextflash;
 };
 
 extern hud_player_info_t	g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine
@@ -850,6 +852,7 @@ public:
 	CHudProgressBar m_ProgressBar;
 	CHudSniperScope m_SniperScope;
 	CHudNVG			m_NVG;
+	CHudRadar	m_Radar;
 
 
 

@@ -161,20 +161,21 @@ int CHud::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 	g_PlayerExtraInfo[33].origin.x = READ_COORD();
 	g_PlayerExtraInfo[33].origin.y = READ_COORD();
 	g_PlayerExtraInfo[33].origin.z = READ_COORD();
-	g_PlayerExtraInfo[33].playerclass = 1;
-	int Flag = READ_BYTE();
-	if( Flag == 1)
-	{
-		g_PlayerExtraInfo[33].radarflashon = 1;
-		g_PlayerExtraInfo[33].radarflashes = 99999;
-		g_PlayerExtraInfo[33].radarflash = gHUD.m_flTime;
-		gHUD.m_Timer.m_iFlags = 0;
-	}
-	g_PlayerExtraInfo[33].dead = 0;
-	strcpy(g_PlayerExtraInfo[33].teamname, "TERRORIST");
 
-	if ( g_PlayerExtraInfo[33].playerclass == 1 )
+	g_PlayerExtraInfo[33].radarflashon = 1;
+	g_PlayerExtraInfo[33].radarflashes = 99999;
+	g_PlayerExtraInfo[33].radarflash = gHUD.m_flTime;
+	strcpy(g_PlayerExtraInfo[33].teamname, "TERRORIST");
+	g_PlayerExtraInfo[33].dead = 0;
+	g_PlayerExtraInfo[33].nextflash = true;
+
+	int Flag = READ_BYTE();
+	g_PlayerExtraInfo[33].playerclass = Flag;
+
+	if( Flag ) // bomb planted
 		m_Timer.m_iFlags = 0;
+
+	return 1;
 }
 
 int CHud::MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf)

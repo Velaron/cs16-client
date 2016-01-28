@@ -150,6 +150,7 @@ void CHud :: Init( void )
 	m_Train.Init();
 	m_Battery.Init();
 	m_StatusIcons.Init();
+	m_Radar.Init();
 
 	// chat, death notice, status bars and other
 	m_SayText.Init();
@@ -339,6 +340,7 @@ void CHud :: VidInit( void )
 	m_Money.VidInit();
 	m_ProgressBar.VidInit();
 	m_SniperScope.VidInit();
+	m_Radar.VidInit();
 }
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)

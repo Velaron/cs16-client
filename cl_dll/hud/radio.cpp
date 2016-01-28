@@ -42,6 +42,9 @@ int CHudRadio::MsgFunc_SendAudio(const char *pszName, int iSize, void *pbuf)
 	m_iPitch = READ_SHORT( );
 	m_iFlags = HUD_ACTIVE;
 
+	g_PlayerExtraInfo[m_iSenderID].radarflashes = 22;
+	g_PlayerExtraInfo[m_iSenderID].radarflash = gHUD.m_flTime;
+	g_PlayerExtraInfo[m_iSenderID].radarflashon = 1;
 	return 1;
 }
 

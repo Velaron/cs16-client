@@ -108,7 +108,6 @@ public:
 
 	int MsgFunc_Health(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf);
-	int MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_ClCorpse(const char *pszName,  int iSize, void *pbuf);
 
@@ -119,23 +118,9 @@ public:
 	float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
 	void GetPainColor( int &r, int &g, int &b );
 	float m_fFade;
-	bool m_bDrawRadar;
-	void UserCmd_ShowRadar( void ) {
-		m_bDrawRadar = true;
-	}
-
-	void UserCmd_HideRadar( void ) {
-		m_bDrawRadar = false;
-	}
-
-	wrect_t m_hrad;
-	wrect_t m_hradopaque;
-
 private:
 	HSPRITE m_hSprite;
 	HSPRITE m_hDamage;
-	HSPRITE m_hRadar;
-	HSPRITE m_hRadaropaque;
 	
 	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
 	float m_flTimeFlash;
@@ -145,7 +130,4 @@ private:
 	void CalcDamageDirection(vec3_t vecFrom);
 	void UpdateTiles(float fTime, long bits);
 	void DrawPlayerLocation( void );
-	void DrawRadar( float flTime );
-	void DrawRadarDot(int x, int y, int size, int r, int g, int b, int a);
-	Vector2D WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles );
 };
