@@ -25,7 +25,7 @@ int CHudMoney::Draw(float flTime)
 	if(( gHUD.m_iHideHUDDisplay & ( HIDEHUD_HEALTH ) ))
 		return 1;
 
-	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
+	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT))))
 		return 1;
 
 	int r, g, b, alphaBalance;

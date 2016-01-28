@@ -34,7 +34,13 @@ int CHudRadar::Init()
 
 void CHudRadar::Reset()
 {
+	// make radar don't draw old players after new map
+	for( int i = 0; i < 34; i++ )
+	{
+		g_PlayerExtraInfo[i].dead = 1;
 
+		if( i <= MAX_HOSTAGES ) g_HostageInfo[i].dead = 1;
+	}
 }
 
 int CHudRadar::VidInit(void)
@@ -71,10 +77,10 @@ int CHudRadar::MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf )
 
 int CHudRadar::Draw(float flTime)
 {
-	if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly() )
-		return 1;
-
-	if( gHUD.m_fPlayerDead )
+	if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) ||
+		 gEngfuncs.IsSpectateOnly() ||
+		 !(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT))) ||
+		 gHUD.m_fPlayerDead )
 		return 1;
 
 	int iTeamNumber = g_PlayerExtraInfo[ gHUD.m_Scoreboard.m_iPlayerNum ].teamnumber;
