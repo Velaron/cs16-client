@@ -23,8 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "utils.h"
 #include "menu_btnsbmp_table.h"
 
-#define ART_BANNER	  	"gfx/shell/head_touchbuttons"
-#define ART_GAMMA		"gfx/shell/gamma"
+#define ART_BANNER	  	"gfx/shell/head_touch_buttons"
 
 #define ID_BACKGROUND 	0
 #define ID_BANNER	  	1
@@ -69,8 +68,7 @@ typedef struct
 
     char		*bNamesPtr[UI_MAXGAMES];
 	menuBitmap_s	background;
-	//menuBitmap_s	banner;
-	//menuBitmap_s	testImage;
+	menuBitmap_s	banner;
 
 	menuPicButton_s	done;
     menuPicButton_s	cancel;
@@ -233,8 +231,16 @@ static void UI_TouchButtons_UpdateFields()
 		uiTouchButtons.textureid = 0;
 	uiTouchButtons.name.buffer[0] = 0;
 	uiTouchButtons.name.cursor = 0;
-	uiTouchButtons.texture.cursor = 0;
-	uiTouchButtons.command.cursor = 0;
+	uiTouchButtons.texture.cursor = strlen( uiTouchButtons.texture.buffer );
+	if( uiTouchButtons.texture.cursor > uiTouchButtons.texture.widthInChars )
+		uiTouchButtons.texture.scroll = uiTouchButtons.texture.cursor;
+	else
+		uiTouchButtons.texture.scroll = 0;
+	uiTouchButtons.command.cursor = strlen( uiTouchButtons.command.buffer );
+	if( uiTouchButtons.command.cursor > uiTouchButtons.command.widthInChars )
+		uiTouchButtons.command.scroll = uiTouchButtons.command.cursor;
+	else
+		uiTouchButtons.command.scroll = 0;
 
 }
 static void UI_TouchButtons_DisableButtons()
@@ -395,12 +401,12 @@ static void UI_TouchButtons_Callback( void *self, int event )
 		if( strlen(uiTouchButtons.name.buffer) > 0)
 		{
 			char command[256];
-			snprintf( command, 256, "touch_addbutton %s %s %s\n", uiTouchButtons.name.buffer,
+			snprintf( command, 256, "touch_addbutton \"%s\" \"%s\" \"%s\"\n", uiTouchButtons.name.buffer,
 					  uiTouchButtons.texture.buffer, uiTouchButtons.command.buffer );
 			CLIENT_COMMAND(0, command);
-			snprintf( command, 256, "touch_setflags %s %i\n", uiTouchButtons.name.buffer, uiTouchButtons.curflags );
+			snprintf( command, 256, "touch_setflags \"%s\" %i\n", uiTouchButtons.name.buffer, uiTouchButtons.curflags );
 			CLIENT_COMMAND(0, command);
-			snprintf( command, 256, "touch_setcolor %s %d %d %d %d\n", uiTouchButtons.name.buffer, CURCOLOR1(red), CURCOLOR1(green), CURCOLOR1(blue),CURCOLOR1(alpha) );
+			snprintf( command, 256, "touch_setcolor \"%s\" %d %d %d %d\n", uiTouchButtons.name.buffer, CURCOLOR1(red), CURCOLOR1(green), CURCOLOR1(blue),CURCOLOR1(alpha) );
 			CLIENT_COMMAND(1, command);
 			uiTouchButtons.name.buffer[0] = 0;
 			uiTouchButtons.name.cursor = 0;
@@ -408,13 +414,13 @@ static void UI_TouchButtons_Callback( void *self, int event )
 		else
 		{
 			char command[256];
-			snprintf( command, 256, "touch_settexture %s %s\n", uiTouchButtons.selectedName, uiTouchButtons.texture.buffer );
+			snprintf( command, 256, "touch_settexture \"%s\" \"%s\"\n", uiTouchButtons.selectedName, uiTouchButtons.texture.buffer );
 			CLIENT_COMMAND(0, command);
-			snprintf( command, 256, "touch_setcommand %s %s\n", uiTouchButtons.selectedName, uiTouchButtons.texture.buffer );
+			snprintf( command, 256, "touch_setcommand \"%s\" \"%s\"\n", uiTouchButtons.selectedName, uiTouchButtons.texture.buffer );
 			CLIENT_COMMAND(0, command);
-			snprintf( command, 256, "touch_setflags %s %i\n", uiTouchButtons.selectedName, uiTouchButtons.curflags );
+			snprintf( command, 256, "touch_setflags \"%s\" %i\n", uiTouchButtons.selectedName, uiTouchButtons.curflags );
 			CLIENT_COMMAND(0, command);
-			snprintf( command, 256, "touch_setcolor %s %d %d %d %d\n", uiTouchButtons.selectedName, CURCOLOR1(red), CURCOLOR1(green), CURCOLOR1(blue),CURCOLOR1(alpha) );
+			snprintf( command, 256, "touch_setcolor \"%s\" %d %d %d %d\n", uiTouchButtons.selectedName, CURCOLOR1(red), CURCOLOR1(green), CURCOLOR1(blue),CURCOLOR1(alpha) );
 			CLIENT_COMMAND(1, command);
 		}
 		UI_TouchButtons_GetButtonList();
@@ -424,7 +430,7 @@ static void UI_TouchButtons_Callback( void *self, int event )
 		break;
 	case ID_SELECT:
 		UI_TouchButtons_DisableButtons();
-		uiFileDialogGlobal.npatterns = 6;
+		uiFileDialogGlobal.npatterns = 7;
 		strcpy( uiFileDialogGlobal.patterns[0], "touch/*.tga");
 		strcpy( uiFileDialogGlobal.patterns[1], "touch_default/*.tga");
 		strcpy( uiFileDialogGlobal.patterns[2], "gfx/touch/*");
@@ -462,14 +468,14 @@ static void UI_TouchButtons_Init( void )
 	uiTouchButtons.background.generic.height = 768;
 	uiTouchButtons.background.pic = ART_BACKGROUND;
 
-	/*uiTouchOptions.banner.generic.id = ID_BANNER;
-	uiTouchOptions.banner.generic.type = QMTYPE_BITMAP;
-	uiTouchOptions.banner.generic.flags = QMF_INACTIVE|QMF_DRAW_ADDITIVE;
-	uiTouchOptions.banner.generic.x = UI_BANNER_POSX;
-	uiTouchOptions.banner.generic.y = UI_BANNER_POSY;
-	uiTouchOptions.banner.generic.width = UI_BANNER_WIDTH;
-	uiTouchOptions.banner.generic.height = UI_BANNER_HEIGHT;
-	uiTouchOptions.banner.pic = ART_BANNER;*/
+	uiTouchButtons.banner.generic.id = ID_BANNER;
+	uiTouchButtons.banner.generic.type = QMTYPE_BITMAP;
+	uiTouchButtons.banner.generic.flags = QMF_INACTIVE|QMF_DRAW_ADDITIVE;
+	uiTouchButtons.banner.generic.x = UI_BANNER_POSX;
+	uiTouchButtons.banner.generic.y = UI_BANNER_POSY - 70;
+	uiTouchButtons.banner.generic.width = UI_BANNER_WIDTH;
+	uiTouchButtons.banner.generic.height = UI_BANNER_HEIGHT;
+	uiTouchButtons.banner.pic = ART_BANNER;
 /*
 	uiTouchOptions.testImage.generic.id = ID_BANNER;
 	uiTouchOptions.testImage.generic.type = QMTYPE_BITMAP;
@@ -608,30 +614,33 @@ static void UI_TouchButtons_Init( void )
 
 	uiTouchButtons.save.generic.id = ID_SAVE;
 	uiTouchButtons.save.generic.type = QMTYPE_BM_BUTTON;
-	uiTouchButtons.save.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
-	uiTouchButtons.save.generic.x = 384 - 72 + 400;
+	uiTouchButtons.save.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW | QMF_ACT_ONRELEASE;
+	uiTouchButtons.save.generic.x = 384 - 72 + 320;
 	uiTouchButtons.save.generic.y = 520;
 	uiTouchButtons.save.generic.name = "Save";
 	uiTouchButtons.save.generic.statusText = "Save as new button";
 	uiTouchButtons.save.generic.callback = UI_TouchButtons_Callback;
+	uiTouchButtons.save.pic = PIC_Load("gfx/shell/btn_touch_save");
 
 	uiTouchButtons.editor.generic.id = ID_EDITOR;
 	uiTouchButtons.editor.generic.type = QMTYPE_BM_BUTTON;
-	uiTouchButtons.editor.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
-	uiTouchButtons.editor.generic.x = 680;
-	uiTouchButtons.editor.generic.y = 570;
+	uiTouchButtons.editor.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW | QMF_ACT_ONRELEASE;
+	uiTouchButtons.editor.generic.x = 384 - 72 + 320;
+	uiTouchButtons.editor.generic.y = 580;
 	uiTouchButtons.editor.generic.name = "Editor";
 	uiTouchButtons.editor.generic.statusText = "Open interactive editor";
 	uiTouchButtons.editor.generic.callback = UI_TouchButtons_Callback;
+	uiTouchButtons.editor.pic = PIC_Load("gfx/shell/btn_touch_editor");
 
 	uiTouchButtons.select.generic.id = ID_SELECT;
 	uiTouchButtons.select.generic.type = QMTYPE_BM_BUTTON;
-	uiTouchButtons.select.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
+	uiTouchButtons.select.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW | QMF_ACT_ONRELEASE;
 	uiTouchButtons.select.generic.x = 500;
 	uiTouchButtons.select.generic.y = 300;
 	uiTouchButtons.select.generic.name = "Select";
 	uiTouchButtons.select.generic.statusText = "Select texture from list";
 	uiTouchButtons.select.generic.callback = UI_TouchButtons_Callback;
+	uiTouchButtons.select.pic = PIC_Load("gfx/shell/btn_touch_select");
 
 	uiTouchButtons.name.generic.id = ID_NAME;
 	uiTouchButtons.name.generic.type = QMTYPE_FIELD;
@@ -642,7 +651,7 @@ static void UI_TouchButtons_Init( void )
 	uiTouchButtons.name.generic.width = 205;
 	uiTouchButtons.name.generic.height = 32;
 	uiTouchButtons.name.generic.callback = UI_TouchButtons_Callback;
-	uiTouchButtons.name.maxLength = 16;
+	uiTouchButtons.name.maxLength = 255;
 
 	uiTouchButtons.command.generic.id = ID_COMMAND;
 	uiTouchButtons.command.generic.type = QMTYPE_FIELD;
@@ -653,7 +662,7 @@ static void UI_TouchButtons_Init( void )
 	uiTouchButtons.command.generic.width = 205;
 	uiTouchButtons.command.generic.height = 32;
 	uiTouchButtons.command.generic.callback = UI_TouchButtons_Callback;
-	uiTouchButtons.command.maxLength = 16;
+	uiTouchButtons.command.maxLength = 255;
 
 	uiTouchButtons.texture.generic.id = ID_TEXTURE;
 	uiTouchButtons.texture.generic.type = QMTYPE_FIELD;
@@ -664,7 +673,7 @@ static void UI_TouchButtons_Init( void )
 	uiTouchButtons.texture.generic.width = 205;
 	uiTouchButtons.texture.generic.height = 32;
 	uiTouchButtons.texture.generic.callback = UI_TouchButtons_Callback;
-	uiTouchButtons.texture.maxLength = 160;
+	uiTouchButtons.texture.maxLength = 255;
 
 	uiTouchButtons.msgBox.generic.id = ID_MSGBOX;
 	uiTouchButtons.msgBox.generic.type = QMTYPE_ACTION;
@@ -720,29 +729,29 @@ static void UI_TouchButtons_Init( void )
 
 	UI_UtilSetupPicButton( &uiTouchButtons.no, PC_CANCEL );
 
-	UI_TouchButtons_GetButtonList();
-
 	uiTouchButtons.reset.generic.id = ID_RESET;
 	uiTouchButtons.reset.generic.type = QMTYPE_BM_BUTTON;
-	uiTouchButtons.reset.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
+	uiTouchButtons.reset.generic.flags = QMF_HIGHLIGHTIFFOCUS | QMF_DROPSHADOW | QMF_ACT_ONRELEASE;
 	uiTouchButtons.reset.generic.name = "Reset";
-	uiTouchButtons.reset.generic.x = 270;
-	uiTouchButtons.reset.generic.y = 600;
+	uiTouchButtons.reset.generic.x = 384 - 72 + 480;
+	uiTouchButtons.reset.generic.y = 580;
 	uiTouchButtons.reset.generic.callback = UI_TouchButtons_Callback;
 	uiTouchButtons.reset.generic.statusText = "Reset touch to default state";
+	uiTouchButtons.reset.pic = PIC_Load("gfx/shell/btn_touch_reset");
 
 	uiTouchButtons.remove.generic.id = ID_DELETE;
 	uiTouchButtons.remove.generic.type = QMTYPE_BM_BUTTON;
 	uiTouchButtons.remove.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
-	uiTouchButtons.remove.generic.x = 270;
-	uiTouchButtons.remove.generic.y = 550;
+	uiTouchButtons.remove.generic.x = 384 - 72 + 480;
+	uiTouchButtons.remove.generic.y = 520;
 	uiTouchButtons.remove.generic.name = "Delete";
 	uiTouchButtons.remove.generic.statusText = "Delete saved game";
 	uiTouchButtons.remove.generic.callback = UI_TouchButtons_Callback;
 	UI_UtilSetupPicButton( &uiTouchButtons.remove, PC_DELETE );
 
+	uiTouchButtons.buttonList.itemNames = (const char **)uiTouchButtons.bNamesPtr;
+
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.background );
-	//UI_AddItem( &uiTouchOptions.menu, (void *)&uiTouchOptions.banner );
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.remove );
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.reset );
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.done );
@@ -764,6 +773,7 @@ static void UI_TouchButtons_Init( void )
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.editor );
 
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.name );
+	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.banner );
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.command );
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.texture );
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.color );
@@ -773,7 +783,7 @@ static void UI_TouchButtons_Init( void )
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.no );
 	UI_AddItem( &uiTouchButtons.menu, (void *)&uiTouchButtons.yes );
 
-
+	UI_TouchButtons_GetButtonList();
 }
 
 /*
@@ -784,7 +794,7 @@ UI_TouchButtons_Precache
 void UI_TouchButtons_Precache( void )
 {
 	PIC_Load( ART_BACKGROUND );
-	//PIC_Load( ART_BANNER );
+	PIC_Load( ART_BANNER );
 	uiTouchButtons.gettingList = false; // prevent filling list before init
 }
 
