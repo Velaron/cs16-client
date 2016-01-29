@@ -163,9 +163,9 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 
 	int client_index = READ_BYTE();		// the client who spoke the message
 	char szBuf[3][256];
-	strncpy( szBuf[0], READ_STRING(), sizeof(origStr));
-	strncpy( szBuf[1], READ_STRING(), sizeof(str1));
-	strncpy( szBuf[2], READ_STRING(), sizeof(str2));
+	strncpy( szBuf[0], READ_STRING(), sizeof(szBuf[0]));
+	strncpy( szBuf[1], READ_STRING(), sizeof(szBuf[1]));
+	strncpy( szBuf[2], READ_STRING(), sizeof(szBuf[2]));
 
 	// TODO:
 	// Make it compatible with CS
