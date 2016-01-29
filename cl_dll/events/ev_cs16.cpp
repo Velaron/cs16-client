@@ -302,13 +302,13 @@ void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName )
 	case 2: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff3.spr"); break;
 	case 3: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff4.spr"); break;
 	}
-	TEMPENTITY *te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos, wallPuffSprite, 20.0f );
+	TEMPENTITY *te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos, wallPuffSprite, 30.0f );
 	if( te )
 	{
-		te->entity.baseline.origin = 15 * pTrace->plane.normal;
+		te->entity.baseline.origin = 10 * pTrace->plane.normal;
 		te->flags = FTENT_SPRANIMATE | FTENT_FADEOUT;
 		te->entity.curstate.rendermode = kRenderTransAdd;
-		te->entity.curstate.renderamt = 60;
+		te->entity.curstate.renderamt = 30;
 		te->entity.angles[ROLL] = gEngfuncs.pfnRandomLong( 0, 359 );
 		te->entity.curstate.scale = 0.25;
 	}
