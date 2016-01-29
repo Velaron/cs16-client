@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include "parsemsg.h"
 #include "vgui_parser.h"
-
+#include "ctype.h"
 
 DECLARE_MESSAGE( m_TextMessage, TextMsg );
 
@@ -168,7 +168,7 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 
 	int msg_dest = READ_BYTE();
 
-	static char szBuf[6][128];
+	static char szBuf[6][256];
 	char *msg_text = LookupString( READ_STRING(), &msg_dest );
 	msg_text = strcpy( szBuf[0], msg_text );
 
@@ -187,8 +187,23 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	StripEndNewlineFromString( sstr4 );
 	char *psz = szBuf[5];
 
-//	if ( gViewPort && gViewPort->AllowedToPrintText() == FALSE )
-		//return 1;
+	// Remove numbers after %s.
+	// VALVEWHY?
+	if( strlen(msg_text) >= 3 )
+	{
+		for( int i = 0; i < strlen(msg_text) - 2; i++)
+		{
+			if( msg_text[i] == '%' && msg_text[i + 1] == 's' && isdigit(msg_text[i + 2]))
+			{
+				char *first = &msg_text[i + 2];
+				char *second = &msg_text[i + 3];
+
+				memmove( first, second, strlen( second ));
+				first[strlen(first)] = '\0';
+			}
+		}
+	}
+
 
 	switch ( msg_dest )
 	{
@@ -211,6 +226,12 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	case HUD_PRINTCONSOLE:
 		sprintf( psz, msg_text, sstr1, sstr2, sstr3, sstr4 );
 		ConsolePrint( ConvertCRtoNL( psz ) );
+		break;
+
+	case HUD_PRINTRADIO:
+		// For some reason, HUD_PRINTRADIO always have "1" in msg_text
+		sprintf( psz, sstr1, sstr2, sstr3, sstr4 );
+		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128 );
 		break;
 	}
 

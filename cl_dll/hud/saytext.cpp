@@ -24,6 +24,8 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
+#include "vgui_parser.h"
 
 //#include "vgui_TeamFortressViewport.h"
 
@@ -160,7 +162,14 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 
 	int client_index = READ_BYTE();		// the client who spoke the message
-	SayTextPrint( READ_STRING(), iSize - 1,  client_index );
+	char szBuf[3][256];
+	strncpy( szBuf[0], READ_STRING(), sizeof(origStr));
+	strncpy( szBuf[1], READ_STRING(), sizeof(str1));
+	strncpy( szBuf[2], READ_STRING(), sizeof(str2));
+
+	// TODO:
+	// Make it compatible with CS
+	SayTextPrint( szBuf[2], strlen(szBuf[2]),  client_index );
 	
 	return 1;
 }
@@ -191,6 +200,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	g_iNameLengths[i] = 0;
 	g_pflNameColors[i] = NULL;
 
+#if 1
 	// if it's a say message, search for the players name in the string
 	if ( *pszBuf == 2 && clientIndex > 0 )
 	{
@@ -208,6 +218,8 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 			}
 		}
 	}
+#endif
+
 
 	strncpy( g_szLineBuffer[i], pszBuf, max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
 

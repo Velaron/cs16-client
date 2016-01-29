@@ -470,6 +470,7 @@ public:
 	int Draw( float flTime );
 	CHudMsgFunc(SayText);
 	void SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex = -1 );
+	void SayTextPrint( char szBuf[3][256] );
 	void EnsureTextFitsInOneLineAndWrapIfHaveTo( int line );
 	friend class CHudSpectator;
 
@@ -568,7 +569,7 @@ public:
 	int Init( void );
 	static char *LocaliseTextString( const char *msg, char *dst_buffer, int buffer_size );
 	static char *BufferedLocaliseTextString( const char *msg );
-	char *LookupString( const char *msg_name, int *msg_dest = NULL );
+	static char *LookupString( const char *msg_name, int *msg_dest = NULL );
 	CHudMsgFunc(TextMsg);
 };
 
