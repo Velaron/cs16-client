@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================
-
+#pragma once
 // eventscripts.h
 #if !defined ( EVENTSCRIPTSH )
 #define EVENTSCRIPTSH

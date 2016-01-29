@@ -4,12 +4,10 @@
 //
 // $NoKeywords: $
 //=============================================================================
-
+#pragma once
 #if !defined( STUDIO_UTIL_H )
 #define STUDIO_UTIL_H
-#if defined( WIN32 )
-#pragma once
-#endif
+
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h

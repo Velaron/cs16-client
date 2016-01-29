@@ -15,7 +15,7 @@
 //  Vector.h
 // A subset of the extdll.h in the project HL Entity DLL
 //
-
+#pragma once
 // Misc C-runtime library headers
 #include "stdio.h"
 #include "stdlib.h"

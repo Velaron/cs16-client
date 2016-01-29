@@ -25,12 +25,10 @@
 *    version.
 *
 */
-
+#pragma once
 #ifndef UNICODE_STR_TOOLS_H
 #define UNICODE_STR_TOOLS_H
-#ifdef _WIN32
-#pragma once
-#endif
+
 
 #ifdef _WIN32
 

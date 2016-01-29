@@ -7,7 +7,7 @@
 
 // Camera.h  --  defines and such for a 3rd person camera
 // NOTE: must include quakedef.h first
-
+#pragma once
 #ifndef _CAMERA_H_
 #define _CAMEA_H_
 

@@ -15,7 +15,7 @@
 //
 // cl_util.h
 //
-
+#pragma once
 #include "cvardef.h"
 #ifndef TRUE
 #define TRUE 1

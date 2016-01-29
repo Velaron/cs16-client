@@ -4,10 +4,9 @@
 //
 // $NoKeywords: $
 //=============================================================================
-
+#pragma once
 #ifndef SPECTATOR_H
 #define SPECTATOR_H
-#pragma once
 
 #include "cl_entity.h"
 #include "hud.h"

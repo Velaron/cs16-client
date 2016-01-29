@@ -4,10 +4,9 @@
 //
 // $NoKeywords: $
 //=============================================================================
-
+#pragma once
 #if !defined( DEMOH )
 #define DEMOH
-#pragma once
 
 // Types of demo messages we can write/parse
 enum

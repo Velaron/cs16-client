@@ -4,10 +4,9 @@
 //
 // $NoKeywords: $
 //=============================================================================
-
+#pragma once
 #if !defined( HUD_IFACEH )
 #define HUD_IFACEH
-#pragma once
 #ifdef _WIN32
 #define EXPORT		_declspec( dllexport )
 #define _DLLEXPORT __declspec( dllexport )

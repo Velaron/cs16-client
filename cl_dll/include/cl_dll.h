@@ -17,7 +17,7 @@
 //
 
 // 4-23-98  JOHN
-
+#pragma once
 //
 //  This DLL is linked by the client when they first initialize.
 // This DLL is responsible for the following tasks:

@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================
-
+#pragma once
 #if !defined ( EV_HLDMH )
 #define EV_HLDMH
 
