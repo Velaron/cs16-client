@@ -384,6 +384,7 @@ struct team_info_t
 	short players;
 	int already_drawn;
 	int scores_overriden;
+	int sumping;
 	//int teamnumber; not used
 };
 

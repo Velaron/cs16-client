@@ -222,17 +222,18 @@ int CHud :: DrawHudString( int xpos, int ypos, int iMaxX, char *szIt, int r, int
 			{
 			case 'y':
 				UnpackRGB( r, g, b, RGB_YELLOWISH );
-				break;
+				continue;
 			case 'w':
 				r = g = b = 255;
-				break;
-			case 'R':
-				if( drawing ) return xpos;
-				return DrawHudStringReverse( iMaxX, ypos, first_xpos, szIt, r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
+				continue;
 			case 'd':
-				break;
+				continue;
+			case 'R':
+				//if( drawing ) return xpos;
+				//return DrawHudStringReverse( iMaxX, ypos, first_xpos, szIt, r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
+				xpos = iMaxX - gHUD.m_scrinfo.charWidths[ 'M' ] * 10;
+				++szIt;
 			}
-			continue;
 		}
 
 		xpos += TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );		
@@ -274,7 +275,7 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
 			return xpos;
 		xpos = next;
 
-		if( szString[i + 1] == '\\' )
+		if( i > 1 && szString[i - 1] == '\\' )
 		{
 			// an escape character
 
@@ -287,8 +288,9 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
 				r = g = b = 255;
 				break;
 			case 'R':
-				if( drawing ) return xpos;
-				else return DrawHudString( iMinX, ypos, first_xpos, &szString[i], r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
+				//if( drawing ) return xpos;
+				//else return DrawHudString( iMinX, ypos, first_xpos, &szString[i - 1], r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
+				//xpos = iMinX + gHUD.m_scrinfo.charWidths['M'] * i ;
 			case 'd':
 				break;
 			}

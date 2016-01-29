@@ -134,7 +134,7 @@ int CHudScoreboard :: Draw( float flTime )
 		{
 			xstart     = 0.125f * ScreenWidth;
 			xend       = ScreenWidth - xstart;
-			ystart     = 100;
+			ystart     = 90;
 			yend       = ScreenHeight - ystart;
 			m_colors.r = 0;
 			m_colors.g = 0;
@@ -179,7 +179,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	ypos = ystart + (list_slot * ROW_GAP);
 	FillRGBA( xstart, ypos, xend - xstart, 1, 255, 140, 0, 255);  // draw the separator line
 	
-	//list_slot += 0.8;
+	list_slot += 0.8;
 
 	if ( !gHUD.m_Teamplay )
 	{
@@ -192,7 +192,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	for ( int i = 1; i <= m_iNumTeams; i++ )
 	{
 		if ( !g_TeamInfo[i].scores_overriden )
-			g_TeamInfo[i].frags = g_TeamInfo[i].deaths = 0;
+			g_TeamInfo[i].sumping = g_TeamInfo[i].frags = g_TeamInfo[i].deaths = 0;
 
 		g_TeamInfo[i].already_drawn = FALSE;
 	}
@@ -220,6 +220,8 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 			g_TeamInfo[j].frags += g_PlayerExtraInfo[i].frags;
 			g_TeamInfo[j].deaths += g_PlayerExtraInfo[i].deaths;
 		}
+
+		g_TeamInfo[j].sumping += g_PlayerInfoList[i].ping;
 
 		if ( g_PlayerInfoList[i].thisplayer )
 			g_TeamInfo[j].ownteam = TRUE;
@@ -259,27 +261,45 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 		ypos = ystart + (list_slot * ROW_GAP);
 
 		// check we haven't drawn too far down
-		//if ( ypos > ROW_RANGE_MAX )  // don't draw to close to the lower border
-		//	break;
+		if ( ypos > yend )  // don't draw to close to the lower border
+			break;
 
 		int r, g, b;
+		char teamName[64];
 		//GetTeamColor(r, g, b, team_info->teamnumber);
 		if( !strcmp(team_info->name, "TERRORIST"))
+		{
 			GetTeamColor( r, g, b, TEAM_TERRORIST );
+			snprintf(teamName, sizeof(teamName), "Terrorists   -   %i players", team_info->players);
+			gHUD.DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
+		}
 		else if( !strcmp(team_info->name, "CT"))
+		{
 			GetTeamColor( r, g, b, TEAM_CT );
-		else GetTeamColor( r, g, b, TEAM_UNASSIGNED );
-
-
-		// draw their name (left to right)
-		gHUD.DrawHudString(       NAME_POS_START(),   ypos, NAME_POS_END(),   team_info->name,   r, g, b );
-		gHUD.DrawHudNumberString( KILLS_POS_START(),  ypos, KILLS_POS_END(),  team_info->frags,  r, g, b );
-		gHUD.DrawHudNumberString( DEATHS_POS_START(), ypos, DEATHS_POS_END(), team_info->deaths, r, g, b );
+			snprintf(teamName, sizeof(teamName), "Counter-Terrorists   -   %i players", team_info->players);
+			gHUD.DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
+		}
+		else if( !strcmp(team_info->name, "SPECTATOR" ) )
+		{
+			GetTeamColor( r, g, b, TEAM_SPECTATOR );
+			strncpy( teamName, "Spectators", sizeof(teamName) );
+		}
+		else
+		{
+			GetTeamColor( r, g, b, TEAM_UNASSIGNED );
+			strncpy( teamName, team_info->name, sizeof(teamName) );
+		}
+		//gHUD.DrawHudNumberString( DEATHS_POS_START(), ypos, DEATHS_POS_END(), team_info->deaths, r, g, b );
+		gHUD.DrawHudString( NAME_POS_START(),   ypos, NAME_POS_END(),   teamName,   r, g, b );
+		gHUD.DrawHudNumberString( PING_POS_END(),  ypos, PING_POS_START(),  team_info->sumping / team_info->players,  r, g, b );
 
 		team_info->already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get drawn again
 
+		// draw underline
+		list_slot += 1.2f;
+		FillRGBA( xstart, ystart + (list_slot * ROW_GAP), xend - xstart, 1, r, g, b, 255);
 
-		list_slot++;
+		list_slot += 0.4f;
 		// draw all the players that belong to this team, indented slightly
 		list_slot = DrawPlayers( xstart, list_slot, 10, team_info->name );
 	}
@@ -330,12 +350,12 @@ int CHudScoreboard :: DrawPlayers( int xpos, float list_slot, int nameoffset, ch
 		if ( ypos > yend )  // don't draw to close to the lower border
 			break;
 
-			int r, g, b;
-			r = g = b = 255;
-			float *colors = GetClientColor( best_player );
-			r *= colors[0];
-			g *= colors[1];
-			b *= colors[2];
+		int r, g, b;
+		r = g = b = 255;
+		float *colors = GetClientColor( best_player );
+		r *= colors[0];
+		g *= colors[1];
+		b *= colors[2];
 
 
 		if(pl_info->thisplayer) // hey, it's me!
@@ -346,7 +366,7 @@ int CHudScoreboard :: DrawPlayers( int xpos, float list_slot, int nameoffset, ch
 		}
 
 
-		gHUD.DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), pl_info->name, r, g, b );
+		gHUD.DrawHudString( NAME_POS_START() + 10, ypos, NAME_POS_END(), pl_info->name, r, g, b );
 
 		// draw bomb( if player have the bomb )
 		if( g_PlayerExtraInfo[best_player].dead )
@@ -424,7 +444,13 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 	
 	if ( cl > 0 && cl <= MAX_PLAYERS )
 	{  // set the players team
-		strncpy( g_PlayerExtraInfo[cl].teamname, READ_STRING(), MAX_TEAM_NAME );
+		char teamName[MAX_TEAM_NAME];
+		strncpy( teamName, READ_STRING(), MAX_TEAM_NAME );
+
+		if( !strcmp(teamName, "UNASSIGNED") )
+			strncpy( teamName, "SPECTATOR", MAX_TEAM_NAME );
+
+		strncpy( g_PlayerExtraInfo[cl].teamname, teamName, MAX_TEAM_NAME );
 	}
 
 	// rebuild the list of teams
@@ -457,7 +483,8 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 		}
 
 		if ( j > m_iNumTeams )
-		{ // they aren't in a listed team, so make a new one
+		{
+			// they aren't in a listed team, so make a new one
 			// search through for an empty team slot
 			for ( j = 1; j <= m_iNumTeams; j++ )
 			{
