@@ -588,9 +588,9 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 	if (gEngfuncs.IsSpectateOnly())
 		return 1;
 
-	if ( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL ) )
+	if ( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_ALL ) )
 	{
-		static wrect_t nullrc;
+		static wrect_t nullrc = {0, 0, 0, 0};
 		gpActiveSel = NULL;
 		SetCrosshair( 0, nullrc, 0, 0, 0 );
 	}
@@ -730,7 +730,6 @@ int CHudAmmo::MsgFunc_Crosshair(const char *pszName, int iSize, void *pbuf)
 int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
-
 	int MessageID = READ_BYTE();
 
 	Vector start, velocity;
@@ -1086,12 +1085,14 @@ int CHudAmmo::Draw(float flTime)
 	if (!m_pWeapon)
 		return 0;
 
+	if( gHUD.m_iFOV > 40 )
+		DrawCrosshair(flTime, m_pWeapon->iId); // draw a dynamic crosshair
+
 	WEAPON *pw = m_pWeapon; // shorthand
 
 	// SPR_Draw Ammo
 	if ((pw->iAmmoType < 0) && (pw->iAmmo2Type < 0))
 		return 0;
-
 
 	int iFlags = DHN_DRAWZERO; // draw 0 values
 
@@ -1176,9 +1177,6 @@ int CHudAmmo::Draw(float flTime)
 		}
 	}
 
-	if( gHUD.m_iFOV > 40 )
-		DrawCrosshair(flTime, m_pWeapon->iId); // draw a dynamic crosshair
-
 	return 1;
 }
 
@@ -1230,6 +1228,10 @@ void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
 	int iDeltaDistance, iDistance;
 	int iLength;
 	float flCrosshairDistance;
+
+
+	if ( g_iWeaponFlags & WPNSTATE_SHIELD_DRAWN )
+		return;
 
 	if ( weaponid > 30 )
 	{
