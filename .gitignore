@@ -41,3 +41,6 @@
 *.exp
 *.idb
 *.ilk
+
+android/pak/
+android/assets/extras.pak
