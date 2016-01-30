@@ -144,7 +144,7 @@ int CHudScoreboard :: Draw( float flTime )
 		}
 	}
 
-	DrawScoreboard(flTime);
+	return DrawScoreboard(flTime);
 }
 
 int CHudScoreboard :: DrawScoreboard( float fTime )
