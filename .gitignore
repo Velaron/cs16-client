@@ -28,3 +28,14 @@
 *.app
 
 *.user
+*.sdf
+*.opendb
+*.pdb
+*.iobj
+*.lastbuildstate
+*.tlog
+*.log
+*.suo
+*.ipch
+*.ipdb
+*.exp

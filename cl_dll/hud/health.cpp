@@ -542,4 +542,5 @@ int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 
 	CreateCorpse( &origin, &angles, szModel, delay, sequence, classID );
 #endif
+   return 0;
 }

@@ -31,6 +31,20 @@
 #include "com_weapons.h"
 //#include "vgui_TeamFortressViewport.h"
 
+#ifdef _MSC_VER
+
+void sincosf (float rad, float *sine, float *cosine)
+{
+   *sine = sinf (rad);
+   *cosine = cosf (rad);
+}
+
+#ifndef M_PI
+#define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
+#endif
+
+#endif
+
 WEAPON *gpActiveSel;	// NULL means off, 1 means just the menu bar, otherwise
 						// this points to the active weapon menu item
 WEAPON *gpLastSel;		// Last weapon menu selection 
@@ -710,6 +724,7 @@ int CHudAmmo::MsgFunc_Crosshair(const char *pszName, int iSize, void *pbuf)
 	{
 		m_bDrawCrosshair = false;
 	}
+   return 0;
 }
 
 int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
@@ -1311,7 +1326,7 @@ void CHudAmmo::CalcCrosshairSize()
 {
 	const char *size = m_pClCrosshairSize->string;
 
-	if( !strcasecmp(size, "auto") )
+	if( !stricmp(size, "auto") )
 	{
 		if( ScreenWidth < 640 )
 			m_iCrosshairScaleBase = 1024;
@@ -1321,11 +1336,11 @@ void CHudAmmo::CalcCrosshairSize()
 		return;
 	}
 
-	if( !strcasecmp( size, "large" ))
+	if( !stricmp( size, "large" ))
 		m_iCrosshairScaleBase = 640;
-	else if( !strcasecmp( size, "medium" ))
+	else if( !stricmp( size, "medium" ))
 		m_iCrosshairScaleBase = 800;
-	else if( !strcasecmp( size, "large" ))
+	else if( !stricmp( size, "large" ))
 		m_iCrosshairScaleBase = 1024;
 
 	return;

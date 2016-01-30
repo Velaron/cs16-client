@@ -7,6 +7,10 @@ Copyright (C) 2016 a1batross
 #include "cl_util.h"
 #include "parsemsg.h"
 
+#ifndef M_PI
+#define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
+#endif
+
 DECLARE_COMMAND( m_Radar, ShowRadar )
 DECLARE_COMMAND( m_Radar, HideRadar )
 
@@ -197,6 +201,7 @@ int CHudRadar::Draw(float flTime)
 			}
 		}
 	}
+   return 0;
 }
 
 void CHudRadar::DrawPlayerLocation()

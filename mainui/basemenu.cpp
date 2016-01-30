@@ -1106,7 +1106,7 @@ void UI_KeyEvent( int key, int down )
 		return;
 	if( key == K_MOUSE1 )
 	{
-		cursorDown = down;
+		cursorDown = !!down;
 	}
 
 	if( uiStatic.menuActive->keyFunc )

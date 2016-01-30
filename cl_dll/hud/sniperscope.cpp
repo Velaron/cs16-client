@@ -82,4 +82,6 @@ int CHudSniperScope::Draw(float flTime)
 	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
 	Quad(right - 1.0f / ScreenWidth, 0, ScreenWidth, ScreenHeight);
 	gEngfuncs.pTriAPI->End();
+
+   return 0;
 }

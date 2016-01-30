@@ -90,7 +90,7 @@ void EV_Fireglock18( event_args_t *args )
 			if( g_bHoldingShield )
 				seq = GLOCK18_SHIELD_SHOOT;
 			else
-				seq = g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE != 0 || g_bGlockBurstMode? GLOCK18_SHOOT1: GLOCK18_SHOOT3;
+				seq = (g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE) != 0 || g_bGlockBurstMode? GLOCK18_SHOOT1: GLOCK18_SHOOT3;
 		}
 		else
 		{
@@ -106,7 +106,7 @@ void EV_Fireglock18( event_args_t *args )
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
-		g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE != 0 || g_bGlockBurstMode ? "weapons/glock18-1.wav": "weapons/glock18-2.wav",
+		(g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE) != 0 || g_bGlockBurstMode ? "weapons/glock18-1.wav": "weapons/glock18-2.wav",
 		1, ATTN_NORM, 0,
 		94 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
 	EV_GetGunPosition( args, vecSrc, origin );
