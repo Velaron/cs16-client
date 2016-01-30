@@ -1,5 +1,13 @@
 #!/bin/sh
 
+mkdir -p pak/
+mkdir -p assets/
+cp -vr extras_src/CS16client_extrass/* pak/
+cp -vr extras_src/CS16Client_vgui_buy_classic/touch/* pak/touch/
+cp -vr extras_src/CS16client_vgui_radio/touch/* pak/touch/
+cp -vr extras_src/CS16Client_vgui_team_classic/touch/* pak/touch/
+python2 makepak.py pak/ assets/extras.pak
+
 ndk-build NDK_TOOLCHAIN_VERSION=4.8 NDK_DEBUG=0 V=0 -j2
 ant debug
 #jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ../../myks.keystore bin/cs16-client-release-unsigned.apk xashdroid -tsa https://timestamp.geotrust.com/tsa
