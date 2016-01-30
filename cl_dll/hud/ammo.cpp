@@ -1017,7 +1017,7 @@ void CHudAmmo::UserCmd_Autobuy()
 	}
 
 	ConsolePrint(szCmd);
-	gEngfuncs.pfnClientCmd(szCmd);
+	gEngfuncs.pfnServerCmd(szCmd);
 
 	gEngfuncs.COM_FreeFile( afile );
 }
@@ -1026,8 +1026,9 @@ void CHudAmmo::UserCmd_Rebuy()
 {
 	char *afile = (char*)gEngfuncs.COM_LoadFile("rebuy.txt", 5, NULL);
 	char *pfile = afile;
-	char token[256];
-	char szCmd[1024];
+	char token[64];
+	char szCmd[512];
+	int lastCh;
 
 	if( !pfile )
 	{
@@ -1035,17 +1036,23 @@ void CHudAmmo::UserCmd_Rebuy()
 		return;
 	}
 
-	strcpy(szCmd, "cl_setrebuy");
+	// start with \"
+	strcpy(szCmd, "cl_setrebuy \"");
+
+
 
 	while(pfile = gEngfuncs.COM_ParseFile( pfile, token ))
 	{
-		// append space first
-		strcat(szCmd, " ");
 		strcat(szCmd, token);
+		// append space after token
+		strcat(szCmd, " ");
 	}
+	// replace last space with ", before terminator
+	lastCh = strlen(szCmd);
+	szCmd[lastCh - 1] = '\"';
 
 	ConsolePrint(szCmd);
-	gEngfuncs.pfnClientCmd(szCmd);
+	gEngfuncs.pfnServerCmd(szCmd);
 
 	gEngfuncs.COM_FreeFile( afile );
 }
