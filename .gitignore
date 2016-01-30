@@ -39,3 +39,5 @@
 *.ipch
 *.ipdb
 *.exp
+*.idb
+*.ilk
