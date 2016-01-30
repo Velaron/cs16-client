@@ -192,8 +192,9 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	for ( int i = 1; i <= m_iNumTeams; i++ )
 	{
 		if ( !g_TeamInfo[i].scores_overriden )
-			g_TeamInfo[i].sumping = g_TeamInfo[i].frags = g_TeamInfo[i].deaths = 0;
-
+			g_TeamInfo[i].frags = g_TeamInfo[i].deaths = 0;
+		g_TeamInfo[i].sumping = 0;
+		g_TeamInfo[i].players = 0;
 		g_TeamInfo[i].already_drawn = FALSE;
 	}
 
@@ -227,6 +228,8 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 			g_TeamInfo[j].ownteam = TRUE;
 		else
 			g_TeamInfo[j].ownteam = FALSE;
+
+		g_TeamInfo[j].players++;
 	}
 
 	// Draw the teams
