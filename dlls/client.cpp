@@ -93,10 +93,6 @@ void ClientDisconnect(edict_t *pEntity)
 
 	UTIL_SetOrigin(&pEntity->v, pEntity->v.origin);
 	g_pGameRules->ClientDisconnected(pEntity);
-
-	if (pPlayer->IsBot())
-	{
-	}
 }
 
 BOOL g_skipCareerInitialSpawn;

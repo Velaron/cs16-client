@@ -143,6 +143,8 @@ void CHudMessage::MessageScanNextChar( void )
 	int srcRed, srcGreen, srcBlue, destRed, destGreen, destBlue;
 	int blend;
 
+   srcRed = srcGreen = srcBlue = destRed = destGreen = destBlue = blend = 0;
+
 	srcRed = m_parms.pMessage->r1;
 	srcGreen = m_parms.pMessage->g1;
 	srcBlue = m_parms.pMessage->b1;
