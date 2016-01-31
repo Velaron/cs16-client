@@ -21,6 +21,7 @@ This file contains "stubs" of class member implementations so that we can predic
  add in the functionality you need.
 ==========================
 */
+#include    "port.h"
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"

@@ -16,6 +16,7 @@
 *
 ****/
 
+#include "port.h"
 #include <string.h>
 #ifndef ACTIVITY_H
 #include "activity.h"

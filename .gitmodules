@@ -1,3 +1,19 @@
 [submodule "yapb"]
 	path = yapb
 	url = https://github.com/jeefo/yapb
+
+[submodule "CS16client_extrass"]
+	path = android/extras_src/CS16client_extrass
+	url = https://github.com/sergiopoverony/CS16client_extrass
+	
+[submodule "CS16client_vgui_radio"]
+	path = android/extras_src/CS16client_vgui_radio
+	url = https://github.com/sergiopoverony/CS16client_vgui_radio
+	
+[submodule "CS16Client_vgui_team_classic"]
+	path = android/extras_src/CS16Client_vgui_team_classic
+	url = https://github.com/sergiopoverony/CS16Client_vgui_team_classic
+
+[submodule "CS16Client_vgui_buy_classic"]
+	path = android/extras_src/CS16Client_vgui_buy_classic
+	url = https://github.com/sergiopoverony/CS16Client_vgui_buy_classic

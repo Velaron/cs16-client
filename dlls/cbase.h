@@ -23,6 +23,7 @@
 #define FCAP_DIRECTIONAL_USE 0x00000040
 #define FCAP_MASTER 0x00000080
 #define FCAP_FORCE_TRANSITION 0x00000080
+#include "port.h"
 
 #include "saverestore.h"
 #include "schedule.h"

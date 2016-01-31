@@ -1394,6 +1394,14 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		case WEAPON_P90:
 			pWeapon = &g_P90;
 			break;
+
+		case WEAPON_NONE:
+			break;
+
+		case WEAPON_GLOCK:
+		default:
+			gEngfuncs.Con_Printf("VALVEWHY: Unknown Weapon %i is active.\n", from->client.m_iId );
+			break;
 	}
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
@@ -1451,8 +1459,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		player.m_rgAmmo[ pCurrent->m_iSecondaryAmmoType ]	= (int)from->client.vuser4[ 2 ];
 	}
 
-	if( g_pWpns[ from->client.m_iId - 1 ] )
-		g_iWeaponFlags = g_pWpns[ from->client.m_iId - 1 ]->m_iWeaponState;
+	if( g_pWpns[ from->client.m_iId ] )
+		g_iWeaponFlags = g_pWpns[ from->client.m_iId ]->m_iWeaponState;
 
 	// For random weapon events, use this seed to seed random # generator
 	player.random_seed = random_seed;
@@ -1723,7 +1731,7 @@ void _DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct u
 #endif
 	{
 		to->client.fov = g_lastFOV;
-		g_iWeaponFlags = from->weapondata[ from->client.m_iId - 1].m_iWeaponState;
+		g_iWeaponFlags = from->weapondata[ from->client.m_iId ].m_iWeaponState;
 		g_iPlayerFlags = from->client.flags;
 		g_iFreezeTimeOver	= !(from->client.iuser3 & PLAYER_FREEZE_TIME_OVER);
 		g_bInBombZone		= (from->client.iuser3 & PLAYER_IN_BOMB_ZONE) != 0;
