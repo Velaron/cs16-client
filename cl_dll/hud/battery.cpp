@@ -41,13 +41,12 @@ int CHudBattery::Init( void )
 
 int CHudBattery::VidInit( void )
 {
-	int HUD_suit_empty = gHUD.GetSpriteIndex( "suit_empty" );
-	int HUD_suit_full = gHUD.GetSpriteIndex( "suit_full" );
+	m_hEmpty[Vest].SetSpriteByName("suit_empty");
+	m_hFull[Vest].SetSpriteByName("suit_full");
+	m_hEmpty[VestHelm].SetSpriteByName("suithelmet_empty");
+	m_hFull[VestHelm].SetSpriteByName("suithelmet_full");
 
-	m_hSprite1 = m_hSprite2 = 0;  // delaying get sprite handles until we know the sprites are loaded
-	m_prc1 = &gHUD.GetSpriteRect( HUD_suit_empty );
-	m_prc2 = &gHUD.GetSpriteRect( HUD_suit_full );
-	m_iHeight = m_prc2->bottom - m_prc1->top;
+	m_iHeight = m_hEmpty[Vest].rect.bottom - m_hEmpty[Vest].rect.top;
 	m_fFade = 0;
 
 	return 1;
@@ -80,7 +79,7 @@ int CHudBattery::Draw( float flTime )
 	int r, g, b, x, y, a;
 	wrect_t rc;
 
-	rc = *m_prc2;
+	rc = m_hEmpty[m_enArmorType].rect;
 
 	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 	rc.top += m_iHeight * ((float)( 100 - ( min( 100, m_iBat ))) * 0.01f );
@@ -112,40 +111,22 @@ int CHudBattery::Draw( float flTime )
 
 	ScaleColors( r, g, b, a );
 	
-	int iOffset = (m_prc1->bottom - m_prc1->top) / 6;
+	int iOffset = m_iHeight / 6;
 
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 	x = ScreenWidth / 5;
 
 	// make sure we have the right sprite handles
-	if( !m_hSprite1 )
-		m_hSprite1 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_empty" ));
-
-	if( !m_hSprite2 )
-		m_hSprite2 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_full" ));
-
-	if( !m_hSprite1Helmet )
-		m_hSprite1Helmet = gHUD.GetSprite( gHUD.GetSpriteIndex( "suithelmet_empty" ));
-
-	if( !m_hSprite2Helmet )
-		m_hSprite2Helmet = gHUD.GetSprite( gHUD.GetSpriteIndex( "suithelmet_full" ));
-
-	if( m_enArmorType == Vest )
-		SPR_Set( m_hSprite1, r, g, b );
-	else
-		SPR_Set( m_hSprite1Helmet, r, g, b );
-	SPR_DrawAdditive( 0,  x, y - iOffset, m_prc1 );
+	SPR_Set( m_hFull[m_enArmorType].spr, r, g, b );
+	SPR_DrawAdditive( 0, x, y - iOffset, &m_hFull[m_enArmorType].rect );
 
 	if( rc.bottom > rc.top )
 	{
-		if( m_enArmorType == Vest )
-			SPR_Set( m_hSprite2, r, g, b );
-		else
-			SPR_Set( m_hSprite2Helmet, r, g, b );
-		SPR_DrawAdditive( 0, x, y - iOffset + (rc.top - m_prc2->top), &rc );
+		SPR_Set( m_hEmpty[m_enArmorType].spr, r, g, b );
+		SPR_DrawAdditive( 0, x, y - iOffset + (rc.top - m_hEmpty[m_enArmorType].rect.top), &rc );
 	}
 
-	x += (m_prc1->right - m_prc1->left);
+	x += (m_hEmpty[Vest].rect.right - m_hEmpty[Vest].rect.left);
 	x = gHUD.DrawHudNumber( x, y, DHN_3DIGITS|DHN_DRAWZERO, m_iBat, r, g, b );
 
 	return 1;

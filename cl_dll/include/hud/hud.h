@@ -29,6 +29,8 @@
 #include "cl_dll.h"
 #include "ammo.h"
 
+#include "csprite.h"
+
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
 #define DHN_3DIGITS  4
@@ -62,6 +64,8 @@ extern cvar_t *cl_minmodels;
 extern cvar_t *cl_min_t;
 extern cvar_t *cl_min_ct;
 extern char *sPlayerModelFiles[];
+
+class CSprite;
 
 inline bool BIsValidTModelIndex( int i )
 {
@@ -493,21 +497,16 @@ public:
 	CHudMsgFunc(ArmorType);
 	
 private:
-	HSPRITE m_hSprite1;
-	HSPRITE m_hSprite2;
-	HSPRITE m_hSprite1Helmet;
-	HSPRITE m_hSprite2Helmet;
-	wrect_t *m_prc1;
-	wrect_t *m_prc2;
-	int	  m_iBat;
-	float m_fFade;
-	int	  m_iHeight;		// width of the battery innards
-
 	enum armortype_t {
 		Vest = 0,
 		VestHelm
 	} m_enArmorType;
 
+	CSprite m_hEmpty[VestHelm + 1];
+	CSprite m_hFull[VestHelm + 1];
+	int	  m_iBat;
+	float m_fFade;
+	int	  m_iHeight;		// width of the battery innards
 };
 
 
@@ -525,12 +524,9 @@ public:
 	CHudMsgFunc(FlashBat);
 	
 private:
-	HSPRITE m_hSprite1;
-	HSPRITE m_hSprite2;
-	HSPRITE m_hBeam;
-	wrect_t *m_prc1;
-	wrect_t *m_prc2;
-	wrect_t *m_prcBeam;
+	CSprite m_hSprite1;
+	CSprite m_hSprite2;
+	CSprite m_hBeam;
 	float m_flBat;
 	int	  m_iBat;
 	int	  m_fOn;

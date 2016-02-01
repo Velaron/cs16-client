@@ -131,6 +131,21 @@ HSPRITE LoadSprite(const char *pszName)
 	return SPR_Load(sz);
 }
 
+int HUD_GetSpriteIndexByName( const char *sz )
+{
+	return gHUD.GetSpriteIndex(sz);
+}
+
+HSPRITE HUD_GetSprite( int index )
+{
+	return gHUD.GetSprite(index);
+}
+
+wrect_t HUD_GetSpriteRect( int index )
+{
+	return gHUD.GetSpriteRect( index );
+}
+
 float g_ColorBlue[3]	= { 0.6, 0.8, 1.0 };
 float g_ColorRed[3]		= { 1.0, 0.25, 0.25 };
 float g_ColorGreen[3]	= { 0.6, 1.0, 0.6 };

@@ -32,9 +32,6 @@
 
 #define MAX_CLIENTS 32
 
-extern BEAM *pBeam;
-extern BEAM *pBeam2;
-
 /// USER-DEFINED SERVER MESSAGE HANDLERS
 
 int CHud :: MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf )
@@ -80,9 +77,14 @@ int CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 		pList = pList->pNext;
 	}
 
-	//Probably not a good place to put this.
-	pBeam = pBeam2 = NULL;
 	g_iFreezeTimeOver = 0;
+
+	for( int i = 0; i < MAX_PLAYERS; i++ )
+	{
+		g_PlayerExtraInfo[i].frags = 0;
+	}
+
+	ResetRain();
 
 	return 1;
 }
@@ -92,31 +94,6 @@ int CHud :: MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 	m_Teamplay = READ_BYTE();
-
-	return 1;
-}
-
-
-int CHud :: MsgFunc_Damage(const char *pszName, int iSize, void *pbuf )
-{
-	int		armor, blood;
-	Vector	from;
-	int		i;
-	float	count;
-	
-	BEGIN_READ( pbuf, iSize );
-	armor = READ_BYTE();
-	blood = READ_BYTE();
-
-	for (i=0 ; i<3 ; i++)
-		from[i] = READ_COORD();
-
-	count = (blood * 0.5) + (armor * 0.5);
-
-	if (count < 10)
-		count = 10;
-
-	// TODO: kick viewangles,  show damage visually
 
 	return 1;
 }
