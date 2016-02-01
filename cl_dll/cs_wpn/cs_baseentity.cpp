@@ -228,7 +228,7 @@ void UTIL_ScreenShake(const Vector &center, float amplitude, float frequency, fl
 void UTIL_Bubbles(Vector mins, Vector maxs, int count) { }
 void RemoveEntityHashValue(entvars_s *pev, const char *value, hash_types_e fieldType) { }
 void AddEntityHashValue(entvars_s *pev, const char *value, hash_types_e fieldType) { }
-int UTIL_PointContents(const Vector &vec) { }
+int UTIL_PointContents(const Vector &vec) { return 0; }
 void UTIL_EmitAmbientSound(edict_t *entity, const Vector &vecOrigin, const char *samp, float vol, float attenuation, int fFlags, int pitch) { }
 
 CGrenade *CGrenade::ShootSatchelCharge(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity) { return 0; }
