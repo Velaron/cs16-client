@@ -66,7 +66,6 @@ static globalvars_t	Globals;
 static CBasePlayerWeapon *g_pWpns[ 32 ];
 
 float g_flApplyVel = 0.0;
-vec3_t previousorigin;
 
 // HLDM Weapon placeholder entities
 CAK47 g_AK47;
@@ -306,6 +305,64 @@ bool CBasePlayer::HasShield()
 	return g_bHoldingShield;
 }
 
+/*
+=====================
+CBasePlayerWeapon::HasSecondaryAttack()
+
+=====================
+*/
+bool CBasePlayerWeapon::HasSecondaryAttack()
+{
+	if (g_bHoldingShield == false)
+	{
+		if (m_iId == WEAPON_AK47 || m_iId == WEAPON_XM1014 || m_iId == WEAPON_MAC10 || m_iId == WEAPON_ELITE || m_iId == WEAPON_FIVESEVEN || m_iId == WEAPON_MP5N || m_iId == WEAPON_M249 || m_iId == WEAPON_M3 || m_iId == WEAPON_TMP || m_iId == WEAPON_DEAGLE || m_iId == WEAPON_P228 || m_iId == WEAPON_P90 || m_iId == WEAPON_C4 || m_iId == WEAPON_GALIL)
+			return false;
+	}
+
+	return true;
+}
+
+void CBasePlayerWeapon::FireRemaining(int &shotsFired, float &shootTime, BOOL isGlock18)
+{
+	m_iClip--;
+
+	if (m_iClip < 0)
+	{
+		m_iClip = 0;
+		shotsFired = 3;
+		shootTime = 0;
+		return;
+	}
+
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+	Vector vecDir;
+
+	int flags;
+	flags = FEV_NOTHOST;
+
+	if (isGlock18)
+	{
+		vecDir = m_pPlayer->FireBullets3(m_pPlayer->GetGunPosition(), gpGlobals->v_forward, 0.05, 8192, 1, BULLET_PLAYER_9MM, 18, 0.9, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
+		PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireGlock18, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000), (int)(m_pPlayer->pev->punchangle.y * 10000), m_iClip != 0, FALSE);
+		m_pPlayer->ammo_9mm--;
+	}
+	else
+	{
+		vecDir = m_pPlayer->FireBullets3(m_pPlayer->GetGunPosition(), gpGlobals->v_forward, m_fBurstSpread, 8192, 2, BULLET_PLAYER_556MM, 30, 0.96, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
+		PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireFamas, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000000), (int)(m_pPlayer->pev->punchangle.y * 10000000), m_iClip != 0, FALSE);
+		m_pPlayer->ammo_556nato--;
+	}
+
+	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+	shotsFired++;
+
+	if (shotsFired == 3)
+		shootTime = 0;
+	else
+		shootTime = gpGlobals->time + 0.1;
+}
 
 bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim)
 {
@@ -719,72 +776,137 @@ Handles weapon firing, reloading, etc.
 */
 void CBasePlayerWeapon::ItemPostFrame( void )
 {
-	if ((m_fInReload) && (m_pPlayer->m_flNextAttack <= 0.0))
-	{
-#if 0 // FIXME, need ammo on client to make this work right
-		// complete the reload.
-		int j = min( iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+	int button = m_pPlayer->pev->button;
 
-		// Add them to the clip
+	if (!HasSecondaryAttack())
+		button &= ~IN_ATTACK2;
+
+	if (m_flGlock18Shoot != 0)
+	{
+		m_iClip--;
+		if( m_iClip < 0 )
+		{
+			m_iClip = m_iGlock18ShotsFired = 0;
+		}
+		FireRemaining(m_iGlock18ShotsFired, m_flGlock18Shoot, TRUE);
+	}
+	else if (gpGlobals->time > m_flFamasShoot && m_flFamasShoot != 0)
+	{
+		m_iClip--;
+		if( m_iClip < 0 )
+		{
+			m_iClip = m_iFamasShotsFired = 0;
+		}
+		FireRemaining(m_iFamasShotsFired, m_flFamasShoot, FALSE);
+	}
+
+	if (m_flNextPrimaryAttack <= 0.0f)
+	{
+		if (m_pPlayer->m_bResumeZoom)
+		{
+			m_pPlayer->pev->fov = m_pPlayer->m_iFOV = m_pPlayer->m_iLastZoom;
+
+			if (m_pPlayer->m_iFOV == m_pPlayer->m_iLastZoom)
+				m_pPlayer->m_bResumeZoom = false;
+		}
+	}
+
+	if (!g_bHoldingShield)
+	{
+		if (m_fInReload && m_pPlayer->pev->button & IN_ATTACK2)
+		{
+			SecondaryAttack();
+			m_pPlayer->pev->button &= ~IN_ATTACK2;
+			m_fInReload = FALSE;
+			m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase();
+		}
+	}
+
+	if ((m_fInReload) && m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase())
+	{
+		int j = min(iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+
 		m_iClip += j;
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= j;
-#else
-		m_iClip += 10;
-#endif
 		m_fInReload = FALSE;
 	}
 
-	assert(m_pPlayer);
-
-	if ((m_pPlayer->pev->button & IN_ATTACK2) && (m_flNextSecondaryAttack <= 0.0))
+	if ((button & IN_ATTACK2) && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase())
 	{
-		if ( pszAmmo2() && !m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] )
-		{
+		if (pszAmmo2() && !m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()])
 			m_fFireOnEmpty = TRUE;
-		}
 
 		SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
-	else if ((m_pPlayer->pev->button & IN_ATTACK) && (m_flNextPrimaryAttack <= 0.0))
+	else if ((m_pPlayer->pev->button & IN_ATTACK) && m_flNextPrimaryAttack <= UTIL_WeaponTimeBase())
 	{
-		if ( (m_iClip == 0 && pszAmmo1()) || (iMaxClip() == -1 && !m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] ) )
-		{
+		if ((!m_iClip && pszAmmo1()) || (iMaxClip() == WEAPON_NOCLIP && !m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()]))
 			m_fFireOnEmpty = TRUE;
-		}
 
-		if( player.m_bCanShoot && !(m_iWeaponState & WPNSTATE_SHIELD_DRAWN) )
-		{
+		if (m_pPlayer->m_bCanShoot == true)
 			PrimaryAttack();
+	}
+	else if (m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload)
+	{
+		if (m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
+		{
+			if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
+			{
+				if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN))
+					Reload();
+			}
 		}
 	}
-	else if ( m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload )
+	else if (!(button & (IN_ATTACK | IN_ATTACK2)))
 	{
-		// reload when reload is pressed, or if no buttons are down and weapon is empty.
-		Reload();
-	}
-	else if ( !(m_pPlayer->pev->button & (IN_ATTACK|IN_ATTACK2) ) )
-	{
-		// no fire buttons down
+		if (m_bDelayFire == true)
+		{
+			m_bDelayFire = false;
+
+			if (m_iShotsFired > 15)
+				m_iShotsFired = 15;
+
+			m_flDecreaseShotsFired = gpGlobals->time + 0.4;
+		}
 
 		m_fFireOnEmpty = FALSE;
 
-		// weapon is useable. Reload if empty and weapon has waited as long as it has to after firing
-		if ( m_iClip == 0 && !(iFlags() & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack < 0.0 )
+		if (m_iId != WEAPON_USP && m_iId != WEAPON_GLOCK18 && m_iId != WEAPON_P228 && m_iId != WEAPON_DEAGLE && m_iId != WEAPON_ELITE && m_iId != WEAPON_FIVESEVEN)
 		{
-			Reload();
-			return;
+			if (m_iShotsFired > 0)
+			{
+				if (gpGlobals->time > m_flDecreaseShotsFired)
+				{
+					m_iShotsFired--;
+					m_flDecreaseShotsFired = gpGlobals->time + 0.0225;
+				}
+			}
+		}
+		else
+			m_iShotsFired = 0;
+
+		if (!IsUseable() && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
+		{
+		}
+		else
+		{
+			if (!m_iClip && !(iFlags() & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
+			{
+				if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
+				{
+					Reload();
+					return;
+				}
+			}
 		}
 
-		WeaponIdle( );
+		WeaponIdle();
 		return;
 	}
 
-	// catch all
-	if ( ShouldWeaponIdle() )
-	{
+	if (ShouldWeaponIdle())
 		WeaponIdle();
-	}
 }
 
 /*
@@ -1095,22 +1217,7 @@ void HUD_InitClientWeapons( void )
 	HUD_PrepEntity( &player		, NULL );
 
 	// Allocate slot(s) for each weapon that we are going to be predicting
-	/*HUD_PrepEntity( &g_Glock	, &player );
-	HUD_PrepEntity( &g_Crowbar	, &player );
-	HUD_PrepEntity( &g_Python	, &player );
-	HUD_PrepEntity( &g_Mp5	, &player );
-	HUD_PrepEntity( &g_Crossbow	, &player );
-	HUD_PrepEntity( &g_Shotgun	, &player );
-	HUD_PrepEntity( &g_Rpg	, &player );
-	HUD_PrepEntity( &g_Gauss	, &player );
-	HUD_PrepEntity( &g_Egon	, &player );
-	HUD_PrepEntity( &g_HGun	, &player );
-	HUD_PrepEntity( &g_HandGren	, &player );
-	HUD_PrepEntity( &g_Satchel	, &player );
-	HUD_PrepEntity( &g_Tripmine	, &player );
-	HUD_PrepEntity( &g_Snark	, &player );*/
 	HUD_PrepEntity( &g_P228, &player);
-	//HUD_PrepEntity( &g_GLOCK18, &player);
 	HUD_PrepEntity( &g_SCOUT, &player);
 	HUD_PrepEntity( &g_HEGrenade, &player);
 	HUD_PrepEntity( &g_XM1014, &player);
@@ -1141,41 +1248,6 @@ void HUD_InitClientWeapons( void )
 	HUD_PrepEntity( &g_P90, &player );
 }
 
-/*
-=====================
-HUD_GetLastOrg
-
-Retruns the last position that we stored for egon beam endpoint.
-=====================
-*/
-void HUD_GetLastOrg( float *org )
-{
-	int i;
-
-	// Return last origin
-	for ( i = 0; i < 3; i++ )
-	{
-		org[i] = previousorigin[i];
-	}
-}
-
-/*
-=====================
-HUD_SetLastOrg
-
-Remember our exact predicted origin so we can draw the egon to the right position.
-=====================
-*/
-void HUD_SetLastOrg( void )
-{
-	int i;
-
-	// Offset final origin by view_offset
-	for ( i = 0; i < 3; i++ )
-	{
-		previousorigin[i] = g_finalstate->playerstate.origin[i] + g_finalstate->client.view_ofs[ i ];
-	}
-}
 
 int GetWeaponAccuracyFlags( int weaponid )
 {
@@ -1395,13 +1467,13 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 			pWeapon = &g_P90;
 			break;
 
-		case WEAPON_NONE:
+		/*case WEAPON_NONE:
 			break;
 
 		case WEAPON_GLOCK:
 		default:
 			gEngfuncs.Con_Printf("VALVEWHY: Unknown Weapon %i is active.\n", from->client.m_iId );
-			break;
+			break;*/
 	}
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
@@ -1446,7 +1518,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pCurrent->m_flNextPrimaryAttack	= pfrom->m_flNextPrimaryAttack;
 		pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;
 		pCurrent->m_flTimeWeaponIdle	= pfrom->m_flTimeWeaponIdle;
-		pCurrent->pev->fuser1			= pfrom->fuser1;
 		pCurrent->m_flStartThrow		= pfrom->fuser2;
 		pCurrent->m_flReleaseThrow		= pfrom->fuser3;
 		pCurrent->m_iSwing				= pfrom->iuser1;
@@ -1459,8 +1530,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		player.m_rgAmmo[ pCurrent->m_iSecondaryAmmoType ]	= (int)from->client.vuser4[ 2 ];
 	}
 
-	if( g_pWpns[ from->client.m_iId ] )
-		g_iWeaponFlags = g_pWpns[ from->client.m_iId ]->m_iWeaponState;
+	if( g_pWpns[ from->client.m_iId - 1 ] )
+		g_iWeaponFlags = g_pWpns[ from->client.m_iId - 1 ]->m_iWeaponState;
 
 	// For random weapon events, use this seed to seed random # generator
 	player.random_seed = random_seed;
@@ -1629,11 +1700,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pto->m_flNextPrimaryAttack		= pCurrent->m_flNextPrimaryAttack;
 		pto->m_flNextSecondaryAttack	= pCurrent->m_flNextSecondaryAttack;
 		pto->m_flTimeWeaponIdle			= pCurrent->m_flTimeWeaponIdle;
-		pto->fuser1						= pCurrent->pev->fuser1;
+		pto->m_flNextReload				= pCurrent->m_flNextReload;
 		pto->fuser2						= pCurrent->m_flStartThrow;
 		pto->fuser3						= pCurrent->m_flReleaseThrow;
 		pto->iuser1						= pCurrent->m_iSwing;
 		pto->m_iWeaponState				= pCurrent->m_iWeaponState;
+		pto->m_fInZoom					= pCurrent->m_iShotsFired;
 		pto->m_fAimedDamage				= pCurrent->m_flLastFire;
 
 		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
@@ -1642,7 +1714,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pto->m_flNextPrimaryAttack		-= cmd->msec / 1000.0;
 		pto->m_flNextSecondaryAttack	-= cmd->msec / 1000.0;
 		pto->m_flTimeWeaponIdle			-= cmd->msec / 1000.0;
-		pto->fuser1						-= cmd->msec / 1000.0;
 
 		to->client.vuser3[2]				= pCurrent->m_iSecondaryAmmoType;
 		to->client.vuser4[0]				= pCurrent->m_iPrimaryAmmoType;
@@ -1698,9 +1769,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	{
 		to->client.fuser3 = -0.001;
 	}
-
-	// Store off the last position from the predicted state.
-	HUD_SetLastOrg();
 
 	// Wipe it so we can't use it after this frame
 	g_finalstate = NULL;
