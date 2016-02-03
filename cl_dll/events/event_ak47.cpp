@@ -44,9 +44,7 @@ void EV_FireAK47( event_args_t *args )
 	vec3_t ShellVelocity, ShellOrigin;
 	vec3_t vecSrc, vecAiming;
 	vec3_t up, right, forward;
-	float flSpread = 0.01;
-	const char *szSoundName;
-	int sequence, shell, idx;
+	int shell, idx;
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
@@ -74,9 +72,14 @@ void EV_FireAK47( event_args_t *args )
 
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
+
+	Vector vSpread;
+	int tracerCount;
+	vSpread.x = args->fparam1;
+	vSpread.y = args->fparam2;
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		1, vecSrc, vecAiming,
-		8192, 0, 0, 0,
-		args->fparam1, args->fparam2 );
+		vSpread, 8192.0, BULLET_PLAYER_762MM, 0, &tracerCount,
+		2 );
 }

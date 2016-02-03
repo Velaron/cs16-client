@@ -76,17 +76,13 @@ void EV_FireSG550(event_args_s *args)
 
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
+	Vector vSpread;
+	int tracerCount;
+	vSpread.x = args->fparam1;
+	vSpread.y = args->fparam2;
 	EV_HLDM_FireBullets( idx,
-						 forward,
-						 right,
-						 up,
-						 1,
-						 vecSrc,
-						 vecAiming,
-						 8192,
-						 0,
-						 0,
-						 0,
-						 args->fparam1,
-						 args->fparam2 );
+		forward, right,	up,
+		1, vecSrc, vecAiming,
+		vSpread, 8192.0, BULLET_PLAYER_556MM, 0, &tracerCount,
+		2 );
 }

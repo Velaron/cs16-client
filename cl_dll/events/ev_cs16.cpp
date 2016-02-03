@@ -36,33 +36,11 @@
 #include "r_studioint.h"
 #include "com_model.h"
 
-extern engine_studio_api_t IEngineStudio;
+#include <assert.h>
 
 static int tracerCount[ 32 ];
 
 extern "C" char PM_FindTextureType( char *name );
-
-void V_PunchAxis( int axis, float punch );
-void VectorAngles( const float *forward, float *angles );
-
-extern cvar_t *cl_lw;
-BEAM *pBeam;
-BEAM *pBeam2;
-
-
-
-#define VECTOR_CONE_1DEGREES Vector( 0.00873, 0.00873, 0.00873 )
-#define VECTOR_CONE_2DEGREES Vector( 0.01745, 0.01745, 0.01745 )
-#define VECTOR_CONE_3DEGREES Vector( 0.02618, 0.02618, 0.02618 )
-#define VECTOR_CONE_4DEGREES Vector( 0.03490, 0.03490, 0.03490 )
-#define VECTOR_CONE_5DEGREES Vector( 0.04362, 0.04362, 0.04362 )
-#define VECTOR_CONE_6DEGREES Vector( 0.05234, 0.05234, 0.05234 )
-#define VECTOR_CONE_7DEGREES Vector( 0.06105, 0.06105, 0.06105 )	
-#define VECTOR_CONE_8DEGREES Vector( 0.06976, 0.06976, 0.06976 )
-#define VECTOR_CONE_9DEGREES Vector( 0.07846, 0.07846, 0.07846 )
-#define VECTOR_CONE_10DEGREES Vector( 0.08716, 0.08716, 0.08716 )
-#define VECTOR_CONE_15DEGREES Vector( 0.13053, 0.13053, 0.13053 )
-#define VECTOR_CONE_20DEGREES Vector( 0.17365, 0.17365, 0.17365 )
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
@@ -373,6 +351,84 @@ int EV_HLDM_CheckTracer( int idx, float *vecSrc, float *end, float *forward, flo
 	return tracer;
 }
 
+/*
+============
+EV_DescribeBulletTypeParameters
+
+Sets iPenetrationPower and flPenetrationDistance.
+If iBulletType is unknown, calls assert() and sets these two vars to 0
+============
+*/
+void EV_DescribeBulletTypeParameters(int iBulletType, int &iPenetrationPower, float &flPenetrationDistance)
+{
+	switch (iBulletType)
+	{
+	case BULLET_PLAYER_9MM:
+	{
+		iPenetrationPower = 21;
+		flPenetrationDistance = 800;
+		break;
+	}
+
+	case BULLET_PLAYER_45ACP:
+	{
+		iPenetrationPower = 15;
+		flPenetrationDistance = 500;
+		break;
+	}
+
+	case BULLET_PLAYER_50AE:
+	{
+		iPenetrationPower = 30;
+		flPenetrationDistance = 1000;
+		break;
+	}
+
+	case BULLET_PLAYER_762MM:
+	{
+		iPenetrationPower = 39;
+		flPenetrationDistance = 5000;
+		break;
+	}
+
+	case BULLET_PLAYER_556MM:
+	{
+		iPenetrationPower = 35;
+		flPenetrationDistance = 4000;
+		break;
+	}
+
+	case BULLET_PLAYER_338MAG:
+	{
+		iPenetrationPower = 45;
+		flPenetrationDistance = 8000;
+		break;
+	}
+
+	case BULLET_PLAYER_57MM:
+	{
+		iPenetrationPower = 30;
+		flPenetrationDistance = 2000;
+		break;
+	}
+
+	case BULLET_PLAYER_357SIG:
+	{
+		iPenetrationPower = 25;
+		flPenetrationDistance = 800;
+		break;
+	}
+
+	default:
+	{
+		iPenetrationPower = 0;
+		flPenetrationDistance = 0;
+		break;
+	}
+	}
+}
+
+
 
 /*
 ================
@@ -381,20 +437,42 @@ FireBullets
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int cShots, float *vecSrc, float *vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int *tracerCount, float flSpreadX, float flSpreadY )
+void EV_HLDM_FireBullets(int idx,
+						 float *forward, float *right, float *up,
+						 int cShots,
+						 float *vecSrc, float *vecDirShooting, float *vecSpread,
+						 float flDistance, int iBulletType, int iTracerFreq, int *tracerCount, int iPenetration)
 {
 	int i;
 	pmtrace_t tr;
 	int iShot;
 	int tracer;
+	int iPenetrationPower;
+	float flPenetrationDistance;
+
+	EV_DescribeBulletTypeParameters( iBulletType, iPenetrationPower, flPenetrationDistance );
 
 	for ( iShot = 1; iShot <= cShots; iShot++ )
 	{
-		vec3_t vecDir, vecEnd;
+		Vector vecDir, vecEnd;
+		Vector vecShotSpread(vecSpread);
+
+		if (iBulletType == BULLET_PLAYER_BUCKSHOT )
+		{
+			float x, y;
+			do
+			{
+				x = gEngfuncs.pfnRandomFloat(-5.0, 5.0) + gEngfuncs.pfnRandomFloat(-5.0, 5.0);
+				y = gEngfuncs.pfnRandomFloat(-5.0, 5.0) + gEngfuncs.pfnRandomFloat(-5.0, 5.0);
+			}
+			while (x * x + y * y > 1);
+			vecShotSpread[0] *= x;
+			vecShotSpread[1] *= y;
+		}
 
 		for ( i = 0; i < 3; i++ )
 		{
-			vecDir[i] = vecDirShooting[i] + flSpreadX * right[ i ] + flSpreadY * up [ i ];
+			vecDir[i] = vecDirShooting[i] + vecShotSpread[YAW] * right[ i ] + vecShotSpread[PITCH] * up [ i ];
 			vecEnd[i] = vecSrc[ i ] + flDistance * vecDir[ i ];
 		}
 
@@ -407,6 +485,9 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 		gEngfuncs.pEventAPI->EV_SetSolidPlayers ( idx - 1 );
 
 		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+
+
+
 		gEngfuncs.pEventAPI->EV_PlayerTrace( vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr );
 
 		tracer = EV_HLDM_CheckTracer( idx, vecSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount );
