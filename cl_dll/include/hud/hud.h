@@ -825,6 +825,7 @@ public:
 	float   m_flScale;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
+	cvar_t *cl_shadows;
 
 	int m_iFontHeight;
 	CHudAmmo		m_Ammo;

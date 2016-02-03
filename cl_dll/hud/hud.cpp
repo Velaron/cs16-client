@@ -74,6 +74,7 @@ GHUD_DECLARE_MESSAGE(BombDrop)
 GHUD_DECLARE_MESSAGE(HostageK)
 GHUD_DECLARE_MESSAGE(BombPickup)
 GHUD_DECLARE_MESSAGE(HostagePos)
+GHUD_DECLARE_MESSAGE(ShadowIdx)
 
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
@@ -91,6 +92,7 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( BombPickup );
 	HOOK_MESSAGE( HostagePos );
 	HOOK_MESSAGE( HostageK );
+	HOOK_MESSAGE( ShadowIdx );
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "_vgui_menus", "0", FCVAR_ARCHIVE | FCVAR_USERINFO ); // force client to use old style menus
@@ -108,9 +110,11 @@ void CHud :: Init( void )
 	cl_min_t     = CVAR_CREATE( "cl_min_t", "1", FCVAR_ARCHIVE );
 	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "1", FCVAR_ARCHIVE );
 	cl_lw        = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
+	cl_shadows   = CVAR_CREATE( "cl_shadows", "1", FCVAR_ARCHIVE );
 	default_fov  = CVAR_CREATE( "default_fov", "90", 0 );
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
+
 
 
 	m_iLogo = 0;

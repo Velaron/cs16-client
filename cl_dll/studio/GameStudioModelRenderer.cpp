@@ -75,7 +75,6 @@ engine_studio_api_t IEngineStudio;
 
 static client_anim_state_t g_state;
 static client_anim_state_t g_clientstate;
-cvar_t *cl_shadows;
 
 CGameStudioModelRenderer::CGameStudioModelRenderer(void)
 {
@@ -958,22 +957,40 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 				IEngineStudio.StudioClientEvents();
 		}
 	}
-	/*if( cl_shadows->value != 0.0f )
+	if( gHUD.cl_shadows->value != 0.0f )
 	{
-		StudioDrawShadow(m_pCurrentEntity->origin, 20.0f);
-	}*/
+		Vector chestpos;
+
+		for( int i = 0; i < m_nCachedBones; i++ )
+		{
+			if( !stricmp(m_nCachedBoneNames[i], "Bip01 Spine") )
+			{
+				chestpos.x = m_rgCachedBoneTransform[i][0][3];
+				chestpos.y = m_rgCachedBoneTransform[i][1][3];
+				chestpos.z = m_rgCachedBoneTransform[i][2][3];
+				StudioDrawShadow(chestpos, 20.0f);
+				break;
+			}
+		}
+
+	}
 
 	return 1;
 }
 
 void CGameStudioModelRenderer::StudioDrawShadow(Vector origin, float scale)
 {
-	/*Vector endPoint;
+	Vector endPoint = origin;
 	pmtrace_t pmTrace;
 
-	endPoint.x = origin.x;
-	endPoint.y = origin.y - 150.0f;
-	endPoint.z = origin.z;
+
+	if ( !gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.pfnGetModelByIndex( m_iShadowSprite ), 0 ))
+	{
+		return;
+	}
+
+
+	endPoint.z -= 150.0f;
 	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 	gEngfuncs.pEventAPI->EV_PlayerTrace(origin, endPoint, PM_STUDIO_BOX | PM_GLASS_IGNORE, -1, &pmTrace);
 
@@ -985,14 +1002,42 @@ void CGameStudioModelRenderer::StudioDrawShadow(Vector origin, float scale)
 
 	VectorNormalize(pmTrace.plane.normal);
 
-	if( pmTrace.plane.normal.z <= 0.7 )
-		return;
+	/*if( !(pmTrace.plane.normal.z == 1 && pmTrace.plane.normal.x == 0 && pmTrace.plane.normal.y == 0) )
+		return;*/
 
 	Vector p1, p2, p3, p4;
 
-	p1.x = (1.0 - pmTrace.fraction) * scale * - pmTrace.plane.normal.z;
+	p1 = p2 = p3 = p4 = pmTrace.endpos;
 
-	IEngineStudio.StudioRenderShadow(m_iShadowSprite, )*/
+	p1.x -= scale / 2;
+	p1.y -= scale / 2;
+
+	p2.x += scale / 2;
+	p2.y -= scale / 2;
+
+	p3.x += scale / 2;
+	p3.y += scale / 2;
+
+	p4.x -= scale / 2;
+	p4.y += scale / 2;
+
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
+	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	gEngfuncs.pTriAPI->Color4ub( 0, 0, 0, 255 );
+	gEngfuncs.pTriAPI->TexCoord2f( 0, 0 );
+	gEngfuncs.pTriAPI->Vertex3fv( p1 );
+
+	gEngfuncs.pTriAPI->TexCoord2f( 0, 1 );
+	gEngfuncs.pTriAPI->Vertex3fv( p2 );
+
+	gEngfuncs.pTriAPI->TexCoord2f( 1, 1 );
+	gEngfuncs.pTriAPI->Vertex3fv( p3 );
+
+	gEngfuncs.pTriAPI->TexCoord2f( 1, 0 );
+	gEngfuncs.pTriAPI->Vertex3fv( p4 );
+
+	gEngfuncs.pTriAPI->End();
 
 }
 void CGameStudioModelRenderer::StudioFxTransform(cl_entity_t *ent, float transform[3][4])
