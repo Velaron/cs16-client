@@ -963,7 +963,7 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 
 		for( int i = 0; i < m_nCachedBones; i++ )
 		{
-			if( !stricmp(m_nCachedBoneNames[i], "Bip01 Spine") )
+			if( !stricmp(m_nCachedBoneNames[i], "Bip01 Spine3") )
 			{
 				chestpos.x = m_rgCachedBoneTransform[i][0][3];
 				chestpos.y = m_rgCachedBoneTransform[i][1][3];
@@ -978,48 +978,57 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 	return 1;
 }
 
-void CGameStudioModelRenderer::StudioDrawShadow(Vector origin, float scale)
+void CGameStudioModelRenderer::StudioDrawShadow( Vector origin, float scale )
 {
 	Vector endPoint = origin;
-	pmtrace_t pmTrace;
+	Vector p1, p2, p3, p4;
+	pmtrace_t pmtrace;
+	static HSPRITE hSpriteFallback = 0;
 
-
-	if ( !gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.pfnGetModelByIndex( m_iShadowSprite ), 0 ))
+	if( !gEngfuncs.pTriAPI->SpriteTexture( (struct model_s*)gEngfuncs.pfnGetModelByIndex(m_iShadowSprite), 0 ) )
 	{
-		return;
+		if( !hSpriteFallback )
+			hSpriteFallback = gEngfuncs.pfnSPR_Load("sprites/shadow_circle.spr");
+		if( !gEngfuncs.pTriAPI->SpriteTexture( (struct model_s* )gEngfuncs.GetSpritePointer(hSpriteFallback), 0))
+			return;
 	}
 
-
 	endPoint.z -= 150.0f;
-	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-	gEngfuncs.pEventAPI->EV_PlayerTrace(origin, endPoint, PM_STUDIO_BOX | PM_GLASS_IGNORE, -1, &pmTrace);
 
-	if( pmTrace.startsolid )
+	gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+	gEngfuncs.pEventAPI->EV_PlayerTrace( origin, endPoint, PM_STUDIO_BOX | PM_GLASS_IGNORE, -1, &pmtrace );
+
+	// don't allow shadow if player in solid area
+	if( pmtrace.startsolid )
 		return;
 
-	if( pmTrace.fraction > 1.0)
+	// don't allow shadow if doesn't hit anything
+	if( pmtrace.fraction > 1.0f )
 		return;
 
-	VectorNormalize(pmTrace.plane.normal);
+	pmtrace.plane.normal = pmtrace.plane.normal.Normalize( );
 
-	/*if( !(pmTrace.plane.normal.z == 1 && pmTrace.plane.normal.x == 0 && pmTrace.plane.normal.y == 0) )
-		return;*/
+	// don't allow shadow on too lean planes
+	if( pmtrace.plane.normal.z <= 0.7 )
+		return;
 
-	Vector p1, p2, p3, p4;
+	pmtrace.plane.normal = pmtrace.plane.normal * scale * ( 1.0 - pmtrace.fraction );
 
-	p1 = p2 = p3 = p4 = pmTrace.endpos;
+	p1.x = pmtrace.endpos.x - pmtrace.plane.normal.z;
+	p1.y = pmtrace.endpos.y + pmtrace.plane.normal.z;
+	p1.z = pmtrace.endpos.z + 1.0f + pmtrace.plane.normal.x - pmtrace.plane.normal.y;
 
-	p1.x -= scale / 2;
-	p1.y -= scale / 2;
+	p2.x = pmtrace.endpos.x + pmtrace.plane.normal.z;
+	p2.y = pmtrace.endpos.y + pmtrace.plane.normal.z;
+	p2.z = pmtrace.endpos.z + 1.0f - pmtrace.plane.normal.x - pmtrace.plane.normal.y;
 
-	p2.x += scale / 2;
-	p2.y -= scale / 2;
+	p3.x = pmtrace.endpos.x + pmtrace.plane.normal.z;
+	p3.y = pmtrace.endpos.y - pmtrace.plane.normal.z;
+	p3.z = pmtrace.endpos.z + 1.0f - pmtrace.plane.normal.x + pmtrace.plane.normal.y;
 
-	p3.x += scale / 2;
-	p3.y += scale / 2;
-
-	p4.x -= scale / 2;
-	p4.y += scale / 2;
+	p4.x = pmtrace.endpos.x - pmtrace.plane.normal.z;
+	p4.y = pmtrace.endpos.y - pmtrace.plane.normal.z;
+	p4.z = pmtrace.endpos.z + 1.0f + pmtrace.plane.normal.x + pmtrace.plane.normal.y;
 
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
 	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
@@ -1027,19 +1036,15 @@ void CGameStudioModelRenderer::StudioDrawShadow(Vector origin, float scale)
 	gEngfuncs.pTriAPI->Color4ub( 0, 0, 0, 255 );
 	gEngfuncs.pTriAPI->TexCoord2f( 0, 0 );
 	gEngfuncs.pTriAPI->Vertex3fv( p1 );
-
-	gEngfuncs.pTriAPI->TexCoord2f( 0, 1 );
+	gEngfuncs.pTriAPI->TexCoord2f( 1, 0 );
 	gEngfuncs.pTriAPI->Vertex3fv( p2 );
-
 	gEngfuncs.pTriAPI->TexCoord2f( 1, 1 );
 	gEngfuncs.pTriAPI->Vertex3fv( p3 );
-
-	gEngfuncs.pTriAPI->TexCoord2f( 1, 0 );
+	gEngfuncs.pTriAPI->TexCoord2f( 0, 1 );
 	gEngfuncs.pTriAPI->Vertex3fv( p4 );
-
-	gEngfuncs.pTriAPI->End();
-
+	gEngfuncs.pTriAPI->End( );
 }
+
 void CGameStudioModelRenderer::StudioFxTransform(cl_entity_t *ent, float transform[3][4])
 {
 	switch (ent->curstate.renderfx)
