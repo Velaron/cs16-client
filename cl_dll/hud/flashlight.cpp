@@ -58,7 +58,7 @@ int CHudFlashlight::VidInit(void)
 	m_hSprite1.SetSpriteByName("flash_empty");
 	m_hSprite2.SetSpriteByName("flash_full");
 	m_hBeam.SetSpriteByName("flash_beam");
-	m_iWidth = m_prc2->right - m_prc2->left;
+	m_iWidth = m_hSprite1.rect.right - m_hSprite1.rect.left;
 
 	return 1;
 };
