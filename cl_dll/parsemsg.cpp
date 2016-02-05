@@ -18,19 +18,20 @@
 typedef unsigned char byte;
 #define true 1
 
+#include <stddef.h>
+
 static byte *gpBuf;
-static int giSize;
+static size_t giSize;
 static int giRead;
-static int giBadRead;
+static bool giBadRead;
 
 void BEGIN_READ( void *buf, int size )
 {
 	giRead = 0;
-	giBadRead = 0;
+	giBadRead = false;
 	giSize = size;
 	gpBuf = (byte*)buf;
 }
-
 
 int READ_CHAR( void )
 {
@@ -163,4 +164,3 @@ float READ_HIRESANGLE( void )
 {
 	return (float)(READ_SHORT() * (360.0/65536));
 }
-
