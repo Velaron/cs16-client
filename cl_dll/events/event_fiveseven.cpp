@@ -73,6 +73,14 @@ void EV_Fire57(event_args_t *args)
 		}
 
 	}
+#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
+	else
+	{
+		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
+		origin = ent->origin;
+	}
+#endif
+
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);

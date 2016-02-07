@@ -101,6 +101,14 @@ void EV_Fireglock18( event_args_t *args )
 		}
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
 	}
+#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
+	else
+	{
+		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
+		origin = ent->origin;
+	}
+#endif
+
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );

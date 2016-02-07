@@ -74,7 +74,13 @@ void EV_FireElite( event_args_s *args, int sequence )
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(sequence, 2);
 	}
-
+#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
+	else
+	{
+		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
+		origin = ent->origin;
+	}
+#endif
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);

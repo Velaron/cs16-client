@@ -65,6 +65,13 @@ void EV_FireM3( event_args_t *args )
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(M3_SHOOT1 + gEngfuncs.pfnRandomLong(0,2), 2);
 	}
+#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
+	else
+	{
+		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
+		origin = ent->origin;
+	}
+#endif
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );

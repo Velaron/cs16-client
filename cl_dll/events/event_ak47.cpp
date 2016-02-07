@@ -59,6 +59,11 @@ void EV_FireAK47( event_args_t *args )
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(AK47_SHOOT1, AK47_SHOOT3), 2);
 		EV_MuzzleFlash();
 	}
+	else
+	{
+		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
+		origin = ent->origin;
+	}
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
@@ -68,7 +73,6 @@ void EV_FireAK47( event_args_t *args )
 		gEngfuncs.pfnRandomLong(0, 1) ? "weapons/ak47-1.wav" : "weapons/ak47-2.wav",
 		1, ATTN_NORM, 0,
 		94 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
-
 
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );

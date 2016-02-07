@@ -455,7 +455,6 @@ void EV_HLDM_FireBullets(int idx,
 	for ( iShot = 1; iShot <= cShots; iShot++ )
 	{
 		Vector vecDir, vecEnd;
-		Vector vecShotSpread(vecSpread);
 
 		//We randomize for the Shotgun.
 		if ( iBulletType == BULLET_PLAYER_BUCKSHOT )
@@ -492,7 +491,6 @@ void EV_HLDM_FireBullets(int idx,
 		gEngfuncs.pEventAPI->EV_SetSolidPlayers ( idx - 1 );
 
 		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-
 
 
 		gEngfuncs.pEventAPI->EV_PlayerTrace( vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr );
