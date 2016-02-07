@@ -123,13 +123,13 @@ public class LauncherActivity extends Activity {
 				return;
 			}
 			break;
-		case 3:
-		case 4:
-			AlertDialog.Builder notImplementedDialogBuilder = new AlertDialog.Builder(this);
-			notImplementedDialogBuilder.setMessage(R.string.not_implemented_msg)
-				.setTitle(R.string.not_implemented_title);
-			notImplementedDialogBuilder.create();
-			return;
+		//case 3:
+		//case 4:
+		//	AlertDialog.Builder notImplementedDialogBuilder = new AlertDialog.Builder(this);
+		//	notImplementedDialogBuilder.setMessage(R.string.not_implemented_msg)
+		//		.setTitle(R.string.not_implemented_title);
+		//	notImplementedDialogBuilder.create();
+		//	return;
 		}
 		
 		Intent intent = new Intent();
