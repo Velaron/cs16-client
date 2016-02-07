@@ -19,9 +19,7 @@
 	<string name="shortcut_name">Shortcut name</string>-->
     <string-array name="avail_servers">
         <item>Nothing</item>
-        <item>cs16nd</item>
-        <item>YaPB over cs16nd</item>
-	<item>ReGameDLL_CS</item>
-	<item>YaPB over ReGameDLL_CS</item>
+        <item>ReGameDLL_CS with Нежные</item>
+        <item>ReGameDLL_CS with YaPB</item>
     </string-array>
 </resources>
