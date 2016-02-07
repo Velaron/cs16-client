@@ -219,6 +219,7 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 		break;
 
 	case HUD_PRINTTALK:
+		psz[0] = 2; // mark, so SayTextPrint will color it
 		sprintf( psz, msg_text, sstr1, sstr2, sstr3, sstr4 );
 		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128 );
 		break;
@@ -230,8 +231,16 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 
 	case HUD_PRINTRADIO:
 		// For some reason, HUD_PRINTRADIO always have "1" in msg_text
-		sprintf( psz, sstr1, sstr2, sstr3, sstr4 );
-		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128 );
+		for( int i = 1; i < MAX_PLAYERS; i++ )
+		{
+			if( g_PlayerInfoList[i].name && !strcmp(g_PlayerInfoList[i].name, sstr2) )
+			{
+				psz[0] = 2;
+				sprintf( psz + 1, sstr1, sstr2, sstr3, sstr4 );
+				gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128, i );
+				break;
+			}
+		}
 		break;
 	}
 

@@ -157,19 +157,57 @@ int CHudSayText :: Draw( float flTime )
 	return 1;
 }
 
+struct CSimpleMap {
+	const char key[32];
+	const char value[64];
+};
+
+CSimpleMap sayTextFmt[] =
+{
+{"#Cstrike_Chat_CT",	"\x02(Counter-Terrorist) %s :  %s"},
+{"#Cstrike_Chat_T", "\x02(Terrorist) %s :  %s"},
+{"#Cstrike_Chat_CT_Dead", "\x02*DEAD*(Counter-Terrorist) %s :  %s"},
+{"#Cstrike_Chat_T_Dead", "\x02*DEAD*(Terrorist) %s :  %s"},
+{"#Cstrike_Chat_Spec", "\x02(Spectator) %s :  %s"},
+{"#Cstrike_Chat_All", "\x02%s :  %s"},
+{"#Cstrike_Chat_AllDead", "\x02*DEAD* %s:  %s"},
+{"#Cstrike_Chat_AllSpec", "\x02*SPEC* %s:  %s"},
+{"#Cstrike_Name_Change", "\x02* %s changed name to %s"},
+};
+
 int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
 	int client_index = READ_BYTE();		// the client who spoke the message
-	char szBuf[3][256];
+	char szBuf[3][64];
 	strncpy( szBuf[0], READ_STRING(), sizeof(szBuf[0]));
 	strncpy( szBuf[1], READ_STRING(), sizeof(szBuf[1]));
 	strncpy( szBuf[2], READ_STRING(), sizeof(szBuf[2]));
 
-	// TODO:
-	// Make it compatible with CS
-	SayTextPrint( szBuf[2], strlen(szBuf[2]),  client_index );
+	const char *fmt =  "\x02%s: %s";
+	int i = 0;
+	for( i; i < sizeof(sayTextFmt) / sizeof(CSimpleMap); i++ )
+	{
+		if( !strncmp( szBuf[0], sayTextFmt[i].key, sizeof( szBuf ) ) )
+		{
+			fmt = sayTextFmt[i].value;
+			break;
+		}
+	}
+
+	char dst[256];
+	if( i == 8 )
+	{
+		snprintf( dst, sizeof( dst ), fmt, szBuf[1], szBuf[2]);
+	}
+	else
+	{
+		GetPlayerInfo( client_index, &g_PlayerInfoList[client_index] );
+		const char *pName = g_PlayerInfoList[client_index].name;
+		snprintf( dst, sizeof( dst ), fmt, pName, szBuf[2]);
+	}
+	SayTextPrint( dst, strlen(dst),  client_index );
 	
 	return 1;
 }
