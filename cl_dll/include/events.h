@@ -62,6 +62,9 @@ void VectorAngles( const float *forward, float *angles );
 #define DECLARE_EVENT( x ) void EV_##x( struct event_args_s *args )
 #define HOOK_EVENT( x, y ) gEngfuncs.pfnHookEvent( "events/" #x ".sc", EV_##y )
 
+// enable it until fix isn't applied in Xash3D
+#define _CS16CLIENT_FIX_EVENT_ORIGIN
+
 extern "C"
 {
 DECLARE_EVENT(FireAK47);
