@@ -457,23 +457,30 @@ void EV_HLDM_FireBullets(int idx,
 		Vector vecDir, vecEnd;
 		Vector vecShotSpread(vecSpread);
 
-		if (iBulletType == BULLET_PLAYER_BUCKSHOT )
+		//We randomize for the Shotgun.
+		if ( iBulletType == BULLET_PLAYER_BUCKSHOT )
 		{
-			float x, y;
-			do
-			{
-				x = gEngfuncs.pfnRandomFloat(-5.0, 5.0) + gEngfuncs.pfnRandomFloat(-5.0, 5.0);
-				y = gEngfuncs.pfnRandomFloat(-5.0, 5.0) + gEngfuncs.pfnRandomFloat(-5.0, 5.0);
-			}
-			while (x * x + y * y > 1);
-			vecShotSpread[0] *= x;
-			vecShotSpread[1] *= y;
-		}
+			float x, y, z;
+			do {
+				x = gEngfuncs.pfnRandomFloat(-0.5,0.5) + gEngfuncs.pfnRandomFloat(-0.5,0.5);
+				y = gEngfuncs.pfnRandomFloat(-0.5,0.5) + gEngfuncs.pfnRandomFloat(-0.5,0.5);
+				z = x*x+y*y;
+			} while (z > 1);
 
-		for ( i = 0; i < 3; i++ )
+			for ( i = 0 ; i < 3; i++ )
+			{
+				vecDir[i] = vecDirShooting[i] + x * vecSpread[0] * right[ i ] + y * vecSpread[1] * up [ i ];
+				vecEnd[i] = vecSrc[ i ] + flDistance * vecDir[ i ];
+			}
+		}//But other guns already have their spread randomized in the synched spread.
+		else
 		{
-			vecDir[i] = vecDirShooting[i] + vecShotSpread[YAW] * right[ i ] + vecShotSpread[PITCH] * up [ i ];
-			vecEnd[i] = vecSrc[ i ] + flDistance * vecDir[ i ];
+
+			for ( i = 0 ; i < 3; i++ )
+			{
+				vecDir[i] = vecDirShooting[i] + vecSpread[0] * right[ i ] + vecSpread[1] * up [ i ];
+				vecEnd[i] = vecSrc[ i ] + flDistance * vecDir[ i ];
+			}
 		}
 
 		gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction( false, true );
@@ -500,6 +507,7 @@ void EV_HLDM_FireBullets(int idx,
 
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
+
 }
 
 void EV_TrainPitchAdjust( event_args_t *args )

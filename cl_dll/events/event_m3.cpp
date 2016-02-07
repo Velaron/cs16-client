@@ -78,8 +78,8 @@ void EV_FireM3( event_args_t *args )
 	VectorCopy( forward, vecAiming );
 	Vector vSpread;
 	int tracerCount;
-	vSpread.x = args->fparam1;
-	vSpread.y = args->fparam2;
+	vSpread.x = 0.0725;
+	vSpread.y = 0.0725;
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		9, vecSrc, vecAiming,
