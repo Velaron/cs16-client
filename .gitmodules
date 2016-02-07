@@ -1,7 +1,10 @@
 [submodule "yapb"]
-	path = yapb
+	path = 3rdparty/yapb
 	url = https://github.com/jeefo/yapb
 
 [submodule "android/extras_src/extras"]
-	path = android/extras_src/extras
+	path = 3rdparty/extras
 	url = https://bitbucket.org/SergioPoverony/cs16client-vgui-menus
+[submodule "3rdparty/regamelite"]
+	path = 3rdparty/regamelite
+	url = https://bitbucket.org/dmitryzhukov/regamelite
