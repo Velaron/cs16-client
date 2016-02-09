@@ -51,19 +51,22 @@ void EV_FireAK47( event_args_t *args )
 	VectorCopy( args->angles, angles );
 	VectorCopy( args->velocity, velocity );
 
-	AngleVectors( angles, forward, right, up );
-
 	if ( EV_IsLocal( args->entindex ) )
 	{
 		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(AK47_SHOOT1, AK47_SHOOT3), 2);
 		EV_MuzzleFlash();
 	}
+#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
 	else
 	{
 		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
 		origin = ent->origin;
+		angles = ent->angles;
 	}
+#endif
+
+	AngleVectors( angles, forward, right, up );
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
