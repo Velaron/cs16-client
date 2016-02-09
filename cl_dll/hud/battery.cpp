@@ -46,7 +46,7 @@ int CHudBattery::VidInit( void )
 	m_hEmpty[VestHelm].SetSpriteByName("suithelmet_empty");
 	m_hFull[VestHelm].SetSpriteByName("suithelmet_full");
 
-	m_iHeight = m_hEmpty[Vest].rect.bottom - m_hEmpty[Vest].rect.top;
+	m_iHeight = m_hFull[Vest].rect.bottom - m_hEmpty[Vest].rect.top;
 	m_fFade = 0;
 
 	return 1;
@@ -111,22 +111,20 @@ int CHudBattery::Draw( float flTime )
 
 	ScaleColors( r, g, b, a );
 	
-	int iOffset = m_iHeight / 6;
-
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 	x = ScreenWidth / 5;
 
 	// make sure we have the right sprite handles
 	SPR_Set( m_hFull[m_enArmorType].spr, r, g, b );
-	SPR_DrawAdditive( 0, x, y - iOffset, &m_hFull[m_enArmorType].rect );
+	SPR_DrawAdditive( 0, x, y, &m_hFull[m_enArmorType].rect );
 
 	if( rc.bottom > rc.top )
 	{
 		SPR_Set( m_hEmpty[m_enArmorType].spr, r, g, b );
-		SPR_DrawAdditive( 0, x, y - iOffset + (rc.top - m_hEmpty[m_enArmorType].rect.top), &rc );
+		SPR_DrawAdditive( 0, x, y + (rc.top - m_hEmpty[m_enArmorType].rect.top), &rc );
 	}
 
-	x += (m_hEmpty[Vest].rect.right - m_hEmpty[Vest].rect.left);
+	x += (m_hEmpty[m_enArmorType].rect.right - m_hEmpty[m_enArmorType].rect.left);
 	x = gHUD.DrawHudNumber( x, y, DHN_3DIGITS|DHN_DRAWZERO, m_iBat, r, g, b );
 
 	return 1;
