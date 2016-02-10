@@ -241,6 +241,9 @@ void CHud :: VidInit( void )
 	m_scrinfo.iSize = sizeof(m_scrinfo);
 	GetScreenInfo(&m_scrinfo);
 
+	m_truescrinfo.iWidth = CVAR_GET_FLOAT("width");
+	m_truescrinfo.iHeight = CVAR_GET_FLOAT("height");
+
 	// ----------
 	// Load Sprites
 	// ---------

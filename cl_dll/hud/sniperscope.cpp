@@ -38,10 +38,10 @@ int CHudSniperScope::VidInit()
 	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga", NULL, 0, TF_NEAREST);
 	m_iScopeArc[3] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_sw.tga", NULL, 0, TF_NEAREST);
 	blackTex = gRenderAPI.GL_FindTexture("*black");
-	left = (ScreenWidth - ScreenHeight)/2;
-	right = left + ScreenHeight;
-	centerx = ScreenWidth/2;
-	centery = ScreenHeight/2;
+	left = (TrueWidth - TrueHeight)/2;
+	right = left + TrueHeight;
+	centerx = TrueWidth/2;
+	centery = TrueHeight/2;
 	return 1;
 }
 
@@ -66,21 +66,21 @@ int CHudSniperScope::Draw(float flTime)
 
 	gRenderAPI.GL_Bind(0, m_iScopeArc[2]);
 	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(centerx, centery, right, ScreenHeight);
+	Quad(centerx, centery, right, TrueHeight);
 	gEngfuncs.pTriAPI->End();
 
 	gRenderAPI.GL_Bind(0, m_iScopeArc[3]);
 	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(left, centery, centerx, ScreenHeight);
+	Quad(left, centery, centerx, TrueHeight);
 	gEngfuncs.pTriAPI->End();
 
 	gRenderAPI.GL_Bind(0, blackTex);
 	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(0, 0, left + 1.0f / ScreenWidth, ScreenHeight);
+	Quad(0, 0, left + 1.0f / TrueWidth, TrueHeight);
 	gEngfuncs.pTriAPI->End();
 
 	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(right - 1.0f / ScreenWidth, 0, ScreenWidth, ScreenHeight);
+	Quad(right - 1.0f / TrueWidth, 0, TrueWidth, TrueHeight);
 	gEngfuncs.pTriAPI->End();
 
    return 0;

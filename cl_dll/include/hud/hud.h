@@ -874,6 +874,9 @@ public:
 
 	// Screen information
 	SCREENINFO	m_scrinfo;
+	// As Xash3D can fake m_scrinfo for hud scailing
+	// we will use a real screen parameters
+	SCREENINFO  m_truescrinfo;
 
 	int	m_iWeaponBits;
 	int	m_fPlayerDead;

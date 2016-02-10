@@ -73,6 +73,9 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 // ScreenWidth returns the width of the screen, in pixels
 #define ScreenWidth (gHUD.m_scrinfo.iWidth)
 
+#define TrueHeight (gHUD.m_truescrinfo.iHeight)
+#define TrueWidth (gHUD.m_truescrinfo.iWidth)
+
 // Use this to set any co-ords in 640x480 space
 #define XRES(x)		((int)(float(x)  * ((float)ScreenWidth / 640.0f) + 0.5f))
 #define YRES(y)		((int)(float(y)  * ((float)ScreenHeight / 480.0f) + 0.5f))
