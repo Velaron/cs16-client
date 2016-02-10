@@ -47,6 +47,8 @@
 #define max(a,b)  (((a) > (b)) ? (a) : (b))
 #endif
 
+#define CanAttack( x, y, z ) ((x) <= (y))
+
 extern "C" char PM_FindTextureType( char *name );
 
 extern globalvars_t *gpGlobals;
@@ -61,7 +63,7 @@ static int			num_ents = 0;
 static CBasePlayer	player;
 
 // Local version of game .dll global variables ( time, etc. )
-static globalvars_t	Globals;
+static globalvars_t	Globals = { 0 };
 
 static CBasePlayerWeapon *g_pWpns[ 32 ];
 
@@ -124,18 +126,6 @@ void AlertMessage( ALERT_TYPE atype, char *szFmt, ... )
 
 	gEngfuncs.Con_Printf( "cl:  " );
 	gEngfuncs.Con_Printf( string );
-}
-
-//Returns if it's multiplayer.
-//Mostly used by the client side weapons.
-bool bIsMultiplayer ( void )
-{
-	return gEngfuncs.GetMaxClients() == 1 ? 0 : 1;
-}
-//Just loads a v_ model.
-void LoadVModel ( char *szViewModel, CBasePlayer *m_pPlayer )
-{
-	gEngfuncs.CL_LoadModel( szViewModel, &m_pPlayer->pev->viewmodel );
 }
 
 /*
@@ -212,6 +202,7 @@ void HUD_PrepEntity( CBaseEntity *pEntity, CBasePlayer *pWeaponOwner )
 	if ( pWeaponOwner )
 	{
 		ItemInfo info;
+		memset( &info, 0, sizeof( ItemInfo ) );
 
 		((CBasePlayerWeapon *)pEntity)->m_pPlayer = pWeaponOwner;
 
@@ -240,11 +231,13 @@ CBasePlayerWeapon :: DefaultReload
 */
 BOOL CBasePlayerWeapon :: DefaultReload( int iClipSize, int iAnim, float fDelay, int body )
 {
+	if( !m_pPlayer->m_pActiveItem )
+		return FALSE;
 
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		return FALSE;
 
-	int j = min(iClipSize - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+	int j = min(iClipSize - m_iClip, player.m_rgAmmo[m_iPrimaryAmmoType]);
 
 	if (j == 0)
 		return FALSE;
@@ -256,7 +249,7 @@ BOOL CBasePlayerWeapon :: DefaultReload( int iClipSize, int iAnim, float fDelay,
 
 	m_fInReload = TRUE;
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + fDelay + 0.5f;
 	return TRUE;
 }
 
@@ -267,6 +260,7 @@ CBasePlayerWeapon :: CanDeploy
 */
 BOOL CBasePlayerWeapon :: CanDeploy( void )
 {
+#if 0
 	BOOL bHasAmmo = 0;
 
 	if ( !pszAmmo1() )
@@ -293,6 +287,9 @@ BOOL CBasePlayerWeapon :: CanDeploy( void )
 	}
 
 	return TRUE;
+#else
+	return TRUE;
+#endif
 }
 /*
 =====================
@@ -324,6 +321,7 @@ bool CBasePlayerWeapon::HasSecondaryAttack()
 
 void CBasePlayerWeapon::FireRemaining(int &shotsFired, float &shootTime, BOOL isGlock18)
 {
+#if 1
 	m_iClip--;
 
 	if (m_iClip < 0)
@@ -338,19 +336,16 @@ void CBasePlayerWeapon::FireRemaining(int &shotsFired, float &shootTime, BOOL is
 
 	Vector vecDir;
 
-	int flags;
-	flags = FEV_NOTHOST;
-
 	if (isGlock18)
 	{
 		vecDir = m_pPlayer->FireBullets3(m_pPlayer->GetGunPosition(), gpGlobals->v_forward, 0.05, 8192, 1, BULLET_PLAYER_9MM, 18, 0.9, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
-		PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireGlock18, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000), (int)(m_pPlayer->pev->punchangle.y * 10000), m_iClip != 0, FALSE);
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, ENT(m_pPlayer->pev), m_usFireGlock18, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000), (int)(m_pPlayer->pev->punchangle.y * 10000), m_iClip != 0, FALSE);
 		m_pPlayer->ammo_9mm--;
 	}
 	else
 	{
 		vecDir = m_pPlayer->FireBullets3(m_pPlayer->GetGunPosition(), gpGlobals->v_forward, m_fBurstSpread, 8192, 2, BULLET_PLAYER_556MM, 30, 0.96, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
-		PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireFamas, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000000), (int)(m_pPlayer->pev->punchangle.y * 10000000), m_iClip != 0, FALSE);
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, ENT(m_pPlayer->pev), m_usFireFamas, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000000), (int)(m_pPlayer->pev->punchangle.y * 10000000), m_iClip != 0, FALSE);
 		m_pPlayer->ammo_556nato--;
 	}
 
@@ -362,6 +357,21 @@ void CBasePlayerWeapon::FireRemaining(int &shotsFired, float &shootTime, BOOL is
 		shootTime = 0;
 	else
 		shootTime = gpGlobals->time + 0.1;
+#else
+	m_iClip--;
+
+	if (m_iClip < 0)
+	{
+		m_iClip = 0;
+		shotsFired = 3;
+		shootTime = 0;
+		return;
+	}
+	else
+	{
+		FireRemaining( shotsFired, shootTime, isGlock18 );
+	}
+#endif
 }
 
 bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim)
@@ -395,10 +405,7 @@ bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim)
 	return true;
 }
 
-void CBasePlayerWeapon::KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change)
-{
-
-}
+void CBasePlayerWeapon::KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change){}
 
 void CBasePlayerWeapon::SetPlayerShieldAnim(void)
 {
@@ -435,8 +442,8 @@ BOOL CBasePlayerWeapon :: DefaultDeploy( char *szViewModel, char *szWeaponModel,
 
 	SendWeaponAnim( iAnim, skiplocal );
 
-	m_pPlayer->m_flNextAttack = 0.5;
-	m_flTimeWeaponIdle = 1.0;
+	m_pPlayer->m_flNextAttack = 0.75f;
+	m_flTimeWeaponIdle = 1.5f;
 	return TRUE;
 }
 
@@ -448,12 +455,25 @@ CBasePlayerWeapon :: PlayEmptySound
 */
 BOOL CBasePlayerWeapon :: PlayEmptySound( void )
 {
+#if 0
 	if (m_iPlayEmptySound)
 	{
-		HUD_PlaySound( "weapons/357_cock1.wav", 0.8 );
-		m_iPlayEmptySound = 0;
-		return 0;
+		switch (m_iId)
+		{
+		case WEAPON_USP:
+		case WEAPON_GLOCK18:
+		case WEAPON_P228:
+		case WEAPON_DEAGLE:
+		case WEAPON_ELITE:
+		case WEAPON_FIVESEVEN:
+			HUD_PlaySound("weapons/dryfire_pistol.wav", 0.8);
+			break;
+		default:
+			HUD_PlaySound("weapons/dryfire_rifle.wav",  0.8);
+			break;
+		}
 	}
+#endif
 	return 0;
 }
 
@@ -497,106 +517,9 @@ void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal )
 
 Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, entvars_t *pevAttacker, bool bPistol, int shared_rand )
 {
-	int iOriginalPenetration = iPenetration;
-	int iPenetrationPower;
-	float flPenetrationDistance;
-	int iCurrentDamage = iDamage;
-	float flCurrentDistance;
-	TraceResult tr, tr2;
-	Vector vecRight = gpGlobals->v_right;
-	Vector vecUp = gpGlobals->v_up;
-	CBaseEntity *pEntity;
-	bool bHitMetal = false;
-	int iSparksAmount;
-
-	switch (iBulletType)
-	{
-		case BULLET_PLAYER_9MM:
-		{
-			iPenetrationPower = 21;
-			flPenetrationDistance = 800;
-			iSparksAmount = 15;
-			iCurrentDamage += (-4 + RANDOM_LONG(0, 10));
-			break;
-		}
-
-		case BULLET_PLAYER_45ACP:
-		{
-			iPenetrationPower = 15;
-			flPenetrationDistance = 500;
-			iSparksAmount = 20;
-			iCurrentDamage += (-2 + RANDOM_LONG(0, 4));
-			break;
-		}
-
-		case BULLET_PLAYER_50AE:
-		{
-			iPenetrationPower = 30;
-			flPenetrationDistance = 1000;
-			iSparksAmount = 20;
-			iCurrentDamage += (-4 + RANDOM_LONG(0, 10));
-			break;
-		}
-
-		case BULLET_PLAYER_762MM:
-		{
-			iPenetrationPower = 39;
-			flPenetrationDistance = 5000;
-			iSparksAmount = 30;
-			iCurrentDamage += (-2 + RANDOM_LONG(0, 4));
-			break;
-		}
-
-		case BULLET_PLAYER_556MM:
-		{
-			iPenetrationPower = 35;
-			flPenetrationDistance = 4000;
-			iSparksAmount = 30;
-			iCurrentDamage += (-3 + RANDOM_LONG(0, 6));
-			break;
-		}
-
-		case BULLET_PLAYER_338MAG:
-		{
-			iPenetrationPower = 45;
-			flPenetrationDistance = 8000;
-			iSparksAmount = 30;
-			iCurrentDamage += (-4 + RANDOM_LONG(0, 8));
-			break;
-		}
-
-		case BULLET_PLAYER_57MM:
-		{
-			iPenetrationPower = 30;
-			flPenetrationDistance = 2000;
-			iSparksAmount = 20;
-			iCurrentDamage += (-4 + RANDOM_LONG(0, 10));
-			break;
-		}
-
-		case BULLET_PLAYER_357SIG:
-		{
-			iPenetrationPower = 25;
-			flPenetrationDistance = 800;
-			iSparksAmount = 20;
-			iCurrentDamage += (-4 + RANDOM_LONG(0, 10));
-			break;
-		}
-
-		default:
-		{
-			iPenetrationPower = 0;
-			flPenetrationDistance = 0;
-			break;
-		}
-	}
-
-	if (!pevAttacker)
-		pevAttacker = pev;
-
 	float x, y, z;
 
-	if (IsPlayer())
+	if ( pevAttacker )
 	{
 		x = UTIL_SharedRandomFloat(shared_rand, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 1, -0.5, 0.5);
 		y = UTIL_SharedRandomFloat(shared_rand + 2, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 3, -0.5, 0.5);
@@ -610,159 +533,6 @@ Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float f
 			z = x * x + y * y;
 		}
 		while (z > 1);
-	}
-
-	Vector vecDir = vecDirShooting + x * flSpread * vecRight + y * flSpread * vecUp;
-	Vector vecEnd = vecSrc + vecDir * flDistance;
-	Vector vecOldSrc;
-	Vector vecNewSrc;
-	float flDamageModifier = 0.5;
-
-	while (iPenetration != 0)
-	{
-		ClearMultiDamage();
-		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev), &tr);
-
-		char cTextureType = UTIL_TextureHit(&tr, vecSrc, vecEnd);
-		bool bSparks = false;
-
-		switch (cTextureType)
-		{
-			case CHAR_TEX_METAL:
-			{
-				bSparks = true;
-				bHitMetal = true;
-				iPenetrationPower *= 0.15;
-				flDamageModifier = 0.2;
-				break;
-			}
-
-			case CHAR_TEX_CONCRETE:
-			{
-				iPenetrationPower *= 0.25;
-				flDamageModifier = 0.25;
-				break;
-			}
-
-			case CHAR_TEX_GRATE:
-			{
-				bSparks = true;
-				bHitMetal = true;
-				iPenetrationPower *= 0.5;
-				flDamageModifier = 0.4;
-				break;
-			}
-
-			case CHAR_TEX_VENT:
-			{
-				bSparks = true;
-				bHitMetal = true;
-				iPenetrationPower *= 0.5;
-				flDamageModifier = 0.45;
-				break;
-			}
-
-			case CHAR_TEX_TILE:
-			{
-				iPenetrationPower *= 0.65;
-				flDamageModifier = 0.3;
-				break;
-			}
-
-			case CHAR_TEX_COMPUTER:
-			{
-				bSparks = true;
-				bHitMetal = true;
-				iPenetrationPower *= 0.4;
-				flDamageModifier = 0.45;
-				break;
-			}
-
-			case CHAR_TEX_WOOD:
-			{
-				iPenetrationPower *= 1;
-				flDamageModifier = 0.6;
-				break;
-			}
-
-			default:
-			{
-				bSparks = false;
-				break;
-			}
-		}
-
-		if (tr.flFraction != 1.0)
-		{
-			pEntity = CBaseEntity::Instance(tr.pHit);
-			iPenetration--;
-			flCurrentDistance = tr.flFraction * flDistance;
-			iCurrentDamage *= pow(flRangeModifier, flCurrentDistance / 500);
-
-			if (flCurrentDistance > flPenetrationDistance)
-				iPenetration = 0;
-
-			if (tr.iHitgroup == HITGROUP_SHIELD)
-			{
-				iPenetration = 0;
-
-				if (tr.flFraction != 1.0)
-				{
-					if (RANDOM_LONG(0, 1))
-						EMIT_SOUND(pEntity->edict(), CHAN_VOICE, "weapons/ric_metal-1.wav", 1, ATTN_NORM);
-					else
-						EMIT_SOUND(pEntity->edict(), CHAN_VOICE, "weapons/ric_metal-2.wav", 1, ATTN_NORM);
-
-					pEntity->pev->punchangle.x = iCurrentDamage * RANDOM_FLOAT(-0.15, 0.15);
-					pEntity->pev->punchangle.z = iCurrentDamage * RANDOM_FLOAT(-0.15, 0.15);
-
-					if (pEntity->pev->punchangle.x < 4)
-						pEntity->pev->punchangle.x = 4;
-
-					if (pEntity->pev->punchangle.z < -5)
-						pEntity->pev->punchangle.z = -5;
-					else if (pEntity->pev->punchangle.z > 5)
-						pEntity->pev->punchangle.z = 5;
-				}
-
-				break;
-			}
-
-			if ((VARS(tr.pHit)->solid == SOLID_BSP) && (iPenetration != 0))
-			{
-				if (bPistol)
-					DecalGunshot(&tr, iBulletType, false, pev, bHitMetal);
-				else if (RANDOM_LONG(0, 3))
-					DecalGunshot(&tr, iBulletType, true, pev, bHitMetal);
-
-				vecSrc = tr.vecEndPos + (vecDir * iPenetrationPower);
-				flDistance = (flDistance - flCurrentDistance) * 0.5;
-				vecEnd = vecSrc + (vecDir * flDistance);
-
-				pEntity->TraceAttack(pevAttacker, iCurrentDamage, vecDir, &tr, DMG_BULLET | DMG_NEVERGIB);
-
-				iCurrentDamage *= flDamageModifier;
-			}
-			else
-			{
-				if (bPistol)
-					DecalGunshot(&tr, iBulletType, false, pev, bHitMetal);
-				else if (RANDOM_LONG(0, 3))
-					DecalGunshot(&tr, iBulletType, true, pev, bHitMetal);
-
-				vecSrc = tr.vecEndPos + (vecDir * 42);
-				flDistance = (flDistance - flCurrentDistance) * 0.75;
-				vecEnd = vecSrc + (vecDir * flDistance);
-
-				pEntity->TraceAttack(pevAttacker, iCurrentDamage, vecDir, &tr, DMG_BULLET | DMG_NEVERGIB);
-
-				iCurrentDamage *= 0.75;
-			}
-		}
-		else
-			iPenetration = 0;
-
-		ApplyMultiDamage(pev, pevAttacker);
 	}
 
 	return Vector(x * flSpread, y * flSpread, 0);
@@ -853,8 +623,8 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		{
 			if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
 			{
-				if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN))
-					Reload();
+				if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN)){}
+					//Reload();
 			}
 		}
 	}
@@ -886,11 +656,16 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		else
 			m_iShotsFired = 0;
 
+
+		// Ugly hack to fix reload twice animation.
+		// let's server do it. :)
+#if 0
 		if (!IsUseable() && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 		{
 		}
 		else
 		{
+
 			if (!m_iClip && !(iFlags() & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 			{
 				if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
@@ -900,45 +675,10 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 				}
 			}
 		}
+#endif
 
 		WeaponIdle();
 		return;
-	}
-
-	if (ShouldWeaponIdle())
-		WeaponIdle();
-}
-
-/*
-=====================
-CBasePlayer::SelectItem
-
-  Switch weapons
-=====================
-*/
-void CBasePlayer::SelectItem(const char *pstr)
-{
-	if (!pstr)
-		return;
-
-	CBasePlayerItem *pItem = NULL;
-
-	if (!pItem)
-		return;
-
-
-	if (pItem == m_pActiveItem)
-		return;
-
-	if (m_pActiveItem)
-		m_pActiveItem->Holster( );
-
-	m_pLastItem = m_pActiveItem;
-	m_pActiveItem = pItem;
-
-	if (m_pActiveItem)
-	{
-		m_pActiveItem->Deploy( );
 	}
 }
 
@@ -1014,7 +754,26 @@ Don't actually trace, but act like the trace didn't hit anything.
 void UTIL_TraceLine( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr )
 {
 	memset( ptr, 0, sizeof( *ptr ) );
-	ptr->flFraction = 1.0;
+#if 0
+	static float flLastFraction = 1.0f;
+
+	if( g_runfuncs )
+	{
+		Vector vStart = vecStart, vEnd = vecEnd;
+		pmtrace_t pmtrace;
+
+		gEngfuncs.pEventAPI->EV_SetTraceHull( 0 );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( vStart, vEnd, 0, -1, &pmtrace );
+		flLastFraction = ptr->flFraction = pmtrace.fraction;
+		ptr->vecEndPos = pmtrace.endpos;
+	}
+	else
+	{
+		ptr->flFraction = flLastFraction;
+	}
+#else
+	ptr->flFraction = 1.0f;
+#endif
 }
 
 /*
@@ -1093,44 +852,44 @@ void UTIL_ParticleLine( CBasePlayer *player, float *start, float *end, float lif
 
 char UTIL_TextureHit(TraceResult *ptr, Vector vecSrc, Vector vecEnd)
 {
-		char chTextureType;
-		float rgfl1[3], rgfl2[3];
-		const char *pTextureName;
-		char szbuffer[64];
-		CBaseEntity *pEntity;
+	char chTextureType;
+	float rgfl1[3], rgfl2[3];
+	const char *pTextureName;
+	char szbuffer[64];
+	CBaseEntity *pEntity;
 
-		if( ptr->pHit == NULL )
-			return CHAR_TEX_FLESH;
+	if( ptr->pHit == NULL )
+		return CHAR_TEX_FLESH;
 
-		pEntity = CBaseEntity::Instance(ptr->pHit);
+	pEntity = CBaseEntity::Instance(ptr->pHit);
 
-		if (pEntity && pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
-				return CHAR_TEX_FLESH;
+	if (pEntity && pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
+		return CHAR_TEX_FLESH;
 
-		vecSrc.CopyToArray(rgfl1);
-		vecEnd.CopyToArray(rgfl2);
+	vecSrc.CopyToArray(rgfl1);
+	vecEnd.CopyToArray(rgfl2);
 
-		if (pEntity)
-				pTextureName = TRACE_TEXTURE(ENT(pEntity->pev), rgfl1, rgfl2);
-		else
-				pTextureName = TRACE_TEXTURE(ENT(0), rgfl1, rgfl2);
+	if (pEntity)
+		pTextureName = TRACE_TEXTURE(ENT(pEntity->pev), rgfl1, rgfl2);
+	else
+		pTextureName = TRACE_TEXTURE(ENT(0), rgfl1, rgfl2);
 
-		if (pTextureName)
-		{
-				if (*pTextureName == '-' || *pTextureName == '+')
-						pTextureName += 2;
+	if (pTextureName)
+	{
+		if (*pTextureName == '-' || *pTextureName == '+')
+			pTextureName += 2;
 
-				if (*pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ')
-						pTextureName++;
+		if (*pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ')
+			pTextureName++;
 
-				strcpy(szbuffer, pTextureName);
-				szbuffer[CBTEXTURENAMEMAX - 1] = 0;
-				chTextureType = PM_FindTextureType(szbuffer);
-		}
-		else
-				chTextureType = 0;
+		strcpy(szbuffer, pTextureName);
+		szbuffer[CBTEXTURENAMEMAX - 1] = 0;
+		chTextureType = PM_FindTextureType(szbuffer);
+	}
+	else
+		chTextureType = 0;
 
-		return chTextureType;
+	return chTextureType;
 }
 
 CBaseEntity *UTIL_PlayerByIndex(int playerIndex)
@@ -1502,7 +1261,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	if ( !pWeapon )
 		return;
 
-	for ( i = 0; i < 32; i++ )
+	for ( i = 0; i < MAX_WEAPONS; i++ )
 	{
 		pCurrent = g_pWpns[ i ];
 		if ( !pCurrent )
@@ -1527,11 +1286,10 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pCurrent->m_iSecondaryAmmoType		= (int)from->client.vuser3[ 2 ];
 		pCurrent->m_iPrimaryAmmoType		= (int)from->client.vuser4[ 0 ];
 		player.m_rgAmmo[ pCurrent->m_iPrimaryAmmoType ]	= (int)from->client.vuser4[ 1 ];
-		player.m_rgAmmo[ pCurrent->m_iSecondaryAmmoType ]	= (int)from->client.vuser4[ 2 ];
 	}
 
-	if( g_pWpns[ from->client.m_iId - 1 ] )
-		g_iWeaponFlags = g_pWpns[ from->client.m_iId - 1 ]->m_iWeaponState;
+	if( g_pWpns[ from->client.m_iId ] )
+		g_iWeaponFlags = g_pWpns[ from->client.m_iId ]->m_iWeaponState;
 
 	// For random weapon events, use this seed to seed random # generator
 	player.random_seed = random_seed;
@@ -1667,22 +1425,21 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
 	if ( g_runfuncs && ( HUD_GetWeaponAnim() != to->client.weaponanim ) )
-	{
-		int body = 2;
-
-		//Pop the model to body 0.
-		/*if ( pWeapon == &g_Tripmine )
-			 body = 0;*/
-
-		//Show laser sight/scope combo
-		/*if ( pWeapon == &g_Python && bIsMultiplayer() )
-			 body = 1;*/
-
 		// Force a fixed anim down to viewmodel
-		HUD_SendWeaponAnim( to->client.weaponanim, body, 1 );
+		HUD_SendWeaponAnim( to->client.weaponanim, 2, 1 );
+
+	if (pWeapon->m_iPrimaryAmmoType < MAX_AMMO_TYPES)
+	{
+		to->client.vuser4.x = pWeapon->m_iPrimaryAmmoType;
+		to->client.vuser4.y = player.m_rgAmmo[ pWeapon->m_iPrimaryAmmoType ];
+	}
+	else
+	{
+		to->client.vuser4.x = -1.0;
+		to->client.vuser4.y = 0;
 	}
 
-	for ( i = 0; i < 32; i++ )
+	for ( i = 0; i < MAX_WEAPONS; i++ )
 	{
 		pCurrent = g_pWpns[ i ];
 
@@ -1709,16 +1466,11 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pto->m_fAimedDamage				= pCurrent->m_flLastFire;
 
 		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
-		pto->m_flNextReload				-= cmd->msec / 1000.0;
-		pto->m_fNextAimBonus			-= cmd->msec / 1000.0;
-		pto->m_flNextPrimaryAttack		-= cmd->msec / 1000.0;
-		pto->m_flNextSecondaryAttack	-= cmd->msec / 1000.0;
-		pto->m_flTimeWeaponIdle			-= cmd->msec / 1000.0;
-
-		to->client.vuser3[2]				= pCurrent->m_iSecondaryAmmoType;
-		to->client.vuser4[0]				= pCurrent->m_iPrimaryAmmoType;
-		to->client.vuser4[1]				= player.m_rgAmmo[ pCurrent->m_iPrimaryAmmoType ];
-		to->client.vuser4[2]				= player.m_rgAmmo[ pCurrent->m_iSecondaryAmmoType ];
+		pto->m_flNextReload				-= cmd->msec / 1000.0f;
+		pto->m_fNextAimBonus			-= cmd->msec / 1000.0f;
+		pto->m_flNextPrimaryAttack		-= cmd->msec / 1000.0f;
+		pto->m_flNextSecondaryAttack	-= cmd->msec / 1000.0f;
+		pto->m_flTimeWeaponIdle			-= cmd->msec / 1000.0f;
 
 		if ( pto->m_fNextAimBonus < -1.0 )
 		{
@@ -1752,22 +1504,10 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	}
 
 	// m_flNextAttack is now part of the weapons, but is part of the player instead
-	to->client.m_flNextAttack -= cmd->msec / 1000.0;
+	to->client.m_flNextAttack -= cmd->msec / 1000.0f;
 	if ( to->client.m_flNextAttack < -0.001 )
 	{
 		to->client.m_flNextAttack = -0.001;
-	}
-
-	to->client.fuser2 -= cmd->msec / 1000.0;
-	if ( to->client.fuser2 < -0.001 )
-	{
-		to->client.fuser2 = -0.001;
-	}
-
-	to->client.fuser3 -= cmd->msec / 1000.0;
-	if ( to->client.fuser3 < -0.001 )
-	{
-		to->client.fuser3 = -0.001;
 	}
 
 	// Wipe it so we can't use it after this frame
