@@ -455,6 +455,10 @@ int CHudSpectator::Draw(float flTime)
 
 		if ( m_vPlayerPos[i][2]<0 )	// marked as invisible ?
 			continue;
+
+		// can player exist without name?
+		if( !g_PlayerInfoList[i+1].name )
+			continue;
 		
 		// check if name would be in inset window
 		if ( m_pip->value != INSET_OFF )
@@ -466,7 +470,7 @@ int CHudSpectator::Draw(float flTime)
 					) continue;
 		}
 
-		color = GetClientColor( i+1 );
+		color = GetClientColor( i+1 ); // ???
 
 		// draw the players name and health underneath
 		sprintf(string, "%s", g_PlayerInfoList[i+1].name );
@@ -1119,15 +1123,10 @@ void CHudSpectator::DrawOverviewLayer()
 	z *= m_OverviewData.layersHeights[0]; // gOverviewData.z_min - 32;
 
 	// i = r_overviewTexture + ( layer*OVERVIEW_X_TILES*OVERVIEW_Y_TILES );
-
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
 	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 	gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, 1.0 );
-
-	frame = 0;
-
-	gEngfuncs.pfnFillRGBA(0, 0, ScreenWidth, ScreenHeight, 0, 0, 0, 0);
-	
+	frame = 0;	
 
 	// rotated view ?
 	if ( m_OverviewData.rotated )

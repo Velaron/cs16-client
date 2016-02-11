@@ -174,7 +174,8 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 		dst->iuser3 = g_iUser3 = src->iuser3;
 	}
 	dst->fuser2					= src->fuser2;
-	iOnTrain[src->number]		= src->iuser4;
+	if( src->number > 0 && src->number < MAX_PLAYERS )
+		iOnTrain[src->number]		= src->iuser4;
 }
 
 /*
