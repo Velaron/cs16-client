@@ -97,6 +97,8 @@ public class LauncherActivity extends Activity {
 		editor.commit();
 		editor.apply();
 
+		extractPAK(this, false);
+
 		switch(mServerSpinner.getSelectedItemPosition())
 		{
 		case 0:
