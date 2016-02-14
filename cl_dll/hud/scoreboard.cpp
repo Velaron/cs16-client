@@ -23,6 +23,8 @@
 #include "parsemsg.h"
 #include "triangleapi.h"
 
+#include "cdll_dll.h"
+
 #include <string.h>
 #include <stdio.h>
 
@@ -36,10 +38,6 @@ int g_iUser2;
 int g_iUser3;
 int g_iTeamNumber;
 int g_iPlayerClass;
-
-#define PLAYER_DEAD (1<<0)
-#define PLAYER_BOMB (1<<1)
-#define PLAYER_VIP (1<<2)
 
 
 // X positions

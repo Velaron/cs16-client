@@ -159,9 +159,9 @@ int CHudHealth:: MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf
 
 	int index = READ_BYTE();
 	unsigned char flags = READ_BYTE();
-	g_PlayerExtraInfo[index].dead = (flags & 1<<0) != 0;
-	g_PlayerExtraInfo[index].has_c4 = (flags & 1<<1) != 0;
-	g_PlayerExtraInfo[index].vip = (flags & 1<<2) != 0;
+	g_PlayerExtraInfo[index].dead   = !!(flags & PLAYER_DEAD);
+	g_PlayerExtraInfo[index].has_c4 = !!(flags & PLAYER_HAS_C4);
+	g_PlayerExtraInfo[index].vip    = !!(flags & PLAYER_VIP);
 	return 1;
 }
 // Returns back a color from the

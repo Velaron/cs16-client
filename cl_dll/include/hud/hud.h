@@ -371,9 +371,9 @@ struct extra_player_info_t
 	bool dead;
 	bool showhealth;
 	bool nextflash;
+	bool radarflashon;
 	Vector origin;
 	int health;
-	int radarflashon;
 	int radarflashes;
 	float radarflash;
 	char location[32];
@@ -397,10 +397,10 @@ struct hostage_info_t
 	char teamname[MAX_TEAM_NAME];
 	vec3_t origin;
 	float radarflash;
-	int radarflashon;
-	int radarflashes;
-	int dead;
+	bool radarflashon;
+	bool dead;
 	bool nextflash;
+	int radarflashes;
 };
 
 extern hud_player_info_t	g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine

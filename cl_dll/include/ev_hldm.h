@@ -40,4 +40,5 @@ void EV_HLDM_FireBullets(int idx,
 						 int cShots,
 						 float *vecSrc, float *vecDirShooting, float *vecSpread,
 						 float flDistance, int iBulletType, int iTracerFreq, int *tracerCount, int iPenetration);
+void EV_CS16Client_KillEveryRound( struct tempent_s *te, float frametime, float currenttime );
 #endif // EV_HLDMH

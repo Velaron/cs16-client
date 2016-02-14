@@ -41,9 +41,9 @@ void CHudRadar::Reset()
 	// make radar don't draw old players after new map
 	for( int i = 0; i < 34; i++ )
 	{
-		g_PlayerExtraInfo[i].dead = 1;
+		g_PlayerExtraInfo[i].radarflashon = false;
 
-		if( i <= MAX_HOSTAGES ) g_HostageInfo[i].dead = 1;
+		if( i <= MAX_HOSTAGES ) g_HostageInfo[i].radarflashon = false;
 	}
 }
 

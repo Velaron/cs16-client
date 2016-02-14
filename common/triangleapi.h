@@ -35,6 +35,7 @@ typedef enum
 #define TRI_LINES			4	
 #define TRI_TRIANGLE_STRIP	5
 #define TRI_QUAD_STRIP		6
+#define TRI_POINTS			7 // Xash3D added
 
 typedef struct triangleapi_s
 {
@@ -55,6 +56,12 @@ typedef struct triangleapi_s
 	int			( *WorldToScreen ) ( float *world, float *screen );  // Returns 1 if it's z clipped
 	void		( *Fog ) ( float flFogColor[3], float flStart, float flEnd, int bOn ); //Works just like GL_FOG, flFogColor is r/g/b.
 	void		( *ScreenToWorld ) ( float *screen, float *world  ); 
+	void	(*GetMatrix)( const int pname, float *matrix );
+	int	(*BoxInPVS)( float *mins, float *maxs );
+	void	(*LightAtPoint)( float *pos, float *value );
+	void	(*Color4fRendermode)( float r, float g, float b, float a, int rendermode );
+	void	(*FogParams)( float flDensity, int iFogSkybox );
+
 
 } triangleapi_t;
 
