@@ -39,6 +39,7 @@
 #include <assert.h>
 
 static int tracerCount[ 32 ];
+extern float g_flRoundTime;
 
 extern "C" char PM_FindTextureType( char *name );
 
@@ -556,15 +557,16 @@ void EV_TrainPitchAdjust( event_args_t *args )
 	}
 }
 
-int EV_TFC_IsAllyTeam( int iTeam1, int iTeam2 )
+void EV_CS16Client_KillEveryRound( TEMPENTITY *te, float frametime, float current_time )
 {
-	return 0;
-}
-
-void EV_Dummy( struct event_args_s *args )
-{
-	gEngfuncs.pEventAPI->EV_WeaponAnimation( 1, 1 );
-	return;
+	if( g_flRoundTime > te->entity.curstate.fuser4 )
+	{
+		// Mark it die on next TempEntUpdate
+		te->die = 0.0f;
+		// Set null renderamt, so it will be invisible now
+		// Also it will die immediately, if FTEMP_FADEOUT was set
+		te->entity.curstate.renderamt = 0;
+	}
 }
 
 void RemoveBody(TEMPENTITY *te, float frametime, float current_time)

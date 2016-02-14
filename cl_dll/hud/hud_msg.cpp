@@ -32,6 +32,8 @@
 
 #define MAX_CLIENTS 32
 
+extern float g_flRoundTime;
+
 /// USER-DEFINED SERVER MESSAGE HANDLERS
 
 int CHud :: MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf )
@@ -79,12 +81,12 @@ int CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 
 	g_iFreezeTimeOver = 0;
 
-	for( int i = 0; i < MAX_PLAYERS; i++ )
-	{
-		g_PlayerExtraInfo[i].frags = 0;
-	}
+	memset( g_PlayerExtraInfo, 0, sizeof(g_PlayerExtraInfo) );
 
 	ResetRain();
+
+	// reset round time
+	g_flRoundTime = 0.0f;
 
 	return 1;
 }
