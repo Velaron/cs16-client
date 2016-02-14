@@ -63,7 +63,7 @@ void EV_FireM3( event_args_t *args )
 	{
 		++g_iShotsFired;
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(M3_SHOOT1 + gEngfuncs.pfnRandomLong(0,2), 2);
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(M3_SHOOT1, M3_SHOOT2), 2);
 	}
 #if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
 	else
