@@ -48,11 +48,12 @@ void EV_FireScout(event_args_s *args)
 	int shell;
 	vec3_t vecSrc, vecAiming;
 	vec3_t up, right, forward;
-	float flSpread = 0.01;
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
-	VectorCopy( args->angles, angles );
+	angles.x = (long double)args->iparam1 / 100.0f + args->angles[0];
+	angles.y = (long double)args->iparam2 / 100.0f + args->angles[1];
+	angles.z = args->angles[2];
 	VectorCopy( args->velocity, velocity );
 
 	AngleVectors( angles, forward, right, up );
@@ -83,8 +84,8 @@ void EV_FireScout(event_args_s *args)
 	VectorCopy( forward, vecAiming );
 	Vector vSpread;
 	int tracerCount;
-	vSpread.x = args->fparam1;
-	vSpread.y = args->fparam2;
+	vSpread.x = args->fparam1 / 1000.0f;
+	vSpread.y = args->fparam2 / 1000.0f;
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		1, vecSrc, vecAiming,
