@@ -5,6 +5,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "vgui_parser.h"
 #include <string.h>
 
 DECLARE_MESSAGE( m_Timer, RoundTime )
@@ -103,6 +104,9 @@ int CHudProgressBar::Init()
 	HOOK_MESSAGE( BarTime2 );
 	HOOK_MESSAGE( BotProgress );
 	m_iFlags = 0;
+	m_szLocalizedHeader = NULL;
+	m_szHeader[0] = '\0';
+	m_fStartTime = m_fPercent = 0.0f;
 
 	gHUD.AddHudElem(this);
 	return 1;
@@ -122,14 +126,15 @@ int CHudProgressBar::Draw( float flTime )
 		m_fPercent = 0.0f;
 		return 1;
 	}
-	if( m_szHeader[0] )
+
+	if( m_szLocalizedHeader && m_szLocalizedHeader[0] )
 	{
 		int r, g, b;
 		UnpackRGB( r, g, b, RGB_YELLOWISH );
-		gHUD.DrawHudString( ScreenWidth / 4, ScreenHeight / 2, ScreenWidth, m_szHeader, r, g, b );
+		gHUD.DrawHudString( ScreenWidth / 4, ScreenHeight / 2, ScreenWidth, (char*)m_szLocalizedHeader, r, g, b );
 
-		gHUD.DrawDarkRectangle( ScreenWidth/ 4, ScreenHeight / 2 + 20, ScreenWidth/2, ScreenHeight/30 );
-		FillRGBA( ScreenWidth/4+2, ScreenHeight/2 +22, m_fPercent * (ScreenWidth/2-4), ScreenHeight/30-4, 255, 140, 0, 255 );
+		gHUD.DrawDarkRectangle( ScreenWidth/ 4, ScreenHeight / 2 + gHUD.m_scrinfo.iCharHeight, ScreenWidth/2, ScreenHeight/30 );
+		FillRGBA( ScreenWidth/4+2, ScreenHeight/2 + gHUD.m_scrinfo.iCharHeight + 2, m_fPercent * (ScreenWidth/2-4), ScreenHeight/30-4, 255, 140, 0, 255 );
 		return 1;
 	}
 
@@ -183,20 +188,28 @@ int CHudProgressBar::MsgFunc_BotProgress(const char *pszName, int iSize, void *p
 	m_iDuration = 0.0f; // don't update our progress bar
 	m_iFlags = HUD_ACTIVE;
 
+	float fNewPercent;
 	int flag = READ_BYTE();
 	switch( flag )
 	{
 	case UPDATE_BOTPROGRESS:
-		m_fPercent = (float)READ_BYTE() / 100.0f;
-		break;
 	case CREATE_BOTPROGRESS:
-		READ_BYTE();
+		fNewPercent = (float)READ_BYTE() / 100.0f;
+		// cs behavior:
+		// just don't decrease percent values
+		if( m_fPercent < fNewPercent )
+		{
+			m_fPercent = fNewPercent;
+		}
 		strncpy(m_szHeader, READ_STRING(), sizeof(m_szHeader));
+		m_szLocalizedHeader = Localize(m_szHeader + 1);
 		break;
 	case REMOVE_BOTPROGRESS:
+	default:
 		m_fPercent = 0.0f;
 		m_szHeader[0] = '\0';
 		m_iFlags = 0;
+		m_szLocalizedHeader = NULL;
 		break;
 	}
 
