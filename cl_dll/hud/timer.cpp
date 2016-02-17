@@ -45,7 +45,8 @@ int CHudTimer::Draw( float fTime )
 	else
 	{
 		m_flPanicTime += gHUD.m_flTimeDelta;
-		if( m_flPanicTime > ((float)seconds / 40.0f))
+		// add 0.1 sec, so it's not flicker fast
+		if( m_flPanicTime > ((float)seconds / 40.0f) + 0.1f)
 		{
 			m_flPanicTime = 0;
 			m_bPanicColorChange = !m_bPanicColorChange;
