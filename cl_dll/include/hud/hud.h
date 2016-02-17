@@ -297,7 +297,8 @@ public:
 	int Draw( float flTime );
 
 	int DrawScoreboard( float flTime );
-	int DrawPlayers( int xoffset, float listslot, int nameoffset = 0, char *team = NULL ); // returns the ypos where it finishes drawing
+	int DrawTeams( float listslot );
+	int DrawPlayers( float listslot, int nameoffset = 0, char *team = NULL ); // returns the ypos where it finishes drawing
 
 	void DeathMsg( int killer, int victim );
 	void SetScoreboardDefaults( void );
@@ -739,6 +740,7 @@ private:
 	float m_fPercent;
 	float m_fStartTime;
 	char m_szHeader[256];
+	const char *m_szLocalizedHeader;
 };
 
 //

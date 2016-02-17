@@ -220,6 +220,7 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 			if ( !stricmp( g_PlayerExtraInfo[i].teamname, g_TeamInfo[j].name ) )
 				break;
 		}
+
 		if ( j > m_iNumTeams )  // player is not in a team, skip to the next guy
 			continue;
 

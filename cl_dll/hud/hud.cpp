@@ -142,7 +142,6 @@ void CHud :: Init( void )
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;
 	m_iNoConsolePrint = 0;
-
 	// fullscreen overlays
 	m_SniperScope.Init();
 	m_NVG.Init();
