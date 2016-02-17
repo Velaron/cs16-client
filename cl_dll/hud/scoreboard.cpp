@@ -168,7 +168,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 
 	int ypos = ystart + (list_slot * ROW_GAP) + 5;
 
-	gHUD.DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), (char*)(gHUD.m_Teamplay? "TEAMS":"PLAYERS"), 255, 140, 0 );
+	gHUD.DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), (char*)(gHUD.m_Teamplay ? "TEAMS" : "PLAYERS"), 255, 140, 0 );
 	gHUD.DrawHudStringReverse( KILLS_POS_END(), ypos, 0, "KILLS", 255, 140, 0 );
 	gHUD.DrawHudString(	DEATHS_POS_START(), ypos, DEATHS_POS_END(), "DEATHS", 255, 140, 0 );
 	gHUD.DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), "PING", 255, 140, 0 );
@@ -179,12 +179,21 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	
 	list_slot += 0.8;
 
-	if ( !gHUD.m_Teamplay )
+	if ( gHUD.m_Teamplay )
+	{
+		DrawTeams( list_slot );
+	}
+	else
 	{
 		// it's not teamplay,  so just draw a simple player list
-		DrawPlayers( xstart, list_slot );
-		return 1;
+		DrawPlayers( list_slot );
 	}
+}
+
+int CHudScoreboard :: DrawTeams( float list_slot )
+{
+	int j;
+	int ypos = ystart + (list_slot * ROW_GAP) + 5;
 
 	// clear out team scores
 	for ( int i = 1; i <= m_iNumTeams; i++ )
@@ -199,8 +208,8 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	// recalc the team scores, then draw them
 	for ( int i = 1; i < MAX_PLAYERS; i++ )
 	{
-		//if ( g_PlayerInfoList[i].name == NULL )
-		//	continue; // empty player slot, skip
+		if ( !g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0] )
+			continue; // empty player slot, skip
 
 		if ( g_PlayerExtraInfo[i].teamname[0] == 0 )
 			continue; // skip over players who are not in a team
@@ -238,7 +247,8 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 
 		for ( int i = 1; i <= m_iNumTeams; i++ )
 		{
-			if ( g_TeamInfo[i].players < 0 )
+			// don't draw team without players
+			if ( g_TeamInfo[i].players <= 0 )
 				continue;
 
 			if ( !g_TeamInfo[i].already_drawn && g_TeamInfo[i].frags >= highest_frags )
@@ -302,18 +312,18 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 
 		list_slot += 0.4f;
 		// draw all the players that belong to this team, indented slightly
-		list_slot = DrawPlayers( xstart, list_slot, 10, team_info->name );
+		list_slot = DrawPlayers( list_slot, 10, team_info->name );
 	}
 
 	// draw all the players who are not in a team
 	list_slot += 4.0f;
-	DrawPlayers( xstart, list_slot, 0, "" );
+	DrawPlayers( list_slot, 0, "" );
 
 	return 1;
 }
 
 // returns the ypos where it finishes drawing
-int CHudScoreboard :: DrawPlayers( int xpos, float list_slot, int nameoffset, char *team )
+int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, char *team )
 {
 	// draw the players, in order,  and restricted to team if set
 	while ( 1 )
@@ -367,7 +377,7 @@ int CHudScoreboard :: DrawPlayers( int xpos, float list_slot, int nameoffset, ch
 		}
 
 
-		gHUD.DrawHudString( NAME_POS_START() + 10, ypos, NAME_POS_END(), pl_info->name, r, g, b );
+		gHUD.DrawHudString( NAME_POS_START() + nameoffset, ypos, NAME_POS_END(), pl_info->name, r, g, b );
 
 		// draw bomb( if player have the bomb )
 		if( g_PlayerExtraInfo[best_player].dead )
