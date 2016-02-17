@@ -617,17 +617,17 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		if (m_pPlayer->m_bCanShoot == true)
 			PrimaryAttack();
 	}
-	else if (m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload)
+	/*else if (m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload)
 	{
 		if (m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 		{
 			if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
 			{
 				if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN)){}
-					//Reload();
+					Reload();
 			}
 		}
-	}
+	}*/
 	else if (!(button & (IN_ATTACK | IN_ATTACK2)))
 	{
 		if (m_bDelayFire == true)
