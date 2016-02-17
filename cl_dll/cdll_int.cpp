@@ -42,6 +42,7 @@ cl_enginefunc_t gEngfuncs;
 render_api_t gRenderAPI;
 mobile_engfuncs_t gMobileAPI;
 CHud gHUD;
+int g_iXash; // indicates a buildnum
 
 void InitInput (void);
 void EV_HookEvents( void );
@@ -152,6 +153,8 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 		return 0;
 
 	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
+
+	g_iXash = (int)CVAR_GET_FLOAT("build");
 
 	EV_HookEvents();
 

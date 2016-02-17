@@ -45,3 +45,4 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 extern cl_enginefunc_t gEngfuncs;
 extern render_api_t gRenderAPI;
 extern mobile_engfuncs_t gMobileAPI;
+extern int g_iXash;

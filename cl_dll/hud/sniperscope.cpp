@@ -33,6 +33,12 @@ int CHudSniperScope::Init()
 
 int CHudSniperScope::VidInit()
 {
+	if( g_iXash == 0 )
+	{
+		ConsolePrint("^3No Xash Found Warning^7: CHudSniperScope is disabled! ");
+		m_iFlags = 0;
+		return 0;
+	}
 	m_iScopeArc[0] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_nw.tga", NULL, 0, TF_NEAREST);
 	m_iScopeArc[1] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_ne.tga", NULL, 0, TF_NEAREST);
 	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga", NULL, 0, TF_NEAREST);
