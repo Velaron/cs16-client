@@ -51,8 +51,8 @@ void EV_FireScout(event_args_s *args)
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
-	angles.x = (long double)args->iparam1 / 100.0f + args->angles[0];
-	angles.y = (long double)args->iparam2 / 100.0f + args->angles[1];
+	angles.x = (long double)args->iparam1 / 100 + args->angles[0];
+	angles.y = (long double)args->iparam2 / 100 + args->angles[1];
 	angles.z = args->angles[2];
 	VectorCopy( args->velocity, velocity );
 

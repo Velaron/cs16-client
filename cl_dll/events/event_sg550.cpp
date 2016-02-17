@@ -52,7 +52,10 @@ void EV_FireSG550(event_args_s *args)
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
-	VectorCopy( args->angles, angles );
+	angles.x = (long double)args->iparam1 / 100 + args->angles[0];
+	angles.y = (long double)args->iparam2 / 100 + args->angles[1];
+	angles.z = args->angles[2];
+	
 	VectorCopy( args->velocity, velocity );
 
 	AngleVectors( angles, forward, right, up );

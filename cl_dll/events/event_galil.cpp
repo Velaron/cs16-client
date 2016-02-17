@@ -54,7 +54,10 @@ void EV_FireGALIL( event_args_t *args )
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
-	VectorCopy( args->angles, angles );
+	angles.x = args->iparam1 / 10000000 + args->angles[0];
+	angles.y = args->iparam2 / 10000000 + args->angles[1];
+	angles.z = args->angles[2];
+
 	VectorCopy( args->velocity, velocity );
 
 	AngleVectors( angles, forward, right, up );
