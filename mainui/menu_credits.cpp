@@ -22,33 +22,53 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "basemenu.h"
 #include "utils.h"
 
-#define UI_CREDITS_PATH		"credits.txt"
-#define UI_CREDITS_MAXLINES		2048
-
 static const char *uiCreditsDefault[] = 
 {
 	"CS16Client v0.1",
 	"Build Date:" __DATE__ " " __TIME__ ,
 	"",
 	"Developers: ",
-	"a1batross and mittorn",
-        "",
-	"Beta-testers:",
-	"ahsim, SergioPoverony, 1.kirill, Messi",
-        "GFOXSH, Romka_ZVO, cerg2010cerg2010, MakcuM56",
-        "akhmamir, valera0141, konnor512, Pho[en]ix",
-	"bayan47, mars873, art-sorokin, lewa_j",
-	"ANIME_lover, yaruhkincssv34, kakashka99, THE_Swank",
-	"namotrasnik, artslay, Se Android 2.2, Smoke-Bomb",
+	"a1batross",
+	"mittorn",
+	"jeefo",
 	"",
-        "Big thanks to Valve Corporation for Counter-Strike",
-        "Uncle Mike for this powerful engine",
-        "and Nagist for cs16nd",
-        "",
-	"Copyright SDLash3D Team 2015 (C)",
+	"Touch & GFX: "
+	"SergioPoverony",
+	"ahsim",
+	"",
+	"Beta-testers:",
+	"1.kirill",
+	"Romka_ZVO",
+	"WolfReiser"
+	"MakcuM56",
+	"Mr.Lightning Bolt",
+	"Kirpich",
+	"MeL0maN",
+	"LordAlfaruh",
+	"Velaron",
+	"KOBL1CK",
+	"Rediska_Morkovka",
+	"IcE",
+	"CSPlayer",
+	"Zu1iN~Mage",
+	"lewa_j",
+	"Cosmo",
+	"Maks56873",
+	"THE-Swank",
+	"Namatrasnik",
+	"picos",
+	"",
+	"Big thanks to Valve Corporation for Counter-Strike",
+	"Uncle Mike for this powerful engine",
+	"Nagist and s1lentq for successful game researching",
+	"Spirit of Half-Life developers for rain code",
+	"hzqst for studio render code",
+	"",
+	"Copyright SDLash3D Team 2015-2016 (C)",
 	"SDLash3D is not affiliated with Valve or any of their partners.",
 	"All copyrights reserved to their respective owners.",
-	0
+	"Thanks for playing!",
+	NULL
 };
 
 typedef struct
@@ -75,18 +95,13 @@ UI_Credits_DrawFunc
 static void UI_Credits_DrawFunc( void )
 {
 	int	i, y;
-	float	speed = 40.0f;
-	int	w = UI_MED_CHAR_WIDTH;
-	int	h = UI_MED_CHAR_HEIGHT;
+	float	speed = 32.0f * (768.0f / ScreenHeight);
+	int	w = UI_SMALL_CHAR_WIDTH;
+	int	h = UI_SMALL_CHAR_HEIGHT;
 	int	color = 0x00FFA000;
 
 	// draw the background first
-	/*if( !uiCredits.finalCredits && !CVAR_GET_FLOAT( "cl_background" ))
-		UI_DrawPic( 0, 0, 1024 * uiStatic.scaleX, 768 * uiStatic.scaleY, uiColorWhite, ART_BACKGROUND );
-	else speed = 45.0f;	// syncronize with final background track :-)*/
-
-	// otherwise running on cutscene
-	speed = 32.0f * (768.0f / ScreenHeight);
+	UI_FillRect( 0, 0, ScreenWidth, ScreenHeight, uiColorBlack );
 
 	// now draw the credits
 	UI_ScaleCoords( NULL, NULL, &w, &h );
@@ -112,8 +127,6 @@ static void UI_Credits_DrawFunc( void )
 	if( y < 0 && UnpackAlpha( color ) == 0 )
 	{
 		uiCredits.active = false; // end of credits
-		if( uiCredits.finalCredits )
-			HOST_ENDGAME( gMenu.m_gameinfo.title );
 	}
 
 	if( !uiCredits.active )
