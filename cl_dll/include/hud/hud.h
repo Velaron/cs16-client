@@ -494,6 +494,7 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw(float flTime);
+	void Reset( void );
 	CHudMsgFunc(Battery);
 	CHudMsgFunc(ArmorType);
 	

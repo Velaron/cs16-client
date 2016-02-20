@@ -47,9 +47,15 @@ int CHudBattery::VidInit( void )
 	m_hFull[VestHelm].SetSpriteByName("suithelmet_full");
 
 	m_iHeight = m_hFull[Vest].rect.bottom - m_hEmpty[Vest].rect.top;
+	m_enArmorType = Vest;
 	m_fFade = 0;
 
 	return 1;
+}
+
+void CHudBattery::Reset( void )
+{
+	m_enArmorType = Vest;
 }
 
 int CHudBattery:: MsgFunc_Battery(const char *pszName, int iSize, void *pbuf )
