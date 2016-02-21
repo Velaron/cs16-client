@@ -115,9 +115,6 @@ void CHud :: Init( void )
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 
-	// To suppress engine warnings about sequences
-	gEngfuncs.Cvar_Set("model", "gign");
-
 
 
 	m_iLogo = 0;
