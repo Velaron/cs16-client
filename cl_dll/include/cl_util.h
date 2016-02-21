@@ -193,3 +193,4 @@ inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)\
 HSPRITE LoadSprite(const char *pszName);
 float *GetClientColor( int clientIndex );
 void GetTeamColor( int &r, int &g, int &b, int teamIndex );
+#define bound( min, num, max ) ((num) >= (min) ? ((num) < (max) ? (num) : (max)) : (min))

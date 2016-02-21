@@ -36,13 +36,13 @@ HSPRITE HUD_GetSprite( int index );
 wrect_t HUD_GetSpriteRect( int index );
 int HUD_GetSpriteIndexByName( const char *sz );
 
-class CSprite {
+class CClientSprite {
 public:
-	CSprite(const char *sprName)
+	CClientSprite(const char *sprName)
 	{
 		SetSpriteByName(sprName);
 	}
-	CSprite()
+	CClientSprite()
 	{
 		spr = 0;
 		rect.bottom = rect.left = rect.right = rect.top = 0;

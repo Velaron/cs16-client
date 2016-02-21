@@ -65,7 +65,7 @@ extern cvar_t *cl_min_t;
 extern cvar_t *cl_min_ct;
 extern char *sPlayerModelFiles[];
 
-class CSprite;
+class CClientSprite;
 
 inline bool BIsValidTModelIndex( int i )
 {
@@ -514,8 +514,8 @@ private:
 		VestHelm
 	} m_enArmorType;
 
-	CSprite m_hEmpty[VestHelm + 1];
-	CSprite m_hFull[VestHelm + 1];
+	CClientSprite m_hEmpty[VestHelm + 1];
+	CClientSprite m_hFull[VestHelm + 1];
 	int	  m_iBat;
 	float m_fFade;
 	int	  m_iHeight;		// width of the battery innards
@@ -536,9 +536,9 @@ public:
 	CHudMsgFunc(FlashBat);
 	
 private:
-	CSprite m_hSprite1;
-	CSprite m_hSprite2;
-	CSprite m_hBeam;
+	CClientSprite m_hSprite1;
+	CClientSprite m_hSprite2;
+	CClientSprite m_hBeam;
 	float m_flBat;
 	int	  m_iBat;
 	int	  m_fOn;
