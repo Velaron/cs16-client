@@ -29,6 +29,7 @@
 #include "ammohistory.h"
 #include "eventscripts.h"
 #include "com_weapons.h"
+
 //#include "vgui_TeamFortressViewport.h"
 
 #ifdef _MSC_VER
@@ -851,6 +852,12 @@ void CHudAmmo::UserCmd_Adjust_Crosshair()
 	{
 		switch ( newCrosshair )
 		{
+		case 0:
+		case 5:
+			m_R = 50;
+			m_G = 250;
+			m_B = 50;
+			break;
 		case 1:
 		case 6:
 			m_R = 250;
@@ -875,11 +882,6 @@ void CHudAmmo::UserCmd_Adjust_Crosshair()
 			m_G = 250;
 			m_B = 250;
 			break;
-		case 5:
-		default:
-			m_R = 50;
-			m_G = 250;
-			m_B = 50;
 		}
 		m_bAdditive = newCrosshair < 5 ? true: false;
 	}
@@ -1262,10 +1264,25 @@ void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
 				iDistance *= 0.5;
 			else
 			{
-				// TODO: Get a weapon speed
 				int iWeaponSpeed = 0;
 
-				if ( (g_flPlayerSpeed > iWeaponSpeed) && (flags & ACCURACY_SPEED) )
+				switch( weaponid )
+				{
+				case 30: // p90
+					iWeaponSpeed = 170;
+					break;
+				case 8: // aug
+				case 14: // galil
+				case 15: // famas
+				case 20: // m249
+				case 22: // m4a1
+				case 27: // sg552
+				case 28: // ak47
+					iWeaponSpeed = 140;
+					break;
+				}
+
+				if ( (g_flPlayerSpeed >= iWeaponSpeed) && (flags & ACCURACY_SPEED) )
 					iDistance *= 1.5;
 			}
 		}
@@ -1349,16 +1366,19 @@ void CHudAmmo::CalcCrosshairSize()
 		else if( ScreenWidth < 1024 )
 			m_iCrosshairScaleBase = 800;
 		else m_iCrosshairScaleBase = 640;
-		return;
 	}
-
-	if( !stricmp( size, "large" ))
+	else if( !stricmp( size, "small" ))
+	{
 		m_iCrosshairScaleBase = 640;
+	}
 	else if( !stricmp( size, "medium" ))
+	{
 		m_iCrosshairScaleBase = 800;
+	}
 	else if( !stricmp( size, "large" ))
+	{
 		m_iCrosshairScaleBase = 1024;
-
+	}
 	return;
 }
 
@@ -1389,13 +1409,9 @@ void CHudAmmo::CalcCrosshairColor()
 
 	sscanf( colors, "%d %d %d", &tempR, &tempG, &tempB);
 
-	m_cvarR = tempR <= 255? tempR > 0? tempR: 0: 255;
-	m_cvarG = tempG <= 255? tempG > 0? tempG: 0: 255;
-	m_cvarB = tempB <= 255? tempB > 0? tempB: 0: 255;
-
-	m_R = m_cvarR;
-	m_G = m_cvarG;
-	m_B = m_cvarB;
+	m_R = m_cvarR = bound( 0, tempR, 255 );
+	m_G = m_cvarG = bound( 0, tempG, 255 );
+	m_B = m_cvarB = bound( 0, tempB, 255 );
 }
 
 //
