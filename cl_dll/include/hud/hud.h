@@ -128,6 +128,9 @@ struct HUDLIST {
 //
 class CHudAmmo: public CHudBase
 {
+	friend class WeaponsResource;
+	friend class HistoryResource;
+
 public:
 	int Init( void );
 	int VidInit( void );
@@ -188,8 +191,12 @@ private:
 	bool m_bDrawCrosshair;
 	int m_iAmmoLastCheck;
 
-	cvar_t *m_pClCrosshairColor, *m_pClCrosshairTranslucent, *m_pClCrosshairSize;
+	cvar_t *m_pClCrosshairColor;
+	cvar_t *m_pClCrosshairTranslucent;
+	cvar_t *m_pClCrosshairSize;
 	cvar_t *m_pClDynamicCrosshair;
+	cvar_t *m_pHud_FastSwitch;
+	cvar_t *m_pHud_DrawHistory_Time;
 
 };
 
@@ -357,6 +364,8 @@ protected:
 
 	// an array of colors...one color for each line
 	float *m_pflNameColors[MAX_STATUSBAR_LINES];
+
+	cvar_t *hud_centerid;
 };
 
 
@@ -426,6 +435,7 @@ public:
 private:
 	int m_HUD_d_skull;  // sprite index of skull icon
 	int m_HUD_d_headshot;
+	cvar_t *hud_deathnotice_time;
 };
 
 //

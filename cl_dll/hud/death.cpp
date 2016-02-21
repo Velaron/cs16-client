@@ -51,7 +51,7 @@ int CHudDeathNotice :: Init( void )
 
 	HOOK_MESSAGE( DeathMsg );
 
-	CVAR_CREATE( "hud_deathnotice_time", "6", 0 );
+	hud_deathnotice_time = CVAR_CREATE( "hud_deathnotice_time", "6", 0 );
 
 	return 1;
 }
@@ -114,7 +114,7 @@ int CHudDeathNotice :: Draw( float flTime )
 			}
 
 			r = 255;  g = 80;	b = 0;
-			if ( rgDeathNoticeList[i].iTeamKill )
+			if ( rgDeathNoticeList[i].bTeamKill )
 			{
 				r = 10;	g = 240; b = 10;  // display it in sickly green
 			}
@@ -237,8 +237,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	rgDeathNoticeList[i].iId = spr;
 
-	DEATHNOTICE_DISPLAY_TIME = CVAR_GET_FLOAT( "hud_deathnotice_time" );
-	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME;
+	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + hud_deathnotice_time->value;
 
 
 	if (rgDeathNoticeList[i].bNonPlayerKill)

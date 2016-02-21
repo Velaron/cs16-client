@@ -55,7 +55,7 @@ void HistoryResource :: AddToHistory( int iType, int iId, int iCount )
 	}
 	
 	HIST_ITEM *freeslot = &rgAmmoHistory[iCurrentHistorySlot++];  // default to just writing to the first slot
-	HISTORY_DRAW_TIME = CVAR_GET_FLOAT( "hud_drawhistory_time" );
+	HISTORY_DRAW_TIME = gHUD.m_Ammo.m_pHud_DrawHistory_Time->value;
 
 	freeslot->type = iType;
 	freeslot->iId = iId;
@@ -77,6 +77,7 @@ void HistoryResource :: AddToHistory( int iType, const char *szName, int iCount 
 	HIST_ITEM *freeslot = &rgAmmoHistory[iCurrentHistorySlot++];  // default to just writing to the first slot
 
 	// I am really unhappy with all the code in this file
+	// I am too, -- a1batross
 
 	int i = gHUD.GetSpriteIndex( szName );
 	if ( i == -1 )
@@ -86,7 +87,7 @@ void HistoryResource :: AddToHistory( int iType, const char *szName, int iCount 
 	freeslot->type = iType;
 	freeslot->iCount = iCount;
 
-	HISTORY_DRAW_TIME = CVAR_GET_FLOAT( "hud_drawhistory_time" );
+	HISTORY_DRAW_TIME = gHUD.m_Ammo.m_pHud_DrawHistory_Time->value;
 	freeslot->DisplayTime = gHUD.m_flTime + HISTORY_DRAW_TIME;
 }
 
