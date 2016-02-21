@@ -38,7 +38,7 @@ int CHudRadio::MsgFunc_SendAudio(const char *pszName, int iSize, void *pbuf)
 	BEGIN_READ( pbuf, iSize );
 
 	m_iSenderID = READ_BYTE( );
-	strcpy( m_sentence, READ_STRING( ));
+	strncpy( m_sentence, READ_STRING( ), sizeof(m_sentence));
 	m_iPitch = READ_SHORT( );
 	m_iFlags = HUD_ACTIVE;
 
@@ -55,7 +55,7 @@ int CHudRadio::MsgFunc_ReloadSound(const char *pszName, int iSize, void *pbuf)
 	m_iPitch = READ_BYTE();
 	int isNotShotgun = READ_BYTE();
 
-	strcpy( m_sentence,  (char*)(isNotShotgun? "weapons/generic_reload.wav" : "weapons/generic_shot_reload.wav"));
+	strncpy( m_sentence,  (char*)(isNotShotgun? "weapons/generic_reload.wav" : "weapons/generic_shot_reload.wav"), sizeof(m_sentence));
 	m_iFlags = HUD_ACTIVE;
 
    return 0;

@@ -383,7 +383,7 @@ bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim)
 	{
 		m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
 		SendWeaponAnim(down_anim, UseDecrement() != FALSE);
-		strcpy(m_pPlayer->m_szAnimExtention, "shieldgun");
+		strncpy(m_pPlayer->m_szAnimExtention, "shieldgun", sizeof(m_pPlayer->m_szAnimExtention));
 		m_fMaxSpeed = 250;
 		m_pPlayer->m_bShieldDrawn = false;
 	}
@@ -391,7 +391,7 @@ bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim)
 	{
 		m_iWeaponState |= WPNSTATE_SHIELD_DRAWN;
 		SendWeaponAnim(up_anim, UseDecrement() != FALSE);
-		strcpy(m_pPlayer->m_szAnimExtention, "shielded");
+		strncpy(m_pPlayer->m_szAnimExtention, "shielded", sizeof(m_pPlayer->m_szAnimExtention));
 		m_fMaxSpeed = 180;
 		m_pPlayer->m_bShieldDrawn = true;
 	}
@@ -412,9 +412,9 @@ void CBasePlayerWeapon::SetPlayerShieldAnim(void)
 	if (m_pPlayer->HasShield() == true)
 	{
 		if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-			strcpy(m_pPlayer->m_szAnimExtention, "shield");
+			strncpy(m_pPlayer->m_szAnimExtention, "shield", sizeof(m_pPlayer->m_szAnimExtention));
 		else
-			strcpy(m_pPlayer->m_szAnimExtention, "shieldgun");
+			strncpy(m_pPlayer->m_szAnimExtention, "shieldgun", sizeof(m_pPlayer->m_szAnimExtention));
 	}
 }
 
@@ -423,7 +423,7 @@ void CBasePlayerWeapon::ResetPlayerShieldAnim(void)
 	if (m_pPlayer->HasShield() == true)
 	{
 		if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-			strcpy(m_pPlayer->m_szAnimExtention, "shieldgun");
+			strncpy(m_pPlayer->m_szAnimExtention, "shieldgun", sizeof(m_pPlayer->m_szAnimExtention));
 	}
 }
 
@@ -882,7 +882,7 @@ char UTIL_TextureHit(TraceResult *ptr, Vector vecSrc, Vector vecEnd)
 		if (*pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ')
 			pTextureName++;
 
-		strcpy(szbuffer, pTextureName);
+		strncpy(szbuffer, pTextureName, sizeof(szbuffer));
 		szbuffer[CBTEXTURENAMEMAX - 1] = 0;
 		chTextureType = PM_FindTextureType(szbuffer);
 	}

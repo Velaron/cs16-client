@@ -55,15 +55,15 @@ void EV_Vehicle(event_args_s *args)
 
 	switch ( noise )
 	{
-	case 1: strcpy( sz, "plats/vehicle1.wav"); break;
-	case 2: strcpy( sz, "plats/vehicle2.wav"); break;
-	case 3: strcpy( sz, "plats/vehicle3.wav"); break;
-	case 4: strcpy( sz, "plats/vehicle4.wav"); break;
-	case 5: strcpy( sz, "plats/vehicle6.wav"); break;
-	case 6: strcpy( sz, "plats/vehicle7.wav"); break;
+	case 1: strncpy( sz, "plats/vehicle1.wav", sizeof(sz)); break;
+	case 2: strncpy( sz, "plats/vehicle2.wav", sizeof(sz)); break;
+	case 3: strncpy( sz, "plats/vehicle3.wav", sizeof(sz)); break;
+	case 4: strncpy( sz, "plats/vehicle4.wav", sizeof(sz)); break;
+	case 5: strncpy( sz, "plats/vehicle6.wav", sizeof(sz)); break;
+	case 6: strncpy( sz, "plats/vehicle7.wav", sizeof(sz)); break;
 	default:
 		// no sound
-		strcpy( sz, "" );
+		strncpy( sz, "",  sizeof(sz) );
 		return;
 	}
 

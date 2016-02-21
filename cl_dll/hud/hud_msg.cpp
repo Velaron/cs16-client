@@ -144,7 +144,7 @@ int CHud::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 	g_PlayerExtraInfo[33].radarflashon = 1;
 	g_PlayerExtraInfo[33].radarflashes = 99999;
 	g_PlayerExtraInfo[33].radarflash = gHUD.m_flTime;
-	strcpy(g_PlayerExtraInfo[33].teamname, "TERRORIST");
+	strncpy(g_PlayerExtraInfo[33].teamname, "TERRORIST", MAX_TEAM_NAME);
 	g_PlayerExtraInfo[33].dead = 0;
 	g_PlayerExtraInfo[33].nextflash = true;
 
@@ -184,7 +184,7 @@ int CHud::MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf)
 			g_HostageInfo[idx].radarflashon = 1;
 			g_HostageInfo[idx].radarflashes = 99999;
 		}
-		strcpy(g_HostageInfo[idx].teamname, "CT");
+		strncpy(g_HostageInfo[idx].teamname, "CT", MAX_TEAM_NAME);
 		g_HostageInfo[idx].dead = 0;
 	}
 

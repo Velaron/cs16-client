@@ -32,12 +32,10 @@
 #include "vgui_parser.h"
 #include "unicode_strtools.h"
 
-#define MAX_LOCALIZED_TITLES 2048
-
 struct locString
 {
-	char toLocalize[256];
-	char localizedString[2048];
+	char toLocalize[MAX_TOLOCALIZE_STRING_SIZE];
+	char localizedString[MAX_LOCALIZEDSTRING_SIZE];
 };
 
 locString gTitlesTXT[MAX_LOCALIZED_TITLES]; // for localized titles.txt strings
@@ -102,7 +100,7 @@ void Localize_Init ()
 
 		if (strlen (token) > 5)
 		{
-			strcpy (gTitlesTXT[giLastTitlesTXT].toLocalize, token);
+			strncpy (gTitlesTXT[giLastTitlesTXT].toLocalize, token, MAX_TOLOCALIZE_STRING_SIZE);
 
 			pfile = gEngfuncs.COM_ParseFile (pfile, gTitlesTXT[giLastTitlesTXT].localizedString);
 		

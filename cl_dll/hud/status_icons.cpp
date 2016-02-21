@@ -141,7 +141,7 @@ void CHudStatusIcons::EnableIcon( char *pszIconName, unsigned char red, unsigned
 	m_IconList[i].r = red;
 	m_IconList[i].g = green;
 	m_IconList[i].b = blue;
-	strcpy( m_IconList[i].szSpriteName, pszIconName );
+	strncpy( m_IconList[i].szSpriteName, pszIconName, MAX_ICONSPRITENAME_LENGTH );
 
 	// Hack: Play Timer sound when a grenade icon is played (in 0.8 seconds)
 	if ( strstr(m_IconList[i].szSpriteName, "grenade") )

@@ -760,7 +760,7 @@ void CStudioModelRenderer::StudioSaveBones(void)
 
 	for (i = 0; i < m_pStudioHeader->numbones; i++)
 	{
-		strcpy(m_nCachedBoneNames[i], pbones[i].name);
+		strncpy(m_nCachedBoneNames[i], pbones[i].name, 32);
 		MatrixCopy((*m_pbonetransform)[i], m_rgCachedBoneTransform[i]);
 		MatrixCopy((*m_plighttransform)[i], m_rgCachedLightTransform[i]);
 	}

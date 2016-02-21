@@ -155,7 +155,7 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 							}
 							else
 							{
-								strcpy( szRepString, "******" );
+								strncpy( szRepString, "******", MAX_PLAYER_NAME_LENGTH );
 							}
 
 							break;

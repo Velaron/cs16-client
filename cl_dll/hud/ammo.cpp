@@ -688,7 +688,7 @@ int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )
 	
 	WEAPON Weapon;
 
-	strcpy( Weapon.szName, READ_STRING() );
+	strncpy( Weapon.szName, READ_STRING(), MAX_WEAPON_NAME );
 	Weapon.iAmmoType = (int)READ_CHAR();	
 	
 	Weapon.iMax1 = READ_BYTE();
@@ -1006,13 +1006,13 @@ void CHudAmmo::UserCmd_Autobuy()
 		return;
 	}
 
-	strcpy(szCmd, "cl_setautobuy");
+	strncpy(szCmd, "cl_setautobuy", sizeof(szCmd));
 
 	while(pfile = gEngfuncs.COM_ParseFile( pfile, token ))
 	{
 		// append space first
-		strcat(szCmd, " ");
-		strcat(szCmd, token);
+		strncat(szCmd, " ", sizeof(szCmd));
+		strncat(szCmd, token, sizeof(szCmd));
 	}
 
 	ConsolePrint(szCmd);
@@ -1026,7 +1026,7 @@ void CHudAmmo::UserCmd_Rebuy()
 	char *afile = (char*)gEngfuncs.COM_LoadFile("rebuy.txt", 5, NULL);
 	char *pfile = afile;
 	char token[64];
-	char szCmd[512];
+	char szCmd[1024];
 	int lastCh;
 
 	if( !pfile )
@@ -1036,15 +1036,15 @@ void CHudAmmo::UserCmd_Rebuy()
 	}
 
 	// start with \"
-	strcpy(szCmd, "cl_setrebuy \"");
+	strncpy(szCmd, "cl_setrebuy \"", sizeof(szCmd));
 
 
 
 	while(pfile = gEngfuncs.COM_ParseFile( pfile, token ))
 	{
-		strcat(szCmd, token);
+		strncat(szCmd, token, sizeof(szCmd));
 		// append space after token
-		strcat(szCmd, " ");
+		strncat(szCmd, " ", sizeof(szCmd));
 	}
 	// replace last space with ", before terminator
 	lastCh = strlen(szCmd);

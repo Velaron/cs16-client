@@ -135,7 +135,7 @@ float EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *v
 
 		if ( pTextureName )
 		{
-			strcpy( texname, pTextureName );
+			strncpy( texname, pTextureName, sizeof( texname ) );
 			pTextureName = texname;
 
 			// strip leading '-0' or '+0~' or '{' or '!'
@@ -150,7 +150,7 @@ float EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *v
 			}
 
 			// '}}'
-			strcpy( szbuffer, pTextureName );
+			strncpy( szbuffer, pTextureName, sizeof(szbuffer) );
 			szbuffer[ CBTEXTURENAMEMAX - 1 ] = 0;
 
 			// get texture type
@@ -535,15 +535,15 @@ void EV_TrainPitchAdjust( event_args_t *args )
 
 	switch ( noise )
 	{
-	case 1: strcpy( sz, "plats/ttrain1.wav"); break;
-	case 2: strcpy( sz, "plats/ttrain2.wav"); break;
-	case 3: strcpy( sz, "plats/ttrain3.wav"); break;
-	case 4: strcpy( sz, "plats/ttrain4.wav"); break;
-	case 5: strcpy( sz, "plats/ttrain6.wav"); break;
-	case 6: strcpy( sz, "plats/ttrain7.wav"); break;
+	case 1: strncpy( sz, "plats/ttrain1.wav", sizeof(sz)); break;
+	case 2: strncpy( sz, "plats/ttrain2.wav", sizeof(sz)); break;
+	case 3: strncpy( sz, "plats/ttrain3.wav", sizeof(sz)); break;
+	case 4: strncpy( sz, "plats/ttrain4.wav", sizeof(sz)); break;
+	case 5: strncpy( sz, "plats/ttrain6.wav", sizeof(sz)); break;
+	case 6: strncpy( sz, "plats/ttrain7.wav", sizeof(sz)); break;
 	default:
 		// no sound
-		strcpy( sz, "" );
+		strncpy( sz, "",  sizeof(sz) );
 		return;
 	}
 

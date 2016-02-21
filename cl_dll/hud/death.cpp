@@ -29,9 +29,9 @@ struct DeathNoticeItem {
 	char szKiller[MAX_PLAYER_NAME_LENGTH*2];
 	char szVictim[MAX_PLAYER_NAME_LENGTH*2];
 	int iId;	// the index number of the associated sprite
-	int iSuicide;
-	int iTeamKill;
-	int iNonPlayerKill;
+	bool bSuicide;
+	bool bTeamKill;
+	bool bNonPlayerKill;
 	float flDisplayTime;
 	float *KillerColor;
 	float *VictimColor;
@@ -102,7 +102,7 @@ int CHudDeathNotice :: Draw( float flTime )
 			if( rgDeathNoticeList[i].iHeadShotId )
 				x -= gHUD.GetSpriteRect(m_HUD_d_headshot).right - gHUD.GetSpriteRect(m_HUD_d_headshot).left;
 
-			if ( !rgDeathNoticeList[i].iSuicide )
+			if ( !rgDeathNoticeList[i].bSuicide )
 			{
 				x -= (5 + ConsoleStringLen( rgDeathNoticeList[i].szKiller ) );
 
@@ -133,7 +133,7 @@ int CHudDeathNotice :: Draw( float flTime )
 			}
 
 			// Draw victims name (if it was a player that was killed)
-			if (rgDeathNoticeList[i].iNonPlayerKill == FALSE)
+			if (!rgDeathNoticeList[i].bNonPlayerKill)
 			{
 				if ( rgDeathNoticeList[i].VictimColor )
 					//gEngfuncs.pfnDrawSetTextColor( rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2] );
@@ -158,8 +158,8 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	int headshot = READ_BYTE();
 
 	char killedwith[32];
-	strcpy( killedwith, "d_" );
-	strncat( killedwith, READ_STRING(), 32 );
+	strncpy( killedwith, "d_", sizeof(killedwith) );
+	strncat( killedwith, READ_STRING(), sizeof(killedwith) );
 
 	//if (gViewPort)
 	//	gViewPort->DeathMsg( killer, victim );
@@ -216,18 +216,18 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	// Is it a non-player object kill?
 	if ( ((char)victim) == -1 )
 	{
-		rgDeathNoticeList[i].iNonPlayerKill = TRUE;
+		rgDeathNoticeList[i].bNonPlayerKill = true;
 
 		// Store the object's name in the Victim slot (skip the d_ bit)
-		strcpy( rgDeathNoticeList[i].szVictim, killedwith+2 );
+		strncpy( rgDeathNoticeList[i].szVictim, killedwith+2, sizeof(killedwith) );
 	}
 	else
 	{
 		if ( killer == victim || killer == 0 )
-			rgDeathNoticeList[i].iSuicide = TRUE;
+			rgDeathNoticeList[i].bSuicide = true;
 
-		if ( !strcmp( killedwith, "d_teammate" ) )
-			rgDeathNoticeList[i].iTeamKill = TRUE;
+		if ( !strncmp( killedwith, "d_teammate", sizeof(killedwith)  ) )
+			rgDeathNoticeList[i].bTeamKill = true;
 	}
 
 	rgDeathNoticeList[i].iHeadShotId = headshot;
@@ -241,7 +241,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME;
 
 
-	if (rgDeathNoticeList[i].iNonPlayerKill)
+	if (rgDeathNoticeList[i].bNonPlayerKill)
 	{
 		ConsolePrint( rgDeathNoticeList[i].szKiller );
 		ConsolePrint( " killed a " );
@@ -251,11 +251,11 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	else
 	{
 		// record the death notice in the console
-		if ( rgDeathNoticeList[i].iSuicide )
+		if ( rgDeathNoticeList[i].bSuicide )
 		{
 			ConsolePrint( rgDeathNoticeList[i].szVictim );
 
-			if ( !strcmp( killedwith, "d_world" ) )
+			if ( !strncmp( killedwith, "d_world", sizeof(killedwith)  ) )
 			{
 				ConsolePrint( " died" );
 			}
@@ -264,7 +264,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 				ConsolePrint( " killed self" );
 			}
 		}
-		else if ( rgDeathNoticeList[i].iTeamKill )
+		else if ( rgDeathNoticeList[i].bTeamKill )
 		{
 			ConsolePrint( rgDeathNoticeList[i].szKiller );
 			ConsolePrint( " killed his teammate " );
@@ -279,17 +279,12 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 			ConsolePrint( rgDeathNoticeList[i].szVictim );
 		}
 
-		if ( killedwith && *killedwith && (*killedwith > 13 ) && strcmp( killedwith, "d_world" ) && !rgDeathNoticeList[i].iTeamKill )
+		if ( killedwith && *killedwith && (*killedwith > 13 ) && strncmp( killedwith, "d_world", sizeof(killedwith) ) && !rgDeathNoticeList[i].bTeamKill )
 		{
 			if ( headshot )
 				ConsolePrint(" with a headshot from ");
 			else
 				ConsolePrint(" with ");
-			// replace the code names with the 'real' names
-			if ( !strcmp( killedwith+2, "egon" ) )
-				strcpy( killedwith, "d_gluon gun" );
-			if ( !strcmp( killedwith+2, "gauss" ) )
-				strcpy( killedwith, "d_tau cannon" );
 
 			ConsolePrint( killedwith+2 ); // skip over the "d_" part
 		}

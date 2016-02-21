@@ -180,7 +180,7 @@ void UTIL_StringToVector( float * pVector, const char *pString )
 	char *pstr, *pfront, tempString[128];
 	int	j;
 
-	strcpy( tempString, pString );
+	strncpy( tempString, pString, sizeof(tempString) );
 	pstr = pfront = tempString;
 	
 	for ( j = 0; j < 3; j++ )
@@ -250,7 +250,7 @@ int UTIL_FindEntityInMap(char * name, float * origin, float * angle)
 				return 0;
 			};
 			
-			strcpy (keyname, token);
+			strncpy (keyname, token, sizeof(keyname));
 
 			// another hack to fix keynames with trailing spaces
 			n = strlen(keyname);
@@ -941,12 +941,12 @@ bool CHudSpectator::ParseOverviewFile( )
 	m_OverviewData.zoom	= 1.0f;
 	m_OverviewData.layers = 0;
 	m_OverviewData.layersHeights[0] = 0.0f;
-	strcpy( m_OverviewData.map, gEngfuncs.pfnGetLevelName() );
+	strncpy( m_OverviewData.map, gEngfuncs.pfnGetLevelName(), sizeof(m_OverviewData.map) );
 
 	if ( strlen( m_OverviewData.map ) == 0 )
 		return false; // not active yet
 
-	strcpy(levelname, m_OverviewData.map + 5);
+	strncpy(levelname, m_OverviewData.map + 5, sizeof( levelname ));
 	levelname[strlen(levelname)-4] = 0;
 	
 	sprintf(filename, "overviews/%s.txt", levelname );
@@ -1048,7 +1048,7 @@ bool CHudSpectator::ParseOverviewFile( )
 				if ( !stricmp( token, "image" ) )
 				{
 					pfile = gEngfuncs.COM_ParseFile(pfile,token);
-					strcpy(m_OverviewData.layersImages[ m_OverviewData.layers ], token);
+					strncpy(m_OverviewData.layersImages[ m_OverviewData.layers ], token, 255);
 					
 					
 				}

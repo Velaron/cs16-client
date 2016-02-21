@@ -210,12 +210,12 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 
 	if ( !NeedMore )
 	{  // we have the whole string, so we can localise it now
-		strcpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ) );
+		strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ), MAX_MENU_STRING );
 
 		// Swap in characters
 		if ( KB_ConvertString( g_szMenuString, &temp ) )
 		{
-			strcpy( g_szMenuString, temp );
+			strncpy( g_szMenuString, temp, MAX_MENU_STRING );
 			free( temp );
 		}
 	}
