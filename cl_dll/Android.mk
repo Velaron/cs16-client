@@ -6,13 +6,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := client
-#ifeq ($(XASH_SDL),1)
-#APP_PLATFORM := android-12
-#LOCAL_SHARED_LIBRARIES += SDL2 
-#LOCAL_CFLAGS += -DXASH_SDL
-#else
 APP_PLATFORM := android-8
-#endif
 LOCAL_CONLYFLAGS += -std=c99
 
 include $(XASH3D_CONFIG)
@@ -38,6 +32,7 @@ SRCS := \
 	./input_xash3d.cpp \
 	./vgui_parser.cpp \
 	./unicode_strtools.cpp \
+	./draw_util.cpp \
 	../pm_shared/pm_debug.c \
 	../pm_shared/pm_math.c \
 	../pm_shared/pm_shared.c \

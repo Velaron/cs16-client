@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 2.6.0)
 project (CLDLL)
 
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLINUX -D_LINUX -DCLIENT_WEAPONS -DCLIENT_DLL")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLINUX -D_LINUX -DCLIENT_WEAPONS -DCLIENT_DLL -D_DEBUG")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings -Wl,--no-undefined")
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
@@ -182,6 +182,7 @@ set (CLDLL_SOURCES
     ./input_xash3d.cpp
     ./vgui_parser.cpp
     ./unicode_strtools.cpp
+	./draw_util.cpp
 
 	${PLAYERMOVE_SRCS}
 	${HUD_SRCS}
