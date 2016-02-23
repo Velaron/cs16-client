@@ -94,5 +94,5 @@ void EV_FireXM1014(event_args_s *args)
 		forward, right,	up,
 		6, vecSrc, vecAiming,
 		vSpread, 8192.0, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount,
-		2 );
+		1 );
 }

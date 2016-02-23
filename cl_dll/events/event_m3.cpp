@@ -91,5 +91,5 @@ void EV_FireM3( event_args_t *args )
 		forward, right,	up,
 		9, vecSrc, vecAiming,
 		vSpread, 8192.0, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount,
-		2 );
+		1 );
 }

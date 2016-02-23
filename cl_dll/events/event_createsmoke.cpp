@@ -29,7 +29,7 @@
 
 #include "com_model.h"
 
-#define SMOKE_CLOUDS 10
+#define SMOKE_CLOUDS 20
 
 void EV_Smoke_FadeOut( struct tempent_s *te, float frametime, float currenttime )
 {
@@ -70,6 +70,9 @@ void EV_CreateSmoke(event_args_s *args)
 
 				pTemp->entity.curstate.renderamt = 255;
 				pTemp->entity.curstate.rendermode = kRenderTransTexture;
+				pTemp->entity.curstate.rendercolor.r = gEngfuncs.pfnRandomLong(210, 230);
+				pTemp->entity.curstate.rendercolor.g = gEngfuncs.pfnRandomLong(210, 230);
+				pTemp->entity.curstate.rendercolor.b = gEngfuncs.pfnRandomLong(210, 230);
 				pTemp->entity.curstate.scale = 5.0f;
 
 				// make it move slowly
