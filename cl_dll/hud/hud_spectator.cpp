@@ -482,6 +482,14 @@ int CHudSpectator::Draw(float flTime)
 		
 	}
 
+
+	// Only draw the overview if Map Mode is selected for this view
+	if ( m_iDrawCycle == 0 &&  ( (g_iUser1 != OBS_MAP_FREE) && (g_iUser1 != OBS_MAP_CHASE) ) )
+		return 1;
+
+	if ( m_iDrawCycle == 1 && m_pip->value < INSET_MAP_FREE )
+		return 1;
+
 	return 1;
 }
 
@@ -1418,16 +1426,28 @@ void CHudSpectator::DrawOverviewEntities()
 
 void CHudSpectator::DrawOverview()
 {
+	static bool glClearForce = false;
+	static float old_glClearValue;
+
 	// draw only in sepctator mode
-	if ( !g_iUser1 )
+	if ( !g_iUser1 || (m_iDrawCycle == 0 &&  ( (g_iUser1 != OBS_MAP_FREE) && (g_iUser1 != OBS_MAP_CHASE) )) || (m_iDrawCycle == 1 && m_pip->value < INSET_MAP_FREE) )
+	{
+		// fix non clearing background for overview
+		if( glClearForce )
+		{
+			gEngfuncs.Cvar_SetValue("gl_clear", old_glClearValue );
+			glClearForce = false;
+		}
 		return;
+	}
 
-	// Only draw the overview if Map Mode is selected for this view
-	if ( m_iDrawCycle == 0 &&  ( (g_iUser1 != OBS_MAP_FREE) && (g_iUser1 != OBS_MAP_CHASE) ) )
-		return;
-
-	if ( m_iDrawCycle == 1 && m_pip->value < INSET_MAP_FREE )
-		return;
+	// fix non clearing background for overview
+	if( !glClearForce )
+	{
+		old_glClearValue = CVAR_GET_FLOAT("gl_clear");
+		gEngfuncs.Cvar_Set("gl_clear", "1");
+		glClearForce = true;
+	}
 
 	DrawOverviewLayer();
 	DrawOverviewEntities();
