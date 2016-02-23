@@ -181,7 +181,7 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 #else
 	if (m_iHealth > 25)
 	{
-		UnpackRGB(r,g,b, RGB_YELLOWISH);
+		DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 	}
 	else
 	{
@@ -227,7 +227,7 @@ int CHudHealth::Draw(float flTime)
 		a = 255;
 
 	GetPainColor( r, g, b );
-	ScaleColors(r, g, b, a );
+	DrawUtils::ScaleColors(r, g, b, a );
 
 	// Only draw health if we have the suit.
 	if (gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)))
@@ -243,7 +243,7 @@ int CHudHealth::Draw(float flTime)
 
 		x = CrossWidth + HealthWidth / 2;
 
-		x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
+		x = DrawUtils::DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
 
 		x += HealthWidth/2;
 
@@ -333,7 +333,7 @@ int CHudHealth::DrawPain(float flTime)
 	{
 		GetPainColor(r,g,b);
 		shade = a * max( m_fAttackFront, 0.5 );
-		ScaleColors(r, g, b, shade);
+		DrawUtils::ScaleColors(r, g, b, shade);
 		SPR_Set(m_hSprite, r, g, b );
 
 		x = ScreenWidth/2 - SPR_Width(m_hSprite, 0)/2;
@@ -347,7 +347,7 @@ int CHudHealth::DrawPain(float flTime)
 	{
 		GetPainColor(r,g,b);
 		shade = a * max( m_fAttackRight, 0.5 );
-		ScaleColors(r, g, b, shade);
+		DrawUtils::ScaleColors(r, g, b, shade);
 		SPR_Set(m_hSprite, r, g, b );
 
 		x = ScreenWidth/2 + SPR_Width(m_hSprite, 1) * 2;
@@ -361,7 +361,7 @@ int CHudHealth::DrawPain(float flTime)
 	{
 		GetPainColor(r,g,b);
 		shade = a * max( m_fAttackRear, 0.5 );
-		ScaleColors(r, g, b, shade);
+		DrawUtils::ScaleColors(r, g, b, shade);
 		SPR_Set(m_hSprite, r, g, b );
 
 		x = ScreenWidth/2 - SPR_Width(m_hSprite, 2)/2;
@@ -375,7 +375,7 @@ int CHudHealth::DrawPain(float flTime)
 	{
 		GetPainColor(r,g,b);
 		shade = a * max( m_fAttackLeft, 0.5 );
-		ScaleColors(r, g, b, shade);
+		DrawUtils::ScaleColors(r, g, b, shade);
 		SPR_Set(m_hSprite, r, g, b );
 
 		x = ScreenWidth/2 - SPR_Width(m_hSprite, 3) * 3;
@@ -397,11 +397,11 @@ int CHudHealth::DrawDamage(float flTime)
 	if (!m_bitsDamage)
 		return 1;
 
-	UnpackRGB(r,g,b, RGB_YELLOWISH);
+	DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 	
 	a = (int)( fabs(sin(flTime*2)) * 256.0);
 
-	ScaleColors(r, g, b, a);
+	DrawUtils::ScaleColors(r, g, b, a);
 	int i;
 	// Draw all the items
 	for (i = 0; i < NUM_DMG_TYPES; i++)

@@ -45,7 +45,7 @@ int CHudMoney::Draw(float flTime)
 	if( m_iBlinkAmt )
 	{
 		m_fBlinkTime += gHUD.m_flTimeDelta;
-		UnpackRGB( r, g, b, m_fBlinkTime > 0.5f? RGB_REDISH : RGB_YELLOWISH );
+		DrawUtils::UnpackRGB( r, g, b, m_fBlinkTime > 0.5f? RGB_REDISH : RGB_YELLOWISH );
 
 		if( m_fBlinkTime > 1.0f )
 		{
@@ -70,17 +70,17 @@ int CHudMoney::Draw(float flTime)
 				b = (RGB_REDISH & 0xFF) - interpolate * (RGB_REDISH & 0xFF);
 			}
 		}
-		else UnpackRGB(r, g, b, RGB_YELLOWISH );
+		else DrawUtils::UnpackRGB(r, g, b, RGB_YELLOWISH );
 	}
 
 	alphaBalance = 128 - interpolate * (128 - MIN_ALPHA);
 
-	ScaleColors( r, g, b, alphaBalance );
+	DrawUtils::ScaleColors( r, g, b, alphaBalance );
 
 	SPR_Set(gHUD.GetSprite(m_HUD_dollar), r, g, b);
 	SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_dollar));
 
-	gHUD.DrawHudNumber2( x + iDollarWidth, y, false, 5, m_iMoneyCount, r, g, b );
+	DrawUtils::DrawHudNumber2( x + iDollarWidth, y, false, 5, m_iMoneyCount, r, g, b );
 	FillRGBA(x + iDollarWidth / 4, y + gHUD.m_iFontHeight / 4, 2, 2, r, g, b, alphaBalance );
 	return 1;
 }

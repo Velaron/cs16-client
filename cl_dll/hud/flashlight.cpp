@@ -101,11 +101,11 @@ int CHudFlashlight::Draw(float flTime)
 		a = MIN_ALPHA;
 
 	if (m_flBat < 0.20)
-		UnpackRGB(r,g,b, RGB_REDISH);
+		DrawUtils::UnpackRGB(r,g,b, RGB_REDISH);
 	else
-		UnpackRGB(r,g,b, RGB_YELLOWISH);
+		DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 
-	ScaleColors(r, g, b, a);
+	DrawUtils::ScaleColors(r, g, b, a);
 
 	y = (m_hSprite1.rect.bottom - m_hSprite1.rect.top)/2;
 	x = ScreenWidth - m_iWidth - m_iWidth/2 ;

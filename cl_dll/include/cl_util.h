@@ -96,51 +96,6 @@ inline int SPR_Height( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Height(x, f)
 inline int SPR_Width( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Width(x, f); }
 
 inline 	client_textmessage_t	*TextMessageGet( const char *pName ) { return gEngfuncs.pfnTextMessageGet( pName ); }
-inline 	int						TextMessageDrawChar( int x, int y, int number, int r, int g, int b ) 
-{ 
-	return gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b );
-}
-
-inline int DrawConsoleString( int x, int y, const char *string )
-{
-	if( hud_textmode->value )
-	{
-		int ret = gHUD.DrawHudString( x, y, 9999, (char*)string, (int) 255*color[0], (int) 255*color[1], (int) 255*color[2]);
-		color[0] = color[1] = color[2] = 1.0f;
-		return ret;
-	}
-	else
-		return gEngfuncs.pfnDrawConsoleString( x, y, (char*) string );
-	
-}
-inline int DrawSetTextColor(float r, float g, float b)
-{
-	if( hud_textmode->value )
-		color[0]=r, color[1] = g, color[2] = b;
-	else
-		gEngfuncs.pfnDrawSetTextColor( r, g, b );
-
-   return 0;
-}
-inline void GetConsoleStringSize( const char *string, int *width, int *height )
-{
-	if( hud_textmode->value )
-		*height = 13, *width =  gHUD.DrawHudStringLen((char*)string);
-	else
-		gEngfuncs.pfnDrawConsoleStringLen( string, width, height );
-}
-
-inline int ConsoleStringLen( const char *string )
-{
-	int _width, _height;
-	if( hud_textmode->value )
-		return gHUD.DrawHudStringLen((char*)string);
-	else
-	{
-		GetConsoleStringSize( string, &_width, &_height );
-		return _width;
-	}
-}
 
 inline void ConsolePrint( const char *string )
 {
@@ -162,9 +117,6 @@ inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( 
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 #define fabs(x)	   ((x) > 0 ? (x) : 0 - (x))
-
-void ScaleColors( int &r, int &g, int &b, int a );
-
 #define DotProduct(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
 #define VectorSubtract(a,b,c) {(c)[0]=(a)[0]-(b)[0];(c)[1]=(a)[1]-(b)[1];(c)[2]=(a)[2]-(b)[2];}
 #define VectorAdd(a,b,c) {(c)[0]=(a)[0]+(b)[0];(c)[1]=(a)[1]+(b)[1];(c)[2]=(a)[2]+(b)[2];}
@@ -182,13 +134,6 @@ extern vec3_t vec3_origin;
 #pragma warning( disable: 4244 )
 // disable 'truncation from 'const double' to 'float' warning message
 #pragma warning( disable: 4305 )
-
-inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)\
-{\
-	r = (ulRGB & 0xFF0000) >>16;\
-	g = (ulRGB & 0xFF00) >> 8;\
-	b = ulRGB & 0xFF;\
-}
 
 HSPRITE LoadSprite(const char *pszName);
 float *GetClientColor( int clientIndex );

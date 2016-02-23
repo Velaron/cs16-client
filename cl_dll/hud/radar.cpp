@@ -111,12 +111,12 @@ int CHudRadar::Draw(float flTime)
 
 		if( g_PlayerExtraInfo[i].has_c4 )
 		{
-			UnpackRGB( r, g, b, RGB_REDISH );
+			DrawUtils::UnpackRGB( r, g, b, RGB_REDISH );
 		}
 		else
 		{
 			// white
-			UnpackRGB( r, g, b, 0x00FFFFFF );
+			DrawUtils::UnpackRGB( r, g, b, 0x00FFFFFF );
 		}
 		Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
 		float zdiff = gHUD.m_vecOrigin.z - g_PlayerExtraInfo[i].origin.z;
@@ -206,7 +206,7 @@ int CHudRadar::Draw(float flTime)
 
 void CHudRadar::DrawPlayerLocation()
 {
-	DrawConsoleString( 30, 30, g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].location );
+	DrawUtils::DrawConsoleString( 30, 30, g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].location );
 }
 
 void CHudRadar::DrawRadarDot(int x, int y, int size, int r, int g, int b, int a)

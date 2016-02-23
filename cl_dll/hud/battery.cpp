@@ -90,7 +90,7 @@ int CHudBattery::Draw( float flTime )
 	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 	rc.top += m_iHeight * ((float)( 100 - ( min( 100, m_iBat ))) * 0.01f );
 
-	UnpackRGB( r, g, b, RGB_YELLOWISH );
+	DrawUtils::UnpackRGB( r, g, b, RGB_YELLOWISH );
 
 	// Has health changed? Flash the health #
 	if( m_fFade )
@@ -115,7 +115,7 @@ int CHudBattery::Draw( float flTime )
 		a = MIN_ALPHA;
 	}
 
-	ScaleColors( r, g, b, a );
+	DrawUtils::ScaleColors( r, g, b, a );
 	
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 	x = ScreenWidth / 5;
@@ -131,7 +131,7 @@ int CHudBattery::Draw( float flTime )
 	}
 
 	x += (m_hEmpty[m_enArmorType].rect.right - m_hEmpty[m_enArmorType].rect.left);
-	x = gHUD.DrawHudNumber( x, y, DHN_3DIGITS|DHN_DRAWZERO, m_iBat, r, g, b );
+	x = DrawUtils::DrawHudNumber( x, y, DHN_3DIGITS|DHN_DRAWZERO, m_iBat, r, g, b );
 
 	return 1;
 }

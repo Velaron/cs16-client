@@ -136,17 +136,16 @@ int CHudSayText :: Draw( float flTime )
 				// draw the first x characters in the player color
 				strncpy( buf, g_szLineBuffer[i], min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+32) );
 				buf[ min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+31) ] = 0;
-				//gEngfuncs.pfnDrawSetTextColor( g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2] );
-				DrawSetTextColor( g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2] );
-				int x = DrawConsoleString( LINE_START, y, buf );
+				DrawUtils::SetConsoleTextColor( g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2] );
+				int x = DrawUtils::DrawConsoleString( LINE_START, y, buf );
 
 				// color is reset after each string draw
-				DrawConsoleString( x, y, g_szLineBuffer[i] + g_iNameLengths[i] );
+				DrawUtils::DrawConsoleString( x, y, g_szLineBuffer[i] + g_iNameLengths[i] );
 			}
 			else
 			{
 				// normal draw
-				DrawConsoleString( LINE_START, y, g_szLineBuffer[i] );
+				DrawUtils::DrawConsoleString( LINE_START, y, g_szLineBuffer[i] );
 			}
 		}
 
@@ -284,7 +283,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )
 {
 	int line_width = 0;
-	GetConsoleStringSize( g_szLineBuffer[line], &line_width, &line_height );
+	DrawUtils::ConsoleStringSize(g_szLineBuffer[line], &line_width, &line_height );
 
 	if ( (line_width + LINE_START) > MAX_LINE_WIDTH )
 	{ // string is too long to fit on line
@@ -316,7 +315,7 @@ void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )
 				last_break = x;
 
 			buf[0] = *x;  // get the length of the current character
-			GetConsoleStringSize( buf, &tmp_len, &line_height );
+			DrawUtils::ConsoleStringSize( buf, &tmp_len, &line_height );
 			length += tmp_len;
 
 			if ( length > MAX_LINE_WIDTH )

@@ -163,15 +163,15 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 
 	// print the heading line
 
-	gHUD.DrawDarkRectangle(xstart, ystart, xend - xstart, yend - ystart,
+	DrawUtils::DrawRectangle(xstart, ystart, xend - xstart, yend - ystart,
 		m_colors.r, m_colors.g, m_colors.b, m_colors.a, m_bDrawStroke);
 
 	int ypos = ystart + (list_slot * ROW_GAP) + 5;
 
-	gHUD.DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), (char*)(gHUD.m_Teamplay ? "TEAMS" : "PLAYERS"), 255, 140, 0 );
-	gHUD.DrawHudStringReverse( KILLS_POS_END(), ypos, 0, "KILLS", 255, 140, 0 );
-	gHUD.DrawHudString(	DEATHS_POS_START(), ypos, DEATHS_POS_END(), "DEATHS", 255, 140, 0 );
-	gHUD.DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), "PING", 255, 140, 0 );
+	DrawUtils::DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), (char*)(gHUD.m_Teamplay ? "TEAMS" : "PLAYERS"), 255, 140, 0 );
+	DrawUtils::DrawHudStringReverse( KILLS_POS_END(), ypos, 0, "KILLS", 255, 140, 0 );
+	DrawUtils::DrawHudString(	DEATHS_POS_START(), ypos, DEATHS_POS_END(), "DEATHS", 255, 140, 0 );
+	DrawUtils::DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), "PING", 255, 140, 0 );
 
 	list_slot += 2;
 	ypos = ystart + (list_slot * ROW_GAP);
@@ -283,13 +283,13 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 		{
 			GetTeamColor( r, g, b, TEAM_TERRORIST );
 			snprintf(teamName, sizeof(teamName), "Terrorists   -   %i players", team_info->players);
-			gHUD.DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
+			DrawUtils::DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
 		}
 		else if( !strcmp(team_info->name, "CT"))
 		{
 			GetTeamColor( r, g, b, TEAM_CT );
 			snprintf(teamName, sizeof(teamName), "Counter-Terrorists   -   %i players", team_info->players);
-			gHUD.DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
+			DrawUtils::DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
 		}
 		else if( !strcmp(team_info->name, "SPECTATOR" ) )
 		{
@@ -301,9 +301,8 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 			GetTeamColor( r, g, b, TEAM_UNASSIGNED );
 			strncpy( teamName, team_info->name, sizeof(teamName) );
 		}
-		//gHUD.DrawHudNumberString( DEATHS_POS_START(), ypos, DEATHS_POS_END(), team_info->deaths, r, g, b );
-		gHUD.DrawHudString( NAME_POS_START(),   ypos, NAME_POS_END(),   teamName,   r, g, b );
-		gHUD.DrawHudNumberString( PING_POS_END(),  ypos, PING_POS_START(),  team_info->sumping / team_info->players,  r, g, b );
+		DrawUtils::DrawHudString( NAME_POS_START(),   ypos, NAME_POS_END(),   teamName,   r, g, b );
+		DrawUtils::DrawHudNumberString( PING_POS_END(),  ypos, PING_POS_START(),  team_info->sumping / team_info->players,  r, g, b );
 
 		team_info->already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get drawn again
 
@@ -378,26 +377,26 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, char *team )
 		}
 
 
-		gHUD.DrawHudString( NAME_POS_START() + nameoffset, ypos, NAME_POS_END(), pl_info->name, r, g, b );
+		DrawUtils::DrawHudString( NAME_POS_START() + nameoffset, ypos, NAME_POS_END(), pl_info->name, r, g, b );
 
 		// draw bomb( if player have the bomb )
 		if( g_PlayerExtraInfo[best_player].dead )
-			gHUD.DrawHudString(	ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Dead", r, g, b );
+			DrawUtils::DrawHudString(	ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Dead", r, g, b );
 		else if( g_PlayerExtraInfo[best_player].has_c4 )
-			gHUD.DrawHudString(	ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Bomb", r, g, b );
+			DrawUtils::DrawHudString(	ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Bomb", r, g, b );
 		else if( g_PlayerExtraInfo[best_player].vip )
-			gHUD.DrawHudString(	ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "VIP", r, g, b );
+			DrawUtils::DrawHudString(	ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "VIP", r, g, b );
 
 		// draw kills (right to left)
-		gHUD.DrawHudNumberString( KILLS_POS_END(), ypos, KILLS_POS_START(), g_PlayerExtraInfo[best_player].frags, r, g, b );
+		DrawUtils::DrawHudNumberString( KILLS_POS_END(), ypos, KILLS_POS_START(), g_PlayerExtraInfo[best_player].frags, r, g, b );
 
 		// draw deaths
-		gHUD.DrawHudNumberString( DEATHS_POS_END(), ypos, DEATHS_POS_START(), g_PlayerExtraInfo[best_player].deaths, r, g, b );
+		DrawUtils::DrawHudNumberString( DEATHS_POS_END(), ypos, DEATHS_POS_START(), g_PlayerExtraInfo[best_player].deaths, r, g, b );
 
 		// draw ping & packetloss
 		static char buf[64];
 		sprintf( buf, "%d", g_PlayerInfoList[best_player].ping );
-		gHUD.DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), buf, r, g, b );
+		DrawUtils::DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), buf, r, g, b );
 	
 		pl_info->name = NULL;  // set the name to be NULL, so this client won't get drawn again
 		list_slot++;

@@ -30,6 +30,7 @@
 #include "ammo.h"
 
 #include "csprite.h"
+#include "draw_util.h"
 
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
@@ -807,17 +808,7 @@ public:
 	int UpdateClientData( client_data_t *cdata, float time );
 	void AddHudElem(CHudBase *p);
 
-	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b );
-	int DrawHudNumber2( int x, int y, bool DrawZero, int iDigits, int iNumber, int r, int g, int b);
-	int DrawHudNumber2( int x, int y, int iNumber, int r, int g, int b);
-	int DrawHudString(int x, int y, int iMaxX, char *szString, int r, int g, int b, bool drawing = false );
-	int DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b, bool drawing = false );
-	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
-	int DrawHudStringLen( char *szIt );
-	void DrawDarkRectangle( int x, int y, int wide, int tall, int r = 0, int g = 0, int b = 0, int a = 153, bool drawStroke = true );
-
 	float GetSensitivity();
-	int GetNumWidth(int iNumber, int iFlags);
 	HSPRITE GetSprite( int index );
 	wrect_t& GetSpriteRect( int index );
 	int GetSpriteIndex( const char *SpriteName );	// gets a sprite index, for use in the m_rghSprites[] array

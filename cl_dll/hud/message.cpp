@@ -199,7 +199,7 @@ void CHudMessage::MessageScanNextChar( void )
 	if ( m_parms.pMessage->effect == 1 && m_parms.charTime != 0 )
 	{
 		if ( m_parms.x >= 0 && m_parms.y >= 0 && (m_parms.x + gHUD.m_scrinfo.charWidths[ m_parms.text ]) <= ScreenWidth )
-			TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.pMessage->r2, m_parms.pMessage->g2, m_parms.pMessage->b2 );
+			DrawUtils::TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.pMessage->r2, m_parms.pMessage->g2, m_parms.pMessage->b2 );
 	}
 }
 
@@ -308,7 +308,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			MessageScanNextChar();
 			
 			if ( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
-				TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b );
+				DrawUtils::TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b );
 			m_parms.x = next;
 		}
 

@@ -1112,9 +1112,9 @@ int CHudAmmo::Draw(float flTime)
 	if (m_fFade > 0)
 		m_fFade -= (gHUD.m_flTimeDelta * 20);
 
-	UnpackRGB(r,g,b, RGB_YELLOWISH);
+	DrawUtils::DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 
-	ScaleColors(r, g, b, a );
+	DrawUtils::DrawUtils::ScaleColors(r, g, b, a );
 
 	// Does this weapon have a clip?
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/2;
@@ -1129,7 +1129,7 @@ int CHudAmmo::Draw(float flTime)
 			// room for the number and the '|' and the current ammo
 			
 			x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, pw->iClip, r, g, b);
+			x = DrawUtils::DrawHudNumber(x, y, iFlags | DHN_3DIGITS, pw->iClip, r, g, b);
 
 			wrect_t rc;
 			rc.top = 0;
@@ -1141,7 +1141,7 @@ int CHudAmmo::Draw(float flTime)
 
 			x += AmmoWidth/2;
 
-			UnpackRGB(r,g,b, RGB_YELLOWISH);
+			DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 
 			// draw the | bar
 			FillRGBA(x, y, iBarWidth, gHUD.m_iFontHeight, r, g, b, a);
@@ -1149,8 +1149,8 @@ int CHudAmmo::Draw(float flTime)
 			x += iBarWidth + AmmoWidth/2;;
 
 			// GL Seems to need this
-			ScaleColors(r, g, b, a );
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), r, g, b);		
+			DrawUtils::ScaleColors(r, g, b, a );
+			x = DrawUtils::DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), r, g, b);
 
 
 		}
@@ -1158,7 +1158,7 @@ int CHudAmmo::Draw(float flTime)
 		{
 			// SPR_Draw a bullets only line
 			x = ScreenWidth - 4 * AmmoWidth - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), r, g, b);
+			x = DrawUtils::DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), r, g, b);
 		}
 
 		// Draw the ammo Icon
@@ -1177,7 +1177,7 @@ int CHudAmmo::Draw(float flTime)
 		{
 			y -= gHUD.m_iFontHeight + gHUD.m_iFontHeight/4;
 			x = ScreenWidth - 4 * AmmoWidth - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags|DHN_3DIGITS, gWR.CountAmmo(pw->iAmmo2Type), r, g, b);
+			x = DrawUtils::DrawHudNumber(x, y, iFlags|DHN_3DIGITS, gWR.CountAmmo(pw->iAmmo2Type), r, g, b);
 
 			// Draw the ammo Icon
 			SPR_Set(m_pWeapon->hAmmo2, r, g, b);
@@ -1433,13 +1433,13 @@ int DrawBar(int x, int y, int width, int height, float f)
 		// Always show at least one pixel if we have ammo.
 		if (w <= 0)
 			w = 1;
-		UnpackRGB(r, g, b, RGB_GREENISH);
+		DrawUtils::UnpackRGB(r, g, b, RGB_GREENISH);
 		FillRGBA(x, y, w, height, r, g, b, 255);
 		x += w;
 		width -= w;
 	}
 
-	UnpackRGB(r, g, b, RGB_YELLOWISH);
+	DrawUtils::UnpackRGB(r, g, b, RGB_YELLOWISH);
 
 	FillRGBA(x, y, width, height, r, g, b, 128);
 
@@ -1515,14 +1515,14 @@ int CHudAmmo::DrawWList(float flTime)
 	{
 		int iWidth;
 
-		UnpackRGB(r,g,b, RGB_YELLOWISH);
+		DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 	
 		if ( iActiveSlot == i )
 			a = 255;
 		else
 			a = 192;
 
-		ScaleColors(r, g, b, 255);
+		DrawUtils::ScaleColors(r, g, b, 255);
 		SPR_Set(gHUD.GetSprite(m_HUD_bucket0 + i), r, g, b );
 
 		// make active slot wide enough to accomodate gun pictures
@@ -1571,13 +1571,13 @@ int CHudAmmo::DrawWList(float flTime)
 				// if active, then we must have ammo.
 				if ( gWR.HasAmmo(p) )
 				{
-					UnpackRGB(r,g,b, RGB_YELLOWISH );
-					ScaleColors(r, g, b, 192);
+					DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH );
+					DrawUtils::ScaleColors(r, g, b, 192);
 				}
 				else
 				{
-					UnpackRGB(r,g,b, RGB_REDISH);
-					ScaleColors(r, g, b, 128);
+					DrawUtils::UnpackRGB(r,g,b, RGB_REDISH);
+					DrawUtils::ScaleColors(r, g, b, 128);
 				}
 
 
@@ -1610,7 +1610,7 @@ int CHudAmmo::DrawWList(float flTime)
 		{
 			// Draw Row of weapons.
 
-			UnpackRGB(r,g,b, RGB_YELLOWISH);
+			DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 
 			for ( int iPos = 0; iPos < MAX_WEAPON_POSITIONS; iPos++ )
 			{
@@ -1621,12 +1621,12 @@ int CHudAmmo::DrawWList(float flTime)
 
 				if ( gWR.HasAmmo(p) )
 				{
-					UnpackRGB(r,g,b, RGB_YELLOWISH);
+					DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 					a = 128;
 				}
 				else
 				{
-					UnpackRGB(r,g,b, RGB_REDISH);
+					DrawUtils::UnpackRGB(r,g,b, RGB_REDISH);
 					a = 96;
 				}
 

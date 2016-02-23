@@ -477,9 +477,8 @@ int CHudSpectator::Draw(float flTime)
 		
 		lx = strlen(string)*3; // 3 is avg. character length :)
 
-		//gEngfuncs.pfnDrawSetTextColor( color[0], color[1], color[2] );
-		DrawSetTextColor( color[0], color[1], color[2] );
-		DrawConsoleString( m_vPlayerPos[i][0]-lx,m_vPlayerPos[i][1], string);
+		DrawUtils::SetConsoleTextColor( color[0], color[1], color[2] );
+		DrawUtils::DrawConsoleString( m_vPlayerPos[i][0]-lx,m_vPlayerPos[i][1], string);
 		
 	}
 
@@ -556,7 +555,7 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 
 		msg->effect = READ_BYTE();		// effect
 
-		UnpackRGB( (int&)msg->r1, (int&)msg->g1, (int&)msg->b1, READ_LONG() );		// color
+		DrawUtils::UnpackRGB( (int&)msg->r1, (int&)msg->g1, (int&)msg->b1, READ_LONG() );		// color
 		msg->r2 = msg->r1;
 		msg->g2 = msg->g1;
 		msg->b2 = msg->b1;
@@ -1229,7 +1228,7 @@ void CHudSpectator::DrawOverviewEntities()
 
 	z = m_OverviewData.layersHeights[0] * zScale;
 	// get yellow/brown HUD color
-	UnpackRGB(ir,ig,ib, RGB_YELLOWISH);
+	DrawUtils::UnpackRGB(ir,ig,ib, RGB_YELLOWISH);
 	r = (float)ir/255.0f;
 	g = (float)ig/255.0f;
 	b = (float)ib/255.0f;

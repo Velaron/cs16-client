@@ -41,7 +41,7 @@ int CHudTimer::Draw( float fTime )
 
 	if( minutes * 60 + seconds > 20 )
 	{
-		UnpackRGB(r,g,b, RGB_YELLOWISH );
+		DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH );
 	}
 	else
 	{
@@ -52,10 +52,10 @@ int CHudTimer::Draw( float fTime )
 			m_flPanicTime = 0;
 			m_bPanicColorChange = !m_bPanicColorChange;
 		}
-		UnpackRGB( r, g, b, m_bPanicColorChange ? RGB_YELLOWISH : RGB_REDISH );
+		DrawUtils::UnpackRGB( r, g, b, m_bPanicColorChange ? RGB_YELLOWISH : RGB_REDISH );
 	}
 
-	ScaleColors( r, g, b, MIN_ALPHA );
+	DrawUtils::ScaleColors( r, g, b, MIN_ALPHA );
 
     
     int iWatchWidth = gHUD.GetSpriteRect(m_HUD_timer).right - gHUD.GetSpriteRect(m_HUD_timer).left;
@@ -66,12 +66,12 @@ int CHudTimer::Draw( float fTime )
     SPR_Set(gHUD.GetSprite(m_HUD_timer), r, g, b);
     SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_timer));
         
-	x = gHUD.DrawHudNumber2( x + iWatchWidth / 4, y, false, 2, minutes, r, g, b );
+	x = DrawUtils::DrawHudNumber2( x + iWatchWidth / 4, y, false, 2, minutes, r, g, b );
 	// draw :
 	FillRGBA(x + iWatchWidth / 4, y + gHUD.m_iFontHeight / 4, 2, 2, r, g, b, 100);
 	FillRGBA(x + iWatchWidth / 4, y + gHUD.m_iFontHeight - gHUD.m_iFontHeight / 4, 2, 2, r, g, b, 100);
 
-	gHUD.DrawHudNumber2( x + iWatchWidth / 2, y, true, 2, seconds, r, g, b );
+	DrawUtils::DrawHudNumber2( x + iWatchWidth / 2, y, true, 2, seconds, r, g, b );
 	return 1;
 }
 
@@ -130,10 +130,10 @@ int CHudProgressBar::Draw( float flTime )
 	if( m_szLocalizedHeader && m_szLocalizedHeader[0] )
 	{
 		int r, g, b;
-		UnpackRGB( r, g, b, RGB_YELLOWISH );
-		gHUD.DrawHudString( ScreenWidth / 4, ScreenHeight / 2, ScreenWidth, (char*)m_szLocalizedHeader, r, g, b );
+		DrawUtils::UnpackRGB( r, g, b, RGB_YELLOWISH );
+		DrawUtils::DrawHudString( ScreenWidth / 4, ScreenHeight / 2, ScreenWidth, (char*)m_szLocalizedHeader, r, g, b );
 
-		gHUD.DrawDarkRectangle( ScreenWidth/ 4, ScreenHeight / 2 + gHUD.m_scrinfo.iCharHeight, ScreenWidth/2, ScreenHeight/30 );
+		DrawUtils::DrawRectangle( ScreenWidth/ 4, ScreenHeight / 2 + gHUD.m_scrinfo.iCharHeight, ScreenWidth/2, ScreenHeight/30 );
 		FillRGBA( ScreenWidth/4+2, ScreenHeight/2 + gHUD.m_scrinfo.iCharHeight + 2, m_fPercent * (ScreenWidth/2-4), ScreenHeight/30-4, 255, 140, 0, 255 );
 		return 1;
 	}
@@ -150,7 +150,7 @@ int CHudProgressBar::Draw( float flTime )
 		return 1;
 	}
 
-	gHUD.DrawDarkRectangle( ScreenWidth/4, ScreenHeight*2/3, ScreenWidth/2, 10 );
+	DrawUtils::DrawRectangle( ScreenWidth/4, ScreenHeight*2/3, ScreenWidth/2, 10 );
 	FillRGBA( ScreenWidth/4+2, ScreenHeight*2/3+2, m_fPercent * (ScreenWidth/2-4), 6, 255, 140, 0, 255 );
 
 	return 1;

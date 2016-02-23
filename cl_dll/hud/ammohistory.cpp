@@ -125,9 +125,9 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				HSPRITE *spr = gWR.GetAmmoPicFromWeapon( rgAmmoHistory[i].iId, rcPic );
 
 				int r, g, b;
-				UnpackRGB(r,g,b, RGB_YELLOWISH);
+				DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				ScaleColors(r, g, b, min(scale, 255) );
+				DrawUtils::ScaleColors(r, g, b, min(scale, 255) );
 
 				// Draw the pic
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
@@ -139,7 +139,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				}
 
 				// Draw the number
-				gHUD.DrawHudNumberString( xpos - 10, ypos, xpos - 100, rgAmmoHistory[i].iCount, r, g, b );
+				DrawUtils::DrawHudNumberString( xpos - 10, ypos, xpos - 100, rgAmmoHistory[i].iCount, r, g, b );
 			}
 			else if ( rgAmmoHistory[i].type == HISTSLOT_WEAP )
 			{
@@ -149,13 +149,13 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 					return 1;  // we don't know about the weapon yet, so don't draw anything
 
 				int r, g, b;
-				UnpackRGB(r,g,b, RGB_YELLOWISH);
+				DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 
 				if ( !gWR.HasAmmo( weap ) )
-					UnpackRGB(r,g,b, RGB_REDISH);	// if the weapon doesn't have ammo, display it as red
+					DrawUtils::UnpackRGB(r,g,b, RGB_REDISH);	// if the weapon doesn't have ammo, display it as red
 
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				ScaleColors(r, g, b, min(scale, 255) );
+				DrawUtils::ScaleColors(r, g, b, min(scale, 255) );
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
 				int xpos = ScreenWidth - (weap->rcInactive.right - weap->rcInactive.left);
@@ -171,9 +171,9 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 
 				wrect_t rect = gHUD.GetSpriteRect( rgAmmoHistory[i].iId );
 
-				UnpackRGB(r,g,b, RGB_YELLOWISH);
+				DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				ScaleColors(r, g, b, min(scale, 255) );
+				DrawUtils::ScaleColors(r, g, b, min(scale, 255) );
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
 				int xpos = ScreenWidth - (rect.right - rect.left) - 10;

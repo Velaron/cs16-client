@@ -217,7 +217,7 @@ int CHudStatusBar :: Draw( float fTime )
 	for ( int i = 0; i < MAX_STATUSBAR_LINES; i++ )
 	{
 		int TextHeight, TextWidth;
-		GetConsoleStringSize( m_szStatusBar[i], &TextWidth, &TextHeight );
+		DrawUtils::ConsoleStringSize( m_szStatusBar[i], &TextWidth, &TextHeight );
 
 		int x = 4;
 		int y = Y_START - ( 4 + TextHeight * i ); // draw along bottom of screen
@@ -230,9 +230,8 @@ int CHudStatusBar :: Draw( float fTime )
 		}
 
 		if ( m_pflNameColors[i] )
-			//gEngfuncs.pfnDrawSetTextColor( m_pflNameColors[i][0], m_pflNameColors[i][1], m_pflNameColors[i][2] );
-			DrawSetTextColor( m_pflNameColors[i][0], m_pflNameColors[i][1], m_pflNameColors[i][2] );
-		DrawConsoleString( x, y, m_szStatusBar[i] );
+			DrawUtils::SetConsoleTextColor( m_pflNameColors[i][0], m_pflNameColors[i][1], m_pflNameColors[i][2] );
+		DrawUtils::DrawConsoleString( x, y, m_szStatusBar[i] );
 	}
 
 	return 1;

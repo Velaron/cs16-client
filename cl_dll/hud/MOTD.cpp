@@ -95,7 +95,7 @@ int CHudMOTD :: Draw( float fTime )
 	int ymax = ypos + height;
 	if( xmax > ScreenWidth - 30 ) xmax = ScreenWidth - 30;
 	char *next_line;
-	gHUD.DrawDarkRectangle(xpos-5, ypos_r - 5, xmax - xpos+10, height + 10);
+	DrawUtils::DrawRectangle(xpos-5, ypos_r - 5, xmax - xpos+10, height + 10);
 	while ( *ch )
 	{
 		int line_length = 0;  // count the length of the current line
@@ -109,7 +109,7 @@ int CHudMOTD :: Draw( float fTime )
 
 		// find where to start drawing the line
 		if( (ypos > ROW_RANGE_MIN) && (ypos + LINE_HEIGHT <= ypos_r + height) )
-			gHUD.DrawHudString( xpos, ypos, xmax, ch, 255, 180, 0 );
+			DrawUtils::DrawHudString( xpos, ypos, xmax, ch, 255, 180, 0 );
 
 		ypos += LINE_HEIGHT;
 
