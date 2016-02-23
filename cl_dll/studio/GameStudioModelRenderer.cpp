@@ -979,7 +979,7 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 	return 1;
 }
 
-#define USE_TRIAPI
+//#define USE_TRIAPI
 
 void CGameStudioModelRenderer::StudioDrawShadow( Vector origin, float scale )
 {
