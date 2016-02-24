@@ -24,12 +24,6 @@ int CHudRadar::Init()
 
 	m_iFlags = HUD_ACTIVE;
 
-	m_hRadar = 0;
-	m_hRadaropaque = 0;
-
-	m_hrad.bottom = m_hrad.left = m_hrad.right = m_hrad.top = 0;
-	m_hradopaque.bottom = m_hradopaque.left = m_hradopaque.right = m_hradopaque.top = 0;
-
 	cl_radartype = CVAR_CREATE( "cl_radartype", "0", FCVAR_ARCHIVE );
 
 	gHUD.AddHudElem( this );
@@ -49,12 +43,8 @@ void CHudRadar::Reset()
 
 int CHudRadar::VidInit(void)
 {
-	m_hRadar = gHUD.GetSprite( gHUD.GetSpriteIndex( "radar" ));
-	m_hRadaropaque = gHUD.GetSprite( gHUD.GetSpriteIndex( "radaropaque" ));
-	m_hrad = gHUD.GetSpriteRect( gHUD.GetSpriteIndex( "radar" ) );
-	m_hradopaque = gHUD.GetSpriteRect( gHUD.GetSpriteIndex( "radaropaque" ) );
-	//m_hHostage = gHUD.GetSprite( gHUD.GetSpriteIndex("hostage") );
-
+	m_hRadar.SetSpriteByName( "radar" );
+	m_hRadarOpaque.SetSpriteByName( "radaropaque" );
 	return 1;
 }
 
@@ -92,23 +82,26 @@ int CHudRadar::Draw(float flTime)
 
 	if( cl_radartype->value )
 	{
-		SPR_Set(m_hRadaropaque, 200, 200, 200);
-		SPR_DrawHoles(0, 0, 0, &m_hradopaque);
+		SPR_Set(m_hRadarOpaque.spr, 200, 200, 200);
+		SPR_DrawHoles(0, 0, 0, &m_hRadarOpaque.rect);
 	}
 	else
 	{
-		SPR_Set( m_hRadar, 25, 75, 25 );
-		SPR_DrawAdditive( 0, 0, 0, &m_hrad );
+		SPR_Set( m_hRadar.spr, 25, 75, 25 );
+		SPR_DrawAdditive( 0, 0, 0, &m_hRadarOpaque.rect );
 	}
 
 	for(int i = 0; i < 33; i++)
 	{
+		// skip local player and dead players
 		if( i == gHUD.m_Scoreboard.m_iPlayerNum || g_PlayerExtraInfo[i].dead)
 			continue;
 
+		// skip non-teammates
 		if( g_PlayerExtraInfo[i].teamnumber != iTeamNumber )
 			continue;
 
+		// player with C4 must be red
 		if( g_PlayerExtraInfo[i].has_c4 )
 		{
 			DrawUtils::UnpackRGB( r, g, b, RGB_REDISH );
@@ -116,20 +109,32 @@ int CHudRadar::Draw(float flTime)
 		else
 		{
 			// white
-			DrawUtils::UnpackRGB( r, g, b, 0x00FFFFFF );
+			DrawUtils::UnpackRGB( r, g, b, RGB_WHITE );
 		}
+
+		// calc radar position
 		Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
+
+
 		float zdiff = gHUD.m_vecOrigin.z - g_PlayerExtraInfo[i].origin.z;
 		if( !g_PlayerExtraInfo[i].radarflashon )
 		{
 			if( zdiff < 20 && zdiff > -20 )
+			{
 				DrawRadarDot( pos.x, pos.y, 4, r, g, b, 255 );
+			}
 			else if( gHUD.m_vecOrigin.z > g_PlayerExtraInfo[i].origin.z )
+			{
 				DrawFlippedT( pos.x, pos.y, 2, r, g, b, 255);
-			else DrawT( pos.x, pos.y, 2, r, g, b, 255 );
+			}
+			else
+			{
+				DrawT( pos.x, pos.y, 2, r, g, b, 255 );
+			}
 		}
 		else
 		{
+			// radar flashing
 			if( g_PlayerExtraInfo[i].radarflashes )
 			{
 				float timer = (flTime - g_PlayerExtraInfo[i].radarflash);
@@ -145,14 +150,22 @@ int CHudRadar::Draw(float flTime)
 			if( g_PlayerExtraInfo[i].nextflash )
 			{
 				if( zdiff < 20 && zdiff > -20 )
+				{
 					DrawRadarDot( pos.x, pos.y, 4, r, g, b, 255 );
+				}
 				else if( gHUD.m_vecOrigin.z > g_PlayerExtraInfo[i].origin.z )
+				{
 					DrawFlippedT( pos.x, pos.y, 2, r, g, b, 255);
-				else DrawT( pos.x, pos.y, 2, r, g, b, 255 );
+				}
+				else
+				{
+					DrawT( pos.x, pos.y, 2, r, g, b, 255 );
+				}
 			}
 		}
 	}
 
+	// Terrorist specific code( C4 Bomb )
 	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST && g_PlayerExtraInfo[33].radarflashon)
 	{
 		Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[33].origin, gHUD.m_vecAngles);
@@ -170,11 +183,17 @@ int CHudRadar::Draw(float flTime)
 		if( g_PlayerExtraInfo[33].nextflash )
 		{
 			if( g_PlayerExtraInfo[33].playerclass )
+			{
 				DrawCross( pos.x, pos.y, 2, 255, 0, 0, 255);
-			else DrawRadarDot( pos.x, pos.y, 4, 255, 0, 0, 255 );
+			}
+			else
+			{
+				DrawRadarDot( pos.x, pos.y, 4, 255, 0, 0, 255 );
+			}
 		}
 	}
 
+	// Counter-Terrorist specific code( hostages )
 	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_CT )
 	{
 		// draw hostages for CT
@@ -201,7 +220,8 @@ int CHudRadar::Draw(float flTime)
 			}
 		}
 	}
-   return 0;
+
+	return 0;
 }
 
 void CHudRadar::DrawPlayerLocation()
@@ -246,7 +266,7 @@ Vector2D CHudRadar::WorldToRadar(const Vector vPlayerOrigin, const Vector vObjec
 	if(diff.y == 0)
 		diff.y = 0.00001f;
 
-	int iMaxRadius = (m_hrad.right - m_hrad.left) / 2.0f;
+	int iMaxRadius = (m_hRadar.rect.right - m_hRadar.rect.left) / 2.0f;
 
 	float flOffset = atan(diff.y / diff.x) * 180.0f / M_PI;
 

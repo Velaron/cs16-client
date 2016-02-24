@@ -38,17 +38,17 @@ int HUD_GetSpriteIndexByName( const char *sz );
 
 class CClientSprite {
 public:
-	CClientSprite(const char *sprName)
+	inline CClientSprite(const char *sprName)
 	{
 		SetSpriteByName(sprName);
 	}
-	CClientSprite()
+	inline CClientSprite()
 	{
 		spr = 0;
 		rect.bottom = rect.left = rect.right = rect.top = 0;
 	}
 
-	void SetSpriteByName( const char *sprName )
+	inline void SetSpriteByName( const char *sprName )
 	{
 		index = HUD_GetSpriteIndexByName(sprName);
 		spr	= HUD_GetSprite(index);

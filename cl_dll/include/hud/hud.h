@@ -24,6 +24,7 @@
 #define RGB_YELLOWISH 0x00FFA000 //255,160,0
 #define RGB_REDISH 0x00FF1010 //255,16,16
 #define RGB_GREENISH 0x0000A000 //0,160,0
+#define RGB_WHITE 0x00FFFFFF
 
 #include "wrect.h"
 #include "cl_dll.h"

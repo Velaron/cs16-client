@@ -1496,7 +1496,7 @@ int CHudAmmo::DrawWList(float flTime)
 	else 
 		iActiveSlot = gpActiveSel->iSlot;
 
-	x = gHUD.m_Radar.m_hrad.right + 10; //!!!
+	x = gHUD.m_Radar.m_hRadar.rect.right + 10; //!!!
 	y = 10; //!!!
 	
 
@@ -1544,7 +1544,7 @@ int CHudAmmo::DrawWList(float flTime)
 
 
 	a = 128; //!!!
-	x = gHUD.m_Radar.m_hrad.right + 10; //!!!;
+	x = gHUD.m_Radar.m_hRadar.rect.right + 10; //!!!;
 
 	// Draw all of the buckets
 	for (i = 0; i < MAX_WEAPON_SLOTS; i++)

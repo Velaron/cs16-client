@@ -6,6 +6,8 @@ Copyright (C) 2015 a1batross
 #ifndef RADAR_H
 #define RADAR_H
 
+class CClientSprite;
+
 class CHudRadar: public CHudBase
 {
 public:
@@ -18,12 +20,10 @@ public:
 
 	void UserCmd_ShowRadar();
 	void UserCmd_HideRadar();
-	wrect_t m_hrad;
-	wrect_t m_hradopaque;
+	CClientSprite m_hRadar;
+	CClientSprite m_hRadarOpaque;
 
 private:
-	HSPRITE m_hRadar;
-	HSPRITE m_hRadaropaque;
 
 	cvar_t *cl_radartype;
 
