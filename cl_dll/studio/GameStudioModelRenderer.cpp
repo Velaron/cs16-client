@@ -36,7 +36,6 @@
 
 #include "StudioModelRenderer.h"
 #include "GameStudioModelRenderer.h"
-#include "event_api.h"
 #include "pm_defs.h"
 
 #define ANIM_WALK_SEQUENCE 3
@@ -79,7 +78,6 @@ static client_anim_state_t g_clientstate;
 CGameStudioModelRenderer::CGameStudioModelRenderer(void)
 {
 	m_bLocal = false;
-	m_iShadowSprite = 0;
 }
 
 mstudioanim_t *CGameStudioModelRenderer::LookupAnimation(mstudioseqdesc_t *pseqdesc, int index)
@@ -781,6 +779,23 @@ int CGameStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t *pplaye
 	if (isLocalPlayer)
 		RestorePlayerState(pplayer);
 
+	if( gHUD.cl_shadows->value != 0.0f )
+	{
+		Vector chestpos;
+
+		for( int i = 0; i < m_nCachedBones; i++ )
+		{
+			if( !stricmp(m_nCachedBoneNames[i], "Bip01 Spine3") )
+			{
+				chestpos.x = m_rgCachedBoneTransform[i][0][3];
+				chestpos.y = m_rgCachedBoneTransform[i][1][3];
+				chestpos.z = m_rgCachedBoneTransform[i][2][3];
+				StudioDrawShadow(chestpos, 20.0f);
+				break;
+			}
+		}
+	}
+
 	return iret;
 }
 
@@ -958,106 +973,10 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 				IEngineStudio.StudioClientEvents();
 		}
 	}
-	if( gHUD.cl_shadows->value != 0.0f && m_iShadowSprite )
-	{
-		Vector chestpos;
-
-		for( int i = 0; i < m_nCachedBones; i++ )
-		{
-			if( !stricmp(m_nCachedBoneNames[i], "Bip01 Spine3") )
-			{
-				chestpos.x = m_rgCachedBoneTransform[i][0][3];
-				chestpos.y = m_rgCachedBoneTransform[i][1][3];
-				chestpos.z = m_rgCachedBoneTransform[i][2][3];
-				StudioDrawShadow(chestpos, 20.0f);
-				break;
-			}
-		}
-
-	}
 
 	return 1;
 }
 
-//#define USE_TRIAPI
-
-void CGameStudioModelRenderer::StudioDrawShadow( Vector origin, float scale )
-{
-	Vector endPoint = origin;
-	Vector p1, p2, p3, p4;
-	pmtrace_t pmtrace;
-	static HSPRITE hSpriteFallback = 0;
-
-#ifdef USE_TRIAPI
-	if( !gEngfuncs.pTriAPI->SpriteTexture( (struct model_s*)gEngfuncs.pfnGetModelByIndex(m_iShadowSprite), 0 ) )
-	{
-		if( !hSpriteFallback )
-			hSpriteFallback = gEngfuncs.pfnSPR_Load("sprites/shadow_circle.spr");
-		if( !gEngfuncs.pTriAPI->SpriteTexture( (struct model_s* )gEngfuncs.GetSpritePointer(hSpriteFallback), 0))
-			return;
-	}
-#endif
-
-	endPoint.z -= 150.0f;
-
-	gEngfuncs.pEventAPI->EV_PushPMStates( );
-
-	gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-	gEngfuncs.pEventAPI->EV_PlayerTrace( origin, endPoint, PM_STUDIO_BOX | PM_GLASS_IGNORE, -1, &pmtrace );
-
-	gEngfuncs.pEventAPI->EV_PopPMStates( );
-
-	// don't allow shadow if player in solid area
-	if( pmtrace.startsolid )
-		return;
-
-	// don't allow shadow if doesn't hit anything
-	if( pmtrace.fraction > 1.0f )
-		return;
-
-	pmtrace.plane.normal = pmtrace.plane.normal.Normalize( );
-
-	// don't allow shadow on too lean planes
-	if( pmtrace.plane.normal.z <= 0.7 )
-		return;
-
-	pmtrace.plane.normal = pmtrace.plane.normal * scale * ( 1.0 - pmtrace.fraction );
-
-	p1.x = pmtrace.endpos.x - pmtrace.plane.normal.z;
-	p1.y = pmtrace.endpos.y + pmtrace.plane.normal.z;
-	p1.z = pmtrace.endpos.z + 1.0f + pmtrace.plane.normal.x - pmtrace.plane.normal.y;
-
-	p2.x = pmtrace.endpos.x + pmtrace.plane.normal.z;
-	p2.y = pmtrace.endpos.y + pmtrace.plane.normal.z;
-	p2.z = pmtrace.endpos.z + 1.0f - pmtrace.plane.normal.x - pmtrace.plane.normal.y;
-
-	p3.x = pmtrace.endpos.x + pmtrace.plane.normal.z;
-	p3.y = pmtrace.endpos.y - pmtrace.plane.normal.z;
-	p3.z = pmtrace.endpos.z + 1.0f - pmtrace.plane.normal.x + pmtrace.plane.normal.y;
-
-	p4.x = pmtrace.endpos.x - pmtrace.plane.normal.z;
-	p4.y = pmtrace.endpos.y - pmtrace.plane.normal.z;
-	p4.z = pmtrace.endpos.z + 1.0f + pmtrace.plane.normal.x + pmtrace.plane.normal.y;
-
-
-#ifndef USE_TRIAPI
-	IEngineStudio.StudioRenderShadow( m_iShadowSprite, p1, p2, p3, p4 );
-#else
-	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
-	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
-	gEngfuncs.pTriAPI->Color4ub( 0, 0, 0, 255 );
-	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		gEngfuncs.pTriAPI->TexCoord2f( 0, 0 );
-		gEngfuncs.pTriAPI->Vertex3fv( p1 );
-		gEngfuncs.pTriAPI->TexCoord2f( 1, 0 );
-		gEngfuncs.pTriAPI->Vertex3fv( p2 );
-		gEngfuncs.pTriAPI->TexCoord2f( 1, 1 );
-		gEngfuncs.pTriAPI->Vertex3fv( p3 );
-		gEngfuncs.pTriAPI->TexCoord2f( 0, 1 );
-		gEngfuncs.pTriAPI->Vertex3fv( p4 );
-	gEngfuncs.pTriAPI->End( );
-#endif
-}
 
 void CGameStudioModelRenderer::StudioFxTransform(cl_entity_t *ent, float transform[3][4])
 {
@@ -1116,10 +1035,6 @@ void CGameStudioModelRenderer::StudioFxTransform(cl_entity_t *ent, float transfo
 		break;
 	}
 	}
-}
-void CGameStudioModelRenderer::StudioSetShadowSprite(int idx)
-{
-	m_iShadowSprite = idx;
 }
 
 void R_StudioInit(void)

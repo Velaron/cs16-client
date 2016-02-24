@@ -68,8 +68,6 @@ public:
 	virtual void StudioPlayerBlend(mstudioseqdesc_t *pseqdesc, int *pBlend, float *pPitch);
 	virtual void CalculateYawBlend(entity_state_t *pplayer);
 	virtual void CalculatePitchBlend(entity_state_t *pplayer);
-	void StudioSetShadowSprite(int idx);
-	void StudioDrawShadow(Vector origin, float scale);
 
 private:
 	void SavePlayerState(entity_state_t *pplayer);
@@ -79,7 +77,6 @@ private:
 
 private:
 	int m_nPlayerGaitSequences[MAX_CLIENTS];
-	int m_iShadowSprite;
 	bool m_bLocal;
 };
 

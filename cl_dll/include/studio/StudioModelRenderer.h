@@ -52,11 +52,15 @@ public:
 	virtual void StudioPlayerBlend(mstudioseqdesc_t *pseqdesc, int *pBlend, float *pPitch);
 	virtual void StudioEstimateGait(entity_state_t *pplayer);
 	virtual void StudioProcessGait(entity_state_t *pplayer);
+	virtual void StudioSetShadowSprite(int idx);
+	virtual void StudioDrawShadow(Vector origin, float scale);
+
 
 public:
 	double m_clTime;
 	double m_clOldTime;
 	int m_fDoInterp;
+	int m_iShadowSprite;
 	int m_fGaitEstimation;
 	int m_nFrameCount;
 	cvar_t *m_pCvarHiModels;
