@@ -20,6 +20,15 @@ int CHudMoney::Init( )
 	return 1;
 }
 
+int CHudMoney::VidInit()
+{
+	m_hDollar.SetSpriteByName("dollar");
+	m_hMinus.SetSpriteByName("minus");
+	m_hPlus.SetSpriteByName("plus");
+
+	return 1;
+}
+
 int CHudMoney::Draw(float flTime)
 {
 	if(( gHUD.m_iHideHUDDisplay & ( HIDEHUD_HEALTH ) ))
@@ -37,7 +46,7 @@ int CHudMoney::Draw(float flTime)
 	}
 	float interpolate = ( 5 - m_fFade ) / 5;
 
-	int iDollarWidth = gHUD.GetSpriteRect(m_HUD_dollar).right - gHUD.GetSpriteRect(m_HUD_dollar).left;
+	int iDollarWidth = m_hDollar.rect.right - m_hDollar.rect.left;
 
 	int x = ScreenWidth - iDollarWidth * 7;
 	int y = MONEY_YPOS;
@@ -57,40 +66,51 @@ int CHudMoney::Draw(float flTime)
 	{
 		if( m_iDelta != 0 )
 		{
+			int iDeltaR, iDeltaG, iDeltaB;
+			int iDollarHeight = m_hDollar.rect.bottom - m_hDollar.rect.top;
+			int iDeltaAlpha = 255 - interpolate * (255);
+
+			DrawUtils::UnpackRGB  (iDeltaR, iDeltaG, iDeltaB, m_iDelta < 0 ? RGB_REDISH : RGB_GREENISH);
+			DrawUtils::ScaleColors(iDeltaR, iDeltaG, iDeltaB, iDeltaAlpha);
+
 			if( m_iDelta > 0 )
 			{
 				r = interpolate * ((RGB_YELLOWISH & 0xFF0000) >> 16);
 				g = (RGB_GREENISH & 0xFF00) >> 8;
 				b = (RGB_GREENISH & 0xFF);
+
+				// draw delta
+				SPR_Set(m_hPlus.spr, iDeltaR, iDeltaG, iDeltaB );
+				SPR_DrawAdditive(0, x, y - iDollarHeight * 1.5, &m_hPlus.rect );
 			}
 			else if( m_iDelta < 0)
 			{
 				r = (RGB_REDISH & 0xFF0000) >> 16;
 				g = ((RGB_REDISH & 0xFF00) >> 8) + interpolate * (((RGB_YELLOWISH & 0xFF00) >> 8) - ((RGB_REDISH & 0xFF00) >> 8));
 				b = (RGB_REDISH & 0xFF) - interpolate * (RGB_REDISH & 0xFF);
+
+				SPR_Set(m_hPlus.spr, iDeltaR, iDeltaG, iDeltaB );
+				SPR_DrawAdditive(0, x, y - iDollarHeight * 1.5, &m_hPlus.rect );
 			}
+
+			DrawUtils::DrawHudNumber2( x + iDollarWidth, y - iDollarHeight * 1.5 , false, 5,
+									   m_iDelta < 0 ? -m_iDelta : m_iDelta,
+									   iDeltaR, iDeltaG, iDeltaB);
+			FillRGBA(x + iDollarWidth / 4, y - iDollarHeight * 1.5 + gHUD.m_iFontHeight / 4, 2, 2, iDeltaR, iDeltaG, iDeltaB, iDeltaAlpha );
 		}
 		else DrawUtils::UnpackRGB(r, g, b, RGB_YELLOWISH );
 	}
 
-	alphaBalance = 128 - interpolate * (128 - MIN_ALPHA);
+	alphaBalance = 255 - interpolate * (255 - MIN_ALPHA);
+
 
 	DrawUtils::ScaleColors( r, g, b, alphaBalance );
 
-	SPR_Set(gHUD.GetSprite(m_HUD_dollar), r, g, b);
-	SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_dollar));
+	SPR_Set(m_hDollar.spr, r, g, b);
+	SPR_DrawAdditive(0, x, y, &m_hDollar.rect);
 
 	DrawUtils::DrawHudNumber2( x + iDollarWidth, y, false, 5, m_iMoneyCount, r, g, b );
 	FillRGBA(x + iDollarWidth / 4, y + gHUD.m_iFontHeight / 4, 2, 2, r, g, b, alphaBalance );
-	return 1;
-}
-
-int CHudMoney::VidInit()
-{
-	m_HUD_dollar = gHUD.GetSpriteIndex( "dollar" );
-	m_HUD_minus = gHUD.GetSpriteIndex( "minus" );
-	m_HUD_plus = gHUD.GetSpriteIndex( "plus" );
-
 	return 1;
 }
 
