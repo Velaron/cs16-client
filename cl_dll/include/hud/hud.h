@@ -506,7 +506,7 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw(float flTime);
-	void Reset( void );
+	void InitHUDData( void );
 	CHudMsgFunc(Battery);
 	CHudMsgFunc(ArmorType);
 	
@@ -681,9 +681,9 @@ private:
 	int m_iBlinkAmt;
 	float m_fBlinkTime;
 	float m_fFade;
-	HSPRITE	m_HUD_dollar;
-	HSPRITE m_HUD_minus;
-	HSPRITE m_HUD_plus;
+	CClientSprite m_hDollar;
+	CClientSprite m_hPlus;
+	CClientSprite m_hMinus;
 };
 //
 //-----------------------------------------------------

@@ -53,7 +53,7 @@ int CHudBattery::VidInit( void )
 	return 1;
 }
 
-void CHudBattery::Reset( void )
+void CHudBattery::InitHUDData( void )
 {
 	m_enArmorType = Vest;
 }
