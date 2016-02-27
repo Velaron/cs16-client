@@ -37,6 +37,8 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 #define EXPORT
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
+#define stristr	strcasestr
+#define strnistr strncasestr
 #endif
 #include "../engine/cdll_int.h"
 #include "../dlls/cdll_dll.h"

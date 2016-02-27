@@ -1,6 +1,6 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ? 1996-2002, Valve LLC, All rights reserved. ============
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================
@@ -22,7 +22,7 @@
 
 
 
-#define OVERVIEW_TILE_SIZE		128		// don't change this
+#define OVERVIEW_TILE_SIZE		256		// don't change this
 #define OVERVIEW_MAX_LAYERS		1
 
 //-----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ typedef struct overviewInfo_s {
 	float		layersHeights[OVERVIEW_MAX_LAYERS];
 	char		layersImages[OVERVIEW_MAX_LAYERS][255];
 	qboolean	rotated;	// are map images rotated (90 degrees) ?
-	
+
 	int			insetWindowX;
 	int			insetWindowY;
 	int			insetWindowHeight;
@@ -91,7 +91,7 @@ public:
 	overviewEntity_t	m_OverviewEntities[MAX_OVERVIEW_ENTITIES];
 	int					m_iObserverFlags;
 	int					m_iSpectatorNumber;
-	
+
 	float				m_mapZoom;		// zoom the user currently uses
 	vec3_t				m_mapOrigin;	// origin where user rotates around
 	cvar_t *			m_drawnames;
@@ -101,7 +101,7 @@ public:
 	cvar_t *			m_autoDirector;
 	float				m_lastAutoDirector;
 	cvar_t *			m_pip;
-	
+
 
 	qboolean			m_chatEnabled;
 
@@ -111,6 +111,11 @@ public:
 
 private:
 	vec3_t		m_vPlayerPos[MAX_PLAYERS];
+	HSPRITE		m_hsprPlayerC4;
+	HSPRITE		m_hsprPlayerVIP;
+	HSPRITE		m_hsprHostage;
+	HSPRITE		m_hsprBackpack;
+	HSPRITE		m_hsprBomb;
 	HSPRITE		m_hsprPlayerBlue;
 	HSPRITE		m_hsprPlayerRed;
 	HSPRITE		m_hsprPlayer;

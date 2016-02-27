@@ -369,9 +369,14 @@ int CHudSpectator::VidInit()
 	m_hsprPlayerBlue	= SPR_Load("sprites/iplayerblue.spr");
 	m_hsprPlayerRed		= SPR_Load("sprites/iplayerred.spr");
 	m_hsprPlayerDead	= SPR_Load("sprites/iplayerdead.spr");
+	m_hsprPlayerVIP		= SPR_Load("sprites/iplayervip.spr");
+	m_hsprPlayerC4		= SPR_Load("sprites/iplayerc4.spr");
 	m_hsprUnkownMap		= SPR_Load("sprites/tile.spr");
 	m_hsprBeam			= SPR_Load("sprites/laserbeam.spr");
 	m_hsprCamera		= SPR_Load("sprites/camera.spr");
+	m_hsprBomb			= SPR_Load("sprites/ic4.spr");
+	m_hsprBackpack		= SPR_Load("sprites/ibackpack.spr");
+	m_hsprHostage		= SPR_Load("sprites/ihostage.spr");
 	m_hCrosshair		= SPR_Load("sprites/crosshairs.spr");
 	
 	return 1;
@@ -1232,7 +1237,7 @@ void CHudSpectator::DrawOverviewEntities()
 	float rmatrix[3][4];	// transformation matrix
 	
 	float			zScale = (90.0f - v_angles[0] ) / 90.0f;
-	
+
 
 	z = m_OverviewData.layersHeights[0] * zScale;
 	// get yellow/brown HUD color
@@ -1268,7 +1273,7 @@ void CHudSpectator::DrawOverviewEntities()
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 
 		gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, 1.0 );
-		
+
 		gEngfuncs.pTriAPI->TexCoord2f (1, 0);
 		VectorMA (origin,  16.0f * sizeScale, up, point);
 		VectorMA (point,   16.0f * sizeScale, right, point);
@@ -1276,7 +1281,7 @@ void CHudSpectator::DrawOverviewEntities()
 		gEngfuncs.pTriAPI->Vertex3fv (point);
 
 		gEngfuncs.pTriAPI->TexCoord2f (0, 0);
-		
+
 		VectorMA (origin,  16.0f * sizeScale, up, point);
 		VectorMA (point,  -16.0f * sizeScale, right, point);
 		point[2] *= zScale;
@@ -1296,17 +1301,17 @@ void CHudSpectator::DrawOverviewEntities()
 
 		gEngfuncs.pTriAPI->End ();
 
-		
+
 		if ( !ent->player)
 			continue;
 		// draw line under player icons
 		origin[2] *= zScale;
 
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
-		
+
 		hSpriteModel = (struct model_s *)gEngfuncs.GetSpritePointer( m_hsprBeam );
 		gEngfuncs.pTriAPI->SpriteTexture( hSpriteModel, 0 );
-		
+
 		gEngfuncs.pTriAPI->Color4f(r, g, b, 0.3);
 
 		gEngfuncs.pTriAPI->Begin ( TRI_QUADS );
@@ -1342,7 +1347,7 @@ void CHudSpectator::DrawOverviewEntities()
 		// calculate some offset under the icon
 		origin[0]+=32.0f;
 		origin[1]+=32.0f;
-		
+
 		gEngfuncs.pTriAPI->WorldToScreen(origin,offset);
 
 		offset[0] = XPROJECT(offset[0]);
@@ -1487,16 +1492,33 @@ bool CHudSpectator::AddOverviewEntity( int type, struct cl_entity_s *ent, const 
 			case TEAM_CT: hSprite = m_hsprPlayerBlue; break;
 			default: hSprite = m_hsprPlayer; break;
 			}
+
+			if( g_PlayerExtraInfo[ent->index].has_c4 )
+				hSprite = m_hsprPlayerC4;
+			else if( g_PlayerExtraInfo[ent->index].vip )
+				hSprite = m_hsprPlayerVIP;
+
+			return AddOverviewEntityToList(hSprite, ent, gEngfuncs.GetClientTime() + duration );
 		}
 		else
 			return false;	// it's an spectator
 	}
-	else if (type == ET_NORMAL)
+	/*else if (type == ET_NORMAL)
 	{
 		return false;
 	}
 	else
-		return false;
+	{
+		else return false;
+	}*/
+
+	if( !stricmp( modelname, "models/w_c4.mdl" ))
+		hSprite = m_hsprBomb;
+	else if( !stricmp( modelname, "models/w_backpack.mdl" ))
+		hSprite = m_hsprBackpack;
+	else if( strstr( modelname, "models/hostage") || strstr( modelname, "models/scientist"))
+		hSprite = m_hsprHostage;
+	else return false;
 
 	return AddOverviewEntityToList(hSprite, ent, gEngfuncs.GetClientTime() + duration );
 }
