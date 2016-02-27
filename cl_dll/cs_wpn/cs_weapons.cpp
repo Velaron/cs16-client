@@ -209,6 +209,7 @@ void HUD_PrepEntity( CBaseEntity *pEntity, CBasePlayer *pWeaponOwner )
 		((CBasePlayerWeapon *)pEntity)->GetItemInfo( &info );
 
 		g_pWpns[ info.iId ] = (CBasePlayerWeapon *)pEntity;
+		CBasePlayerItem::ItemInfoArray[ info.iId ] = info;
 	}
 }
 
@@ -617,17 +618,17 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		if (m_pPlayer->m_bCanShoot == true)
 			PrimaryAttack();
 	}
-	/*else if (m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload)
+	else if (m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload)
 	{
 		if (m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 		{
 			if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
 			{
-				if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN)){}
+				if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN))
 					Reload();
 			}
 		}
-	}*/
+	}
 	else if (!(button & (IN_ATTACK | IN_ATTACK2)))
 	{
 		if (m_bDelayFire == true)
@@ -657,29 +658,35 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 			m_iShotsFired = 0;
 
 
-		// Ugly hack to fix reload twice animation.
-		// let's server do it. :)
-#if 0
-		if (!IsUseable() && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
-		{
-		}
-		else
-		{
-
-			if (!m_iClip && !(iFlags() & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
+		if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN))
 			{
-				if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
+
+			static int oldClip = 0;
+
+			if( oldClip != m_iClip )
+			{
+				oldClip = m_iClip;
+				gEngfuncs.Con_DPrintf("%i\n", m_iClip);
+			}
+
+				if (m_iClip == 0 && !(iFlags() & ITEM_FLAG_NOAUTORELOAD)
+						&& m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 				{
-					Reload();
-					return;
+					if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
+					{
+						gEngfuncs.pfnConsolePrint("MEOW!\n");
+						Reload();
+						return;
+					}
 				}
 			}
-		}
-#endif
 
 		WeaponIdle();
 		return;
 	}
+
+	if (ShouldWeaponIdle())
+		WeaponIdle();
 }
 
 /*
@@ -1472,6 +1479,14 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pto->m_flNextSecondaryAttack	-= cmd->msec / 1000.0f;
 		pto->m_flTimeWeaponIdle			-= cmd->msec / 1000.0f;
 
+
+		if( pto->m_flPumpTime != -9999.0f )
+		{
+			pto->m_flPumpTime -= cmd->msec / 1000.0f;
+			if( pto->m_flPumpTime < -1.0f )
+				pto->m_flPumpTime = 1.0f;
+		}
+
 		if ( pto->m_fNextAimBonus < -1.0 )
 		{
 			pto->m_fNextAimBonus = -1.0;
@@ -1497,10 +1512,10 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 			pto->m_flNextReload = -0.001;
 		}
 
-		if ( pto->fuser1 < -0.001 )
+		/*if ( pto->fuser1 < -0.001 )
 		{
 			pto->fuser1 = -0.001;
-		}
+		}*/
 	}
 
 	// m_flNextAttack is now part of the weapons, but is part of the player instead
