@@ -7,4 +7,4 @@
 	url = https://bitbucket.org/SergioPoverony/cs16client-vgui-menus
 [submodule "3rdparty/regamelite"]
 	path = 3rdparty/regamelite
-	url = https://bitbucket.org/dmitryzhukov/regamelite
+	url = https://gitlab.com/jeefo/regamelite.git
