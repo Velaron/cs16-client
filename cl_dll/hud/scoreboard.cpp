@@ -241,16 +241,24 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 	}
 
 	// Draw the teams
+	int iSpectatorPos = -1;
 
-	for ( int current_team = 1; current_team <= m_iNumTeams; current_team++ )
+	while( true )
 	{
-		/*int best_team = 0;
+		int highest_frags = -99999; int lowest_deaths = 99999;
+		int best_team = 0;
 
 		for ( int i = 1; i <= m_iNumTeams; i++ )
 		{
 			// don't draw team without players
 			if ( g_TeamInfo[i].players <= 0 )
 				continue;
+
+			if (!strnicmp(g_TeamInfo[i].name, "SPECTATOR", MAX_TEAM_NAME))
+			{
+				iSpectatorPos = i;
+				continue;
+			}
 
 			if ( !g_TeamInfo[i].already_drawn && g_TeamInfo[i].frags >= highest_frags )
 			{
@@ -265,14 +273,14 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 
 		// draw the best team on the scoreboard
 		if ( !best_team )
-			break;*/
-
+		{
+			// if spectators is found and still not drawn
+			if( iSpectatorPos != -1 && g_TeamInfo[iSpectatorPos].already_drawn == FALSE )
+				best_team = iSpectatorPos;
+			else break;
+		}
 		// draw out the best team
-		team_info_t *team_info = &g_TeamInfo[current_team];
-
-		// maybe useless check
-		if( !team_info->name || !team_info->name[0] )
-			continue;
+		team_info_t *team_info = &g_TeamInfo[best_team];
 
 		// don't draw team without players
 		if ( team_info->players <= 0 )
@@ -286,34 +294,31 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 
 		int r, g, b;
 		char teamName[64];
-		//GetTeamColor(r, g, b, team_info->teamnumber);
-		switch( current_team )
+		if( !stricmp(team_info->name, "TERRORIST"))
 		{
-		case 1:
 			GetTeamColor( r, g, b, TEAM_TERRORIST );
 			snprintf(teamName, sizeof(teamName), "Terrorists   -   %i players", team_info->players);
 			DrawUtils::DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
-			break;
-		case 2:
+		}
+		else if( !stricmp( team_info->name, "CT") )
+		{
 			GetTeamColor( r, g, b, TEAM_CT );
 			snprintf(teamName, sizeof(teamName), "Counter-Terrorists   -   %i players", team_info->players);
 			DrawUtils::DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
-			break;
-		case 3:
+		}
+		else if( !stricmp( team_info->name, "SPECTATOR" ) )
+		{
 			GetTeamColor( r, g, b, TEAM_SPECTATOR );
 			strncpy( teamName, "Spectators", sizeof(teamName) );
-			break;
-		default:
+		}
+		else
+		{
 			GetTeamColor( r, g, b, TEAM_UNASSIGNED );
 			strncpy( teamName, team_info->name, sizeof(teamName) );
-			break;
 		}
 
-		DrawUtils::DrawHudString( NAME_POS_START(),   ypos, NAME_POS_END(),   teamName,   r, g, b );
-
-		// prevent SIGFPE
-		if( team_info->players )
-			DrawUtils::DrawHudNumberString( PING_POS_END(),  ypos, PING_POS_START(),  team_info->sumping / team_info->players,  r, g, b );
+		DrawUtils::DrawHudString( NAME_POS_START(),		 ypos, NAME_POS_END(),   teamName,   r, g, b );
+		DrawUtils::DrawHudNumberString( PING_POS_END(),  ypos, PING_POS_START(),  team_info->sumping / team_info->players,  r, g, b );
 
 		team_info->already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get drawn again
 
@@ -508,21 +513,10 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 		if ( j > m_iNumTeams )
 		{
 			// they aren't in a listed team, so make a new one
-
-			if( !stricmp(g_PlayerExtraInfo[i].teamname, "TERRORIST"))
-				j = 1;
-			else if( !stricmp(g_PlayerExtraInfo[i].teamname, "CT"))
-				j = 2;
-			else if( !stricmp(g_PlayerExtraInfo[i].teamname, "SPECTATOR"))
-				j = 3; // spectators, unassigned and other
-			else
+			for ( j = 1; j <= m_iNumTeams; j++ )
 			{
-				// shouldn't execute, but anyway...
-				for ( j = 4; j <= m_iNumTeams; j++ )
-				{
-					if ( g_TeamInfo[j].name[0] == '\0' )
-						break;
-				}
+				if ( g_TeamInfo[j].name[0] == '\0' )
+					break;
 			}
 
 

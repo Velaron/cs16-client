@@ -50,7 +50,7 @@ typedef struct {
 enum 
 { 
 	MAX_PLAYERS = 64,
-	MAX_TEAMS = 64,
+	MAX_TEAMS = 8,
 	MAX_TEAM_NAME = 16,
 	MAX_HOSTAGES = 24,
 };
