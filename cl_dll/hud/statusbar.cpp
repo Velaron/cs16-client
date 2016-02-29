@@ -211,6 +211,12 @@ int CHudStatusBar :: Draw( float fTime )
 		m_bReparseString = FALSE;
 	}
 
+	if( g_iUser1 > 0 )
+	{
+		// this is a spectator, so don't draw any statusbars
+		return;
+	}
+
 	int Y_START = ScreenHeight - YRES(32 + 4);
 
 	// Draw the status bar lines
@@ -223,7 +229,8 @@ int CHudStatusBar :: Draw( float fTime )
 		int y = Y_START - ( 4 + TextHeight * i ); // draw along bottom of screen
 
 		// let user set status ID bar centering
-		if ( (i == STATUSBAR_ID_LINE) && (hud_centerid->value != 0.0f) )
+		if ( i == STATUSBAR_ID_LINE &&
+			 hud_centerid->value != 0.0f )
 		{
 			x = max( 0, max(2, (ScreenWidth - TextWidth)) / 2 );
 			y = (ScreenHeight / 2) + (TextHeight * hud_centerid->value );
