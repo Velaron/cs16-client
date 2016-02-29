@@ -322,7 +322,6 @@ bool CBasePlayerWeapon::HasSecondaryAttack()
 
 void CBasePlayerWeapon::FireRemaining(int &shotsFired, float &shootTime, BOOL isGlock18)
 {
-#if 1
 	m_iClip--;
 
 	if (m_iClip < 0)
@@ -358,21 +357,6 @@ void CBasePlayerWeapon::FireRemaining(int &shotsFired, float &shootTime, BOOL is
 		shootTime = 0;
 	else
 		shootTime = gpGlobals->time + 0.1;
-#else
-	m_iClip--;
-
-	if (m_iClip < 0)
-	{
-		m_iClip = 0;
-		shotsFired = 3;
-		shootTime = 0;
-		return;
-	}
-	else
-	{
-		FireRemaining( shotsFired, shootTime, isGlock18 );
-	}
-#endif
 }
 
 bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim)
@@ -659,34 +643,22 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 
 
 		if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN))
+		{
+
+			if (m_iClip == 0 && !(iFlags() & ITEM_FLAG_NOAUTORELOAD)
+					&& m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 			{
-
-			static int oldClip = 0;
-
-			if( oldClip != m_iClip )
-			{
-				oldClip = m_iClip;
-				gEngfuncs.Con_DPrintf("%i\n", m_iClip);
-			}
-
-				if (m_iClip == 0 && !(iFlags() & ITEM_FLAG_NOAUTORELOAD)
-						&& m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
+				if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
 				{
-					if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
-					{
-						gEngfuncs.pfnConsolePrint("MEOW!\n");
-						Reload();
-						return;
-					}
+					Reload();
+					return;
 				}
 			}
+		}
 
 		WeaponIdle();
 		return;
 	}
-
-	if (ShouldWeaponIdle())
-		WeaponIdle();
 }
 
 /*
