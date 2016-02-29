@@ -67,6 +67,11 @@ static globalvars_t	Globals = { 0 };
 
 static CBasePlayerWeapon *g_pWpns[ 32 ];
 
+extern int g_rseq;
+extern int g_gaitseq;
+extern vec3_t g_clorg;
+extern vec3_t g_clang;
+
 float g_flApplyVel = 0.0;
 
 // HLDM Weapon placeholder entities
@@ -104,6 +109,7 @@ int g_iWeaponFlags;
 bool g_bInBombZone;
 int g_iFreezeTimeOver;
 bool g_bHoldingShield;
+bool g_bHoldingKnife;
 vec3_t g_vPlayerVelocity;
 float g_flPlayerSpeed;
 int g_iPlayerFlags;
@@ -497,7 +503,7 @@ void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal )
 {
 	m_pPlayer->pev->weaponanim = iAnim;
 
-	HUD_SendWeaponAnim( iAnim, m_pPlayer->pev->body, 0 );
+	HUD_SendWeaponAnim( iAnim, m_iId, m_pPlayer->pev->body, 0 );
 }
 
 Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, entvars_t *pevAttacker, bool bPistol, int shared_rand )
@@ -1267,8 +1273,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		player.m_rgAmmo[ pCurrent->m_iPrimaryAmmoType ]	= (int)from->client.vuser4[ 1 ];
 	}
 
-	if( g_pWpns[ from->client.m_iId ] )
-		g_iWeaponFlags = g_pWpns[ from->client.m_iId ]->m_iWeaponState;
+	if( pWeapon )
+		g_iWeaponFlags = pWeapon->m_iWeaponState;
 
 	// For random weapon events, use this seed to seed random # generator
 	player.random_seed = random_seed;
@@ -1324,15 +1330,16 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	}
 
 	flags = from->client.iuser3;
+	g_bHoldingKnife		= pWeapon->m_iId == WEAPON_KNIFE;
 	player.m_bCanShoot	= (flags & PLAYER_CAN_SHOOT) != 0;
 	g_iFreezeTimeOver	= !(flags & PLAYER_FREEZE_TIME_OVER);
 	g_bInBombZone		= (flags & PLAYER_IN_BOMB_ZONE) != 0;
 	g_bHoldingShield	= (flags & PLAYER_HOLDING_SHIELD) != 0;
 
 	// Point to current weapon object
-	if ( from->client.m_iId )
+	if ( pWeapon )
 	{
-		player.m_pActiveItem = g_pWpns[ from->client.m_iId ];
+		player.m_pActiveItem = pWeapon;
 	}
 
 	// Don't go firing anything if we have died.
@@ -1340,6 +1347,13 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	if ( ( player.pev->deadflag != ( DEAD_DISCARDBODY + 1 ) ) &&
 		 !CL_IsDead() && player.pev->viewmodel && !g_iUser1 )
 	{
+		/*if( g_bHoldingKnife && pWeapon->m_iClientWeaponState &&
+				player.pev->button & IN_FORWARD )
+			player.m_flNextAttack = 0;
+		else if( player.m_flNextAttack > 0 )
+		{
+
+		}*/
 		if ( player.m_flNextAttack <= 0 )
 		{
 			pWeapon->ItemPostFrame();
@@ -1403,9 +1417,9 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
-	if ( g_runfuncs && ( HUD_GetWeaponAnim() != to->client.weaponanim ) )
+	if ( g_runfuncs && ( HUD_GetWeaponAnim() != to->client.weaponanim ) && ( HUD_GetWeapon() != to->client.m_iId ))
 		// Force a fixed anim down to viewmodel
-		HUD_SendWeaponAnim( to->client.weaponanim, 2, 1 );
+		HUD_SendWeaponAnim( to->client.weaponanim, to->client.m_iId, 2, 1 );
 
 	if (pWeapon->m_iPrimaryAmmoType < MAX_AMMO_TYPES)
 	{
@@ -1517,8 +1531,8 @@ void _DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct u
 	g_runfuncs = runfuncs;
 	//g_curstate = from;
 
-#if defined( CLIENT_WEAPONS )
-	if ( cl_lw && cl_lw->value )
+//#if defined( CLIENT_WEAPONS )
+	/*if ( cl_lw && cl_lw->value )
 	{
 		HUD_WeaponsPostThink( from, to, cmd, time, random_seed );
 	}
@@ -1532,6 +1546,16 @@ void _DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct u
 		g_bInBombZone		= (from->client.iuser3 & PLAYER_IN_BOMB_ZONE) != 0;
 		g_bHoldingShield	= (from->client.iuser3 & PLAYER_HOLDING_SHIELD) != 0;
 		g_bGlockBurstMode   = false; // will be taken from g_iWeaponFlags
+	}*/
+
+	HUD_WeaponsPostThink( from, to, cmd, time, random_seed );
+
+	if ( g_runfuncs )
+	{
+		g_gaitseq	= to->playerstate.gaitsequence;
+		g_rseq		= to->playerstate.sequence;
+		g_clang		= cmd->viewangles;
+		g_clorg		= to->playerstate.origin;
 	}
 
 	// All games can use FOV state

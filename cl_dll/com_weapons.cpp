@@ -72,6 +72,7 @@ void COM_Log( char *pszFile, char *fmt, ...)
 // remember the current animation for the view model, in case we get out of sync with
 //  server.
 static int g_currentanim;
+static int g_currentweapon;
 
 /*
 =====================
@@ -80,16 +81,17 @@ HUD_SendWeaponAnim
 Change weapon model animation
 =====================
 */
-void HUD_SendWeaponAnim( int iAnim, int body, int force )
+void HUD_SendWeaponAnim( int iAnim, int iWeaponId, int iBody, int iForce )
 {
 	// Don't actually change it.
-	if ( !g_runfuncs && !force )
+	if ( !g_runfuncs && !iForce )
 		return;
 
 	g_currentanim = iAnim;
+	g_currentweapon = iWeaponId;
 
 	// Tell animation system new info
-	gEngfuncs.pfnWeaponAnim( iAnim, body );
+	gEngfuncs.pfnWeaponAnim( iAnim, iBody );
 }
 
 /*
@@ -102,6 +104,18 @@ Retrieve current predicted weapon animation
 int HUD_GetWeaponAnim( void )
 {
 	return g_currentanim;
+}
+
+/*
+=====================
+HUD_GetWeapon
+
+Retrieve current predicted weapon id
+=====================
+*/
+int HUD_GetWeapon( void )
+{
+	return g_currentweapon;
 }
 
 /*
