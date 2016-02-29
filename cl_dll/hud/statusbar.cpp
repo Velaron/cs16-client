@@ -214,7 +214,7 @@ int CHudStatusBar :: Draw( float fTime )
 	if( g_iUser1 > 0 )
 	{
 		// this is a spectator, so don't draw any statusbars
-		return;
+		return 1;
 	}
 
 	int Y_START = ScreenHeight - YRES(32 + 4);
