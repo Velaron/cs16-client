@@ -1333,24 +1333,24 @@ void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
 	// drawing
 	if ( gHUD.m_NVG.m_iEnable )
 	{
-		gEngfuncs.pfnFillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	 iLength, 1, 250, 50, 50, m_iAlpha);
-		gEngfuncs.pfnFillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	 iLength, 1, 250, 50, 50, m_iAlpha);
-		gEngfuncs.pfnFillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, 250, 50, 50, m_iAlpha);
-		gEngfuncs.pfnFillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, 250, 50, 50, m_iAlpha);
+		FillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	iLength, 1, 250, 50, 50, m_iAlpha);
+		FillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	iLength, 1, 250, 50, 50, m_iAlpha);
+		FillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, 250, 50, 50, m_iAlpha);
+		FillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, 250, 50, 50, m_iAlpha);
 	}
 	else if ( !m_bAdditive )
 	{
-		gEngfuncs.pfnFillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	 iLength, 1, m_R, m_G, m_B, m_iAlpha);
-		gEngfuncs.pfnFillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	 iLength, 1, m_R, m_G, m_B, m_iAlpha);
-		gEngfuncs.pfnFillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
-		gEngfuncs.pfnFillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
+		FillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
+		FillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
+		FillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
+		FillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
 	}
 	else
 	{
-		gEngfuncs.pfnFillRGBA(WEST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
-		gEngfuncs.pfnFillRGBA(EAST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
-		gEngfuncs.pfnFillRGBA(NORTH_SOUTH_XPOS,	NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
-		gEngfuncs.pfnFillRGBA(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
+		FillRGBA(WEST_XPOS, EAST_WEST_YPOS,		iLength, 1, m_R, m_G, m_B, m_iAlpha);
+		FillRGBA(EAST_XPOS, EAST_WEST_YPOS,		iLength, 1, m_R, m_G, m_B, m_iAlpha);
+		FillRGBA(NORTH_SOUTH_XPOS,	NORTH_YPOS,	1, iLength, m_R, m_G, m_B, m_iAlpha);
+		FillRGBA(NORTH_SOUTH_XPOS, SOUTH_YPOS,	1, iLength, m_R, m_G, m_B, m_iAlpha);
 	}
 	return;
 }

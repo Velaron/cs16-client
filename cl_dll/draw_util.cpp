@@ -200,16 +200,7 @@ int DrawUtils :: GetNumWidth( int iNumber, int iFlags )
 
 void DrawUtils :: DrawRectangle(int x, int y, int wide, int tall , int r, int g, int b, int a, bool drawStroke)
 {
-	FillRGBA(x, y, wide, tall, r, g, b, a);
-	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	gEngfuncs.pTriAPI->Color4f(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
-	gEngfuncs.pTriAPI->Vertex3f(x * gHUD.m_flScale, (y+tall) * gHUD.m_flScale, 0);
-	gEngfuncs.pTriAPI->Vertex3f(x * gHUD.m_flScale, y * gHUD.m_flScale, 0);
-	gEngfuncs.pTriAPI->Vertex3f((x + wide) * gHUD.m_flScale, y * gHUD.m_flScale, 0);
-	gEngfuncs.pTriAPI->Vertex3f((x + wide) * gHUD.m_flScale, (y+tall) * gHUD.m_flScale, 0);
-	gEngfuncs.pTriAPI->End();
-
+	FillRGBABlend(x, y, wide, tall, r, g, b, a);
 	if(drawStroke)
 	{
 		// TODO: remove this hardcoded hardcore
