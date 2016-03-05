@@ -489,7 +489,7 @@ void CGib::WaitTillLand(void)
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
 #endif
-//GCC почему-то не видит этот дефайн в extdll.h
+//GCC РїРѕС‡РµРјСѓ-С‚Рѕ РЅРµ РІРёРґРёС‚ СЌС‚РѕС‚ РґРµС„Р°Р№РЅ РІ extdll.h
 void CGib::BounceGibTouch(CBaseEntity *pOther)
 {
 	if (pev->flags & FL_ONGROUND)

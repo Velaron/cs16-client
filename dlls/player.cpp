@@ -3870,7 +3870,7 @@ void CBasePlayer::PostThink(void)
 	{
 		if (pev->velocity.x || pev->velocity.y)
 		{
-			if (/*(pev->velocity.x || pev->velocity.y) &&*/ FBitSet(pev->flags, FL_ONGROUND))//(pev->velocity.x || pev->velocity.y) проверены строкой выше...
+			if (/*(pev->velocity.x || pev->velocity.y) &&*/ FBitSet(pev->flags, FL_ONGROUND))//(pev->velocity.x || pev->velocity.y) РїСЂРѕРІРµСЂРµРЅС‹ СЃС‚СЂРѕРєРѕР№ РІС‹С€Рµ...
 				SetAnimation(PLAYER_WALK);
 			else if (pev->waterlevel > 1)
 				SetAnimation(PLAYER_WALK);

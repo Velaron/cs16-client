@@ -1006,7 +1006,7 @@ int SENTENCEG_PlayRndI(edict_t *entity, int isentenceg, float volume, float atte
 
 	int ipick = USENTENCEG_Pick(isentenceg, name);
 
-	if (ipick > 0 && *name)//Похоже, тут хотели проверить не указатель на name, а записалось ли туда что-нибудь. Поэтому *name будет правильнее, чем просто name.
+	if (ipick > 0 && *name)//РџРѕС…РѕР¶Рµ, С‚СѓС‚ С…РѕС‚РµР»Рё РїСЂРѕРІРµСЂРёС‚СЊ РЅРµ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° name, Р° Р·Р°РїРёСЃР°Р»РѕСЃСЊ Р»Рё С‚СѓРґР° С‡С‚Рѕ-РЅРёР±СѓРґСЊ. РџРѕСЌС‚РѕРјСѓ *name Р±СѓРґРµС‚ РїСЂР°РІРёР»СЊРЅРµРµ, С‡РµРј РїСЂРѕСЃС‚Рѕ name.
 		EMIT_SOUND_DYN(entity, CHAN_VOICE, name, volume, attenuation, flags, pitch);
 
 	return ipick;

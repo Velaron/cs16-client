@@ -270,9 +270,9 @@ void UI_DrawString( int x, int y, int w, int h, const char *string, const int co
 			ch &= 255;
 #if 0
 #ifdef _WIN32
-			// fix for letter �
-			if( ch == 0xB8 ) ch = (byte)'�';
-			if( ch == 0xA8 ) ch = (byte)'�';
+			// fix for letter пїЅ
+			if( ch == 0xB8 ) ch = (byte)'пїЅ';
+			if( ch == 0xA8 ) ch = (byte)'пїЅ';
 #endif
 #endif
 			ch = UtfProcessChar( (unsigned char) ch );

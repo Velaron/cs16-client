@@ -15,5 +15,5 @@ typedef struct
 void UI_PopPButtonStack( void );
 void UI_ClearButtonStack( void );
 
-// использовать кусок из btns_main.bmp заместо head_%s.bmp
+// РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РєСѓСЃРѕРє РёР· btns_main.bmp Р·Р°РјРµСЃС‚Рѕ head_%s.bmp
 //#define TA_ALT_MODE 1

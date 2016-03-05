@@ -70,7 +70,7 @@ void CBreakable::KeyValue(KeyValueData *pkvd)
 			m_Explosion = expRandom;
 		else
 		*/
-		// if и else одинаковые
+		// if Рё else РѕРґРёРЅР°РєРѕРІС‹Рµ
 			m_Explosion = expRandom;
 
 		pkvd->fHandled = TRUE;

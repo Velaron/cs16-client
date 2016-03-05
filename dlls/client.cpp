@@ -4573,7 +4573,7 @@ void RegisterEncoders(void)
 #ifndef max
 #define max(a,b)  (((a) > (b)) ? (a) : (b))
 #endif
-//GCC почему-то не видит этот дефайн в extdll.h
+//GCC РїРѕС‡РµРјСѓ-С‚Рѕ РЅРµ РІРёРґРёС‚ СЌС‚РѕС‚ РґРµС„Р°Р№РЅ РІ extdll.h
 
 int GetWeaponData(struct edict_s *player, struct weapon_data_s *info)
 {
