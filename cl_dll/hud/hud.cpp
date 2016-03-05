@@ -76,9 +76,20 @@ GHUD_DECLARE_MESSAGE(BombPickup)
 GHUD_DECLARE_MESSAGE(HostagePos)
 GHUD_DECLARE_MESSAGE(ShadowIdx)
 
+#ifdef _CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
+void __CmdFunc_InputCommandSpecial()
+{
+	gEngfuncs.pfnClientCmd("_special");
+}
+#endif
+
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
+#ifdef _CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
+	HOOK_COMMAND( "special", InputCommandSpecial );
+#endif
+
 	HOOK_MESSAGE( Logo );
 	HOOK_MESSAGE( ResetHUD );
 	HOOK_MESSAGE( GameMode );
