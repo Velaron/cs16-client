@@ -45,3 +45,5 @@
 
 android/pak/
 android/assets/extras.pak
+*-build
+*admob-id.xml
