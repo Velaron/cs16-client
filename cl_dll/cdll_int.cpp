@@ -72,7 +72,7 @@ void	DLLEXPORT HUD_Frame( double time );
 void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
 void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
 int 	DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback );
-int    DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi );
+int     DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi );
 }
 
 /*
@@ -161,6 +161,26 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	return 1;
 }
 
+#ifdef _CS16CLIENT_ENABLE_GSRC_SUPPORT
+/*
+=================
+HUD_GetRect
+
+VGui stub
+=================
+*/
+int *HUD_GetRect( void )
+{
+	static int extent[4];
+
+	extent[0] = gEngfuncs.GetWindowCenterX() - ScreenWidth / 2;
+	extent[1] = gEngfuncs.GetWindowCenterY() - ScreenHeight / 2;
+	extent[2] = gEngfuncs.GetWindowCenterX() + ScreenWidth / 2;
+	extent[3] = gEngfuncs.GetWindowCenterY() + ScreenHeight / 2;
+
+	return extent;
+}
+#endif
 
 /*
 ==========================
@@ -172,9 +192,13 @@ so the HUD can reinitialize itself.
 ==========================
 */
 
+bool isLoaded = false;
+
 int DLLEXPORT HUD_VidInit( void )
 {
 	gHUD.VidInit();
+
+	isLoaded = true;
 
 	//VGui_Startup();
 
@@ -210,7 +234,7 @@ redraw the HUD.
 
 int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
-	gHUD.Redraw( time, intermission );
+	 gHUD.Redraw( time, intermission );
 
 	return 1;
 }
@@ -259,9 +283,9 @@ Called by engine every frame that client .dll is loaded
 
 void DLLEXPORT HUD_Frame( double time )
 {
-	//ServersThink( time );
-
-	//GetClientVoiceMgr()->Frame(time);
+#ifdef _CS16CLIENT_ENABLE_GSRC_SUPPORT
+	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
+#endif
 }
 
 
@@ -275,7 +299,6 @@ Called when a player starts or stops talking.
 
 void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
 {
-	//GetClientVoiceMgr()->UpdateSpeakerStatus(entindex, bTalking);
 }
 
 /*

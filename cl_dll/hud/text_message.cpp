@@ -234,7 +234,7 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 		// For some reason, HUD_PRINTRADIO always have "1" in msg_text
 		for( int i = 1; i < MAX_PLAYERS; i++ )
 		{
-			if( g_PlayerInfoList[i].name && !strcmp(g_PlayerInfoList[i].name, sstr2) )
+			if( g_PlayerInfoList[i].name && !strncmp(g_PlayerInfoList[i].name, sstr2, strlen(sstr2)) )
 			{
 				psz[0] = 2;
 				snprintf( psz + 1, MAX_TEXTMSG_STRING-1, sstr1, sstr2, sstr3, sstr4 );

@@ -367,15 +367,9 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, gEngfuncs.pfnRandomLong( 15, 30 ), dir.z, -75.0f, 75.0f );
 		}
 
-		int wallPuffSprite;
-		switch( gEngfuncs.pfnRandomLong( 0, 4 ) ) // every bullet makes a wall puff
-		{
-		case 0: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff1.spr"); break;
-		case 1: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff2.spr"); break;
-		case 2: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff3.spr"); break;
-		case 3: wallPuffSprite = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff4.spr"); break;
-		}
-		TEMPENTITY *te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos, wallPuffSprite, 30.0f );
+
+		TEMPENTITY *te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos,
+							gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff1.spr"), 30.0f );
 		if( te )
 		{
 			te->flags = FTENT_SPRANIMATE | FTENT_FADEOUT;

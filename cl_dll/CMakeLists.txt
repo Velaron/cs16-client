@@ -177,9 +177,10 @@ set (CLDLL_SOURCES
     ./parsemsg.cpp
     ./rain.cpp
     ./tri.cpp
-    ./util.cpp
-    ./view.cpp
-    ./input_xash3d.cpp
+	./util.cpp
+	./view.cpp
+	./input_xash3d.cpp
+	#./input_sdl.cpp
     ./vgui_parser.cpp
     ./unicode_strtools.cpp
 	./draw_util.cpp
@@ -203,7 +204,8 @@ include_directories (
 	../game_shared/
 	../public/)
 add_library (${CLDLL_LIBRARY} SHARED ${CLDLL_SOURCES})
-target_link_libraries( ${CLDLL_LIBRARY} ${CMAKE_DL_LIBS} )
+add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT )
+target_link_libraries( ${CLDLL_LIBRARY} ${CMAKE_DL_LIBS} -L/usr/lib/i386-linux-gnu -lSDL2 )
 
 
 set_target_properties (${CLDLL_SHARED} PROPERTIES
