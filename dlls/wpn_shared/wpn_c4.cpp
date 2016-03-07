@@ -21,6 +21,10 @@
 #include "gamerules.h"
 
 //#define C4MADNESS
+#ifdef CLIENT_WEAPONS
+extern bool g_bInBombZone;
+#endif
+
 enum c4_e
 {
 	C4_IDLE1,
@@ -120,7 +124,11 @@ void CC4::PrimaryAttack(void)
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		return;
 
+#ifndef CLIENT_WEAPONS
 	BOOL onBombZone = m_pPlayer->m_signals.GetState() & SIGNAL_BOMB;
+#else
+	BOOL onBombZone = g_bInBombZone;
+#endif
 	BOOL onGround = m_pPlayer->pev->flags & FL_ONGROUND;
 
 	if (!m_bStartedArming)
@@ -184,9 +192,9 @@ void CC4::PrimaryAttack(void)
 				m_pPlayer->m_bHasC4 = false;
 
 #ifndef CLIENT_WEAPONS
-		if (pev->speed != 0 && g_pGameRules)
-			g_pGameRules->m_iC4Timer = (int)pev->speed;
-#endif
+				if (pev->speed != 0 && g_pGameRules)
+					g_pGameRules->m_iC4Timer = (int)pev->speed;
+
 				CGrenade *pGrenade = CGrenade::ShootSatchelCharge(m_pPlayer->pev, m_pPlayer->pev->origin, Vector(0, 0, 0));
 
 				MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
@@ -197,21 +205,18 @@ void CC4::PrimaryAttack(void)
 				WRITE_LONG(11 | DRC_FLAG_FACEPLAYER);
 				MESSAGE_END();
 
-#ifndef CLIENT_WEAPONS
 				MESSAGE_BEGIN(MSG_ALL, gmsgBombDrop);
 				WRITE_COORD(pGrenade->pev->origin.x);
 				WRITE_COORD(pGrenade->pev->origin.y);
 				WRITE_COORD(pGrenade->pev->origin.z);
 				WRITE_BYTE(1);
 				MESSAGE_END();
-#endif
 				UTIL_ClientPrintAll(HUD_PRINTCENTER, "#Bomb_Planted");
 
 				UTIL_LogPrintf("\"%s<%i><%s><TERRORIST>\" triggered \"Planted_The_Bomb\"\n", STRING(m_pPlayer->pev->netname), GETPLAYERUSERID(m_pPlayer->edict()), GETPLAYERAUTHID(m_pPlayer->edict()));
-#ifndef CLIENT_WEAPONS
 				g_pGameRules->m_bBombDropped = false;
 #endif		
-		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/c4_plant.wav", VOL_NORM, ATTN_NORM);
+				EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/c4_plant.wav", VOL_NORM, ATTN_NORM);
 
 				m_pPlayer->pev->body = 0;
 				m_pPlayer->ResetMaxSpeed();
