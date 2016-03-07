@@ -39,10 +39,10 @@ int CHudSniperScope::VidInit()
 		m_iFlags = 0;
 		return 0;
 	}
-	m_iScopeArc[0] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_nw.tga", NULL, 0, TF_NEAREST);
-	m_iScopeArc[1] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_ne.tga", NULL, 0, TF_NEAREST);
-	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga", NULL, 0, TF_NEAREST);
-	m_iScopeArc[3] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_sw.tga", NULL, 0, TF_NEAREST);
+	m_iScopeArc[0] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_nw.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[1] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_ne.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[3] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_sw.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
 	blackTex = gRenderAPI.GL_FindTexture("*black");
 	left = (TrueWidth - TrueHeight)/2;
 	right = left + TrueHeight;
@@ -57,7 +57,7 @@ int CHudSniperScope::Draw(float flTime)
 		return 1;
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
 	gEngfuncs.pTriAPI->Brightness(1.0);
-	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
+	gEngfuncs.pTriAPI->Color4ub(0, 0, 0, 255);
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
 	gRenderAPI.GL_Bind(0, m_iScopeArc[0]);
@@ -89,5 +89,11 @@ int CHudSniperScope::Draw(float flTime)
 	Quad(right - 1.0f / TrueWidth, 0, TrueWidth, TrueHeight);
 	gEngfuncs.pTriAPI->End();
 
-   return 0;
+	FillRGBABlend(0,                  ScreenHeight/2, ScreenWidth/2 - 20, 1,  0, 0, 0, 255);
+	FillRGBABlend(ScreenWidth/2 + 20, ScreenHeight/2, ScreenWidth       , 1,  0, 0, 0, 255);
+
+	FillRGBABlend(ScreenWidth/2, 0                  , 1, ScreenHeight/2 - 20, 0, 0, 0, 255);
+	FillRGBABlend(ScreenWidth/2, ScreenHeight/2 + 20, 1, ScreenHeight       , 0, 0, 0, 255);
+
+	return 0;
 }
