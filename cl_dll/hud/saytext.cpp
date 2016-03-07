@@ -156,7 +156,21 @@ int CHudSayText :: Draw( float flTime )
 	return 1;
 }
 
-struct CSimpleMap {
+enum
+{
+	CHAT_CT = 0,
+	CHAT_T,
+	CHAT_CT_DEAD,
+	CHAT_T_DEAD,
+	CHAT_SPEC,
+	CHAT_ALL,
+	CHAT_ALLDEAD,
+	CHAT_ALLSPEC,
+	CHAT_NAME_CHANGE
+};
+
+struct CSimpleMap
+{
 	const char key[32];
 	const char value[64];
 };
@@ -186,7 +200,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 
 	const char *fmt =  "\x02%s: %s";
 	int i = 0;
-	for( i; i < sizeof(sayTextFmt) / sizeof(CSimpleMap); i++ )
+	for( i = CHAT_CT; i < CHAT_NAME_CHANGE; i++ )
 	{
 		if( !strncmp( szBuf[0], sayTextFmt[i].key, sizeof( szBuf ) ) )
 		{
@@ -195,8 +209,24 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 		}
 	}
 
+
+#if 1
+	// If text is sent from dead player or spectator
+	// don't draw it, until local player isn't specator or dead.
+	switch( i )
+	{
+	case CHAT_CT_DEAD:
+	case CHAT_T_DEAD:
+	case CHAT_ALLDEAD:
+	case CHAT_ALLSPEC:
+	case CHAT_SPEC:
+		if( !gHUD.m_fPlayerDead || !g_iUser1 )
+			return 1;
+	}
+#endif
+
 	char dst[256];
-	if( i == 8 )
+	if( i == CHAT_NAME_CHANGE )
 	{
 		snprintf( dst, sizeof( dst ), fmt, szBuf[1], szBuf[2]);
 	}
@@ -213,13 +243,6 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 
 void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex )
 {
-	/*if ( gViewPort && gViewPort->AllowedToPrintText() == FALSE )
-	{
-		// Print it straight to the console
-		ConsolePrint( pszBuf );
-		return;
-	}*/
-
 	// find an empty string slot
 	int i;
 	for ( i = 0; i < MAX_LINES; i++ )
