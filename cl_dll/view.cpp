@@ -687,6 +687,10 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 		view->origin[2] += 0.5;
 	}
 
+	// Don't allow viewmodel, if we are in sniper scope
+	if( gHUD.m_iFOV <= 40 )
+		view->model = NULL;
+
 	// Add in the punchangle, if any
 	VectorAdd ( pparams->viewangles, pparams->punchangle, pparams->viewangles );
 
@@ -720,20 +724,18 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	}
 #endif
 
+	static float lastorg[3];
+	vec3_t delta;
+
+	VectorSubtract( pparams->simorg, lastorg, delta );
+
+	if ( Length( delta ) != 0.0 )
 	{
-		static float lastorg[3];
-		vec3_t delta;
+		VectorCopy( pparams->simorg, ViewInterp.Origins[ ViewInterp.CurrentOrigin & ORIGIN_MASK ] );
+		ViewInterp.OriginTime[ ViewInterp.CurrentOrigin & ORIGIN_MASK ] = pparams->time;
+		ViewInterp.CurrentOrigin++;
 
-		VectorSubtract( pparams->simorg, lastorg, delta );
-
-		if ( Length( delta ) != 0.0 )
-		{
-			VectorCopy( pparams->simorg, ViewInterp.Origins[ ViewInterp.CurrentOrigin & ORIGIN_MASK ] );
-			ViewInterp.OriginTime[ ViewInterp.CurrentOrigin & ORIGIN_MASK ] = pparams->time;
-			ViewInterp.CurrentOrigin++;
-
-			VectorCopy( pparams->simorg, lastorg );
-		}
+		VectorCopy( pparams->simorg, lastorg );
 	}
 
 	// Smooth out whole view in multiplayer when on trains, lifts
@@ -960,7 +962,7 @@ void V_GetDeathCam(cl_entity_t * ent1, cl_entity_t * ent2, float * angle, float 
 	static vec3_t nonDestructedOrigin;
 	float distance = 168.0f;
 
-	v_lastDistance+= v_frametime * 96.0f;	// move unit per seconds back
+	v_lastDistance += v_frametime * 96.0f;	// move unit per seconds back
 
 	if ( v_resetCamera )
 		v_lastDistance = 64.0f;
@@ -1400,43 +1402,21 @@ void V_GetMapChasePosition(int target, float * cl_angles, float * origin, float 
 	VectorMA(origin, -1536, forward, origin);
 }
 
-int V_FindViewModelByWeaponModel(int weaponindex)
+int V_FindViewModelByWeaponModel( int iWeaponIndex )
 {
-
-	static char * modelmap[][2] =	{
-		{ "models/p_crossbow.mdl",		"models/v_crossbow.mdl"		},
-		{ "models/p_crowbar.mdl",		"models/v_crowbar.mdl"		},
-		{ "models/p_egon.mdl",			"models/v_egon.mdl"			},
-		{ "models/p_gauss.mdl",			"models/v_gauss.mdl"		},
-		{ "models/p_9mmhandgun.mdl",	"models/v_9mmhandgun.mdl"	},
-		{ "models/p_grenade.mdl",		"models/v_grenade.mdl"		},
-		{ "models/p_hgun.mdl",			"models/v_hgun.mdl"			},
-		{ "models/p_9mmAR.mdl",			"models/v_9mmAR.mdl"		},
-		{ "models/p_357.mdl",			"models/v_357.mdl"			},
-		{ "models/p_rpg.mdl",			"models/v_rpg.mdl"			},
-		{ "models/p_shotgun.mdl",		"models/v_shotgun.mdl"		},
-		{ "models/p_squeak.mdl",		"models/v_squeak.mdl"		},
-		{ "models/p_tripmine.mdl",		"models/v_tripmine.mdl"		},
-		{ "models/p_satchel_radio.mdl",	"models/v_satchel_radio.mdl"},
-		{ "models/p_satchel.mdl",		"models/v_satchel.mdl"		},
-		{ NULL, NULL } };
-
-	struct model_s * weaponModel = IEngineStudio.GetModelByIndex( weaponindex );
-
-	if ( weaponModel )
+	model_t *pWeaponModel = IEngineStudio.GetModelByIndex( iWeaponIndex );
+	if ( pWeaponModel && pWeaponModel->name )
 	{
-		int len = strlen( weaponModel->name );
-		int i = 0;
+		static char szViewModelName[MAX_MODEL_NAME];
+		strncpy( szViewModelName, pWeaponModel->name, sizeof( szViewModelName ) );
 
-		while ( modelmap[i] != NULL )
+		char *szSub = strstr( szViewModelName, "/p_" );
+		if( szSub )
 		{
-			if ( !strnicmp( weaponModel->name, modelmap[i][0], len ) )
-			{
-				return gEngfuncs.pEventAPI->EV_FindModelIndex( modelmap[i][1] );
-			}
-			i++;
+			// szSub pointer is a part of szViewModelName
+			szSub[1] = 'v';
+			return gEngfuncs.pEventAPI->EV_FindModelIndex(szViewModelName);
 		}
-
 		return 0;
 	}
 	else
@@ -1470,7 +1450,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 	VectorCopy ( pparams->viewangles, v_angles );
 	VectorCopy ( pparams->vieworg, v_origin );
 
-	if (  ( g_iUser1 == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE ) && ent )
+	if ( ( g_iUser1 == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE ) && ent )
 	{
 		// calculate player velocity
 		float timeDiff = ent->curstate.msg_time - ent->prevstate.msg_time;
@@ -1495,7 +1475,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 
 			pparams->health = 1;
 
-			cl_entity_t	 * gunModel = gEngfuncs.GetViewModel();
+			cl_entity_t	*gunModel = gEngfuncs.GetViewModel();
 
 			if ( lastWeaponModelIndex != ent->curstate.weaponmodel )
 			{
@@ -1622,8 +1602,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 	// write back new values into pparams
 	VectorCopy ( v_cl_angles, pparams->cl_viewangles );
 	VectorCopy ( v_angles, pparams->viewangles )
-			VectorCopy ( v_origin, pparams->vieworg );
-
+	VectorCopy ( v_origin, pparams->vieworg );
 }
 
 
@@ -1643,25 +1622,6 @@ void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 	{
 		V_CalcNormalRefdef ( pparams );
 	}
-
-	/*
-// Example of how to overlay the whole screen with red at 50 % alpha
-#define SF_TEST
-#if defined SF_TEST
-	{
-		screenfade_t sf;
-		gEngfuncs.pfnGetScreenFade( &sf );
-
-		sf.fader = 255;
-		sf.fadeg = 0;
-		sf.fadeb = 0;
-		sf.fadealpha = 128;
-		sf.fadeFlags = FFADE_STAYOUT | FFADE_OUT;
-
-		gEngfuncs.pfnSetScreenFade( &sf );
-	}
-#endif
-*/
 }
 
 /*
