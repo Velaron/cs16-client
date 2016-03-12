@@ -32,88 +32,95 @@
 #include "vgui_parser.h"
 #include "unicode_strtools.h"
 
-struct locString
-{
-	char toLocalize[MAX_TOLOCALIZE_STRING_SIZE];
-	char localizedString[MAX_LOCALIZEDSTRING_SIZE];
-};
+#include <unordered_map>
+#include <stdexcept> // std::out_of_range
 
-locString gTitlesTXT[MAX_LOCALIZED_TITLES]; // for localized titles.txt strings
-//locString gCstrikeMsgs[1024]; // for another
-int giLastTitlesTXT = 0;
-const char* Localize( const char* string )
+// for localized titles.txt strings
+typedef std::unordered_map< std::string, const char * > CDict;
+
+CDict gTitlesTXT;
+
+const char *Localize( const char *string )
 {
-	StripEndNewlineFromString( (char*)string );
-        
-	for( int i = 0; i < giLastTitlesTXT; ++i )
-	{
-		if( !stricmp(gTitlesTXT[i].toLocalize, string))
-			return gTitlesTXT[i].localizedString;
-	}
-	// nothing was found
-	return string;
+	StripEndNewlineFromString( (char *)string );
+	std::string	key(string);
+	CDict::const_iterator got = gTitlesTXT.find(key);
+
+	// if iterator points to end, then it 'key' not found in dictionary
+	if( got != gTitlesTXT.end() || got->first != key )
+		return got->second;
+	else return string;
 }
 
-void Localize_Init ()
+void Localize_Init( )
 {
 	char filename[64];
-	const char *gamedir = gEngfuncs.pfnGetGameDirectory();
-	snprintf( filename, 64, "%s/resource/%s_english.txt", gamedir, gamedir );
+	const char *gamedir = gEngfuncs.pfnGetGameDirectory( );
+	snprintf( filename, sizeof( filename ), "%s/resource/%s_english.txt", gamedir, gamedir );
 #ifndef OPENBINARY
 	FILE *wf = fopen( filename, "r" );
 #else
 	FILE *wf = fopen( filename, "rb" );
 #endif
-	
-	if (!wf)
+
+	if ( !wf )
 	{
-		gEngfuncs.Con_Printf ("Couldn't open file %s. Strings will not be localized!.\n", filename);
+		gEngfuncs.Con_Printf( "Couldn't open file %s. Strings will not be localized!.\n", filename );
 		return;
 	}
 
-	fseek (wf, 0L, SEEK_END);
-	int unicodeLength = ftell (wf);
-	fseek (wf, 0L, SEEK_SET);
+	fseek( wf, 0L, SEEK_END );
+	int unicodeLength = ftell( wf );
+	fseek( wf, 0L, SEEK_SET );
 
 	uchar16 *unicodeBuf = new uchar16[unicodeLength];
-	fread (unicodeBuf, 1, unicodeLength, wf);
-	fclose (wf);
+	fread( unicodeBuf, 1, unicodeLength, wf );
+	fclose( wf );
 	unicodeBuf++;
 
 	int ansiLength = unicodeLength / 2;
 
 	char *afile = new char[ansiLength]; // save original pointer, so we can free it later
+	char *token = new char[MAX_LOCALIZEDSTRING_SIZE];
 	char *pfile = afile;
-	Q_UTF16ToUTF8 (unicodeBuf, afile, ansiLength, STRINGCONVERT_ASSERT_REPLACE);
+	Q_UTF16ToUTF8( unicodeBuf, afile, ansiLength, STRINGCONVERT_ASSERT_REPLACE );
 
-	char token[2048];
-	while (true)
+	while ( true )
 	{
-		if (giLastTitlesTXT > MAX_LOCALIZED_TITLES)
+		pfile = gEngfuncs.COM_ParseFile( pfile, token );
+		if ( !pfile )
 		{
-			gEngfuncs.Con_Printf ("Too many localized titles.txt strings\n");
 			break;
 		}
 
-		pfile = gEngfuncs.COM_ParseFile (pfile, token);
-		if(!pfile) break;
-
-		if (strlen (token) > 5)
+		if ( strlen( token ) > 5 )
 		{
-			strncpy (gTitlesTXT[giLastTitlesTXT].toLocalize, token, MAX_TOLOCALIZE_STRING_SIZE);
+			char *localizedString = new char[MAX_LOCALIZEDSTRING_SIZE];
+			pfile = gEngfuncs.COM_ParseFile( pfile, localizedString );
 
-			pfile = gEngfuncs.COM_ParseFile (pfile, gTitlesTXT[giLastTitlesTXT].localizedString);
-		
-			if(!pfile) break;
-			giLastTitlesTXT++;
+			if( pfile && gTitlesTXT.size() < gTitlesTXT.max_size() )
+			{
+				gTitlesTXT[ std::string(token) ] = localizedString;
+			}
+			else
+			{
+				delete[] localizedString;
+				break;
+			}
 		}
 	}
 
-	delete [] --unicodeBuf;
-	delete [] afile;
+	delete[] token;
+	delete[] --unicodeBuf;
+	delete[] afile;
 }
 
 void Localize_Free( )
 {
+	for (auto& x: gTitlesTXT)
+	{
+		gEngfuncs.Con_DPrintf("Destroying pair: %s %s\n", x.first, x.second);
+		delete []x.second;
+	}
 	return;
 }
