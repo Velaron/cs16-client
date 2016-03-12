@@ -338,7 +338,7 @@ void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName, char chTextu
 	}
 }
 
-void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r, int g, int b, bool bCreateSparks, char cTextureType)
+void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r, int g, int b, bool bCreateWallPuff, bool bCreateSparks, char cTextureType)
 {
 	physent_t *pe;
 
@@ -351,27 +351,28 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 		if( bCreateSparks )
 		{
 			Vector dir = pTrace->plane.normal;
-			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat(4.0f, 12.0f );
-			dir.y = dir.y * dir.y * gEngfuncs.pfnRandomFloat(4.0f, 12.0f );
-			dir.z = dir.z * dir.z * gEngfuncs.pfnRandomFloat(4.0f, 12.0f );
+			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
+			dir.y = dir.y * dir.y * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
+			dir.z = dir.z * dir.z * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, gEngfuncs.pfnRandomLong( 15, 30 ), dir.z, -75.0f, 75.0f );
 		}
 
-
-		TEMPENTITY *te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos,
-							gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff1.spr"), 30.0f );
-		if( te )
+		if( bCreateWallPuff )
 		{
-			te->flags = FTENT_SPRANIMATE | FTENT_FADEOUT;
-			te->entity.curstate.rendermode = kRenderTransAdd;
-			te->entity.curstate.rendercolor.r = r;
-			te->entity.curstate.rendercolor.g = g;
-			te->entity.curstate.rendercolor.b = b;
-			te->entity.curstate.renderamt = 255;
-			te->entity.curstate.scale = 0.33;
-			te->entity.baseline.origin = 20 * pTrace->plane.normal;
+			TEMPENTITY *te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos,
+								gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff1.spr"), 30.0f );
+			if( te )
+			{
+				te->flags = FTENT_SPRANIMATE | FTENT_FADEOUT;
+				te->entity.curstate.rendermode = kRenderTransAdd;
+				te->entity.curstate.rendercolor.r = r;
+				te->entity.curstate.rendercolor.g = g;
+				te->entity.curstate.rendercolor.b = b;
+				te->entity.curstate.renderamt = 255;
+				te->entity.curstate.scale = 0.33;
+				te->entity.baseline.origin = 20 * pTrace->plane.normal;
+			}
 		}
-
 	}
 }
 
@@ -491,7 +492,7 @@ void EV_DescribeBulletTypeParameters(int iBulletType, int &iPenetrationPower, fl
 
 /*
 ================
-FireBullets
+EV_HLDM_FireBullets
 
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
@@ -549,7 +550,6 @@ void EV_HLDM_FireBullets(int idx,
 		// Now add in all of the players.
 		gEngfuncs.pEventAPI->EV_SetSolidPlayers ( idx - 1 );
 
-
 		while (iShotPenetration != 0)
 		{
 			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
@@ -557,28 +557,12 @@ void EV_HLDM_FireBullets(int idx,
 			EV_HLDM_CheckTracer( idx, vecShotSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount );
 
 			float flCurrentDistance = tr.fraction * flDistance;
-#ifdef _DEBUG
-			// absolute end
-			gEngfuncs.pEfxAPI->R_ParticleLine( vecEnd, vecEnd, 255, 255, 255, 20.0f);
-#endif
 
 			if( flCurrentDistance == 0.0f )
 			{
-#ifdef _DEBUG
-				// absolute start ( don't traceline after )
-				gEngfuncs.pEfxAPI->R_ParticleLine( vecShotSrc, vecShotSrc, 255, 255, 0, 20.0f );
-#endif
 				break;
 			}
 
-#ifdef _DEBUG
-			// absoulute start
-			gEngfuncs.pEfxAPI->R_ParticleLine( vecShotSrc, vecShotSrc, 0, 0, 255, 20.0f);
-			// trace
-			gEngfuncs.pEfxAPI->R_ParticleLine( vecShotSrc, tr.endpos, 0, 255, 0, 20.0f );
-			// hit
-			gEngfuncs.pEfxAPI->R_ParticleLine( tr.endpos, tr.endpos, 255, 0, 0, 20.0f);
-#endif
 			if ( flCurrentDistance > flPenetrationDistance )
 				iShotPenetration = 0;
 			else iShotPenetration--;
@@ -616,7 +600,7 @@ void EV_HLDM_FireBullets(int idx,
 			}
 
 			// do damage, paint decals
-			EV_HLDM_DecalGunshot( &tr, iBulletType, 0, r_smoke, g_smoke, b_smoke, bSparks, cTextureType );
+			EV_HLDM_DecalGunshot( &tr, iBulletType, 0, r_smoke, g_smoke, b_smoke, true, bSparks, cTextureType );
 
 			if( iBulletType == BULLET_PLAYER_BUCKSHOT || iShotPenetration == 0 )
 			{
@@ -649,7 +633,8 @@ void EV_HLDM_FireBullets(int idx,
 			{
 				gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 				gEngfuncs.pEventAPI->EV_PlayerTrace(vEndPos, vStartPos, 0, -1, &trOriginal);
-				EV_HLDM_DecalGunshot( &trOriginal, iBulletType, 0, r_smoke, g_smoke, b_smoke, bSparks, cTextureType );
+				// draw wallpuff, only if start was been in non-solid area
+				EV_HLDM_DecalGunshot( &trOriginal, iBulletType, 0, r_smoke, g_smoke, b_smoke, !trOriginal.startsolid, bSparks, cTextureType );
 			}
 		}
 		gEngfuncs.pEventAPI->EV_PopPMStates();
