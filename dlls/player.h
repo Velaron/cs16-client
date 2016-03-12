@@ -338,7 +338,7 @@ public:
 	void EXPORT PlayerDeathThink(void);
 	void PlayerUse(void);
 	void CheckSuitUpdate(void);
-	void SetSuitUpdate(char *name, int fgroup, int iNoRepeat);
+	void SetSuitUpdate(const char *name, int fgroup, int iNoRepeat);
 	void UpdateGeigerCounter(void);
 	void CheckTimeBasedDamage(void);
 	void BarnacleVictimBitten(entvars_t *pevBarnacle);

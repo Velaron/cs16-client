@@ -46,10 +46,10 @@ public:
 	static int DrawHudNumber2( int x, int y, int iNumber,
 						   int r, int g, int b);
 
-	static int DrawHudString(int x, int y, int iMaxX, char *szString,
+	static int DrawHudString(int x, int y, int iMaxX, const char *szString,
 						 int r, int g, int b, bool drawing = false );
 
-	static int DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
+	static int DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString,
 								 int r, int g, int b, bool drawing = false );
 
 	static int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber,

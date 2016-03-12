@@ -613,7 +613,7 @@ public:
 	virtual CBasePlayerItem *GetWeaponPtr(void) { return (CBasePlayerItem *)this; }
 
 public:
-	BOOL DefaultDeploy(char *szViewModel, char *szWeaponModel, int iAnim, char *szAnimExt, int skiplocal = 0);
+	BOOL DefaultDeploy(const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int skiplocal = 0);
 	int DefaultReload(int iClipSize, int iAnim, float fDelay, int body = 0);
 	void ReloadSound(void);
 	BOOL AddPrimaryAmmo(int iCount, char *szName, int iMaxClip, int iMaxCarry);

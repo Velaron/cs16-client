@@ -7,9 +7,9 @@
 extern cvar_t *hud_textmode;
 float DrawUtils :: color[3];
 
-int DrawUtils :: DrawHudString( int xpos, int ypos, int iMaxX, char *szIt, int r, int g, int b, bool drawing )
+int DrawUtils :: DrawHudString( int xpos, int ypos, int iMaxX, const char *str, int r, int g, int b, bool drawing )
 {
-	int first_xpos = xpos;
+	char *szIt = (char*)str;
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
@@ -64,11 +64,8 @@ int DrawUtils :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber
 
 }
 
-int DrawUtils :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b, bool drawing )
+int DrawUtils :: DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, bool drawing )
 {
-	int first_xpos = xpos;
-
-
 	// iterate throug the string in reverse
 	for ( signed int i = strlen(szString); i >= 0; i-- )
 	{

@@ -72,7 +72,6 @@ void EV_FireUSP( event_args_t *args )
 	int shell;
 	vec3_t vecSrc, vecAiming;
 	vec3_t up, right, forward;
-	float flSpread = 0.01;
 	const char *szSoundName;
 
 	idx = args->entindex;

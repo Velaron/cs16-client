@@ -38,7 +38,6 @@
 
 #include <assert.h>
 
-static int tracerCount[ 32 ];
 extern float g_flRoundTime;
 
 extern "C" char PM_FindTextureType( char *name );
@@ -106,8 +105,7 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	// hit the world, try to play sound based on texture material type
 	char chTextureType = CHAR_TEX_CONCRETE;
 	float fvol;
-	float fvolbar;
-	char *rgsz[4];
+	const char *rgsz[4];
 	int cnt;
 	float fattn = ATTN_NORM;
 	int entity;
@@ -164,7 +162,6 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	case CHAR_TEX_CONCRETE:
 	{
 		fvol = 0.9;
-		fvolbar = 0.6;
 		rgsz[0] = "player/pl_step1.wav";
 		rgsz[1] = "player/pl_step2.wav";
 		cnt = 2;
@@ -173,7 +170,6 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	case CHAR_TEX_METAL:
 	{
 		fvol = 0.9;
-		fvolbar = 0.3;
 		rgsz[0] = "player/pl_metal1.wav";
 		rgsz[1] = "player/pl_metal2.wav";
 		cnt = 2;
@@ -182,7 +178,6 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	case CHAR_TEX_DIRT:
 	{
 		fvol = 0.9;
-		fvolbar = 0.1;
 		rgsz[0] = "player/pl_dirt1.wav";
 		rgsz[1] = "player/pl_dirt2.wav";
 		rgsz[2] = "player/pl_dirt3.wav";
@@ -192,7 +187,6 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	case CHAR_TEX_VENT:
 	{
 		fvol = 0.5;
-		fvolbar = 0.3;
 		rgsz[0] = "player/pl_duct1.wav";
 		rgsz[1] = "player/pl_duct1.wav";
 		cnt = 2;
@@ -201,7 +195,6 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	case CHAR_TEX_GRATE:
 	{
 		fvol = 0.9;
-		fvolbar = 0.5;
 		rgsz[0] = "player/pl_grate1.wav";
 		rgsz[1] = "player/pl_grate4.wav";
 		cnt = 2;
@@ -210,7 +203,6 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	case CHAR_TEX_TILE:
 	{
 		fvol = 0.8;
-		fvolbar = 0.2;
 		rgsz[0] = "player/pl_tile1.wav";
 		rgsz[1] = "player/pl_tile3.wav";
 		rgsz[2] = "player/pl_tile2.wav";
@@ -221,7 +213,6 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	case CHAR_TEX_SLOSH:
 	{
 		fvol = 0.9;
-		fvolbar = 0;
 		rgsz[0] = "player/pl_slosh1.wav";
 		rgsz[1] = "player/pl_slosh3.wav";
 		rgsz[2] = "player/pl_slosh2.wav";
@@ -232,7 +223,6 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	case CHAR_TEX_SNOW:
 	{
 		fvol = 0.7;
-		fvolbar = 0.4;
 		rgsz[0] = "debris/pl_snow1.wav";
 		rgsz[1] = "debris/pl_snow2.wav";
 		rgsz[2] = "debris/pl_snow3.wav";
@@ -243,7 +233,6 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	case CHAR_TEX_WOOD:
 	{
 		fvol = 0.9;
-		fvolbar = 0.2;
 		rgsz[0] = "debris/wood1.wav";
 		rgsz[1] = "debris/wood2.wav";
 		rgsz[2] = "debris/wood3.wav";
@@ -254,7 +243,6 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	case CHAR_TEX_COMPUTER:
 	{
 		fvol = 0.8;
-		fvolbar = 0.2;
 		rgsz[0] = "debris/glass1.wav";
 		rgsz[1] = "debris/glass2.wav";
 		rgsz[2] = "debris/glass3.wav";
@@ -263,7 +251,7 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	}
 	case CHAR_TEX_FLESH:
 	{
-		fvol = 1.0;fvolbar = 0.2;
+		fvol = 1.0;
 		rgsz[0] = "weapons/bullet_hit1.wav";
 		rgsz[1] = "weapons/bullet_hit2.wav";
 		fattn = 1.0;
@@ -517,7 +505,6 @@ void EV_HLDM_FireBullets(int idx,
 	int i;
 	pmtrace_t tr;
 	int iShot;
-	int tracer;
 	int iPenetrationPower;
 	float flPenetrationDistance;
 
@@ -567,7 +554,7 @@ void EV_HLDM_FireBullets(int idx,
 		{
 			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 			gEngfuncs.pEventAPI->EV_PlayerTrace(vecShotSrc, vecEnd, 0, -1, &tr);
-			tracer = EV_HLDM_CheckTracer( idx, vecShotSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount );
+			EV_HLDM_CheckTracer( idx, vecShotSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount );
 
 			float flCurrentDistance = tr.fraction * flDistance;
 #ifdef _DEBUG

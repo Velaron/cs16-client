@@ -147,8 +147,6 @@ int CHudScoreboard :: Draw( float flTime )
 
 int CHudScoreboard :: DrawScoreboard( float fTime )
 {
-	int j;
-
 	GetAllPlayersInfo();
 
 //	Packetloss removed on Kelly 'shipping nazi' Bailey's orders
@@ -188,6 +186,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 		// it's not teamplay,  so just draw a simple player list
 		DrawPlayers( list_slot );
 	}
+	return 1;
 }
 
 int CHudScoreboard :: DrawTeams( float list_slot )
@@ -339,7 +338,7 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 }
 
 // returns the ypos where it finishes drawing
-int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, char *team )
+int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *team )
 {
 	// draw the players, in order,  and restricted to team if set
 	while ( 1 )

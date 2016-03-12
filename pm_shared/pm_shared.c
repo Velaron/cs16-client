@@ -131,7 +131,9 @@ hull_t;
 
 #define PLAYER_LONGJUMP_SPEED 350
 
+#ifdef MSC_VER
 #pragma warning(disable : 4244)
+#endif
 
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
@@ -502,7 +504,6 @@ void PM_UpdateStepSound(void)
 	float fvol;
 	vec3_t knee;
 	vec3_t feet;
-	vec3_t center;
 	float height;
 	float speed;
 	int fLadder;
@@ -528,7 +529,6 @@ void PM_UpdateStepSound(void)
 	{
 		PM_CatagorizeTextureType();
 
-		VectorCopy(pmove->origin, center);
 		VectorCopy(pmove->origin, knee);
 		VectorCopy(pmove->origin, feet);
 
@@ -925,7 +925,6 @@ void PM_Accelerate(vec3_t wishdir, float wishspeed, float accel)
 
 void PM_WalkMove(void)
 {
-	int clip;
 	int oldonground;
 	int i;
 
@@ -935,7 +934,7 @@ void PM_WalkMove(void)
 	vec3_t wishdir;
 	float wishspeed;
 
-	vec3_t dest, start;
+	vec3_t dest;
 	vec3_t original, originalvel;
 	vec3_t down, downvel;
 	float downdist, updist;
@@ -994,7 +993,6 @@ void PM_WalkMove(void)
 	dest[1] = pmove->origin[1] + pmove->velocity[1]*pmove->frametime;
 	dest[2] = pmove->origin[2];
 
-	VectorCopy(dest, start);
 	trace = pmove->PM_PlayerTrace(pmove->origin, dest, PM_NORMAL, -1);
 
 	if (trace.fraction == 1)
@@ -1012,7 +1010,7 @@ void PM_WalkMove(void)
 	VectorCopy(pmove->origin, original);
 	VectorCopy(pmove->velocity, originalvel);
 
-	clip = PM_FlyMove();
+	PM_FlyMove();
 
 	VectorCopy(pmove->origin, down);
 	VectorCopy(pmove->velocity, downvel);
@@ -1028,7 +1026,7 @@ void PM_WalkMove(void)
 	if (!trace.startsolid && !trace.allsolid)
 		VectorCopy(trace.endpos, pmove->origin);
 
-	clip = PM_FlyMove();
+	PM_FlyMove();
 
 	VectorCopy(pmove->origin, dest);
 	dest[2] -= pmove->movevars->stepsize;
@@ -1490,7 +1488,6 @@ int PM_CheckStuck(void)
 void PM_SpectatorMove(void)
 {
 	float speed, drop, friction, control, newspeed;
-	float accel;
 	float currentspeed, addspeed, accelspeed;
 	int i;
 	vec3_t wishvel;
@@ -1630,7 +1627,6 @@ void PM_FixPlayerCrouchStuck(int direction)
 
 void PM_UnDuck(void)
 {
-	int i;
 	pmtrace_t trace;
 	vec3_t newOrigin;
 
@@ -1675,15 +1671,11 @@ void PM_UnDuck(void)
 
 void PM_Duck(void)
 {
-	int i;
 	float time;
 	float duckFraction;
 
 	int buttonsChanged = (pmove->oldbuttons ^ pmove->cmd.buttons);
 	int nButtonPressed = buttonsChanged & pmove->cmd.buttons;
-
-	int duckchange = buttonsChanged & IN_DUCK ? 1 : 0;
-	int duckpressed = nButtonPressed & IN_DUCK ? 1 : 0;
 
 	if (pmove->cmd.buttons & IN_DUCK)
 	{
@@ -2022,7 +2014,6 @@ void PM_NoClip(void)
 	int i;
 	vec3_t wishvel;
 	float fmove, smove;
-	float currentspeed, addspeed, accelspeed;
 
 	fmove = pmove->cmd.forwardmove;
 	smove = pmove->cmd.sidemove;
@@ -2067,11 +2058,6 @@ void PM_PreventMegaBunnyJumping(void)
 
 void PM_Jump(void)
 {
-	int i;
-	qboolean tfc = false;
-
-	qboolean cansuperjump = false;
-
 	if (pmove->dead)
 	{
 		pmove->oldbuttons |= IN_JUMP;

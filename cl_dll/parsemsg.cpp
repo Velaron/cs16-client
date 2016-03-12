@@ -22,7 +22,7 @@ typedef unsigned char byte;
 
 static byte *gpBuf;
 static size_t giSize;
-static int giRead;
+static size_t giRead;
 static bool giBadRead;
 
 void BEGIN_READ( void *buf, int size )
@@ -128,11 +128,10 @@ float READ_FLOAT( void )
 char* READ_STRING( void )
 {
 	static char     string[2048];
-	int             l,c;
+	int             c;
+	size_t			l = 0;
 
 	string[0] = 0;
-
-	l = 0;
 	do
 	{
 		if ( giRead+1 > giSize )
@@ -143,7 +142,7 @@ char* READ_STRING( void )
 			break;
 		string[l] = c;
 		l++;
-	} while (l < sizeof(string)-1);
+	} while (l < sizeof(string) - 1);
 	
 	string[l] = 0;
 	

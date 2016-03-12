@@ -775,7 +775,6 @@ void CStudioModelRenderer::StudioMergeBones(model_t *m_pSubModel)
 {
 	int i, j;
 	double f;
-	int do_hunt = true;
 
 	mstudiobone_t *pbones;
 	mstudioseqdesc_t *pseqdesc;

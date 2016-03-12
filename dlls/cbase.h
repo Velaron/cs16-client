@@ -253,7 +253,7 @@ public:
 	}
 
 #ifdef _DEBUG
-	void FunctionCheck(void *pFunction, char *name)
+	void FunctionCheck(void *pFunction, const char *name)
 	{
 		if (pFunction && !NAME_FOR_FUNCTION((unsigned long)(pFunction)))
 		{ 
@@ -267,28 +267,28 @@ public:
 		}
 	}
 
-	BASEPTR ThinkSet(BASEPTR func, char *name)
+	BASEPTR ThinkSet(BASEPTR func, const char *name)
 	{
 		m_pfnThink = func;
 		FunctionCheck((void *)*((int *)((char *)this + (offsetof(CBaseEntity, m_pfnThink)))), name);
 		return func;
 	}
 
-	ENTITYFUNCPTR TouchSet(ENTITYFUNCPTR func, char *name)
+	ENTITYFUNCPTR TouchSet(ENTITYFUNCPTR func, const char *name)
 	{
 		m_pfnTouch = func;
 		FunctionCheck((void *)*((int *)((char *)this + (offsetof(CBaseEntity, m_pfnTouch)))), name);
 		return func;
 	}
 
-	USEPTR UseSet(USEPTR func, char *name)
+	USEPTR UseSet(USEPTR func, const char *name)
 	{
 		m_pfnUse = func;
 		FunctionCheck((void *)*((int *)((char *)this + (offsetof(CBaseEntity, m_pfnUse)))), name);
 		return func;
 	}
 
-	ENTITYFUNCPTR BlockedSet(ENTITYFUNCPTR func, char *name)
+	ENTITYFUNCPTR BlockedSet(ENTITYFUNCPTR func, const char *name)
 	{
 		m_pfnBlocked = func;
 		FunctionCheck((void *)*((int *)((char *)this + (offsetof(CBaseEntity, m_pfnBlocked)))), name);
@@ -349,7 +349,7 @@ public:
 };
 
 #ifdef _DEBUG
-#define SetThink(a) ThinkSet(static_cast <void (CBaseEntity::*)(void)>(a), #a)
+#define SetThink(a) ThinkSet(static_cast <void (CBaseEntity::*)(void)>(a), (char*)#a)
 #define SetTouch(a) TouchSet(static_cast <void (CBaseEntity::*)(CBaseEntity *)>(a), #a)
 #define SetUse(a) UseSet(static_cast <void (CBaseEntity::*)(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)>(a), #a)
 #define SetBlocked(a) BlockedSet(static_cast <void (CBaseEntity::*)(CBaseEntity *)>(a), #a)

@@ -612,19 +612,12 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 {
 	static wrect_t nullrc;
-	int fOnTarget = FALSE;
 
 	BEGIN_READ( pbuf, iSize );
 
 	int iState = READ_BYTE();
 	int iId = READ_CHAR();
 	int iClip = READ_CHAR();
-
-	// detect if we're also on target
-	if ( iState > 1 )
-	{
-		fOnTarget = TRUE;
-	}
 
 	if ( iId < 1 )
 	{
@@ -731,7 +724,7 @@ int CHudAmmo::MsgFunc_Crosshair(const char *pszName, int iSize, void *pbuf)
 int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
-	int MessageID = READ_BYTE();
+	READ_BYTE();
 
 	Vector start, velocity;
 	start.x = READ_COORD();
@@ -748,7 +741,7 @@ int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
 	int ModelIndex = READ_SHORT();
 	int BounceSoundType = READ_BYTE();
 	int Life = READ_BYTE();
-	int PlayerID = READ_BYTE();
+	READ_BYTE();
 
 	float sin, cos, x, y;
 	sincosf( Rotation, &sin, &cos );
@@ -1010,7 +1003,7 @@ void CHudAmmo::UserCmd_Autobuy()
 
 	strncpy(szCmd, "cl_setautobuy", sizeof(szCmd));
 
-	while(pfile = gEngfuncs.COM_ParseFile( pfile, token ))
+	while((pfile = gEngfuncs.COM_ParseFile( pfile, token )))
 	{
 		// append space first
 		strncat(szCmd, " ", sizeof(szCmd));
@@ -1042,7 +1035,7 @@ void CHudAmmo::UserCmd_Rebuy()
 
 
 
-	while(pfile = gEngfuncs.COM_ParseFile( pfile, token ))
+	while((pfile = gEngfuncs.COM_ParseFile( pfile, token )))
 	{
 		strncat(szCmd, token, sizeof(szCmd));
 		// append space after token
@@ -1130,12 +1123,6 @@ int CHudAmmo::Draw(float flTime)
 			
 			x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
 			x = DrawUtils::DrawHudNumber(x, y, iFlags | DHN_3DIGITS, pw->iClip, r, g, b);
-
-			wrect_t rc;
-			rc.top = 0;
-			rc.left = 0;
-			rc.right = AmmoWidth;
-			rc.bottom = 100;
 
 			int iBarWidth =  AmmoWidth/10;
 

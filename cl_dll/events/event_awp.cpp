@@ -43,13 +43,8 @@ void EV_FireAWP( event_args_t *args )
 	vec3_t origin;
 	vec3_t angles;
 	vec3_t velocity;
-
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	int shell;
 	vec3_t vecSrc, vecAiming;
 	vec3_t up, right, forward;
-	float flSpread = 0.01;
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
@@ -74,9 +69,6 @@ void EV_FireAWP( event_args_t *args )
 		origin = ent->origin;
 	}
 #endif
-
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell_big.mdl");
-	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
 									   "weapons/awp1.wav",

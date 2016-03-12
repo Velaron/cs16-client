@@ -199,7 +199,7 @@ typedef struct cl_enginefuncs_s
 	void						( *pfnWeaponAnim )			( int iAnim, int body );
 	float						( *pfnRandomFloat )			( float flLow, float flHigh );
 	long						( *pfnRandomLong )			( long lLow, long lHigh );
-	void						( *pfnHookEvent )			( char *name, void ( *pfnEvent )( struct event_args_s *args ) );
+	void						( *pfnHookEvent )			( const char *name, void ( *pfnEvent )( struct event_args_s *args ) );
 	int							(*Con_IsVisible)			();
 	const char					*( *pfnGetGameDirectory )	( void );
 	struct cvar_s				*( *pfnGetCvarPointer )		( const char *szName );

@@ -134,7 +134,7 @@ void V_NormalizeAngles( float *angles )
 		}
 	}
 }
-
+*/
 /*
 ===================
 V_InterpolateAngles
@@ -143,7 +143,8 @@ Interpolate Euler angles.
 FIXME:  Use Quaternions to avoid discontinuities
 Frac is 0.0 to 1.0 ( i.e., should probably be clamped, but doesn't have to be )
 ===================
-
+*/
+/*
 void V_InterpolateAngles( float *start, float *end, float *output, float frac )
 {
 	int i;
@@ -433,11 +434,8 @@ V_CalcIntermissionRefdef
 */
 void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 {
-	cl_entity_t	*ent, *view;
+	cl_entity_t	*view;
 	float		old;
-
-	// ent is the player model ( visible when out of body )
-	ent = gEngfuncs.GetLocalPlayer();
 
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();

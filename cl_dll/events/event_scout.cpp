@@ -42,10 +42,6 @@ void EV_FireScout(event_args_s *args)
 	vec3_t origin;
 	vec3_t angles;
 	vec3_t velocity;
-
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	int shell;
 	vec3_t vecSrc, vecAiming;
 	vec3_t up, right, forward;
 
@@ -72,8 +68,6 @@ void EV_FireScout(event_args_s *args)
 	}
 #endif
 
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell_big.mdl");
-	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
 									   "weapons/scout_fire-1.wav",
 									   1, ATTN_NORM, 0,

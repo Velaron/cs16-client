@@ -38,12 +38,11 @@ enum g3sg1_e
 
 void EV_FireG3SG1(event_args_s *args)
 {
-vec3_t origin, angles, velocity;
+	vec3_t origin, angles, velocity;
 
 	vec3_t ShellVelocity, ShellOrigin;
 	vec3_t vecSrc, vecAiming;
 	vec3_t up, right, forward;
-	float flSpread = 0.01;
 	int shell, idx;
 
 	idx = args->entindex;

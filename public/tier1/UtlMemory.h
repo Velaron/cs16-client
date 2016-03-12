@@ -10,13 +10,9 @@
 //
 // A growable memory class.
 //=============================================================================
-
+#pragma once
 #ifndef UTLMEMORY_H
 #define UTLMEMORY_H
-
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <string.h>
 #include <new>
@@ -24,8 +20,10 @@
 #include <stdarg.h>
 #include <assert.h>
 
+#ifdef MSC_VER
 #pragma warning (disable:4100)
 #pragma warning (disable:4514)
+#endif
 
 //-----------------------------------------------------------------------------
 // Methods to invoke the constructor, copy constructor, and destructor

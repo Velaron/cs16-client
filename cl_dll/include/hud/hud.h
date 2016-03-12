@@ -307,7 +307,7 @@ public:
 
 	int DrawScoreboard( float flTime );
 	int DrawTeams( float listslot );
-	int DrawPlayers( float listslot, int nameoffset = 0, char *team = NULL ); // returns the ypos where it finishes drawing
+	int DrawPlayers( float listslot, int nameoffset = 0, const char *team = NULL ); // returns the ypos where it finishes drawing
 
 	void DeathMsg( int killer, int victim );
 	void SetScoreboardDefaults( void );
@@ -579,7 +579,7 @@ public:
 	int Init( void );
 	static char *LocaliseTextString( const char *msg, char *dst_buffer, int buffer_size );
 	static char *BufferedLocaliseTextString( const char *msg );
-	static char *LookupString( const char *msg_name, int *msg_dest = NULL );
+	static char *LookupString( char *msg_name, int *msg_dest = NULL );
 	CHudMsgFunc(TextMsg);
 };
 
@@ -800,7 +800,7 @@ private:
 class CHud
 {
 public:
-	CHud() : m_iSpriteCount(0), m_pHudList(NULL) {}
+	CHud() : m_pHudList(NULL), m_iSpriteCount(0)  {}
 	~CHud();			// destructor, frees allocated memory // thanks, Captain Obvious
 
 	void Init( void );

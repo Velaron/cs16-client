@@ -70,7 +70,7 @@ char *CHudTextMessage::LocaliseTextString( const char *msg, char *dst_buffer, in
 				continue;
 			}
 
-			if(clmsg->pMessage[0] == '#') strncpy(dst, Localize(clmsg->pMessage+1), sizeof( dst ));
+			if(clmsg->pMessage[0] == '#') strncpy(dst, Localize(clmsg->pMessage+1), buffer_size);
 
 			// copy string into message over the msg name
 			for ( char *wsrc = (char*)clmsg->pMessage; *wsrc != 0; wsrc++, dst++ )
@@ -100,10 +100,10 @@ char *CHudTextMessage::BufferedLocaliseTextString( const char *msg )
 }
 
 // Simplified version of LocaliseTextString;  assumes string is only one word
-char *CHudTextMessage::LookupString( const char *msg, int *msg_dest )
+char *CHudTextMessage::LookupString( char *msg, int *msg_dest )
 {
 	if ( !msg )
-		return "";
+		return (char*)"";
 
 	// '#' character indicates this is a reference to a string in titles.txt, and not the string itself
 	if ( msg[0] == '#' ) 
@@ -192,7 +192,7 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	// VALVEWHY?
 	if( strlen(msg_text) >= 3 )
 	{
-		for( int i = 0; i < strlen(msg_text) - 2; i++)
+		for( size_t i = 0; i < strlen(msg_text) - 2; i++)
 		{
 			if( msg_text[i] == '%' && msg_text[i + 1] == 's' && isdigit(msg_text[i + 2]))
 			{

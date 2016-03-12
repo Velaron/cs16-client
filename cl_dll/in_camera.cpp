@@ -79,7 +79,7 @@ POINT		cam_mouse;
 //-------------------------------------------------- Local Variables
 
 static kbutton_t cam_pitchup, cam_pitchdown, cam_yawleft, cam_yawright;
-static kbutton_t cam_in, cam_out, cam_move;
+static kbutton_t cam_in, cam_out;
 
 //-------------------------------------------------- Prototypes
 

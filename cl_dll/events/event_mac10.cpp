@@ -44,9 +44,7 @@ void EV_FireMAC10(event_args_s *args)
 	vec3_t ShellVelocity, ShellOrigin;
 	vec3_t vecSrc, vecAiming;
 	vec3_t up, right, forward;
-	float flSpread = 0.01;
-	const char *szSoundName;
-	int sequence, shell, idx;
+	int shell, idx;
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );

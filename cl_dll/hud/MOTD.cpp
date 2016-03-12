@@ -74,7 +74,6 @@ int CHudMOTD :: Draw( float fTime )
 	}
 
 	gHUD.m_iNoConsolePrint |= 1 << 1;
-	bool bScroll;
 	// find the top of where the MOTD should be drawn,  so the whole thing is centered in the screen
 	int ypos = (ScreenHeight - LINE_HEIGHT * m_iLines)/2; // shift it up slightly
 	char *ch = m_szMOTD;
@@ -93,7 +92,6 @@ int CHudMOTD :: Draw( float fTime )
 		ypos_r = ROW_RANGE_MIN;
 		height = ROW_RANGE_MAX;
 	}
-	int ymax = ypos + height;
 	if( xmax > ScreenWidth - 30 ) xmax = ScreenWidth - 30;
 	char *next_line;
 	DrawUtils::DrawRectangle(xpos-5, ypos_r - 5, xmax - xpos+10, height + 10);
@@ -101,7 +99,7 @@ int CHudMOTD :: Draw( float fTime )
 	{
 		int line_length = 0;  // count the length of the current line
 		for ( next_line = ch; *next_line != '\n' && *next_line != 0; next_line++ )
-			line_length += gHUD.m_scrinfo.charWidths[ *next_line ];
+			line_length += gHUD.m_scrinfo.charWidths[ (unsigned char)*next_line ];
 		char *top = next_line;
 		if ( *top == '\n' )
 			*top = 0;

@@ -612,7 +612,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 	static int gTempEntFrame = 0;
 	int			i;
 	TEMPENTITY	*pTemp, *pnext, *pprev;
-	float		freq, gravity, gravitySlow, life, fastFreq;
+	float		gravity, gravitySlow, life, fastFreq;
 
 	// Nothing to simulate
 	if ( !*ppTempEntActive )		
@@ -650,7 +650,6 @@ void DLLEXPORT HUD_TempEntUpdate (
 	}
 
 	pprev = NULL;
-	freq = client_time * 0.01;
 	fastFreq = client_time * 5.5;
 	gravity = -frametime * cl_gravity;
 	gravitySlow = gravity * 0.5;
@@ -737,9 +736,11 @@ void DLLEXPORT HUD_TempEntUpdate (
 			}
 			else if ( pTemp->flags & FTENT_SPIRAL )
 			{
+				/*
 				float s, c;
 				s = sin( pTemp->entity.baseline.origin[2] + fastFreq );
 				c = cos( pTemp->entity.baseline.origin[2] + fastFreq );
+				*/
 
 				pTemp->entity.origin[0] += pTemp->entity.baseline.origin[0] * frametime + 8 * sin( client_time * 20 + (long long)(void*)pTemp );
 				pTemp->entity.origin[1] += pTemp->entity.baseline.origin[1] * frametime + 4 * sin( client_time * 30 + (long long)(void*)pTemp );

@@ -277,7 +277,7 @@ extern char *UTIL_dtos1(int d);
 extern char *UTIL_dtos2(int d);
 extern char *UTIL_dtos3(int d);
 extern char *UTIL_dtos4(int d);
-extern void UTIL_LogPrintf(char *fmt, ...);
+extern void UTIL_LogPrintf(const char *fmt, ...);
 extern float UTIL_DotPoints(const Vector &vecSrc, const Vector &vecCheck, const Vector &vecDir);
 extern void UTIL_StripToken(const char *pKey, char *pDest);
 extern char UTIL_TextureHit(TraceResult *ptrHit, Vector vecSrc, Vector vecEnd);
