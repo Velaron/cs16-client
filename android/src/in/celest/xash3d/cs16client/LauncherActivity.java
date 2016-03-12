@@ -106,6 +106,7 @@ public class LauncherActivity extends Activity {
 			break;
 		case 1:
 			// Engine will load libserver.so by himself
+			argv = argv + " -bots";
 			break;
 		case 2:
 			String fullPath = getFilesDir().getAbsolutePath().replace("/files","/lib");
