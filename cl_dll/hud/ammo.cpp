@@ -1006,8 +1006,8 @@ void CHudAmmo::UserCmd_Autobuy()
 	while((pfile = gEngfuncs.COM_ParseFile( pfile, token )))
 	{
 		// append space first
-		strncat(szCmd, " ", sizeof(szCmd));
-		strncat(szCmd, token, sizeof(szCmd));
+		strcat(szCmd, " ");
+		strcat(szCmd, token);
 	}
 
 	ConsolePrint(szCmd);
@@ -1037,9 +1037,9 @@ void CHudAmmo::UserCmd_Rebuy()
 
 	while((pfile = gEngfuncs.COM_ParseFile( pfile, token )))
 	{
-		strncat(szCmd, token, sizeof(szCmd));
+		strcat(szCmd, token);
 		// append space after token
-		strncat(szCmd, " ", sizeof(szCmd));
+		strcat(szCmd, " ");
 	}
 	// replace last space with ", before terminator
 	lastCh = strlen(szCmd);
