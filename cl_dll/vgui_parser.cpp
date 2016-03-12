@@ -74,11 +74,15 @@ void Localize_Init( )
 	fseek( wf, 0L, SEEK_SET );
 
 	uchar16 *unicodeBuf = new uchar16[unicodeLength];
-	fread( unicodeBuf, 1, unicodeLength, wf );
+	int totalRead = fread( unicodeBuf, 1, unicodeLength, wf );
+
+	if( totalRead != unicodeLength )
+		gEngfuncs.Con_Printf( "Warning: total read of %s differs from size!", filename );
+
 	fclose( wf );
 	unicodeBuf++;
 
-	int ansiLength = unicodeLength / 2;
+	int ansiLength = totalRead / 2;
 
 	char *afile = new char[ansiLength]; // save original pointer, so we can free it later
 	char *token = new char[MAX_LOCALIZEDSTRING_SIZE];
