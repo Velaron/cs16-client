@@ -286,11 +286,11 @@ public:
 	void Scroll( float amount );
 	float scroll;
 	bool m_bShow;
+	cvar_t *cl_hide_motd;
 
 protected:
 	static int MOTD_DISPLAY_TIME;
 	char m_szMOTD[ MAX_MOTD_LENGTH ];
-	cvar_t *cl_hide_motd;
 	
 	int m_iLines;
 	int m_iMaxLength;
@@ -590,6 +590,7 @@ public:
 class CHudMessage: public CHudBase
 {
 public:
+	friend class CHudTextMessage;
 	int Init( void );
 	int VidInit( void );
 	int Draw(float flTime);

@@ -19,10 +19,12 @@
 #define DLLEXPORT __declspec( dllexport )
 #else
 #define DLLEXPORT
+#ifndef PORT_H
 typedef struct point_s{
 	int x;
 	int y;
 } POINT;
+#endif
 #define GetCursorPos(x)
 #define SetCursorPos(x,y)
 #endif

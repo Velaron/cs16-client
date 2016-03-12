@@ -10,7 +10,7 @@ cvar_t		*in_joystick;
 #define	YAW		1
 #define	ROLL	2 
 
-extern "C"  void DLLEXPORT IN_ClientMoveEvent( float forwardmove, float sidemove );
+extern "C" void DLLEXPORT IN_ClientMoveEvent( float forwardmove, float sidemove );
 extern "C" void DLLEXPORT IN_ClientLookEvent( float relyaw, float relpitch );
 
 extern kbutton_t	in_strafe;
@@ -43,6 +43,7 @@ float ac_sidemove;
 int ac_movecount;
 float rel_yaw;
 float rel_pitch;
+bool bMouseInUse = false;
 
 #define F 1<<0	// Forward
 #define B 1<<1	// Back
@@ -55,6 +56,7 @@ float rel_pitch;
 #define IMPULSE_DOWN	2
 #define IMPULSE_UP		4
 
+bool CL_IsDead();
 
 void IN_ToggleButtons( float forwardmove, float sidemove )
 {
@@ -152,10 +154,17 @@ void IN_ClientLookEvent( float relyaw, float relpitch )
 // Rotate camera and add move values to usercmd
 void IN_Move( float frametime, usercmd_t *cmd )
 {
+#ifdef __ANDROID__
+	if( bMouseInUse )
+		return;
+#endif
+
 	Vector viewangles;
 	gEngfuncs.GetViewAngles( viewangles );
+
 	bool fLadder = false;
-	if( cl_laddermode->value !=2 ) fLadder = gEngfuncs.GetLocalPlayer()->curstate.movetype == MOVETYPE_FLY;
+	if( cl_laddermode->value != 2 )
+		fLadder = gEngfuncs.GetLocalPlayer()->curstate.movetype == MOVETYPE_FLY;
 	//if(ac_forwardmove || ac_sidemove)
 	//gEngfuncs.Con_Printf("Move: %f %f %f %f\n", ac_forwardmove, ac_sidemove, rel_pitch, rel_yaw);
 #if 0
@@ -164,7 +173,7 @@ void IN_Move( float frametime, usercmd_t *cmd )
 		V_StopPitchDrift();
 	}
 #endif
-	if( gHUD.m_iIntermission )
+	if( gHUD.m_iIntermission || CL_IsDead() )
 		return;
 
 	if( gHUD.GetSensitivity() != 0 )
@@ -177,11 +186,11 @@ void IN_Move( float frametime, usercmd_t *cmd )
 		rel_yaw *= sensitivity->value;
 		rel_pitch *= sensitivity->value;
 	}
-	/*if(gHUD.m_MOTD.m_bShow)
+	if(gHUD.m_MOTD.cl_hide_motd->value == 0.0f && gHUD.m_MOTD.m_bShow)
 	{
 		gHUD.m_MOTD.scroll += rel_pitch;
 	}
-	else*/
+	else
 	{
 		viewangles[PITCH] += rel_pitch;
 		viewangles[YAW] += rel_yaw;
@@ -229,6 +238,7 @@ extern "C" void IN_MouseEvent( int mstate )
 	}	
 	
 	mouse_oldbuttonstate = mstate;
+	bMouseInUse = true;
 }
 
 // Stubs
@@ -267,5 +277,11 @@ void IN_Init( void )
 	sensitivity = gEngfuncs.pfnRegisterVariable ( "sensitivity", "3", FCVAR_ARCHIVE );
 	in_joystick = gEngfuncs.pfnRegisterVariable ( "joystick", "0", FCVAR_ARCHIVE );
 	cl_laddermode = gEngfuncs.pfnRegisterVariable ( "cl_laddermode", "2", FCVAR_ARCHIVE );
+
+#ifdef __ANDROID__
+	gEngfuncs.Cvar_SetValue("m_yaw", -1);
+	gEngfuncs.Cvar_SetValue("m_pitch", -1);
+#endif
+
 	ac_forwardmove = ac_sidemove = rel_yaw = rel_pitch = 0;
 }
