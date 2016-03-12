@@ -24,9 +24,8 @@ cmake_minimum_required(VERSION 2.6.0)
 project (CLDLL)
 
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -DLINUX -D_LINUX -DCLIENT_WEAPONS -DCLIENT_DLL -D_DEBUG -D_CS16CLIENT_ALLOW_SPECIAL_SCRIPTING")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings -Wl,--no-undefined -std=c++11")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ ")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--no-undefined -std=c++11")
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Os")
@@ -204,7 +203,10 @@ include_directories (
 	../game_shared/
 	../public/)
 add_library (${CLDLL_LIBRARY} SHARED ${CLDLL_SOURCES})
-add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT )
+add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT
+	-DLINUX -D_LINUX -DCLIENT_WEAPONS -DCLIENT_DLL
+	-D_DEBUG -D_CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
+	-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp)
 target_link_libraries( ${CLDLL_LIBRARY} ${CMAKE_DL_LIBS} -L/usr/lib/i386-linux-gnu -lSDL2 )
 
 

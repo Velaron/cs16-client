@@ -46,7 +46,7 @@ const char *Localize( const char *string )
 	std::string	key(string);
 	CDict::const_iterator got = gTitlesTXT.find(key);
 
-	// if iterator points to end, then it 'key' not found in dictionary
+	// if iterator points to end, then it 'key' not found in dictionary-
 	if( got != gTitlesTXT.end() || got->first != key )
 		return got->second;
 	else return string;

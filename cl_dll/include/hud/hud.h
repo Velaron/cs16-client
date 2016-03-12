@@ -65,7 +65,7 @@ extern cvar_t *cl_weather;
 extern cvar_t *cl_minmodels;
 extern cvar_t *cl_min_t;
 extern cvar_t *cl_min_ct;
-extern char *sPlayerModelFiles[];
+extern const char *sPlayerModelFiles[];
 
 class CClientSprite;
 
@@ -641,8 +641,8 @@ public:
 	
 	//had to make these public so CHud could access them (to enable concussion icon)
 	//could use a friend declaration instead...
-	void EnableIcon( char *pszIconName, unsigned char red, unsigned char green, unsigned char blue );
-	void DisableIcon( char *pszIconName );
+	void EnableIcon( const char *pszIconName, unsigned char red, unsigned char green, unsigned char blue );
+	void DisableIcon( const char *pszIconName );
 
 	friend class CHudScoreboard;
 

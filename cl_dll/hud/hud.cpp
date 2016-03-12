@@ -42,7 +42,7 @@ cvar_t *cl_min_ct;
 cvar_t *cl_minmodels;
 cvar_t *cl_lw = NULL;
 wrect_t nullrc = { 0, 0, 0, 0 };
-char *sPlayerModelFiles[12] =
+const char *sPlayerModelFiles[12] =
 {
 	"models/player.mdl",
 	"models/player/leet/leet.mdl", // t

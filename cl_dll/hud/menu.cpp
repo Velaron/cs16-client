@@ -273,7 +273,7 @@ void CHudMenu::UserCmd_OldStyleMenuClose()
 
 void CHudMenu::ShowVGUIMenu( int menuType )
 {
-	char *szCmd;
+	const char *szCmd;
 
 	switch(menuType)
 	{
