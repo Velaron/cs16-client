@@ -360,10 +360,12 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 	{
 		EV_HLDM_GunshotDecalTrace( pTrace, EV_HLDM_DamageDecal( pe ), cTextureType );
 
-		Vector dir = pTrace->plane.normal;
-		dir = dir * gEngfuncs.pfnRandomFloat(4.0f, 12.0f );
 		if( bCreateSparks )
 		{
+			Vector dir = pTrace->plane.normal;
+			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat(4.0f, 12.0f );
+			dir.y = dir.y * dir.y * gEngfuncs.pfnRandomFloat(4.0f, 12.0f );
+			dir.z = dir.z * dir.z * gEngfuncs.pfnRandomFloat(4.0f, 12.0f );
 			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, gEngfuncs.pfnRandomLong( 15, 30 ), dir.z, -75.0f, 75.0f );
 		}
 
@@ -378,8 +380,8 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 			te->entity.curstate.rendercolor.g = g;
 			te->entity.curstate.rendercolor.b = b;
 			te->entity.curstate.renderamt = 255;
-			te->entity.curstate.scale = 0.25;
-			te->entity.baseline.origin = 10 * pTrace->plane.normal;
+			te->entity.curstate.scale = 0.33;
+			te->entity.baseline.origin = 20 * pTrace->plane.normal;
 		}
 
 	}
