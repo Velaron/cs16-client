@@ -23,7 +23,6 @@ SRCS := \
 	./entity.cpp \
 	./in_camera.cpp \
 	./input.cpp \
-	./overview.cpp \
 	./parsemsg.cpp \
 	./rain.cpp \
 	./tri.cpp \
@@ -67,6 +66,7 @@ SRCS := \
 	./hud/flashlight.cpp \
 	./hud/death.cpp \
 	./hud/saytext.cpp \
+	./hud/spectator_gui.cpp \
 	./com_weapons.cpp \
 	./cs_wpn/cs_baseentity.cpp \
 	./cs_wpn/cs_objects.cpp \

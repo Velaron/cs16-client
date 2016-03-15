@@ -152,6 +152,7 @@ set (HUD_SRCS
 	./hud/flashlight.cpp
 	./hud/death.cpp
 	./hud/saytext.cpp
+	./hud/spectator_gui.cpp
 )
 
 set (STUDIORENDER_SRCS
@@ -177,8 +178,8 @@ set (CLDLL_SOURCES
     ./tri.cpp
 	./util.cpp
 	./view.cpp
-	./input_xash3d.cpp
-	#./input_sdl.cpp
+	#./input_xash3d.cpp
+	./input_sdl.cpp
     ./vgui_parser.cpp
     ./unicode_strtools.cpp
 	./draw_util.cpp
