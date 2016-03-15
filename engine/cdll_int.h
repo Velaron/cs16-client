@@ -171,7 +171,7 @@ typedef struct cl_enginefuncs_s
 	const char					*( *PhysInfo_ValueForKey )	( const char *key );
 	const char					*( *ServerInfo_ValueForKey )( const char *key );
 	float						( *GetClientMaxspeed )		( void );
-	int							( *CheckParm )				( char *parm, char **ppnext );
+	int							( *CheckParm )				( const char *parm, char **ppnext );
 	void						( *Key_Event )				( int key, int down );
 	void						( *GetMousePosition )		( int *mx, int *my );
 	int							( *IsNoClipping )			( void );

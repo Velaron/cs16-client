@@ -26,6 +26,8 @@
 *
 */
 
+#include "port.h"
+
 #include <string.h>
 #include "wrect.h" // need for cl_dll.h
 #include "cl_dll.h"
@@ -33,37 +35,40 @@
 #include "unicode_strtools.h"
 
 #include <unordered_map>
-#include <stdexcept> // std::out_of_range
+#include <string>
 
 // for localized titles.txt strings
-typedef std::unordered_map< std::string, const char * > CDict;
+using namespace std;
+typedef unordered_map< string, char* > CDict;
 
 CDict gTitlesTXT;
 
-const char *Localize( const char *string )
+const char *Localize( const char *szStr )
 {
-	StripEndNewlineFromString( (char *)string );
-	std::string	key(string);
-	CDict::const_iterator got = gTitlesTXT.find(key);
+	StripEndNewlineFromString( (char *)szStr );
+	auto got = gTitlesTXT.find( string(szStr) );
 
-	// if iterator points to end, then it 'key' not found in dictionary-
-	if( got != gTitlesTXT.end() || got->first != key )
-		return got->second;
-	else return string;
+	// if iterator points to end, then 'key' not found in dictionary
+	if( got == gTitlesTXT.end() )
+		return szStr;
+
+	return got->second;
 }
 
 void Localize_Init( )
 {
-	char filename[64];
 	const char *gamedir = gEngfuncs.pfnGetGameDirectory( );
+
+	char filename[64];
 	snprintf( filename, sizeof( filename ), "%s/resource/%s_english.txt", gamedir, gamedir );
+
 #ifndef OPENBINARY
 	FILE *wf = fopen( filename, "r" );
 #else
 	FILE *wf = fopen( filename, "rb" );
 #endif
 
-	if ( !wf )
+	if( !wf )
 	{
 		gEngfuncs.Con_Printf( "Couldn't open file %s. Strings will not be localized!.\n", filename );
 		return;
@@ -75,56 +80,51 @@ void Localize_Init( )
 
 	uchar16 *unicodeBuf = new uchar16[unicodeLength];
 	int totalRead = fread( unicodeBuf, 1, unicodeLength, wf );
-
-	if( totalRead != unicodeLength )
-		gEngfuncs.Con_Printf( "Warning: total read of %s differs from size!", filename );
-
-	fclose( wf );
-	unicodeBuf++;
-
-	int ansiLength = totalRead / 2;
-
-	char *afile = new char[ansiLength]; // save original pointer, so we can free it later
-	char *token = new char[MAX_LOCALIZEDSTRING_SIZE];
-	char *pfile = afile;
-	Q_UTF16ToUTF8( unicodeBuf, afile, ansiLength, STRINGCONVERT_ASSERT_REPLACE );
-
-	while ( true )
+	if( totalRead == unicodeLength ) // no problem, so read it.
 	{
-		pfile = gEngfuncs.COM_ParseFile( pfile, token );
-		if ( !pfile )
+		int ansiLength = totalRead / 2;
+		char *afile = new char[ansiLength]; // save original pointer, so we can free it later
+		char *pfile = afile;
+		char *token = new char[MAX_LOCALIZEDSTRING_SIZE];
+
+		Q_UTF16ToUTF8( unicodeBuf + 1, afile, ansiLength, STRINGCONVERT_ASSERT_REPLACE );
+
+		while( (pfile = gEngfuncs.COM_ParseFile( pfile, token )) && gTitlesTXT.size() < gTitlesTXT.max_size() )
 		{
-			break;
+			if( strlen( token ) > 5 )
+			{
+				char szLocString[MAX_LOCALIZEDSTRING_SIZE];
+				pfile = gEngfuncs.COM_ParseFile( pfile, szLocString );
+
+				if( pfile && gTitlesTXT.size() < gTitlesTXT.max_size() )
+				{
+					size_t iLen = strlen( szLocString );
+					char *szLocCopyString = new char[iLen];
+					strncpy(szLocCopyString, szLocString, iLen );
+					gTitlesTXT[ string(token) ] = szLocCopyString;
+				}
+			}
 		}
 
-		if ( strlen( token ) > 5 )
-		{
-			char *localizedString = new char[MAX_LOCALIZEDSTRING_SIZE];
-			pfile = gEngfuncs.COM_ParseFile( pfile, localizedString );
-
-			if( pfile && gTitlesTXT.size() < gTitlesTXT.max_size() )
-			{
-				gTitlesTXT[ std::string(token) ] = localizedString;
-			}
-			else
-			{
-				delete[] localizedString;
-				break;
-			}
-		}
+		delete[] token;
+		delete[] afile;
+	}
+	else
+	{
+		gEngfuncs.Con_Printf( "Warning: total read of %s differs from size! Error: %s\n", filename, strerror( errno ));
+		gEngfuncs.Con_Printf( "Couldn't open file %s. Strings will not be localized!.\n", filename );
 	}
 
-	delete[] token;
-	delete[] --unicodeBuf;
-	delete[] afile;
+	fclose( wf );
+	delete[] unicodeBuf;
 }
 
 void Localize_Free( )
 {
-	for (auto& x: gTitlesTXT)
+	for( auto it = gTitlesTXT.begin(); it != gTitlesTXT.end(); ++it )
 	{
-		gEngfuncs.Con_DPrintf("Destroying pair: %s %s\n", x.first, x.second);
-		delete []x.second;
+		delete[] it->second;
 	}
+	gTitlesTXT.clear();
 	return;
 }
