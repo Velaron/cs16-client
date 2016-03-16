@@ -196,6 +196,16 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 			ShowVGUIMenu(MENU_RADIOC);
 			return 1;
 		}
+		else
+		{
+			// we just show touch screen numbers
+			ShowVGUIMenu(MENU_NUMERICAL_MENU);
+		}
+	}
+	else
+	{
+		// we just show touch screen numbers
+		ShowVGUIMenu(MENU_NUMERICAL_MENU);
 	}
 
 	if ( !m_fWaitingForMore ) // this is the start of a new menu
@@ -310,12 +320,12 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 		else szCmd = "exec touch/buy_submachinegun_ct.cfg";
 		break;
 	case MENU_BUY_MACHINEGUN:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
 			szCmd = "exec touch/buy_machinegun_t.cfg";
 		else szCmd = "exec touch/buy_machinegun_ct.cfg";
 		break;
 	case MENU_BUY_ITEM:
-		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == 1 )
+		if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
 			szCmd = "exec touch/buy_item_t.cfg";
 		else szCmd = "exec touch/buy_item_ct.cfg";
 		break;
@@ -330,6 +340,9 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 		break;
 	case MENU_RADIOSELECTOR:
 		szCmd = "exec touch/radioselector.cfg";
+		break;
+	case MENU_NUMERICAL_MENU:
+		szCmd = "exec touch/numerical_menu.cfg";
 		break;
 	default:
 		szCmd = "touch_removebutton _menu_*"; // back to the default touch page
@@ -346,7 +359,11 @@ void CHudMenu::UserCmd_ShowVGUIMenu()
 	if( gEngfuncs.Cmd_Argc() != 1 )
 	{
 		ConsolePrint("usage: showvguimenu <menuType>\n");
+		return;
 	}
+
+	if( gEngfuncs.pfnGetCvarFloat("touch_enable") == 0.0f )
+		return;
 
 	if( gEngfuncs.pfnGetCvarFloat("_vgui_menus") == 0.0f )
 		return;
