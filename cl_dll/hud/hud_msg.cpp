@@ -152,8 +152,10 @@ int CHud::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 	g_PlayerExtraInfo[33].playerclass = Flag;
 
 	if( Flag ) // bomb planted
+	{
+		m_SpectatorGui.m_bBombPlanted = 0;
 		m_Timer.m_iFlags = 0;
-
+	}
 	return 1;
 }
 

@@ -95,7 +95,14 @@ int CHudDeathNotice :: Draw( float flTime )
 		//if ( !gHUD.m_iNoConsolePrint )
 		{
 			// Draw the death notice
-			y = YRES(DEATHNOTICE_TOP) + 2 + (20 * i);  //!!!
+			if( !g_iUser1 )
+			{
+				y = YRES(DEATHNOTICE_TOP) + 2 + (20 * i);  //!!!
+			}
+			else
+			{
+				y = ScreenHeight / 7 + 2 + (20 * i);
+			}
 
 			int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
 			x = ScreenWidth - DrawUtils::ConsoleStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);

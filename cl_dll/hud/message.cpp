@@ -198,7 +198,7 @@ void CHudMessage::MessageScanNextChar( void )
 
 	if ( m_parms.pMessage->effect == 1 && m_parms.charTime != 0 )
 	{
-		if ( m_parms.x >= 0 && m_parms.y >= 0 && (m_parms.x + gHUD.m_scrinfo.charWidths[ m_parms.text ]) <= ScreenWidth )
+		if ( m_parms.x >= 0 && m_parms.y >= 0 && (m_parms.x + gHUD.GetCharWidth( m_parms.text )) <= ScreenWidth )
 			DrawUtils::TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.pMessage->r2, m_parms.pMessage->g2, m_parms.pMessage->b2 );
 	}
 }
@@ -269,12 +269,12 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			width = 0;
 		}
 		else
-			width += gHUD.m_scrinfo.charWidths[(unsigned char)*pText];
+			width += gHUD.GetCharWidth((unsigned char)*pText);
 		pText++;
 		length++;
 	}
 	m_parms.length = length;
-	m_parms.totalHeight = (m_parms.lines * gHUD.m_scrinfo.iCharHeight);
+	m_parms.totalHeight = (m_parms.lines * gHUD.GetCharHeight());
 
 
 	m_parms.y = YPosition( pMessage->y, m_parms.totalHeight );
@@ -292,7 +292,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 		{
 			unsigned char c = *pText;
 			line[m_parms.lineLength] = c;
-			m_parms.width += gHUD.m_scrinfo.charWidths[c];
+			m_parms.width += gHUD.GetCharWidth(c);
 			m_parms.lineLength++;
 			pText++;
 		}
@@ -304,7 +304,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 		for ( j = 0; j < m_parms.lineLength; j++ )
 		{
 			m_parms.text = line[j];
-			int next = m_parms.x + gHUD.m_scrinfo.charWidths[ m_parms.text ];
+			int next = m_parms.x + gHUD.GetCharWidth( m_parms.text );
 			MessageScanNextChar();
 			
 			if ( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
@@ -312,7 +312,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			m_parms.x = next;
 		}
 
-		m_parms.y += gHUD.m_scrinfo.iCharHeight;
+		m_parms.y += gHUD.GetCharHeight();
 	}
 }
 

@@ -153,6 +153,7 @@ void CHud :: Init( void )
 	// fullscreen overlays
 	m_SniperScope.Init();
 	m_NVG.Init();
+	m_SpectatorGui.Init();
 
 	// Game HUD things
 	m_Ammo.Init();
@@ -360,6 +361,7 @@ void CHud :: VidInit( void )
 	m_ProgressBar.VidInit();
 	m_SniperScope.VidInit();
 	m_Radar.VidInit();
+	m_SpectatorGui.VidInit();
 }
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)

@@ -85,6 +85,9 @@ public:
 		g = (int)(g * x);
 		b = (int)(b * x);
 	}
+
+	static void Draw2DQuad( float x1, float y1, float x2, float y2 );
+
 private:
 	// console string color
 	static float color[3];

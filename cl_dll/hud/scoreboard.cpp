@@ -293,27 +293,22 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 
 		int r, g, b;
 		char teamName[64];
-		if( !stricmp(team_info->name, "TERRORIST"))
+
+		GetTeamColor( r, g, b, team_info->teamnumber );
+		switch( team_info->teamnumber )
 		{
-			GetTeamColor( r, g, b, TEAM_TERRORIST );
+		case TEAM_TERRORIST:
 			snprintf(teamName, sizeof(teamName), "Terrorists   -   %i players", team_info->players);
 			DrawUtils::DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
-		}
-		else if( !stricmp( team_info->name, "CT") )
-		{
-			GetTeamColor( r, g, b, TEAM_CT );
+			break;
+		case TEAM_CT:
 			snprintf(teamName, sizeof(teamName), "Counter-Terrorists   -   %i players", team_info->players);
 			DrawUtils::DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
-		}
-		else if( !stricmp( team_info->name, "SPECTATOR" ) )
-		{
-			GetTeamColor( r, g, b, TEAM_SPECTATOR );
+			break;
+		case TEAM_SPECTATOR:
+		case TEAM_UNASSIGNED:
 			strncpy( teamName, "Spectators", sizeof(teamName) );
-		}
-		else
-		{
-			GetTeamColor( r, g, b, TEAM_UNASSIGNED );
-			strncpy( teamName, team_info->name, sizeof(teamName) );
+			break;
 		}
 
 		DrawUtils::DrawHudString( NAME_POS_START(),		 ypos, NAME_POS_END(),   teamName,   r, g, b );
@@ -376,13 +371,11 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 		if ( ypos > yend )  // don't draw to close to the lower border
 			break;
 
-		int r, g, b;
-		r = g = b = 255;
+		int r = 255, g = 255, b = 255;
 		float *colors = GetClientColor( best_player );
 		r *= colors[0];
 		g *= colors[1];
 		b *= colors[2];
-
 
 		if(pl_info->thisplayer) // hey, it's me!
 		{
@@ -394,11 +387,11 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 
 		// draw bomb( if player have the bomb )
 		if( g_PlayerExtraInfo[best_player].dead )
-			DrawUtils::DrawHudString(	ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Dead", r, g, b );
+			DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Dead", r, g, b );
 		else if( g_PlayerExtraInfo[best_player].has_c4 )
-			DrawUtils::DrawHudString(	ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Bomb", r, g, b );
+			DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Bomb", r, g, b );
 		else if( g_PlayerExtraInfo[best_player].vip )
-			DrawUtils::DrawHudString(	ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "VIP", r, g, b );
+			DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "VIP",  r, g, b );
 
 		// draw kills (right to left)
 		DrawUtils::DrawHudNumberString( KILLS_POS_END(), ypos, KILLS_POS_START(), g_PlayerExtraInfo[best_player].frags, r, g, b );
@@ -464,16 +457,28 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 {
 	BEGIN_READ( pbuf, iSize );
 	short cl = READ_BYTE();
-	
+	int teamNumber = 0;
+
 	if ( cl > 0 && cl <= MAX_PLAYERS )
-	{  // set the players team
+	{
+		// set the players team
 		char teamName[MAX_TEAM_NAME];
 		strncpy( teamName, READ_STRING(), MAX_TEAM_NAME );
 
-		if( !strcmp(teamName, "UNASSIGNED") )
+		if( !stricmp( teamName, "TERRORIST") )
+			teamNumber = TEAM_TERRORIST;
+		else if( !stricmp( teamName, "CT") )
+			teamNumber = TEAM_CT;
+		else if( !stricmp( teamName, "SPECTATOR" ) || !stricmp( teamName, "UNASSIGNED" ) )
+		{
+			teamNumber = TEAM_SPECTATOR;
 			strncpy( teamName, "SPECTATOR", MAX_TEAM_NAME );
+		}
+		// just in case
+		else teamNumber = TEAM_UNASSIGNED;
 
 		strncpy( g_PlayerExtraInfo[cl].teamname, teamName, MAX_TEAM_NAME );
+		g_PlayerExtraInfo[cl].teamnumber = teamNumber;
 	}
 
 	// rebuild the list of teams
@@ -520,6 +525,7 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 			m_iNumTeams = max( j, m_iNumTeams );
 
 			strncpy( g_TeamInfo[j].name, g_PlayerExtraInfo[i].teamname, MAX_TEAM_NAME );
+			g_TeamInfo[j].teamnumber = g_PlayerExtraInfo[i].teamnumber;
 			g_TeamInfo[j].players = 0;
 		}
 

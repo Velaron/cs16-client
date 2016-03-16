@@ -1,27 +1,37 @@
 /*
 hud_overlays.cpp - HUD Overlays
-Copyright (C) 2015 a1batross
+Copyright (C) 2015-2016 a1batross
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+In addition, as a special exception, the author gives permission to
+link the code of this program with the Half-Life Game Engine ("HL
+Engine") and Modified Game Libraries ("MODs") developed by Valve,
+L.L.C ("Valve").  You must obey the GNU General Public License in all
+respects for all of the code used other than the HL Engine and MODs
+from Valve.  If you modify this file, you may extend this exception
+to your version of the file, but you are not obligated to do so.  If
+you do not wish to do so, delete this exception statement from your
+version.
+
 */
 
 #include "hud.h"
 #include "triangleapi.h"
 #include "r_efx.h"
 #include "cl_util.h"
-
-void Quad(float x1, float y1, float x2, float y2)
-{
-	gEngfuncs.pTriAPI->TexCoord2f(0,0);
-	gEngfuncs.pTriAPI->Vertex3f(x1, y1, 0);
-
-	gEngfuncs.pTriAPI->TexCoord2f(0,1);
-	gEngfuncs.pTriAPI->Vertex3f(x1, y2, 0);
-
-	gEngfuncs.pTriAPI->TexCoord2f(1,1);
-	gEngfuncs.pTriAPI->Vertex3f(x2, y2, 0);
-
-	gEngfuncs.pTriAPI->TexCoord2f(1,0);
-	gEngfuncs.pTriAPI->Vertex3f(x2, y1, 0);
-}
 
 
 int CHudSniperScope::Init()
@@ -43,7 +53,6 @@ int CHudSniperScope::VidInit()
 	m_iScopeArc[1] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_ne.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
 	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
 	m_iScopeArc[3] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_sw.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
-	blackTex = gRenderAPI.GL_FindTexture("*black");
 	left = (TrueWidth - TrueHeight)/2;
 	right = left + TrueHeight;
 	centerx = TrueWidth/2;
@@ -61,33 +70,19 @@ int CHudSniperScope::Draw(float flTime)
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
 	gRenderAPI.GL_Bind(0, m_iScopeArc[0]);
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(left, 0, centerx, centery);
-	gEngfuncs.pTriAPI->End();
+	DrawUtils::Draw2DQuad(left, 0, centerx, centery);
 
 	gRenderAPI.GL_Bind(0, m_iScopeArc[1]);
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(centerx, 0, right, centery);
-	gEngfuncs.pTriAPI->End();
+	DrawUtils::Draw2DQuad(centerx, 0, right, centery);
 
 	gRenderAPI.GL_Bind(0, m_iScopeArc[2]);
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(centerx, centery, right, TrueHeight);
-	gEngfuncs.pTriAPI->End();
+	DrawUtils::Draw2DQuad(centerx, centery, right, TrueHeight);
 
 	gRenderAPI.GL_Bind(0, m_iScopeArc[3]);
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(left, centery, centerx, TrueHeight);
-	gEngfuncs.pTriAPI->End();
+	DrawUtils::Draw2DQuad(left, centery, centerx, TrueHeight);
 
-	gRenderAPI.GL_Bind(0, blackTex);
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(0, 0, left + 1.0f / TrueWidth, TrueHeight);
-	gEngfuncs.pTriAPI->End();
-
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	Quad(right - 1.0f / TrueWidth, 0, TrueWidth, TrueHeight);
-	gEngfuncs.pTriAPI->End();
+	FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
+	FillRGBABlend( (ScreenWidth - ScreenHeight) / 2 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
 
 	FillRGBABlend(0,                  ScreenHeight/2, ScreenWidth/2 - 20, 1,  0, 0, 0, 255);
 	FillRGBABlend(ScreenWidth/2 + 20, ScreenHeight/2, ScreenWidth       , 1,  0, 0, 0, 255);

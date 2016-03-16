@@ -299,6 +299,7 @@ protected:
 
 class CHudScoreboard: public CHudBase
 {
+	friend class CHudSpectatorGui;
 public:
 	int Init( void );
 	void InitHUDData( void );
@@ -401,7 +402,7 @@ struct team_info_t
 	int already_drawn;
 	int scores_overriden;
 	int sumping;
-	//int teamnumber; not used
+	int teamnumber;
 };
 
 struct hostage_info_t
@@ -713,6 +714,7 @@ private:
 //
 class CHudTimer: public CHudBase
 {
+	friend class CHudSpectatorGui;
 public:
 	int Init( void );
 	int VidInit( void );
@@ -771,9 +773,11 @@ public:
 private:
 	float left, right, centerx, centery;
 	int m_iScopeArc[4];
-	int blackTex;
-
 };
+
+//
+//-----------------------------------------------------
+//
 
 class CHudNVG: public CHudBase
 {
@@ -789,6 +793,40 @@ public:
 private:
 	int m_iAlpha;
 
+};
+
+//
+//-----------------------------------------------------
+//
+
+class CHudSpectatorGui: public CHudBase
+{
+public:
+	int Init();
+	int VidInit();
+	int Draw( float flTime );
+	void InitHUDData();
+	void Think();
+	void Reset();
+	CHudMsgFunc( SpecHealth );
+	CHudMsgFunc( SpecHealth2 );
+
+	void CalcAllNeededData( );
+
+	bool m_bBombPlanted;
+	int m_iPlayerLastPointedAt;
+
+private:
+	// szMapName is 64 bytes only. Removing "maps/" and ".bsp" gived me this result
+	class Labels
+	{
+	public:
+		short m_iTerrorists;
+		short m_iCounterTerrorists;
+		char m_szTimer[64];
+		char m_szMap[64];
+	} label;
+	int m_hTimerTexture;
 };
 
 //
@@ -814,6 +852,15 @@ public:
 	HSPRITE GetSprite( int index );
 	wrect_t& GetSpriteRect( int index );
 	int GetSpriteIndex( const char *SpriteName );	// gets a sprite index, for use in the m_rghSprites[] array
+
+	inline short GetCharWidth ( unsigned char ch )
+	{
+		return m_scrinfo.charWidths[ ch ];
+	}
+	inline int GetCharHeight( )
+	{
+		return m_scrinfo.iCharHeight;
+	}
 
 
 	HSPRITE						m_hsprCursor;
@@ -858,6 +905,7 @@ public:
 	CHudSniperScope m_SniperScope;
 	CHudNVG			m_NVG;
 	CHudRadar	m_Radar;
+	CHudSpectatorGui m_SpectatorGui;
 
 
 
