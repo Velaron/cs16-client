@@ -508,7 +508,7 @@ void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal )
 
 Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, entvars_t *pevAttacker, bool bPistol, int shared_rand )
 {
-	float x, y, z;
+	float x, y;
 
 	if ( pevAttacker )
 	{
@@ -517,6 +517,7 @@ Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float f
 	}
 	else
 	{
+		float z;
 		do
 		{
 			x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
@@ -840,7 +841,6 @@ char UTIL_TextureHit(TraceResult *ptr, Vector vecSrc, Vector vecEnd)
 	char chTextureType;
 	float rgfl1[3], rgfl2[3];
 	const char *pTextureName;
-	char szbuffer[64];
 	CBaseEntity *pEntity;
 
 	if( ptr->pHit == NULL )
@@ -861,6 +861,8 @@ char UTIL_TextureHit(TraceResult *ptr, Vector vecSrc, Vector vecEnd)
 
 	if (pTextureName)
 	{
+		char szbuffer[64];
+
 		if (*pTextureName == '-' || *pTextureName == '+')
 			pTextureName += 2;
 
@@ -943,7 +945,6 @@ void HUD_InitClientWeapons( void )
 	// Fake functions
 	g_engfuncs.pfnPrecacheModel		= stub_PrecacheModel;
 	g_engfuncs.pfnPrecacheSound		= stub_PrecacheSound;
-	g_engfuncs.pfnPrecacheEvent		= stub_PrecacheEvent;
 	g_engfuncs.pfnNameForFunction	= stub_NameForFunction;
 	g_engfuncs.pfnSetModel			= stub_SetModel;
 	g_engfuncs.pfnSetClientMaxspeed = HUD_SetMaxSpeed;
@@ -1080,11 +1081,9 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	int buttonsChanged;
 	CBasePlayerWeapon *pWeapon = NULL;
 	CBasePlayerWeapon *pCurrent;
-	weapon_data_t nulldata, *pfrom, *pto;
+	weapon_data_t *pfrom, *pto;
 	static int lasthealth;
 	int flags;
-
-	memset( &nulldata, 0, sizeof( nulldata ) );
 
 	HUD_InitClientWeapons();
 
@@ -1330,7 +1329,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	}
 
 	flags = from->client.iuser3;
-	g_bHoldingKnife		= pWeapon->m_iId == WEAPON_KNIFE;
+	g_bHoldingKnife		= pWeapon && pWeapon->m_iId == WEAPON_KNIFE;
 	player.m_bCanShoot	= (flags & PLAYER_CAN_SHOOT) != 0;
 	g_iFreezeTimeOver	= !(flags & PLAYER_FREEZE_TIME_OVER);
 	g_bInBombZone		= (flags & PLAYER_IN_BOMB_ZONE) != 0;
