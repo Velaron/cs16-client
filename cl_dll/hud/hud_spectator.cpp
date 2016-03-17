@@ -85,22 +85,15 @@ void SpectatorSpray(void)
 }
 void SpectatorHelp(void)
 {
-	/*if ( gViewPort )
-	{
-		gViewPort->ShowVGUIMenu( MENU_SPECHELP );
-	}
-	else*/
-	{
-		char *text = CHudTextMessage::BufferedLocaliseTextString( "#Spec_Help_Text" );
+	char *text = CHudTextMessage::BufferedLocaliseTextString( "#Spec_Help_Text" );
 
-		if ( text )
+	if ( text )
+	{
+		while ( *text )
 		{
-			while ( *text )
-			{
-				if ( *text != 13 )
-					gEngfuncs.Con_Printf( "%c", *text );
-				text++;
-			}
+			if ( *text != 13 )
+				gEngfuncs.Con_Printf( "%c", *text );
+			text++;
 		}
 	}
 }
@@ -112,8 +105,6 @@ void SpectatorMenu( void )
 		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
 		return;
 	}
-	
-	//gViewPort->m_pSpectatorPanel->ShowMenu( atoi( gEngfuncs.Cmd_Argv(1))!=0  );
 }
 
 void ToggleScores( void )
@@ -129,6 +120,51 @@ void ToggleScores( void )
 			gViewPort->ShowScoreBoard();
 		}
 	}*/
+}
+
+void SpecDrawNames( void )
+{
+	if ( gEngfuncs.Cmd_Argc() <= 1 )
+	{
+		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
+		return;
+	}
+}
+
+void SpecDrawCone( void )
+{
+	if ( gEngfuncs.Cmd_Argc() <= 1 )
+	{
+		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
+		return;
+	}
+}
+
+void SpecDrawStatus( void )
+{
+	if ( gEngfuncs.Cmd_Argc() <= 1 )
+	{
+		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
+		return;
+	}
+}
+
+void SpecAutoDirector( void )
+{
+	if ( gEngfuncs.Cmd_Argc() <= 1 )
+	{
+		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
+		return;
+	}
+}
+
+void SpecPip( void )
+{
+	if ( gEngfuncs.Cmd_Argc() <= 1 )
+	{
+		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
+		return;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -154,13 +190,18 @@ int CHudSpectator::Init()
 	gEngfuncs.pfnAddCommand ("spec_help", SpectatorHelp );
 	gEngfuncs.pfnAddCommand ("spec_menu", SpectatorMenu );
 	gEngfuncs.pfnAddCommand ("togglescores", ToggleScores );
+	gEngfuncs.pfnAddCommand ("spec_drawnames", SpecDrawNames );
+	gEngfuncs.pfnAddCommand ("spec_drawcone", SpecDrawCone );
+	gEngfuncs.pfnAddCommand ("spec_drawstatus", SpecDrawStatus );
+	gEngfuncs.pfnAddCommand ("spec_autodirector", SpecAutoDirector );
+	gEngfuncs.pfnAddCommand ("spec_pip", SpecPip );
 
 	m_drawnames		= gEngfuncs.pfnRegisterVariable("spec_drawnames_internal","1",0);
 	m_specmode      = gEngfuncs.pfnRegisterVariable("spec_mode_internal","1",0);
 	m_drawcone		= gEngfuncs.pfnRegisterVariable("spec_drawcone_internal","1",0);
 	m_drawstatus	= gEngfuncs.pfnRegisterVariable("spec_drawstatus_internal","1",0);
 	m_autoDirector	= gEngfuncs.pfnRegisterVariable("spec_autodirector_internal","1",0);
-	m_pip			= gEngfuncs.pfnRegisterVariable("spec_pip","1",0);
+	m_pip			= gEngfuncs.pfnRegisterVariable("spec_pip_internal","1",0);
 	m_lastAutoDirector = 0.0f;
 	
 	if ( !m_drawnames || !m_drawcone || !m_drawstatus || !m_autoDirector || !m_pip)
@@ -720,7 +761,6 @@ void CHudSpectator::HandleButtonsDown( int ButtonPressed )
 
 	// gEngfuncs.Con_Printf(" HandleButtons:%i\n", ButtonPressed );
 	//	if ( !gViewPort )
-	return;
 
 	//Not in intermission.
 	if ( gHUD.m_iIntermission )
@@ -737,8 +777,10 @@ void CHudSpectator::HandleButtonsDown( int ButtonPressed )
 		return;
 
 	// enable spectator screen
-	//if ( ButtonPressed & IN_DUCK )
-	//	gViewPort->m_pSpectatorPanel->ShowMenu(!gViewPort->m_pSpectatorPanel->m_menuVisible);
+	if ( ButtonPressed & IN_DUCK )
+	{
+		gHUD.m_SpectatorGui.UserCmd_ToggleSpectatorMenu();
+	}
 
 	//  'Use' changes inset window mode
 	if ( ButtonPressed & IN_USE )
@@ -1690,5 +1732,11 @@ void CHudSpectator::InitHUDData()
 
 int CHudSpectator::MsgFunc_Spectator(const char *pszName, int iSize, void *buf)
 {
+	return 1;
+}
+
+int CHudSpectator::MsgFunc_ADStop(const char *pszName, int iSize, void *buf)
+{
+	m_autoDirector->value = 0;
 	return 1;
 }

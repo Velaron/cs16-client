@@ -78,6 +78,7 @@ public:
 	void DirectorMessage( int iSize, void *pbuf );
 	void SetSpectatorStartPosition();
 	CHudMsgFunc(Spectator);
+	CHudMsgFunc(ADStop);
 	int Init();
 	int VidInit();
 

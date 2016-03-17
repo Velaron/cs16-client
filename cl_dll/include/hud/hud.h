@@ -811,6 +811,11 @@ public:
 	CHudMsgFunc( SpecHealth );
 	CHudMsgFunc( SpecHealth2 );
 
+	CHudUserCmd( ToggleSpectatorMenu );
+	CHudUserCmd( ToggleSpectatorMenuOptions );
+	CHudUserCmd( ToggleSpectatorMenuOptionsSettings );
+	CHudUserCmd( ToggleSpectatorMenuSpectateOptions );
+
 	void CalcAllNeededData( );
 
 	bool m_bBombPlanted;
@@ -827,6 +832,9 @@ private:
 		char m_szMap[64];
 	} label;
 	int m_hTimerTexture;
+
+	bool m_bIsMenuShown;
+	byte m_pucColor[4];
 };
 
 //

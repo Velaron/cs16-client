@@ -262,10 +262,16 @@ void CHud :: VidInit( void )
 	m_hsprLogo = 0;
 	m_hsprCursor = 0;
 
-	if (ScreenWidth < 640)
-		m_iRes = 320;
-	else
-		m_iRes = 640;
+	if( ScreenWidth < 640 && CVAR_GET_FLOAT("hud_scale") <= 1.0f )
+	{
+		gEngfuncs.Cvar_SetValue("hud_scale", ScreenWidth / 640.0f );
+	}
+	else if( CVAR_GET_FLOAT("hud_scale") < 1.0f )
+	{
+		gEngfuncs.Cvar_SetValue("hud_scale", 1.0f );
+	}
+	GetScreenInfo(&m_scrinfo);
+	m_iRes = 640;
 
 	// Only load this once
 	if ( !m_pSpriteList )
