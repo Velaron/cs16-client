@@ -27,6 +27,8 @@
 
 DECLARE_MESSAGE( m_Message, HudText )
 DECLARE_MESSAGE( m_Message, GameTitle )
+DECLARE_MESSAGE( m_Message, HudTextPro )
+//DECLARE_MESSAGE( m_Message, HudTextArgs )
 
 // 1 Global client_textmessage_t for custom messages that aren't in the titles.txt
 client_textmessage_t	g_pCustomMessage;
@@ -37,6 +39,8 @@ int CHudMessage::Init(void)
 {
 	HOOK_MESSAGE( HudText );
 	HOOK_MESSAGE( GameTitle );
+	HOOK_MESSAGE( HudTextPro );
+	//HOOK_MESSAGE( HudTextArgs );
 
 	gHUD.AddHudElem(this);
 	Reset();
@@ -545,4 +549,24 @@ void CHudMessage::MessageAdd(client_textmessage_t * newMessage )
 		}
 	}
 
+}
+
+
+int CHudMessage::MsgFunc_HudTextPro( const char *pszName, int iSize, void *pbuf )
+{
+	const char *sz;
+	int hint;
+	BEGIN_READ(pbuf, iSize);
+	sz = READ_STRING();
+	hint = READ_BYTE();
+
+	MessageAdd(sz, gHUD.m_flTime/*, hint, Newfont*/); // TODO
+
+	// Remember the time -- to fix up level transitions
+	m_parms.time = gHUD.m_flTime;
+
+	// Turn on drawing
+	if ( !(m_iFlags & HUD_ACTIVE) )
+		m_iFlags |= HUD_ACTIVE;
+	return 1;
 }

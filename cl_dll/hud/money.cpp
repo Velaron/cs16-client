@@ -119,8 +119,8 @@ int CHudMoney::Draw(float flTime)
 				g = ((RGB_REDISH & 0xFF00) >> 8) + interpolate * (((RGB_YELLOWISH & 0xFF00) >> 8) - ((RGB_REDISH & 0xFF00) >> 8));
 				b = (RGB_REDISH & 0xFF) - interpolate * (RGB_REDISH & 0xFF);
 
-				SPR_Set(m_hPlus.spr, iDeltaR, iDeltaG, iDeltaB );
-				SPR_DrawAdditive(0, x, y - iDollarHeight * 1.5, &m_hPlus.rect );
+				SPR_Set(m_hMinus.spr, iDeltaR, iDeltaG, iDeltaB );
+				SPR_DrawAdditive(0, x, y - iDollarHeight * 1.5, &m_hMinus.rect );
 			}
 
 			DrawUtils::DrawHudNumber2( x + iDollarWidth, y - iDollarHeight * 1.5 , false, 5,

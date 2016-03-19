@@ -150,6 +150,9 @@ void CHud :: Init( void )
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;
 	m_iNoConsolePrint = 0;
+
+	Localize_Init();
+
 	// fullscreen overlays
 	m_SniperScope.Init();
 	m_NVG.Init();
@@ -183,7 +186,6 @@ void CHud :: Init( void )
 	m_Menu.Init();
 	m_Scoreboard.Init();
 
-	Localize_Init();
 	InitRain();
 
 	//ServersInit();
