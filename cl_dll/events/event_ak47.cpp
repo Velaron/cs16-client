@@ -52,26 +52,29 @@ void EV_FireAK47( event_args_t *args )
 	angles.y = (long double)args->iparam2 / 100 + args->angles[1];
 	angles.z = args->angles[2];
 	VectorCopy( args->velocity, velocity );
+	AngleVectors( angles, forward, right, up );
 
 	if ( EV_IsLocal( args->entindex ) )
 	{
 		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(AK47_SHOOT1, AK47_SHOOT3), 2);
 		EV_MuzzleFlash();
+		if( cl_righthand->value == 0.0f )
+		{
+			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0, 0);
+		}
+		else
+		{
+			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, 10.0, 0);
+		}
 	}
-#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
 	else
 	{
-		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
-		origin = ent->origin;
-		angles = ent->angles;
+		EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0, 0);
 	}
-#endif
 
-	AngleVectors( angles, forward, right, up );
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
-	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,

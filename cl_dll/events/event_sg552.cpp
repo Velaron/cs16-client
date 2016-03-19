@@ -65,17 +65,21 @@ void EV_FireSG552( event_args_t *args )
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(SG552_SHOOT1, SG552_SHOOT3), 2);
+		if( cl_righthand->value == 0.0f )
+		{
+			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0, 0);
+		}
+		else
+		{
+			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, 10.0, 0);
+		}
 	}
-#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
 	else
 	{
-		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
-		origin = ent->origin;
+		EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0, 0);
 	}
-#endif
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
-	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
 		gEngfuncs.pfnRandomLong( 0, 1 ) ? "weapons/sg552-1.wav" : "weapons/sg552-2.wav",

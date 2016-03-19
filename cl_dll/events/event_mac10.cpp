@@ -61,14 +61,19 @@ void EV_FireMAC10(event_args_s *args)
 		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(MAC10_SHOOT1, MAC10_SHOOT3), 2);
 		EV_MuzzleFlash();
+		if( cl_righthand->value == 0.0f )
+		{
+			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -9.0, -11.0, 0);
+		}
+		else
+		{
+			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -9.0, 11.0, 0);
+		}
 	}
-#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
 	else
 	{
-		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
-		origin = ent->origin;
+		EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0, 0);
 	}
-#endif
 
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");

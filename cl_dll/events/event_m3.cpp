@@ -61,13 +61,6 @@ void EV_FireM3( event_args_t *args )
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(M3_SHOOT1, M3_SHOOT2), 2);
 	}
-#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
-	else
-	{
-		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
-		origin = ent->origin;
-	}
-#endif
 
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
 									   "weapons/m3-1.wav",

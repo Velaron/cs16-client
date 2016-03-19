@@ -148,19 +148,11 @@ EV_GetDefaultShellInfo
 Determine where to eject shells from
 =================
 */
-void EV_GetDefaultShellInfo( event_args_t *args, float *origin, float *velocity, float *ShellVelocity, float *ShellOrigin, float *forward, float *right, float *up, float forwardScale, float upScale, float rightScale )
+void EV_GetDefaultShellInfo( event_args_t *args, float *origin, float *velocity, float *ShellVelocity, float *ShellOrigin, float *forward, float *right, float *up, float forwardScale, float upScale, float rightScale, bool bReverseDirection )
 {
-	int i;
-	vec3_t view_ofs;
-	float fR, fU;
+	int idx = args->entindex;
 
-	int idx;
-
-	idx = args->entindex;
-
-	VectorClear( view_ofs );
-	view_ofs[2] = DEFAULT_VIEWHEIGHT;
-
+	vec3_t view_ofs = { 0, 0, DEFAULT_VIEWHEIGHT };
 	if ( EV_IsPlayer( idx ) )
 	{
 		if ( EV_IsLocal( idx ) )
@@ -173,13 +165,23 @@ void EV_GetDefaultShellInfo( event_args_t *args, float *origin, float *velocity,
 		}
 	}
 
-	fR = gEngfuncs.pfnRandomFloat( 50, 70 );
-	fU = gEngfuncs.pfnRandomFloat( 100, 150 );
+	float fR = gEngfuncs.pfnRandomFloat( 50, 70 );
+	float fU = gEngfuncs.pfnRandomFloat( 75, 175 );
+	float fF = gEngfuncs.pfnRandomFloat( 25, 250 );
+	float fDirection = rightScale > 0.0f ? -1.0f : 1.0f;
 
-	for ( i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; i++ )
 	{
-		ShellVelocity[i] = velocity[i] + right[i] * fR + up[i] * fU + forward[i] * 25;
-		ShellOrigin[i]   = origin[i] + view_ofs[i] + up[i] * upScale + forward[i] * forwardScale + right[i] * rightScale;
+		if( bReverseDirection )
+		{
+			ShellVelocity[i] = velocity[i] * 0.5f - right[i] * fR * fDirection + up[i] * fU + forward[i] * fF;
+		}
+		else
+		{
+			ShellVelocity[i] = velocity[i] * 0.5f + right[i] * fR * fDirection + up[i] * fU + forward[i] * fF;
+		}
+		ShellOrigin[i]   = velocity[i] * 0.1f + origin[i] + view_ofs[i] +
+				upScale * up[i] + forwardScale * forward[i] + rightScale * right[i];
 	}
 }
 

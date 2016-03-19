@@ -60,14 +60,19 @@ vec3_t origin, angles, velocity;
 		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(P90_SHOOT1, P90_SHOOT3), 2);
 		EV_MuzzleFlash();
+		if( cl_righthand->value == 0.0f )
+		{
+			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -16.0, -22.0, 0);
+		}
+		else
+		{
+			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -16.0, 22.0, 0);
+		}
 	}
-#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
 	else
 	{
-		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
-		origin = ent->origin;
+		EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0, 0);
 	}
-#endif
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
