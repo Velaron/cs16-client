@@ -42,7 +42,8 @@ cl_enginefunc_t gEngfuncs;
 render_api_t gRenderAPI;
 mobile_engfuncs_t gMobileAPI;
 CHud gHUD;
-int g_iXash; // indicates a buildnum
+int g_iXash = 0; // indicates a buildnum
+int g_iMobileAPIVersion = 0;
 
 void InitInput (void);
 void EV_HookEvents( void );
@@ -350,6 +351,7 @@ int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 		return 1;
 	}
 
+	g_iMobileAPIVersion = MOBILITY_API_VERSION;
 	gMobileAPI = *mobileapi;
 
 	return 0;
