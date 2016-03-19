@@ -597,6 +597,8 @@ public:
 	int Draw(float flTime);
 	CHudMsgFunc(HudText);
 	CHudMsgFunc(GameTitle);
+	CHudMsgFunc(HudTextArgs);
+	CHudMsgFunc(HudTextPro);
 
 	float FadeBlend( float fadein, float fadeout, float hold, float localTime );
 	int	XPosition( float x, int width, int lineWidth );
@@ -806,7 +808,6 @@ public:
 	int VidInit();
 	int Draw( float flTime );
 	void InitHUDData();
-	void Think();
 	void Reset();
 	CHudMsgFunc( SpecHealth );
 	CHudMsgFunc( SpecHealth2 );
@@ -821,7 +822,7 @@ public:
 	bool m_bBombPlanted;
 	int m_iPlayerLastPointedAt;
 
-private:
+private:	
 	// szMapName is 64 bytes only. Removing "maps/" and ".bsp" gived me this result
 	class Labels
 	{
@@ -830,11 +831,17 @@ private:
 		short m_iCounterTerrorists;
 		char m_szTimer[64];
 		char m_szMap[64];
+		char m_szNameAndHealth[80];
 	} label;
 	int m_hTimerTexture;
 
-	bool m_bIsMenuShown;
-	byte m_pucColor[4];
+	enum {
+		ROOT_MENU = (1<<0),
+		MENU_OPTIONS = (1<<1),
+		MENU_OPTIONS_SETTINGS = (1<<2),
+		MENU_SPEC_OPTIONS = (1<<3)
+	};
+	byte m_menuFlags;
 };
 
 //

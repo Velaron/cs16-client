@@ -33,43 +33,16 @@ version.
 #include "cl_util.h"
 #include "parsemsg.h"
 
+#include "vgui_parser.h"
 /*
  * We will draw all elements inside a box. It's size 16x9.
  */
 
 #define XPOS( x ) ( (x) / 16.0f )
-#define YPOS( x ) ( (x) / 9.0f  )
+#define YPOS( y ) ( (y) / 9.0f  )
 
-/*
- * Black bar:
- * Height = 2/9 of ScreenHeight.
- * Width = ScreenWidth.
- */
-#define BAR_HEIGHT ( ( 2.0f / 9.0f ) * ScreenHeight )
-#define BAR_WIDTH  ( ScreenWidth )
-
-
-/*
- * Button:
- * Height = bar's height * 0.5
- * Width = ScreenWidth * 0.25
- */
-#define BUTTON_HEIGHT ( BAR_HEIGHT * 0.5 )
-#define BUTTON_WIDTH  ( ScreenWidth * 0.25 )
-
-/*
- * Little button:
- * Height = button's height
- * Width = button's height
- */
-#define LITTLE_BUTTON_HEIGHT BUTTON_HEIGHT
-#define LITTLE_BUTTON_WIDTH  BUTTON_HEIGHT
-
-/*
- * DIVIDER POSITION AND HEIGHT
- */
-#define DIVIDER_XPOS (ScreenWidth * 0.85f)
-#define DIVIDER_GAP (20)
+#define INT_XPOS(x) int(XPOS(x) * ScreenWidth)
+#define INT_YPOS(y) int(YPOS(y) * ScreenHeight)
 
 DECLARE_MESSAGE( m_SpectatorGui, SpecHealth );
 DECLARE_MESSAGE( m_SpectatorGui, SpecHealth2 );
@@ -123,111 +96,149 @@ int CHudSpectatorGui::Init()
 
 	gHUD.AddHudElem(this);
 	m_iFlags = HUD_ACTIVE;
-	m_bIsMenuShown = false;
+	m_menuFlags = 0;
 
 	return 1;
 }
 
 int CHudSpectatorGui::VidInit()
 {
-	if( g_iXash )
+	if( !g_iXash )
 	{
-		m_hTimerTexture = gRenderAPI.GL_LoadTexture("gfx/vgui/timer.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP );
-	}
-	else
-	{
-		m_hTimerTexture = 0;
+		ConsolePrint("Warning: CHudSpectatorGui is disabled! Dude, you are running me on old GoldSrc?\n");
+		m_iFlags = HUD_ACTIVE;
+		return 0;
 	}
 
+	m_hTimerTexture = gRenderAPI.GL_LoadTexture("gfx/vgui/timer.tga", NULL, 0, TF_NEAREST | TF_NOPICMIP| TF_NOMIPMAP| TF_CLAMP );
 	return 1;
+}
+
+inline void DrawButtonWithText( int x1, int y1, int wide, int tall, int halfCharHeight, const char *sz, int r, int g, int b )
+{
+	DrawUtils::DrawRectangle(x1, y1, wide, tall);
+	DrawUtils::DrawHudString(x1 + INT_XPOS(0.5), y1 + tall*0.5 - halfCharHeight, x1 + wide, sz, r, g, b );
 }
 
 int CHudSpectatorGui::Draw( float flTime )
 {
 	if( !g_iUser1 )
+	{
+		if( m_menuFlags & ROOT_MENU )
+		{
+			UserCmd_ToggleSpectatorMenu(); // this will remove any submenus;
+			m_menuFlags = 0;
+		}
 		return 1;
+	}
 
 	// check for scoreboard. We will don't draw it, because screen space econodmy
 	/*if( gHUD.m_Scoreboard.m_bForceDraw || !(!gHUD.m_Scoreboard.m_bShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission ))
 		return 1;*/
 
-	int r, g, b;
-	r = 255; g = 140; b = 0;
-
-	// at first, draw these silly black bars
-	if( gHUD.m_Spectator.m_pip->value == INSET_OFF )
-	{
-		DrawUtils::DrawRectangle(0, 0, BAR_WIDTH, BAR_HEIGHT, 0, 0, 0, 153, false);
-	}
-	else
-	{
-		int startpos;
-
-		startpos = XRES(gHUD.m_Spectator.m_OverviewData.insetWindowWidth) + XRES(gHUD.m_Spectator.m_OverviewData.insetWindowX);
-
-		startpos *= ScreenWidth / TrueWidth; // hud_scale adjust
-
-		DrawUtils::DrawRectangle(startpos, 0, BAR_WIDTH - startpos, BAR_HEIGHT, 0, 0, 0, 153, false);
-	}
-
-	DrawUtils::DrawRectangle(0, ScreenHeight - BAR_HEIGHT, ScreenWidth, BAR_HEIGHT, 0, 0, 0, 153, false);
-
-	// divider
-	FillRGBABlend( DIVIDER_XPOS, BAR_HEIGHT * 0.25, 1, BAR_HEIGHT * 0.5, r, g, b, 255 );
-
 	// function name says it
 	CalcAllNeededData( );
 
+	int r = 255, g = 140, b = 0;
 
-	// draw counter-terrorist and terrorist remaining and time3
-	DrawUtils::DrawHudString( DIVIDER_XPOS + DIVIDER_GAP, BAR_HEIGHT * 0.25, ScreenWidth, label.m_szMap, r, g, b );
-
-	if( m_hTimerTexture )
+	// at first, draw these silly black bars
+	int startpos = 0;
+	if( gHUD.m_Spectator.m_pip->value != INSET_OFF ) // pip adjust
 	{
-		gRenderAPI.GL_Bind( 0, m_hTimerTexture );
-		DrawUtils::Draw2DQuad( TrueWidth * 0.85 + DIVIDER_GAP, TrueHeight / 14,
-							   TrueWidth * 0.85 + DIVIDER_GAP + gHUD.GetCharHeight(), TrueHeight / 14 + gHUD.GetCharHeight() );
+		startpos = XRES(gHUD.m_Spectator.m_OverviewData.insetWindowWidth) + XRES(gHUD.m_Spectator.m_OverviewData.insetWindowX);
+		startpos *= ScreenWidth / TrueWidth; // hud_scale adjust
+	}
+	FillRGBABlend(startpos, 0, ScreenWidth - startpos, INT_YPOS(2), 0, 0, 0, 153);
+	FillRGBABlend(0, ScreenHeight - INT_YPOS(2), ScreenWidth, INT_YPOS(2), 0, 0, 0, 153);
+
+	// divider
+	FillRGBABlend( INT_XPOS(13), INT_YPOS(2) * 0.25, 1, INT_YPOS(9) * 0.5, r, g, b, 255 );
+
+	{ // mapname. extradata
+		DrawUtils::DrawHudString( INT_XPOS(13) + 20, INT_YPOS(2) * 0.25, ScreenWidth, label.m_szMap, r, g, b );
 	}
 
-	DrawUtils::DrawHudString( DIVIDER_XPOS + DIVIDER_GAP * 2 + gHUD.GetCharWidth('M'), BAR_HEIGHT * 0.5, ScreenWidth, label.m_szTimer, r, g, b);
-
-	// CTs, Ts labels
-	DrawUtils::DrawHudString( ScreenWidth * 0.7, BAR_HEIGHT * 0.25, ScreenWidth * 0.8, "Counter-Terrorists:", r, g, b );
-	DrawUtils::DrawHudString( ScreenWidth * 0.7, BAR_HEIGHT * 0.5, ScreenWidth * 0.8, "Terrorists:", r, g, b );
-
-	// CTs, Ts count
-	DrawUtils::DrawHudNumberString( DIVIDER_XPOS - DIVIDER_GAP, BAR_HEIGHT * 0.25, ScreenWidth * 0.8, label.m_iCounterTerrorists, r, g, b );
-	DrawUtils::DrawHudNumberString( DIVIDER_XPOS - DIVIDER_GAP, BAR_HEIGHT * 0.5, ScreenWidth * 0.8, label.m_iTerrorists, r, g, b );
-
-	if( g_iUser2 > 0 && g_iUser2 < MAX_PLAYERS )
+	if( !m_bBombPlanted ) // timer remaining
 	{
-		cl_entity_t *pEnt = gEngfuncs.GetEntityByIndex( g_iUser2 );
-		if( pEnt && pEnt->player )
+		if( m_hTimerTexture )
 		{
-			hud_player_info_t *pInfo = g_PlayerInfoList + pEnt->index;
-			GetPlayerInfo( pEnt->index, pInfo );
-			if( pInfo->name )
-			{
-				char szNameAndHealth[64];
-				snprintf( szNameAndHealth, 64, "%s (%i)", pInfo->name, g_PlayerExtraInfo[pEnt->index].health );
-				int iLen = DrawUtils::HudStringLen( szNameAndHealth );
+			gRenderAPI.GL_Bind( 0, m_hTimerTexture );
+			DrawUtils::Draw2DQuad( INT_XPOS(13) + 20, INT_YPOS(2) * 0.5,
+								   INT_XPOS(13) + 20 + gHUD.GetCharHeight(), INT_YPOS(2) * 0.5 + gHUD.GetCharHeight() );
+		}
+		DrawUtils::DrawHudString( INT_XPOS(13) + 20 * 2 + gHUD.GetCharWidth('M'), INT_YPOS(2) * 0.5, ScreenWidth, label.m_szTimer, r, g, b);
+	}
 
-				GetTeamColor( r, g, b, g_PlayerExtraInfo[ pEnt->index ].teamnumber );
-				DrawUtils::DrawHudString( ScreenWidth * 0.5 - iLen * 0.5, ScreenHeight - BAR_HEIGHT * 0.5 , ScreenWidth, szNameAndHealth, r, g, b );
+	{ // draw team here
+		DrawUtils::DrawHudString( ScreenWidth * 0.7, INT_YPOS(2) * 0.25, ScreenWidth * 0.8, "Counter-Terrorists:", r, g, b );
+		DrawUtils::DrawHudString( ScreenWidth * 0.7, INT_YPOS(2) * 0.5, ScreenWidth * 0.8, "Terrorists:", r, g, b );
+		// count
+		DrawUtils::DrawHudNumberString( INT_XPOS(13) - 20, INT_YPOS(2) * 0.25, ScreenWidth * 0.8, label.m_iCounterTerrorists, r, g, b );
+		DrawUtils::DrawHudNumberString( INT_XPOS(13) - 20, INT_YPOS(2) * 0.5,  ScreenWidth * 0.8, label.m_iTerrorists,        r, g, b );
+	}
+
+	if( m_menuFlags & ROOT_MENU )
+	{
+		int h = gHUD.GetCharHeight() * 0.5;
+		// draw the root menu
+		DrawButtonWithText(INT_XPOS(0.5),  INT_YPOS(7.5), INT_XPOS(4), INT_YPOS(1), h, "Options", r, g, b);
+		DrawButtonWithText(INT_XPOS(5),    INT_YPOS(7.5), INT_XPOS(1), INT_YPOS(1), h, "<", r, g, b);
+
+		DrawUtils::DrawRectangle(INT_XPOS(6), INT_YPOS(7.5), INT_XPOS(4), INT_YPOS(1));
+		// name will be drawn later
+
+		DrawButtonWithText(INT_XPOS(10),   INT_YPOS(7.5), INT_XPOS(1), INT_YPOS(1), h, ">", r, g, b );
+		DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(7.5), INT_XPOS(4), INT_YPOS(1), h, "Spectate Options", r, g, b);
+		if( m_menuFlags & MENU_OPTIONS )
+		{
+			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(1.5), INT_XPOS(4), INT_YPOS(1), h, "Close", r, g, b );
+			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(2.5), INT_XPOS(4), INT_YPOS(1), h, "Help", r, g, b );
+			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(3.5), INT_XPOS(4), INT_YPOS(1), h, "Settings", r, g, b );
+			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(4.5), INT_XPOS(4), INT_YPOS(1), h, "Picture-in-Picture", r, g, b );
+			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(5.5), INT_XPOS(4), INT_YPOS(1), h, "Autodirector", r, g, b );
+			DrawButtonWithText(INT_XPOS(0.5), INT_YPOS(6.5), INT_XPOS(4), INT_YPOS(1), h, "Show scores", r, g, b );
+			if( m_menuFlags & MENU_OPTIONS_SETTINGS )
+			{
+				DrawButtonWithText(INT_XPOS(4.5), INT_YPOS(3.5), INT_XPOS(4), INT_YPOS(1), h, "Chat messages", r, g, b );
+				DrawButtonWithText(INT_XPOS(4.5), INT_YPOS(4.5), INT_XPOS(4), INT_YPOS(1), h, "Show status", r, g, b );
+				DrawButtonWithText(INT_XPOS(4.5), INT_YPOS(5.5), INT_XPOS(4), INT_YPOS(1), h, "View cone", r, g, b );
+				DrawButtonWithText(INT_XPOS(4.5), INT_YPOS(6.5), INT_XPOS(4), INT_YPOS(1), h, "Player names", r, g, b );
 			}
 		}
+
+		if( m_menuFlags & MENU_SPEC_OPTIONS )
+		{
+			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(1.5), INT_XPOS(4), INT_YPOS(1), h, "Chase Map Overview", r, g, b );
+			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(2.5), INT_XPOS(4), INT_YPOS(1), h, "Free Map Overview", r, g, b );
+			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(3.5), INT_XPOS(4), INT_YPOS(1), h, "First Person", r, g, b );
+			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(4.5), INT_XPOS(4), INT_YPOS(1), h, "Free look", r, g, b );
+			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(5.5), INT_XPOS(4), INT_YPOS(1), h, "Free Chase Camera", r, g, b );
+			DrawButtonWithText(INT_XPOS(11.5), INT_YPOS(6.5), INT_XPOS(4), INT_YPOS(1), h, "Locked Chase Camera", r, g, b );
+		}
 	}
+
+	if( !label.m_szNameAndHealth[0] )
+	{
+		int iLen = DrawUtils::HudStringLen( label.m_szNameAndHealth );
+		GetTeamColor( r, g, b, g_PlayerExtraInfo[ g_iUser2 ].teamnumber );
+		DrawUtils::DrawHudString( ScreenWidth * 0.5 - iLen * 0.5, INT_YPOS(8) - gHUD.GetCharHeight() * 0.5, ScreenWidth,
+								  label.m_szNameAndHealth, r, g, b );
+	}
+
 	return 1;
 }
 
 void CHudSpectatorGui::CalcAllNeededData( )
 {
 	// mapname
-	static char szMapNameStripped[55];
-	const char *szMapName = gEngfuncs.pfnGetLevelName(); //  "maps/%s.bsp"
-	strncpy( szMapNameStripped, szMapName + 5, sizeof( szMapNameStripped ) );
-	szMapNameStripped[strlen(szMapNameStripped) - 4] = '\0';
-	snprintf( label.m_szMap, sizeof( label.m_szMap ), "Map: %s", szMapNameStripped );
+	if( !label.m_szMap[0] )
+	{
+		static char szMapNameStripped[55];
+		const char *szMapName = gEngfuncs.pfnGetLevelName(); //  "maps/%s.bsp"
+		strncpy( szMapNameStripped, szMapName + 5, sizeof( szMapNameStripped ) );
+		szMapNameStripped[strlen(szMapNameStripped) - 4] = '\0';
+		snprintf( label.m_szMap, sizeof( label.m_szMap ), "Map: %s", szMapNameStripped );
+	}
 
 	// team
 	label.m_iTerrorists        = 0;
@@ -248,32 +259,44 @@ void CHudSpectatorGui::CalcAllNeededData( )
 
 	// timer
 	// time must be positive
-	if( m_bBombPlanted )
-	{
-		label.m_szTimer[0] = '\0';
-	}
-	else
+	if( !m_bBombPlanted )
 	{
 		int iMinutes = max( 0, (int)( gHUD.m_Timer.m_iTime + gHUD.m_Timer.m_fStartTime - gHUD.m_flTime ) / 60);
 		int iSeconds = max( 0, (int)( gHUD.m_Timer.m_iTime + gHUD.m_Timer.m_fStartTime - gHUD.m_flTime ) - (iMinutes * 60));
 
 		sprintf( label.m_szTimer, "%i:%i", iMinutes, iSeconds );
 	}
+
+	// player name
+	if( g_iUser2 > 0 && g_iUser2 < MAX_PLAYERS )
+	{
+		hud_player_info_t sInfo;
+		GetPlayerInfo( g_iUser2, &sInfo );
+
+		if( sInfo.name )
+		{
+			snprintf( label.m_szNameAndHealth, sizeof( label.m_szNameAndHealth ),
+					  "%s (%i)",  sInfo.name, g_PlayerExtraInfo[g_iUser2].health );
+			return;
+		}
+	}
+	else label.m_szNameAndHealth[0] = '\0';
 }
 
 void CHudSpectatorGui::InitHUDData()
 {
 	m_bBombPlanted = false;
-}
-
-void CHudSpectatorGui::Think()
-{
-
+	label.m_szMap[0] = '\0';
 }
 
 void CHudSpectatorGui::Reset()
 {
 	m_bBombPlanted = false;
+	if( m_menuFlags & ROOT_MENU )
+	{
+		UserCmd_ToggleSpectatorMenu(); // this will remove any submenus;
+		m_menuFlags = 0;
+	}
 }
 
 int CHudSpectatorGui::MsgFunc_SpecHealth(const char *pszName, int iSize, void *buf)
@@ -305,116 +328,120 @@ int CHudSpectatorGui::MsgFunc_SpecHealth2(const char *pszName, int iSize, void *
 
 void CHudSpectatorGui::UserCmd_ToggleSpectatorMenu()
 {
-	static byte color[4] = {0, 0, 0, 153};
+	static byte color[4] = {0, 0, 0, 0};
 
-	m_bIsMenuShown = !m_bIsMenuShown;
+	if( !g_iMobileAPIVersion )
+		return;
 
-	gMobileAPI.pfnTouchSetClientOnly( m_bIsMenuShown );
+	gMobileAPI.pfnTouchSetClientOnly( !(m_menuFlags & ROOT_MENU) );
 
-	if( m_bIsMenuShown )
+	if( !(m_menuFlags & ROOT_MENU) )
 	{
-		ClientCmd("touch_set_stroke 1 255 140 0 255");
-
+		m_menuFlags |= ROOT_MENU;
 		gMobileAPI.pfnTouchAddClientButton( "_spec_menu_options", "*white", "_spec_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 7.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 7.5f ), color, 0, 1.0f, 0 );
 
 		gMobileAPI.pfnTouchAddClientButton( "_spec_menu_find_next_player_reverse", "*white", "_spec_find_next_player_reverse",
-			XPOS(5.0f), YPOS(7.5f), XPOS(6.0f), YPOS(8.5f), color, 0, 1.0f, TOUCH_FL_STROKE );
+			XPOS(5.0f), YPOS(7.5f), XPOS(6.0f), YPOS(8.5f), color, 0, 1.0f, 0 );
 
 		gMobileAPI.pfnTouchAddClientButton( "_spec_menu_nick", "*white", "*white",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 6.0f, 7.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 6.0f, 7.5f ), color, 0, 1.0f, 0 );
 
 		gMobileAPI.pfnTouchAddClientButton( "_spec_menu_find_next_player", "*white", "_spec_find_next_player",
-			XPOS(10.0f),YPOS(7.5f), XPOS(11.0f),YPOS(8.5f), color, 0, 1.0f, TOUCH_FL_STROKE );
+			XPOS(10.0f),YPOS(7.5f), XPOS(11.0f),YPOS(8.5f), color, 0, 1.0f, 0 );
 
 		gMobileAPI.pfnTouchAddClientButton( "_spec_menu_spectate_options", "*white", "_spec_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 7.5f ),color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 7.5f ),color, 0, 1.0f, 0 );
 	}
 	else
 	{
+		m_menuFlags &= ~ROOT_MENU;
 		gMobileAPI.pfnTouchRemoveButton( "_spec_*" );
 	}
 }
 
 void CHudSpectatorGui::UserCmd_ToggleSpectatorMenuOptions()
 {
-	static byte color[4] = {0, 0, 0, 153};
-	static bool isShown = false;
+	static byte color[4] = {0, 0, 0, 0};
 
-	if( !m_bIsMenuShown )
+	if( !(m_menuFlags & ROOT_MENU) || !g_iMobileAPIVersion )
 		return;
 
-	if( isShown = !isShown )
+	if( !(m_menuFlags & MENU_OPTIONS) )
 	{
+		m_menuFlags |= MENU_OPTIONS;
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_close", "*white", "_spec_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 1.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 1.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_help", "*white", "TODO; _spec_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 2.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 2.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_settings", "*white", "_spec_toggle_menu_options_settings",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 3.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 3.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_pip", "*white", "spec_pip t; _spec_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 4.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 4.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_ad", "*white", "spec_autodirector t; _spec_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 5.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 5.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_showscores", "*white", "scoreboard; _spec_menu_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 6.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 6.5f ), color, 0, 1.0f, 0 );
 	}
 	else
 	{
+		m_menuFlags &= ~MENU_OPTIONS;
 		gMobileAPI.pfnTouchRemoveButton( "_spec_opt_*" );
 	}
 }
 
 void CHudSpectatorGui::UserCmd_ToggleSpectatorMenuOptionsSettings()
 {
-	static byte color[4] = {0, 0, 0, 153};
-	static bool isShown = false;
+	static byte color[4] = {0, 0, 0, 0};
 
-	if( !m_bIsMenuShown )
+	if( !(m_menuFlags & ROOT_MENU) || !g_iMobileAPIVersion )
 		return;
 
-	if( isShown = !isShown )
+	if( !(m_menuFlags & MENU_OPTIONS_SETTINGS) )
 	{
+		m_menuFlags |= MENU_OPTIONS_SETTINGS;
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_chat_msgs", "*white", "TODO; _spec_toggle_menu_options_settings",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 3.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 3.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_set_status", "*white", "spec_drawstatus t; _spec_toggle_menu_options_settings",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 4.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 4.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_draw_cones", "*white", "spec_drawcone t; _spec_toggle_menu_options_settings",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 5.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 5.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_draw_names", "*white", "spec_drawnames t; _spec_toggle_menu_options_settings",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 6.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 6.5f ), color, 0, 1.0f, 0 );
 	}
 	else
 	{
+		m_menuFlags &= ~MENU_OPTIONS_SETTINGS;
 		gMobileAPI.pfnTouchRemoveButton( "_spec_opt_set_*" );
 	}
 }
 
 void CHudSpectatorGui::UserCmd_ToggleSpectatorMenuSpectateOptions()
 {
-	static byte color[4] = {0, 0, 0, 153};
-	static bool isShown = false;
+	static byte color[4] = {0, 0, 0, 0};
 
-	if( !m_bIsMenuShown )
+	if( !(m_menuFlags & ROOT_MENU) || !g_iMobileAPIVersion )
 		return;
 
-	if( isShown = !isShown )
+	if( !(m_menuFlags & MENU_SPEC_OPTIONS) )
 	{
+		m_menuFlags |= MENU_SPEC_OPTIONS;
 		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_6", "*white", "spec_mode 6; _spec_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 1.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 1.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_5", "*white", "spec_mode 5; _spec_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 2.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 2.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_4", "*white", "spec_mode 4; _spec_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 3.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 3.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_3", "*white", "spec_mode 3; _spec_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 4.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 4.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_2", "*white", "spec_mode 2; _spec_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 5.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 5.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_spec_1", "*white", "spec_mode 1; _spec_menu_spectate_options",
-			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 6.5f ), color, 0, 1.0f, TOUCH_FL_STROKE );
+			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 11.5f, 6.5f ), color, 0, 1.0f, 0 );
 	}
 	else
 	{
+		m_menuFlags &= ~MENU_SPEC_OPTIONS;
 		gMobileAPI.pfnTouchRemoveButton( "_spec_spec_*" );
 	}
 }
