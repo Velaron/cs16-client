@@ -65,7 +65,7 @@ void EV_FireTMP(event_args_s *args)
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(TMP_SHOOT1, TMP_SHOOT3), 2);
-		if( cl_righthand->value == 0.0f )
+		if( !cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -6.0, -11.0, 0);
 		}
@@ -80,7 +80,6 @@ void EV_FireTMP(event_args_s *args)
 	}
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");
-	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
 		gEngfuncs.pfnRandomLong( 0, 1 ) ? "weapons/tmp-1.wav" : "weapons/tmp-2.wav",

@@ -81,7 +81,7 @@ void EV_FireM4A1( event_args_t *args )
 			sequence = gEngfuncs.pfnRandomLong( M4A1_SHOOT1_UNSIL, M4A1_SHOOT3_UNSIL );
 		}
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(sequence, 2);
-		if( cl_righthand->value == 0.0f )
+		if( !cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0, 0);
 		}
@@ -97,7 +97,6 @@ void EV_FireM4A1( event_args_t *args )
 
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
-	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 	if( args->bparam1 )
 	{

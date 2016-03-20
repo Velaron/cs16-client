@@ -91,7 +91,7 @@ void EV_FireP228(event_args_s *args)
 			seq = g_bHoldingShield ? (int)P228_SHIELD_SHOOT_EMPTY : (int)P228_SHOOT_EMPTY;
 		}
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
-		if( cl_righthand->value == 0.0f )
+		if( !cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, -14.0, 0);
 		}
@@ -107,7 +107,6 @@ void EV_FireP228(event_args_s *args)
 
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");
-	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
 										   "weapons/p228-1.wav",

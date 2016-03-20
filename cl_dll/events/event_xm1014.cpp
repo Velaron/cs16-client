@@ -66,7 +66,7 @@ void EV_FireXM1014(event_args_s *args)
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(XM1014_FIRE1, XM1014_FIRE2), 2);
-		if( cl_righthand->value == 0.0f )
+		if( !cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 22.0, -9.0, -11.0, 0);
 		}

@@ -61,7 +61,7 @@ void EV_FireMAC10(event_args_s *args)
 		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(MAC10_SHOOT1, MAC10_SHOOT3), 2);
 		EV_MuzzleFlash();
-		if( cl_righthand->value == 0.0f )
+		if( !cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -9.0, -11.0, 0);
 		}
@@ -77,7 +77,6 @@ void EV_FireMAC10(event_args_s *args)
 
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
-	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,

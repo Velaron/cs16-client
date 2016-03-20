@@ -65,7 +65,7 @@ void EV_FireMP5( event_args_t *args )
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(MP5N_SHOOT1 + gEngfuncs.pfnRandomLong(0,2), 2);
-		if( cl_righthand->value == 0.0f )
+		if( !cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -10.0, -11.0, 0);
 		}
@@ -81,7 +81,6 @@ void EV_FireMP5( event_args_t *args )
 
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
-	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, -right, up, 12, -10, -7 );
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
 									   gEngfuncs.pfnRandomLong( 0, 1 ) ? "weapons/mp5-1.wav" : "weapons/mp5-2.wav",

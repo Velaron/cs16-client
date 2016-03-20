@@ -113,7 +113,7 @@ void EV_FireUSP( event_args_t *args )
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
 
 
-		if( cl_righthand->value == 0.0f )
+		if( !cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, -14.0, 0);
 		}
@@ -128,7 +128,7 @@ void EV_FireUSP( event_args_t *args )
 	}
 
 
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");
+	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/shotgunshell.mdl");
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 
 	if( !silencer_on )
