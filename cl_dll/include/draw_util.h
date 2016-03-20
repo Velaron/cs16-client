@@ -55,7 +55,7 @@ public:
 	static int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber,
 								int r, int g, int b );
 
-	static int HudStringLen( char *szIt );
+	static int HudStringLen( const char *szIt );
 
 	static int GetNumWidth(int iNumber, int iFlags);
 

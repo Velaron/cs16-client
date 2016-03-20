@@ -34,6 +34,8 @@
 #include "vgui_parser.h"
 #include "unicode_strtools.h"
 
+#include "errno.h"
+
 #include <unordered_map>
 #include <string>
 

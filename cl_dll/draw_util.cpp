@@ -74,7 +74,7 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 	return xpos;
 }
 
-int DrawUtils::HudStringLen( char *szIt )
+int DrawUtils::HudStringLen( const char *szIt )
 {
 	int l = 0;
 	// draw the string until we hit the null character or a newline character
