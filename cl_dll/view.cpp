@@ -60,6 +60,8 @@ float	vJumpOrigin[3];
 float	vJumpAngles[3];
 }
 
+
+void V_GetChaseOrigin( float * angles, float * origin, float distance, float * returnvec );
 void V_DropPunchAngle ( float frametime, float *ev_punchangle );
 void VectorAngles( const float *forward, float *angles );
 
@@ -617,7 +619,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	}
 
 	// Treating cam_ofs[2] as the distance
-	if( CL_IsThirdPerson() )
+	/*if( CL_IsThirdPerson() )
 	{
 		vec3_t ofs;
 
@@ -634,7 +636,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 		{
 			pparams->vieworg[ i ] += -ofs[2] * camForward[ i ];
 		}
-	}
+	}*/
 
 	// Give gun our viewangles
 	VectorCopy ( pparams->cl_viewangles, view->angles );
@@ -893,64 +895,51 @@ void V_SmoothInterpolateAngles( float * startAngle, float * endAngle, float * fi
 // Get the origin of the Observer based around the target's position and angles
 void V_GetChaseOrigin( float * angles, float * origin, float distance, float * returnvec )
 {
-	vec3_t	vecEnd;
-	vec3_t	forward;
-	vec3_t	vecStart;
-	pmtrace_t * trace;
+	Vector vecStart, vecEnd;
+	pmtrace_t *trace;
 	int maxLoops = 8;
 
+	Vector forward, right, up;
+
+	// trace back from the target using the player's view angles
+	AngleVectors( angles, forward, right, up );
+	forward = -forward;
+
+	vecStart = origin;
+	vecEnd = vecStart + forward * distance;
+
 	int ignoreent = -1;	// first, ignore no entity
+	cl_entity_t *ent = NULL;
 
-	cl_entity_t	 *	ent = NULL;
-
-	// Trace back from the target using the player's view angles
-	AngleVectors(angles, forward, NULL, NULL);
-
-	VectorScale(forward,-1,forward);
-
-	VectorCopy( origin, vecStart );
-
-	VectorMA(vecStart, distance , forward, vecEnd);
-
-	while ( maxLoops > 0)
+	while( maxLoops > 0 )
 	{
 		trace = gEngfuncs.PM_TraceLine( vecStart, vecEnd, PM_TRACELINE_PHYSENTSONLY, 2, ignoreent );
 
-		// WARNING! trace->ent is is the number in physent list not the normal entity number
+		if( trace->ent <= 0 )
+			break; // we hit the world or nothing, stop trace
 
-		if ( trace->ent <= 0)
-			break;	// we hit the world or nothing, stop trace
+		ent = gEngfuncs.GetEntityByIndex( PM_GetPhysEntInfo( trace->ent ));
+		if( ent == NULL ) break;
 
-		ent = gEngfuncs.GetEntityByIndex( PM_GetPhysEntInfo( trace->ent ) );
-
-		// hit non-player solid BSP , stop here
-		if ( ent == NULL && ent->curstate.solid == SOLID_BSP && !ent->player )
+		// hit non-player solid BSP, stop here
+		if( ent->curstate.solid == SOLID_BSP && !ent->player )
 			break;
 
 		// if close enought to end pos, stop, otherwise continue trace
-		if( Distance(trace->endpos, vecEnd ) < 1.0f )
+		if( trace->fraction < 1.0f )
 		{
 			break;
 		}
 		else
 		{
 			ignoreent = trace->ent;	// ignore last hit entity
-			VectorCopy( trace->endpos, vecStart);
+			vecStart = trace->endpos;
 		}
-
 		maxLoops--;
 	}
 
-	/*if ( ent )
-	{
-		gEngfuncs.Con_Printf("Trace loops %i , entity %i, model %s, solid %i\n",(8-maxLoops),ent->curstate.number, ent->model->name , ent->curstate.solid );
-	}*/
-
 	VectorMA( trace->endpos, 8, trace->plane.normal, returnvec );
-
-	//gEngfuncs.Con_DPrintf("origin(%f %f %f) returnvec(%f %f %f)\n", origin[0], origin[1], origin[2], returnvec[0], returnvec[1], returnvec[2]);
-
-	v_lastDistance = Distance(trace->endpos, origin);	// real distance without offset
+	v_lastDistance = (trace->endpos - Vector(origin)).Length();	// real distance without offset
 }
 
 void V_GetDeathCam(cl_entity_t * ent1, cl_entity_t * ent2, float * angle, float * origin)
@@ -1603,7 +1592,70 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 	VectorCopy ( v_origin, pparams->vieworg );
 }
 
+void V_CalcThirdPersonRefdef( ref_params_t *pparams )
+{
+	static float lasttime, oldz = 0;
 
+	pparams->vieworg = pparams->simorg;
+	pparams->vieworg = pparams->vieworg + pparams->viewheight;
+	pparams->viewangles = pparams->cl_viewangles + pparams->punchangle + ev_punchangle;
+
+	v_angles = pparams->viewangles;
+	v_lastAngles = pparams->viewangles;
+
+	// never let view origin sit exactly on a node line, because a water plane can
+	// dissapear when viewed with the eye exactly on it.
+	// FIXME, we send origin at 1/128 now, change this?
+	// the server protocol only specifies to 1/16 pixel, so add 1/32 in each axis
+	pparams->vieworg[0] += 1.0f / 32;
+	pparams->vieworg[1] += 1.0f / 32;
+	pparams->vieworg[2] += 1.0f / 32;
+
+	// this is smooth stair climbing in thirdperson mode but not affected for client model :(
+	if( !pparams->smoothing && pparams->onground && pparams->simorg[2] - oldz > 0.0f )
+	{
+		float steptime;
+
+		steptime = pparams->time - lasttime;
+		if( steptime < 0 ) steptime = 0;
+
+		oldz += steptime * 150.0f;
+
+		if( oldz > pparams->simorg[2] )
+			oldz = pparams->simorg[2];
+		if( pparams->simorg[2] - oldz > pparams->movevars->stepsize )
+			oldz = pparams->simorg[2] - pparams->movevars->stepsize;
+
+		pparams->vieworg[2] += oldz - pparams->simorg[2];
+	}
+	else
+	{
+		oldz = pparams->simorg[2];
+	}
+
+	lasttime = pparams->time;
+
+	V_GetChaseOrigin( pparams->viewangles, pparams->vieworg, cl_chasedist->value, pparams->vieworg );
+
+	float pitch = pparams->viewangles[PITCH];
+
+	// normalize angles
+	if( pitch > 180.0f )
+		pitch -= 360.0f;
+	else if( pitch < -180.0f )
+		pitch += 360.0f;
+
+	// player pitch is inverted
+	pitch /= -3.0;
+
+	cl_entity_t *ent = gEngfuncs.GetLocalPlayer();
+
+	// slam local player's pitch value
+	ent->angles[PITCH] = pitch;
+	ent->curstate.angles[PITCH] = pitch;
+	ent->prevstate.angles[PITCH] = pitch;
+	ent->latched.prevangles[PITCH] = pitch;
+}
 
 void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 {
@@ -1616,7 +1668,11 @@ void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 	{
 		V_CalcSpectatorRefdef ( pparams );
 	}
-	else if ( !pparams->paused )
+	else if ( CL_IsThirdPerson() )
+	{
+		V_CalcThirdPersonRefdef ( pparams );
+	}
+	else
 	{
 		V_CalcNormalRefdef ( pparams );
 	}
