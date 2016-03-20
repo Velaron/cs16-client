@@ -37,8 +37,6 @@ extern "C" float	vJumpAngles[3];
 extern void V_GetInEyePos(int entity, float * origin, float * angles );
 extern void V_ResetChaseCam();
 extern void V_GetChasePos(int target, float * cl_angles, float * origin, float * angles);
-extern void VectorAngles( const float *forward, float *angles );
-extern "C" void NormalizeAngles( float *angles );
 extern float * GetClientColor( int clientIndex );
 
 extern vec3_t v_origin;		// last view origin
@@ -48,8 +46,6 @@ extern vec3_t v_sim_org;	// last sim origin
 
 void SpectatorMode(void)
 {
-
-
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
 		gEngfuncs.Con_Printf( "usage:  spec_mode <Main Mode> [<Inset Mode>]\n" );
@@ -89,12 +85,7 @@ void SpectatorHelp(void)
 
 	if ( text )
 	{
-		while ( *text )
-		{
-			if ( *text != 13 )
-				gEngfuncs.Con_Printf( "%c", *text );
-			text++;
-		}
+		CenterPrint( text );
 	}
 }
 
@@ -105,66 +96,66 @@ void SpectatorMenu( void )
 		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
 		return;
 	}
+	gEngfuncs.Cvar_Set( "spec_menu_internal", gEngfuncs.Cmd_Argv(1) );
 }
 
 void ToggleScores( void )
 {
-	/*if ( gViewPort )
-	{
-		if (gViewPort->IsScoreBoardVisible() )
-		{
-			gViewPort->HideScoreBoard();
-		}
-		else
-		{
-			gViewPort->ShowScoreBoard();
-		}
-	}*/
+
 }
 
 void SpecDrawNames( void )
 {
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
-		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
+		gEngfuncs.Con_Printf( "usage:  spec_draw_names <0|1>\n" );
 		return;
 	}
+	gEngfuncs.Cvar_Set( "spec_draw_names_internal", gEngfuncs.Cmd_Argv(1) );
 }
 
 void SpecDrawCone( void )
 {
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
-		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
+		gEngfuncs.Con_Printf( "usage:  spec_draw_cone <0|1>\n" );
 		return;
 	}
+
+	gEngfuncs.Cvar_Set( "spec_draw_cone_internal", gEngfuncs.Cmd_Argv(1) );
 }
 
 void SpecDrawStatus( void )
 {
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
-		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
+		gEngfuncs.Con_Printf( "usage:  spec_draw_status <0|1>\n" );
 		return;
 	}
+
+	gEngfuncs.Cvar_Set( "spec_draw_status_internal", gEngfuncs.Cmd_Argv(1) );
 }
 
 void SpecAutoDirector( void )
 {
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
-		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
+		gEngfuncs.Con_Printf( "usage:  spec_auto_director <0|1>\n" );
 		return;
 	}
+
+	gEngfuncs.Cvar_Set( "spec_auto_director_internal", gEngfuncs.Cmd_Argv(1) );
 }
 
 void SpecPip( void )
 {
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
-		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
+		gEngfuncs.Con_Printf( "usage:  spec_pip <0|1>\n" );
 		return;
 	}
+
+	gEngfuncs.Cvar_Set( "spec_pip_internal", gEngfuncs.Cmd_Argv(1) );
 }
 
 //-----------------------------------------------------------------------------
@@ -204,7 +195,7 @@ int CHudSpectator::Init()
 	m_pip			= gEngfuncs.pfnRegisterVariable("spec_pip_internal","1",0);
 	m_lastAutoDirector = 0.0f;
 	
-	if ( !m_drawnames || !m_drawcone || !m_drawstatus || !m_autoDirector || !m_pip)
+	if ( !m_drawnames || !m_drawcone || !m_drawstatus || !m_autoDirector || !m_pip || !m_specmode )
 	{
 		gEngfuncs.Con_Printf("ERROR! Couldn't register all spectator variables.\n");
 		return 0;

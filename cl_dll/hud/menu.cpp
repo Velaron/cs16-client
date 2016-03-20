@@ -54,7 +54,7 @@ int CHudMenu :: Init( void )
 	HOOK_COMMAND( "client_buy_close", OldStyleMenuClose );
 	HOOK_COMMAND( "showvguimenu", ShowVGUIMenu );
 
-	_extended_menus = CVAR_CREATE("_extended_menus", "0", FCVAR_ARCHIVE);
+	_extended_menus = CVAR_CREATE("_extended_menus", "1", FCVAR_ARCHIVE);
 
 	InitHUDData();
 
@@ -252,7 +252,7 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
 	UserCmd_OldStyleMenuClose();
-	ClientCmd("touch_removebutton _menu_*");
+	gMobileAPI.pfnTouchRemoveButton("_menu_*");
 	return 1;
 }
 
@@ -275,7 +275,7 @@ void CHudMenu::UserCmd_OldStyleMenuClose()
 {
 	m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
 	m_iFlags &= ~HUD_ACTIVE;
-	ClientCmd("touch_removebutton _menu_*");
+	gMobileAPI.pfnTouchRemoveButton("_menu_*");
 }
 
 // lol, no real VGUI here

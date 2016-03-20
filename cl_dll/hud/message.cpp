@@ -28,7 +28,7 @@
 DECLARE_MESSAGE( m_Message, HudText )
 DECLARE_MESSAGE( m_Message, GameTitle )
 DECLARE_MESSAGE( m_Message, HudTextPro )
-//DECLARE_MESSAGE( m_Message, HudTextArgs )
+DECLARE_MESSAGE( m_Message, HudTextArgs )
 
 // 1 Global client_textmessage_t for custom messages that aren't in the titles.txt
 client_textmessage_t	g_pCustomMessage;
@@ -40,7 +40,7 @@ int CHudMessage::Init(void)
 	HOOK_MESSAGE( HudText );
 	HOOK_MESSAGE( GameTitle );
 	HOOK_MESSAGE( HudTextPro );
-	//HOOK_MESSAGE( HudTextArgs );
+	HOOK_MESSAGE( HudTextArgs );
 
 	gHUD.AddHudElem(this);
 	Reset();
@@ -144,15 +144,11 @@ int CHudMessage::YPosition( float y, int height )
 
 void CHudMessage::MessageScanNextChar( void )
 {
-	int srcRed, srcGreen, srcBlue, destRed, destGreen, destBlue;
-	int blend;
-
-   srcRed = srcGreen = srcBlue = destRed = destGreen = destBlue = blend = 0;
-
-	srcRed = m_parms.pMessage->r1;
-	srcGreen = m_parms.pMessage->g1;
-	srcBlue = m_parms.pMessage->b1;
-	blend = 0;	// Pure source
+	int srcRed = m_parms.pMessage->r1;
+	int srcGreen = m_parms.pMessage->g1;
+	int srcBlue = m_parms.pMessage->b1;
+	int destRed, destGreen, destBlue, blend;
+	destRed = destGreen = destBlue = blend = 0;
 
 	switch( m_parms.pMessage->effect )
 	{
@@ -568,5 +564,24 @@ int CHudMessage::MsgFunc_HudTextPro( const char *pszName, int iSize, void *pbuf 
 	// Turn on drawing
 	if ( !(m_iFlags & HUD_ACTIVE) )
 		m_iFlags |= HUD_ACTIVE;
+	return 1;
+}
+
+int CHudMessage::MsgFunc_HudTextArgs( const char *pszName, int iSize, void *pbuf )
+{
+	/*BEGIN_READ( pbuf, iSize );
+
+	const char *sz = READ_STRING();
+	int hint = READ_BYTE();
+
+	MessageAdd(sz, gHUD.m_flTime, hint, Newfont); // TODO
+
+	// Remember the time -- to fix up level transitions
+	m_parms.time = gHUD.m_flTime;
+
+	// Turn on drawing
+	if ( !(m_iFlags & HUD_ACTIVE) )
+		m_iFlags |= HUD_ACTIVE;*/
+
 	return 1;
 }

@@ -30,6 +30,7 @@
 #include "vgui_parser.h"
 #include "rain.h"
 
+#include "camera.h"
 
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 
@@ -105,18 +106,15 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( HostageK );
 	HOOK_MESSAGE( ShadowIdx );
 
-	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
-	CVAR_CREATE( "_vgui_menus", "0", FCVAR_ARCHIVE | FCVAR_USERINFO ); // force client to use old style menus
-	CVAR_CREATE( "cl_lb", "0", FCVAR_ARCHIVE | FCVAR_USERINFO ); // force client to use old style menus
-	CVAR_CREATE( "lefthand", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	CVAR_CREATE( "_vgui_menus", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
-	CVAR_CREATE( "_ah", "1", FCVAR_ARCHIVE| FCVAR_USERINFO);
+	CVAR_CREATE( "_ah", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
 	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
 
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
 	cl_righthand = CVAR_CREATE( "hand", "1", FCVAR_ARCHIVE );
-	cl_weather   = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	cl_weather   = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE );
 	cl_minmodels = CVAR_CREATE( "cl_minmodels", "1", FCVAR_ARCHIVE );
 	cl_min_t     = CVAR_CREATE( "cl_min_t", "1", FCVAR_ARCHIVE );
 	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "1", FCVAR_ARCHIVE );
