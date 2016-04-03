@@ -356,17 +356,11 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 
 void CHudMenu::UserCmd_ShowVGUIMenu()
 {
-	if( gEngfuncs.Cmd_Argc() != 1 )
+	if( gEngfuncs.Cmd_Argc() < 2 )
 	{
 		ConsolePrint("usage: showvguimenu <menuType>\n");
 		return;
 	}
-
-	if( gEngfuncs.pfnGetCvarFloat("touch_enable") == 0.0f )
-		return;
-
-	if( gEngfuncs.pfnGetCvarFloat("_vgui_menus") == 0.0f )
-		return;
 
 	int menuType = atoi(gEngfuncs.Cmd_Argv(1));
 	ShowVGUIMenu(menuType);
