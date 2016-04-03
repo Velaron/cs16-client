@@ -211,7 +211,7 @@ CHud :: ~CHud()
 		m_pHudList = NULL;
 	}
 
-	Localize_Free();
+	//Localize_Free();
 
 	//ServersShutdown();
 }

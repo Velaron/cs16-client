@@ -27,6 +27,8 @@ extern "C"
 #include <string.h>
 #include <ctype.h>
 
+#include "vgui_parser.h"
+
 
 extern "C" 
 {
@@ -379,8 +381,8 @@ int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding
 	return 1;
 }
 
-void IN_BreakDown( void ) { KeyDown( &in_break );};
-void IN_BreakUp( void ) { KeyUp( &in_break ); };
+void IN_BreakDown( void ) { KeyDown( &in_break );}
+void IN_BreakUp( void ) { KeyUp( &in_break ); }
 void IN_KLookDown (void) {KeyDown(&in_klook);}
 void IN_KLookUp (void) {KeyUp(&in_klook);}
 void IN_JLookDown (void) {KeyDown(&in_jlook);}
@@ -1019,4 +1021,5 @@ void ShutdownInput (void)
 void DLLEXPORT HUD_Shutdown( void )
 {
 	ShutdownInput();
+	Localize_Free();
 }
