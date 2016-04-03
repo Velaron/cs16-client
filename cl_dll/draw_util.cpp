@@ -36,7 +36,7 @@ version.
 extern cvar_t *hud_textmode;
 float DrawUtils::color[3];
 
-int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, int r, int g, int b, bool drawing )
+int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, int r, int g, int b, float scale, bool drawing )
 {
 	char *szIt = (char *)str;
 	// draw the string until we hit the null character or a newline character
@@ -68,31 +68,31 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 			}
 		}
 
-		xpos += TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
+		xpos += TextMessageDrawChar( xpos, ypos, *szIt, r, g, b, scale );
 	}
 
 	return xpos;
 }
 
-int DrawUtils::HudStringLen( const char *szIt )
+int DrawUtils::HudStringLen(const char *szIt , float scale)
 {
 	int l = 0;
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		l += gHUD.m_scrinfo.charWidths[(unsigned char)*szIt]; // variable-width fonts look cool
+		l += gHUD.m_scrinfo.charWidths[(unsigned char)*szIt] * scale; // variable-width fonts look cool
 	}
 	return l;
 }
 
-int DrawUtils::DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b )
+int DrawUtils::DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b, float scale )
 {
 	char szString[32];
 	snprintf( szString, 32, "%d", iNumber );
-	return DrawHudStringReverse( xpos, ypos, iMinX, szString, r, g, b );
+	return DrawHudStringReverse( xpos, ypos, iMinX, szString, r, g, b, scale );
 }
 
-int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, bool drawing )
+int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, float scale, bool drawing )
 {
 	// iterate throug the string in reverse
 	for ( signed int i = strlen( szString ); i >= 0; i-- )
@@ -124,7 +124,7 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 			continue;
 		}
 
-		TextMessageDrawChar( xpos, ypos, szString[i], r, g, b );
+		TextMessageDrawChar( xpos, ypos, szString[i], r, g, b, scale );
 	}
 
 	return xpos;
@@ -331,9 +331,17 @@ int DrawUtils::ConsoleStringLen( const char *string )
 	}
 }
 
-int DrawUtils::TextMessageDrawChar( int x, int y, int number, int r, int g, int b )
+int DrawUtils::TextMessageDrawChar( int x, int y, int number, int r, int g, int b , float scale )
 {
-	return gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b );
+	int ret;
+	if( scale && g_iMobileAPIVersion )
+	{
+		ret = gMobileAPI.pfnDrawScaledCharacter( x, y, number, r, g, b, scale );
+	}
+	else
+	{
+		ret = gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b );
+	}
 }
 
 void DrawUtils::Draw2DQuad( float x1, float y1, float x2, float y2 )
