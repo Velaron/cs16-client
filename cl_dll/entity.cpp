@@ -166,7 +166,6 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 	cl_entity_t *player = gEngfuncs.GetLocalPlayer();	// Get the local player's index
 	if ( dst->number == player->index )
 	{
-		g_iPlayerClass = dst->playerclass;
 		g_iTeamNumber = g_PlayerExtraInfo[dst->number].teamnumber;
 
 		dst->iuser1 = g_iUser1 = src->iuser1;
@@ -209,16 +208,14 @@ void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct
 	pcd->maxspeed				= ppcd->maxspeed;
 
 	pcd->deadflag				= ppcd->deadflag;
-
-	// Spectating or not dead == get control over view angles.
-	g_iAlive = ( ppcd->iuser1 || ( pcd->deadflag == DEAD_NO ) ) ? 1 : 0;
-
 	// Spectator
 	pcd->iuser1					= ppcd->iuser1;
 	pcd->iuser2					= ppcd->iuser2;
-
 	// Duck prevention
-	pcd->iuser3 = ppcd->iuser3;
+	pcd->iuser3					= ppcd->iuser3;
+	// Spectating or not dead == get control over view angles.
+	g_iAlive = ( ppcd->iuser1 || ( pcd->deadflag == DEAD_NO ) ) ? 1 : 0;
+
 
 	if ( gEngfuncs.IsSpectateOnly() )
 	{
@@ -227,11 +224,10 @@ void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct
 		pcd->iuser1 = g_iUser1;	// observer mode
 		pcd->iuser2 = g_iUser2; // first target
 		pcd->iuser3 = g_iUser3; // second target
-
 	}
 
 	// Fire prevention
-	pcd->iuser4 = ppcd->iuser4;
+	pcd->iuser4					= ppcd->iuser4;
 
 	pcd->fuser2					= ppcd->fuser2;
 	pcd->fuser3					= ppcd->fuser3;
@@ -240,284 +236,7 @@ void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct
 	VectorCopy( ppcd->vuser2, pcd->vuser2 );
 	VectorCopy( ppcd->vuser3, pcd->vuser3 );
 	VectorCopy( ppcd->vuser4, pcd->vuser4 );
-
-	memcpy( wd, pwd, 32 * sizeof( weapon_data_t ) );
 }
-
-/*
-//#define TEST_IT
-#if defined( TEST_IT )
-
-cl_entity_t mymodel[9];
-
-void MoveModel( void )
-{
-	cl_entity_t *player;
-	int i, j;
-	int modelindex;
-	struct model_s *mod;
-
-	// Load it up with some bogus data
-	player = gEngfuncs.GetLocalPlayer();
-	if ( !player )
-		return;
-
-	mod = gEngfuncs.CL_LoadModel( "models/sentry3.mdl", &modelindex );
-	for ( i = 0; i < 3; i++ )
-	{
-		for ( j = 0; j < 3; j++ )
-		{
-			// Don't draw over ourself...
-			if ( ( i == 1 ) && ( j == 1 ) )
-				continue;
-
-			mymodel[ i * 3 + j ] = *player;
-
-			mymodel[ i * 3 + j ].player = 0;
-
-			mymodel[ i * 3 + j ].model = mod;
-			mymodel[ i * 3 + j ].curstate.modelindex = modelindex;
-		
-				// Move it out a bit
-			mymodel[ i * 3 + j ].origin[0] = player->origin[0] + 50 * ( 1 - i );
-			mymodel[ i * 3 + j ].origin[1] = player->origin[1] + 50 * ( 1 - j );
-
-			gEngfuncs.CL_CreateVisibleEntity( ET_NORMAL, &mymodel[i*3+j] );
-		}
-	}
-
-}
-
-#endif
-
-//#define TRACE_TEST
-#if defined( TRACE_TEST )
-
-extern int hitent;
-
-cl_entity_t hit;
-
-void TraceModel( void )
-{
-	cl_entity_t *ent;
-
-	if ( hitent <= 0 )
-		return;
-
-	// Load it up with some bogus data
-	ent = gEngfuncs.GetEntityByIndex( hitent );
-	if ( !ent )
-		return;
-
-	hit = *ent;
-	//hit.curstate.rendermode = kRenderTransTexture;
-	//hit.curstate.renderfx = kRenderFxGlowShell;
-	//hit.curstate.renderamt = 100;
-
-	hit.origin[2] += 40;
-
-	gEngfuncs.CL_CreateVisibleEntity( ET_NORMAL, &hit );
-}
-
-#endif
-*/
-
-/*
-void ParticleCallback( struct particle_s *particle, float frametime )
-{
-	int i;
-
-	for ( i = 0; i < 3; i++ )
-	{
-		particle->org[ i ] += particle->vel[ i ] * frametime;
-	}
-}
-
-cvar_t *color = NULL;
-void Particles( void )
-{
-	static float lasttime;
-	float curtime;
-	
-	curtime = gEngfuncs.GetClientTime();
-
-	if ( ( curtime - lasttime ) < 2.0 )
-		return;
-
-	if ( !color )
-	{
-		color = gEngfuncs.pfnRegisterVariable ( "color","255 0 0", 0 );
-	}
-
-	lasttime = curtime;
-
-	// Create a few particles
-	particle_t *p;
-	int i, j;
-
-	for ( i = 0; i < 1000; i++ )
-	{
-		int r, g, b;
-		p = gEngfuncs.pEfxAPI->R_AllocParticle( ParticleCallback );
-		if ( !p )
-			break;
-
-		for ( j = 0; j < 3; j++ )
-		{
-			p->org[ j ] = v_origin[ j ] + gEngfuncs.pfnRandomFloat( -32.0, 32.0 );;
-			p->vel[ j ] = gEngfuncs.pfnRandomFloat( -100.0, 100.0 );
-		}
-
-		if ( color )
-		{
-			sscanf( color->string, "%i %i %i", &r, &g, &b );
-		}
-		else
-		{
-			r = 192;
-			g = 0;
-			b = 0;
-		}
-
-		p->color = 	gEngfuncs.pEfxAPI->R_LookupColor( r, g, b );
-		gEngfuncs.pEfxAPI->R_GetPackedColor( &p->packedColor, p->color );
-
-		// p->die is set to current time so all you have to do is add an additional time to it
-		p->die += 3.0;
-	}
-}
-*/
-
-/*
-void TempEntCallback ( struct tempent_s *ent, float frametime, float currenttime )
-{
-	int i;
-
-	for ( i = 0; i < 3; i++ )
-	{
-		ent->entity.curstate.origin[ i ] += ent->entity.baseline.origin[ i ] * frametime;
-	}
-}
-
-void TempEnts( void )
-{
-	static float lasttime;
-	float curtime;
-	
-	curtime = gEngfuncs.GetClientTime();
-
-	if ( ( curtime - lasttime ) < 10.0 )
-		return;
-
-	lasttime = curtime;
-
-	TEMPENTITY *p;
-	int i, j;
-	struct model_s *mod;
-	vec3_t origin;
-	int index;
-
-	mod = gEngfuncs.CL_LoadModel( "sprites/laserdot.spr", &index );
-
-	for ( i = 0; i < 100; i++ )
-	{
-		for ( j = 0; j < 3; j++ )
-		{
-			origin[ j ] = v_origin[ j ];
-			if ( j != 2 )
-			{
-				origin[ j ] += 75;
-			}
-		}
-
-		p = gEngfuncs.pEfxAPI->CL_TentEntAllocCustom( (float *)&origin, mod, 0, TempEntCallback );
-		if ( !p )
-			break;
-
-		for ( j = 0; j < 3; j++ )
-		{
-			p->entity.curstate.origin[ j ] = origin[ j ];
-
-			// Store velocity in baseline origin
-			p->entity.baseline.origin[ j ] = gEngfuncs.pfnRandomFloat( -100, 100 );
-		}
-
-		// p->die is set to current time so all you have to do is add an additional time to it
-		p->die += 10.0;
-	}
-}
-*/
-
-#if defined( BEAM_TEST )
-// Note can't index beam[ 0 ] in Beam callback, so don't use that index
-// Room for 1 beam ( 0 can't be used )
-static cl_entity_t beams[ 2 ];
-
-void BeamEndModel( void )
-{
-	cl_entity_t *player, *model;
-	int modelindex;
-	struct model_s *mod;
-
-	// Load it up with some bogus data
-	player = gEngfuncs.GetLocalPlayer();
-	if ( !player )
-		return;
-
-	mod = gEngfuncs.CL_LoadModel( "models/sentry3.mdl", &modelindex );
-	if ( !mod )
-		return;
-
-	// Slot 1
-	model = &beams[ 1 ];
-
-	*model = *player;
-	model->player = 0;
-	model->model = mod;
-	model->curstate.modelindex = modelindex;
-		
-	// Move it out a bit
-	model->origin[0] = player->origin[0] - 100;
-	model->origin[1] = player->origin[1];
-
-	model->attachment[0] = model->origin;
-	model->attachment[1] = model->origin;
-	model->attachment[2] = model->origin;
-	model->attachment[3] = model->origin;
-
-	gEngfuncs.CL_CreateVisibleEntity( ET_NORMAL, model );
-}
-
-void Beams( void )
-{
-	static float lasttime;
-	float curtime;
-	struct model_s *mod;
-	int index;
-
-	BeamEndModel();
-	
-	curtime = gEngfuncs.GetClientTime();
-	float end[ 3 ];
-
-	if ( ( curtime - lasttime ) < 10.0 )
-		return;
-
-	mod = gEngfuncs.CL_LoadModel( "sprites/laserbeam.spr", &index );
-	if ( !mod )
-		return;
-
-	lasttime = curtime;
-
-	end [ 0 ] = v_origin.x + 100;
-	end [ 1 ] = v_origin.y + 100;
-	end [ 2 ] = v_origin.z;
-
-	BEAM *p1;
-	p1 = gEngfuncs.pEfxAPI->R_BeamEntPoint( -1, end, index,
-		10.0, 2.0, 0.3, 1.0, 5.0, 0.0, 1.0, 1.0, 1.0, 1.0 );
-}
-#endif
 
 /*
 =========================
@@ -528,29 +247,6 @@ Gives us a chance to add additional entities to the render this frame
 */
 void DLLEXPORT HUD_CreateEntities( void )
 {
-	// e.g., create a persistent cl_entity_t somewhere.
-	// Load an appropriate model into it ( gEngfuncs.CL_LoadModel )
-	// Call gEngfuncs.CL_CreateVisibleEntity to add it to the visedicts list
-/*
-#if defined( TEST_IT )
-	MoveModel();
-#endif
-
-#if defined( TRACE_TEST )
-	TraceModel();
-#endif
-*/
-/*
-	Particles();
-*/
-/*
-	TempEnts();
-*/
-
-#if defined( BEAM_TEST )
-	Beams();
-#endif
-
 	// Add in any game specific objects
 	Game_AddObjects();
 
@@ -805,7 +501,6 @@ void DLLEXPORT HUD_TempEntUpdate (
 					gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 
 					gEngfuncs.pEventAPI->EV_PlayerTrace( pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX, -1, &pmtrace );
-
 
 					if ( pmtrace.fraction != 1 )
 					{
