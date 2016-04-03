@@ -30,6 +30,11 @@
 #define DRAW_UTIL_H
 // Drawing primitives
 
+#define DHN_DRAWZERO 1
+#define DHN_2DIGITS  2
+#define DHN_3DIGITS  4
+
+
 class DrawUtils
 {
 public:
@@ -47,15 +52,15 @@ public:
 						   int r, int g, int b);
 
 	static int DrawHudString(int x, int y, int iMaxX, const char *szString,
-						 int r, int g, int b, bool drawing = false );
+						 int r, int g, int b, float scale = 0.0f, bool drawing = false );
 
 	static int DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString,
-								 int r, int g, int b, bool drawing = false );
+								 int r, int g, int b, float scale = 0.0f, bool drawing = false );
 
 	static int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber,
-								int r, int g, int b );
+								int r, int g, int b, float scale = 0.0f );
 
-	static int HudStringLen( const char *szIt );
+	static int HudStringLen( const char *szIt, float scale = 1.0f );
 
 	static int GetNumWidth(int iNumber, int iFlags);
 
@@ -69,7 +74,7 @@ public:
 
 	static void ConsoleStringSize( const char *szIt, int *width, int *height );
 
-	static int TextMessageDrawChar( int x, int y, int number, int r, int g, int b );
+	static int TextMessageDrawChar( int x, int y, int number, int r, int g, int b, float scale = 0.0f );
 
 	static inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)
 	{

@@ -33,19 +33,12 @@
 #include "csprite.h"
 #include "draw_util.h"
 
-#define DHN_DRAWZERO 1
-#define DHN_2DIGITS  2
-#define DHN_3DIGITS  4
 #define MIN_ALPHA	 100	
 
 #define		HUDELEM_ACTIVE	1
 
 #define CHudMsgFunc(x) int MsgFunc_##x(const char *pszName, int iSize, void *buf)
 #define CHudUserCmd(x) void UserCmd_##x()
-
-typedef struct {
-	int x, y;
-} POSITION;
 
 enum 
 { 
@@ -54,10 +47,6 @@ enum
 	MAX_TEAM_NAME = 16,
 	MAX_HOSTAGES = 24,
 };
-
-typedef struct {
-	unsigned char r,g,b,a;
-} RGBA;
 
 typedef struct cvar_s cvar_t;
 extern cvar_t *cl_righthand;
@@ -68,6 +57,11 @@ extern cvar_t *cl_min_ct;
 extern const char *sPlayerModelFiles[];
 
 class CClientSprite;
+
+struct RGBA
+{
+	unsigned char r, g, b, a;
+};
 
 inline bool BIsValidTModelIndex( int i )
 {
@@ -98,7 +92,6 @@ inline bool BIsValidCTModelIndex( int i )
 class CHudBase
 {
 public:
-	POSITION  m_pos;
 	int   m_type;
 	int	  m_iFlags; // active, moving,
 	virtual		~CHudBase() {}
@@ -980,7 +973,6 @@ private:
 
 extern CHud gHUD;
 
-extern int g_iPlayerClass;
 extern int g_iTeamNumber;
 extern int g_iUser1;
 extern int g_iUser2;
