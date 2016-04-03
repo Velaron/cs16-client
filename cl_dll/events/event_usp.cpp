@@ -76,7 +76,7 @@ void EV_FireUSP( event_args_t *args )
 
 	idx = args->entindex;
 	bool silencer_on = !args->bparam2;
-	bool empty		 = !!args->bparam1;
+	bool empty		 = !args->bparam1;
 	VectorCopy( args->origin, origin );
 	angles.x = (long double)args->iparam1 / 100 + args->angles[0];
 	angles.y = (long double)args->iparam2 / 100 + args->angles[1];

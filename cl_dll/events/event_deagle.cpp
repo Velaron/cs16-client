@@ -64,7 +64,14 @@ void EV_FireDEAGLE( event_args_t *args )
 	{
 		++g_iShotsFired;
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(DEAGLE_SHOOT1, DEAGLE_SHOOT2), 2);
+		if( args->bparam1 )
+		{
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( gEngfuncs.pfnRandomLong(DEAGLE_SHOOT1, DEAGLE_SHOOT2), 2 );
+		}
+		else
+		{
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( DEAGLE_SHOOT_EMPTY, 2 );
+		}
 		if( !cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -11.0, -16.0, 0);
