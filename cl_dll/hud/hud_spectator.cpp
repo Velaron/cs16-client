@@ -62,7 +62,6 @@ void SpectatorMode(void)
 void SpectatorSpray(void)
 {
 	vec3_t forward;
-	char string[128];
 
 	if ( !gEngfuncs.IsSpectateOnly() )
 		return;
@@ -73,6 +72,7 @@ void SpectatorSpray(void)
 	pmtrace_t * trace = gEngfuncs.PM_TraceLine( v_origin, forward, PM_TRACELINE_PHYSENTSONLY, 2, -1 );
 	if ( trace->fraction != 1.0 )
 	{
+		char string[128];
 		sprintf(string, "drc_spray %.2f %.2f %.2f %i",
 				trace->endpos[0], trace->endpos[1], trace->endpos[2], trace->ent );
 		gEngfuncs.pfnServerCmd(string);
@@ -546,7 +546,6 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 	{
 	case DRC_CMD_START	:
 		// now we have to do some things clientside, since the proxy doesn't know our mod
-		g_iPlayerClass = 0;
 		g_iTeamNumber = 0;
 
 		// fake a InitHUD & ResetHUD message

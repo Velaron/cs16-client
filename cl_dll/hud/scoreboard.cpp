@@ -37,7 +37,6 @@ int g_iUser1;
 int g_iUser2;
 int g_iUser3;
 int g_iTeamNumber;
-int g_iPlayerClass;
 
 
 // X positions
