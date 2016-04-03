@@ -32,17 +32,85 @@
 vec3_t vec3_origin = {0,0,0};
 int nanmask = 255<<23;
 
+/*
+=================
+rsqrt
+=================
+*/
+float rsqrt( float number )
+{
+	int	i;
+	float	x, y;
+
+	if( number == 0.0f )
+		return 0.0f;
+
+	x = number * 0.5f;
+	i = *(int *)&number;	// evil floating point bit level hacking
+	i = 0x5f3759df - (i >> 1);	// what the fuck?
+	y = *(float *)&i;
+	y = y * (1.5f - (x * y * y));	// first iteration
+
+	return y;
+}
+
 float	anglemod(float a)
 {
 	a = (360.0/65536) * ((int)(a*(65536/360.0)) & 65535);
 	return a;
 }
+#define RAD2DEG( x )	((float)(x) * (float)(180.f / M_PI))
+#define DEG2RAD( x )	((float)(x) * (float)(M_PI / 180.f))
+
+#ifdef VECTORIZE_SINCOS
+// Test shown that this is not so effictively
+#if defined(__SSE__) || defined(_M_IX86_FP)
+#if defined(__SSE2__) || defined(_M_IX86_FP)
+  #define USE_SSE2
+ #endif
+#include "sse_mathfun.h"
+#endif
+
+
+#if defined(__ARM_NEON__) || defined(__NEON__)
+	#include "neon_mathfun.h"
+#endif
+
+
+void SinCosFastVector(float r1, float r2, float r3, float r4,
+					  float *s0, float *s1, float *s2, float *s3,
+					  float *c0, float *c1, float *c2, float *c3)
+{
+	v4sf rad_vector = {r1, r2, r3, r4};
+	v4sf sin_vector, cos_vector;
+
+	sincos_ps(rad_vector, &sin_vector, &cos_vector);
+
+	*s0 = sin_vector[0];
+	if(s1) *s1 = sin_vector[1];
+	if(s2) *s2 = sin_vector[2];
+	if(s3) *s3 = sin_vector[3];
+
+	*c0 = cos_vector[0];
+	if(s1) *c1 = cos_vector[1];
+	if(s2) *c2 = cos_vector[2];
+	if(s3) *c3 = cos_vector[3];
+}
+#endif
 
 void AngleVectors (const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
-	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
-	
+
+
+#ifdef VECTORIZE_SINCOS
+	SinCosFastVector( DEG2RAD(angles[YAW]),
+					  DEG2RAD(angles[PITCH]),
+					  DEG2RAD(angles[ROLL]), 0,
+					  &sy, &sp, &sr, NULL,
+					  &cy, &cp, &cr, NULL);
+#else
+	float		angle;
 	angle = angles[YAW] * (M_PI*2 / 360);
 	sy = sin(angle);
 	cy = cos(angle);
@@ -52,6 +120,7 @@ void AngleVectors (const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	angle = angles[ROLL] * (M_PI*2 / 360);
 	sr = sin(angle);
 	cr = cos(angle);
+#endif
 
 	if (forward)
 	{
@@ -75,9 +144,16 @@ void AngleVectors (const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 
 void AngleVectorsTranspose (const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
-	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
 	
+#ifdef VECTORIZE_SINCOS
+	SinCosFastVector( DEG2RAD(angles[YAW]),
+					  DEG2RAD(angles[PITCH]),
+					  DEG2RAD(angles[ROLL]), 0,
+					  &sy, &sp, &sr, NULL,
+					  &cy, &cp, &cr, NULL);
+#else
+	float		angle;
 	angle = angles[YAW] * (M_PI*2 / 360);
 	sy = sin(angle);
 	cy = cos(angle);
@@ -87,6 +163,7 @@ void AngleVectorsTranspose (const vec3_t angles, vec3_t forward, vec3_t right, v
 	angle = angles[ROLL] * (M_PI*2 / 360);
 	sr = sin(angle);
 	cr = cos(angle);
+#endif
 
 	if (forward)
 	{
@@ -111,9 +188,16 @@ void AngleVectorsTranspose (const vec3_t angles, vec3_t forward, vec3_t right, v
 
 void AngleMatrix (const vec3_t angles, float (*matrix)[4] )
 {
-	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
 	
+#ifdef VECTORIZE_SINCOS
+	SinCosFastVector( DEG2RAD(angles[YAW]),
+					  DEG2RAD(angles[PITCH]),
+					  DEG2RAD(angles[ROLL]), 0,
+					  &sy, &sp, &sr, NULL,
+					  &cy, &cp, &cr, NULL);
+#else
+	float		angle;
 	angle = angles[YAW] * (M_PI*2 / 360);
 	sy = sin(angle);
 	cy = cos(angle);
@@ -123,6 +207,7 @@ void AngleMatrix (const vec3_t angles, float (*matrix)[4] )
 	angle = angles[ROLL] * (M_PI*2 / 360);
 	sr = sin(angle);
 	cr = cos(angle);
+#endif
 
 	// matrix = (YAW * PITCH) * ROLL
 	matrix[0][0] = cp*cy;
@@ -141,9 +226,16 @@ void AngleMatrix (const vec3_t angles, float (*matrix)[4] )
 
 void AngleIMatrix (const vec3_t angles, float matrix[3][4] )
 {
-	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
 	
+#ifdef VECTORIZE_SINCOS
+	SinCosFastVector( DEG2RAD(angles[YAW]),
+					  DEG2RAD(angles[PITCH]),
+					  DEG2RAD(angles[ROLL]), 0,
+					  &sy, &sp, &sr, NULL,
+					  &cy, &cp, &cr, NULL);
+#else
+	float		angle;
 	angle = angles[YAW] * (M_PI*2 / 360);
 	sy = sin(angle);
 	cy = cos(angle);
@@ -153,6 +245,7 @@ void AngleIMatrix (const vec3_t angles, float matrix[3][4] )
 	angle = angles[ROLL] * (M_PI*2 / 360);
 	sr = sin(angle);
 	cr = cos(angle);
+#endif
 
 	// matrix = (YAW * PITCH) * ROLL
 	matrix[0][0] = cp*cy;
@@ -334,11 +427,10 @@ float VectorNormalize (vec3_t v)
 	float	length, ilength;
 
 	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);		// FIXME
 
 	if (length)
 	{
-		ilength = 1/length;
+		ilength = rsqrt( length );
 		v[0] *= ilength;
 		v[1] *= ilength;
 		v[2] *= ilength;

@@ -34,6 +34,23 @@
 
 double sqrt(double x);
 
+float rsqrt( float number )
+{
+	int	i;
+	float	x, y;
+
+	if( number == 0.0f )
+		return 0.0f;
+
+	x = number * 0.5f;
+	i = *(int *)&number;	// evil floating point bit level hacking
+	i = 0x5f3759df - (i >> 1);	// what the fuck?
+	y = *(float *)&i;
+	y = y * (1.5f - (x * y * y));	// first iteration
+
+	return y;
+}
+
 float Length(const float *v)
 {
 	int		i;
@@ -78,17 +95,16 @@ void VectorAngles( const float *forward, float *angles )
 
 float VectorNormalize (float *v)
 {
-	float	length, ilength;
+	float	length;
 
 	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);		// FIXME
+	length = rsqrt (length);
 
 	if (length)
 	{
-		ilength = 1/length;
-		v[0] *= ilength;
-		v[1] *= ilength;
-		v[2] *= ilength;
+		v[0] *= length;
+		v[1] *= length;
+		v[2] *= length;
 	}
 
 	return length;

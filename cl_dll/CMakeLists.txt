@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 2.6.0)
 project (CLDLL)
 
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS}  -flto -march=native -Wall -Wl,--no-undefined")
+set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wl,--no-undefined")
 set (CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 set (CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  -O3")
 set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Os")
@@ -195,6 +195,7 @@ include_directories (
 	include/
 	include/hud/
 	include/studio/
+	include/math/
 	../cl_dll/
 	../common/
 	../engine/
@@ -205,7 +206,7 @@ include_directories (
 add_library (${CLDLL_LIBRARY} SHARED ${CLDLL_SOURCES})
 add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT
 	-DLINUX -D_LINUX -DCLIENT_WEAPONS -DCLIENT_DLL
-	-D_DEBUG -D_CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
+	-D_DEBUG -DVECTORIZE_SINCOS
 	-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp)
 target_link_libraries( ${CLDLL_LIBRARY} ${CMAKE_DL_LIBS} -L/usr/lib/i386-linux-gnu -lSDL2 )
 

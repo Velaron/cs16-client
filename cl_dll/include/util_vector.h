@@ -21,6 +21,8 @@
 #include "stdlib.h"
 #include "math.h"
 
+float rsqrt( float x );
+
 // Header file containing definition of globalvars_t and entvars_t
 typedef int	func_t;					//
 typedef int	string_t;				// from engine's pr_comp.h;
@@ -44,18 +46,9 @@ public:
 
 	inline Vector2D Normalize ( void ) const
 	{
-		Vector2D vec2;
-
-		float flLen = Length();
-		if ( flLen == 0 )
-		{
-			return Vector2D( (float)0, (float)0 );
-		}
-		else
-		{
-			flLen = 1 / flLen;
-			return Vector2D( x * flLen, y * flLen );
-		}
+		float flLen = rsqrt( x * x + y * y );
+		if ( flLen == 0 ) return Vector2D( 0.0f, 0.0f );
+		else return Vector2D( x * flLen, y * flLen );
 	}
 
 	vec_t	x, y;
@@ -94,9 +87,12 @@ public:
 	operator const float *() const					{ return &x; } // Vectors will now automatically convert to float * when needed
 	inline Vector Normalize(void) const
 	{
-		float flLen = Length();
+		/*float flLen = Length();
 		if (flLen == 0) return Vector(0,0,1); // ????
-		flLen = 1 / flLen;
+		flLen = 1 / flLen;*/
+
+		float flLen = rsqrt( x * x + y * y + z * z );
+		if( flLen == 0.0f ) return Vector( 0, 0, 1 ); // ????
 		return Vector(x * flLen, y * flLen, z * flLen);
 	}
 

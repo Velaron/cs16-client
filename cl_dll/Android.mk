@@ -141,6 +141,7 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH) \
 	$(LOCAL_PATH)/include \
 	$(LOCAL_PATH)/include/hud \
 	$(LOCAL_PATH)/include/studio \
+	$(LOCAL_PATH)/include/math \
 	$(LOCAL_PATH)/../common \
 	$(LOCAL_PATH)/../engine \
 	$(LOCAL_PATH)/../game_shared \

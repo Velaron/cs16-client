@@ -392,9 +392,9 @@ Idle swaying
 */
 void V_AddIdle ( struct ref_params_s *pparams )
 {
-	pparams->viewangles[ROLL] += v_idlescale * sin(pparams->time*v_iroll_cycle.value) * v_iroll_level.value;
-	pparams->viewangles[PITCH] += v_idlescale * sin(pparams->time*v_ipitch_cycle.value) * v_ipitch_level.value;
-	pparams->viewangles[YAW] += v_idlescale * sin(pparams->time*v_iyaw_cycle.value) * v_iyaw_level.value;
+	pparams->viewangles[ROLL]  += v_idlescale * sin(pparams->time * v_iroll_cycle.value) * v_iroll_level.value;
+	pparams->viewangles[PITCH] += v_idlescale * sin(pparams->time * v_ipitch_cycle.value) * v_ipitch_level.value;
+	pparams->viewangles[YAW]   += v_idlescale * sin(pparams->time * v_iyaw_cycle.value) * v_iyaw_level.value;
 }
 
 

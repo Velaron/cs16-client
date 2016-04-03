@@ -12,6 +12,44 @@
 #include "com_model.h"
 #include "studio_util.h"
 
+#ifdef VECTORIZE_SINCOS
+
+// Test shown that this is not so effictively
+#if defined(__SSE__) || defined(_M_IX86_FP)
+#if defined(__SSE2__) || defined(_M_IX86_FP)
+  #define USE_SSE2
+ #endif
+#include "sse_mathfun.h"
+#endif
+
+
+#if defined(__ARM_NEON__) || defined(__NEON__)
+	#include "neon_mathfun.h"
+#endif
+
+
+void SinCosFastVector(float r1, float r2, float r3, float r4,
+					  float *s0, float *s1, float *s2, float *s3,
+					  float *c0, float *c1, float *c2, float *c3)
+{
+	v4sf rad_vector = {r1, r2, r3, r4};
+	v4sf sin_vector, cos_vector;
+
+	sincos_ps(rad_vector, &sin_vector, &cos_vector);
+
+	*s0 = sin_vector[0];
+	if(s1) *s1 = sin_vector[1];
+	if(s2) *s2 = sin_vector[2];
+	if(s3) *s3 = sin_vector[3];
+
+	*c0 = cos_vector[0];
+	if(s1) *c1 = cos_vector[1];
+	if(s2) *c2 = cos_vector[2];
+	if(s3) *c3 = cos_vector[3];
+}
+#endif
+
+
 /*
 ====================
 AngleMatrix
@@ -20,9 +58,18 @@ AngleMatrix
 */
 void AngleMatrix (const float *angles, float (*matrix)[4] )
 {
-	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
 	
+
+#ifdef VECTORIZE_SINCOS
+	SinCosFastVector( DEG2RAD(angles[YAW]),
+					  DEG2RAD(angles[PITCH]),
+					  DEG2RAD(angles[ROLL]), 0,
+					  &sy, &sp, &sr, NULL,
+					  &cy, &cp, &cr, NULL);
+#else
+	float		angle;
+
 	angle = angles[YAW] * (M_PI*2 / 360);
 	sy = sin(angle);
 	cy = cos(angle);
@@ -32,6 +79,7 @@ void AngleMatrix (const float *angles, float (*matrix)[4] )
 	angle = angles[ROLL] * (M_PI*2 / 360);
 	sr = sin(angle);
 	cr = cos(angle);
+#endif
 
 	// matrix = (YAW * PITCH) * ROLL
 	matrix[0][0] = cp*cy;
@@ -135,8 +183,16 @@ AngleQuaternion
 */
 void AngleQuaternion( float *angles, vec4_t quaternion )
 {
-	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
+
+#ifdef VECTORIZE_SINCOS
+	SinCosFastVector( angles[2] * 0.5,
+					  angles[1] * 0.5,
+					  angles[0] * 0.5, 0,
+					  &sy, &sp, &sr, NULL,
+					  &cy, &cp, &cr, NULL);
+#else
+	float		angle;
 
 	// FIXME: rescale the inputs to 1/2 angle
 	angle = angles[2] * 0.5;
@@ -148,6 +204,7 @@ void AngleQuaternion( float *angles, vec4_t quaternion )
 	angle = angles[0] * 0.5;
 	sr = sin(angle);
 	cr = cos(angle);
+#endif
 
 	quaternion[0] = sr*cp*cy-cr*sp*sy; // X
 	quaternion[1] = cr*sp*cy+sr*cp*sy; // Y
