@@ -100,7 +100,7 @@ void Localize_Init( )
 
 				if( pfile && gTitlesTXT.size() < gTitlesTXT.max_size() )
 				{
-					size_t iLen = strlen( szLocString );
+					size_t iLen = strlen( szLocString ) + 1;
 					char *szLocCopyString = new char[iLen];
 					strncpy(szLocCopyString, szLocString, iLen );
 					gTitlesTXT[ string(token) ] = szLocCopyString;
