@@ -32,8 +32,6 @@ DECLARE_MESSAGE( m_Message, HudTextArgs )
 
 // 1 Global client_textmessage_t for custom messages that aren't in the titles.txt
 client_textmessage_t	g_pCustomMessage;
-const char *g_pCustomName = "Custom";
-char g_pCustomText[1024];
 
 int CHudMessage::Init(void)
 {
@@ -404,6 +402,12 @@ int CHudMessage::Draw( float fTime )
 			else
 			{
 				// The message is over
+				if( !strcmp( m_pMessages[i]->pName, "Custom" ) )
+				{
+					delete[] m_pMessages[i]->pName;
+					delete[] m_pMessages[i]->pMessage;
+				}
+				delete m_pMessages[i];
 				m_pMessages[i] = NULL;
 			}
 		}
@@ -433,36 +437,45 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 				tempMessage = TextMessageGet( pName+1 );
 			else
 				tempMessage = TextMessageGet( pName );
-			// If we couldnt find it in the titles.txt, just create it
-			if ( !tempMessage )
-			{
-				g_pCustomMessage.effect = 2;
-				g_pCustomMessage.r1 = g_pCustomMessage.g1 = g_pCustomMessage.b1 = g_pCustomMessage.a1 = 100;
-				g_pCustomMessage.r2 = 240;
-				g_pCustomMessage.g2 = 110;
-				g_pCustomMessage.b2 = 0;
-				g_pCustomMessage.a2 = 0;
-				g_pCustomMessage.x = -1;		// Centered
-				g_pCustomMessage.y = 0.7;
-				g_pCustomMessage.fadein = 0.01;
-				g_pCustomMessage.fadeout = 1.5;
-				g_pCustomMessage.fxtime = 0.25;
-				g_pCustomMessage.holdtime = 5;
-				g_pCustomMessage.pName = g_pCustomName;
-				strncpy( g_pCustomText, pName, sizeof(g_pCustomText) );
-				g_pCustomMessage.pMessage = g_pCustomText;
 
-				tempMessage = &g_pCustomMessage;
+			client_textmessage_t *message = new client_textmessage_t;
+			if( tempMessage )
+			{
+				*message = *tempMessage;
+
+				// localize again, if it need
+				if( message->pMessage[0] == '#' )
+				{
+					char *szCustomName = new char[10];
+					char *szCustomText = new char[1024];
+					strcpy( szCustomName, "Custom" );
+					strcpy( szCustomText, pName );
+					message->pMessage = szCustomText;
+					message->pName = szCustomName;
+				}
 			}
 			else
 			{
-				// we have found message in titles.txt, but it still need translating
-				if( tempMessage->pMessage[0] == '#' )
-				{
-					char *temp = (char *)tempMessage->pMessage;
-					tempMessage->pMessage = Localize(temp+1);
-					free( temp );
-				}
+				char *szCustomName = new char[10];
+				char *szCustomText = new char[1024];
+				strcpy( szCustomName, "Custom" );
+				strcpy( szCustomText, pName );
+
+				// If we couldnt find it in the titles.txt, just create it
+				message->effect = 2;
+				message->r1 = message->g1 = message->b1 = message->a1 = 100;
+				message->r2 = 240;
+				message->g2 = 110;
+				message->b2 = 0;
+				message->a2 = 0;
+				message->x = -1;		// Centered
+				message->y = 0.7;
+				message->fadein = 0.01;
+				message->fadeout = 1.5;
+				message->fxtime = 0.25;
+				message->holdtime = 5;
+				message->pName = szCustomName;
+				message->pMessage = szCustomText;
 			}
 
 			for ( j = 0; j < maxHUDMessages; j++ )
@@ -470,23 +483,26 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 				if ( m_pMessages[j] )
 				{
 					// is this message already in the list
-					if ( !strcmp( tempMessage->pMessage, m_pMessages[j]->pMessage ) )
+					if ( !strcmp( message->pMessage, m_pMessages[j]->pMessage ) )
 					{
 						return;
 					}
 
 					// get rid of any other messages in same location (only one displays at a time)
-					if ( fabs( tempMessage->y - m_pMessages[j]->y ) < 0.0001 )
+					if ( fabs( message->y - m_pMessages[j]->y ) < 0.0001 && fabs( message->x - m_pMessages[j]->x ) < 0.0001 )
 					{
-						if ( fabs( tempMessage->x - m_pMessages[j]->x ) < 0.0001 )
+						if( !strcmp( m_pMessages[j]->pName, "Custom" ) )
 						{
-							m_pMessages[j] = NULL;
+							delete[] m_pMessages[j]->pName;
+							delete[] m_pMessages[j]->pMessage;
 						}
+						delete m_pMessages[j];
+						m_pMessages[j] = NULL;
 					}
 				}
 			}
 
-			m_pMessages[i] = tempMessage;
+			m_pMessages[i] = message;
 			m_startTime[i] = time;
 			return;
 		}
