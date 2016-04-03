@@ -39,6 +39,8 @@
 
 #include "cl_entity.h"
 
+#include "ammo.h"
+#include "ammohistory.h"
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
 #endif
@@ -241,12 +243,11 @@ BOOL CBasePlayerWeapon :: DefaultReload( int iClipSize, int iAnim, float fDelay,
 	if( !m_pPlayer->m_pActiveItem )
 		return FALSE;
 
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	if ( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
 		return FALSE;
 
 	int j = min(iClipSize - m_iClip, player.m_rgAmmo[m_iPrimaryAmmoType]);
-
-	if (j == 0)
+	if ( j == 0 )
 		return FALSE;
 
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + fDelay;
@@ -324,6 +325,64 @@ bool CBasePlayerWeapon::HasSecondaryAttack()
 	}
 
 	return true;
+}
+
+BOOL UTIL_GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon)
+{
+	if (!pCurrentWeapon->CanHolster())
+	{
+		// can't put this gun away right now, so can't switch.
+		return FALSE;
+	}
+
+	int iBestWeight = -1; // no weapon lower than -1 can be autoswitched to
+	WEAPON *pBest = NULL;
+
+	int i = 0;
+	for ( WEAPON *pWpn = gWR.GetFirstPos(i); pWpn; pWpn = gWR.GetNextActivePos(i, pWpn->iSlotPos) )
+	{
+		int iCurrentId = pWpn->iId;
+		CBasePlayerWeapon *pWpnEnt = g_pWpns[iCurrentId];
+
+		if( pWpnEnt && iBestWeight < pWpnEnt->iWeight() )
+		{
+			if( pCurrentWeapon->m_iId != iCurrentId )
+			{
+				pBest = pWpn;
+				iBestWeight = pWpnEnt->iWeight();
+			}
+		}
+		++i;
+	}
+
+	// if we make it here, we've checked all the weapons and found no useable
+	// weapon in the same catagory as the current weapon.
+
+	// if pBest is null, we didn't find ANYTHING. Shouldn't be possible- should always
+	// at least get the crowbar, but ya never know.
+	if ( !pBest )
+		return FALSE;
+
+	CBasePlayerWeapon *pBestWeapon = g_pWpns[pBest->iId];
+
+	if( !pPlayer || !pBestWeapon )
+		return TRUE;
+
+	if( pBestWeapon->CanDeploy() )
+	{
+		if( pPlayer->m_pActiveItem )
+			pPlayer->m_pActiveItem->Holster();
+
+		pPlayer->m_pActiveItem = pBestWeapon;
+		pBestWeapon->Deploy();
+	}
+
+	return TRUE;
+}
+
+void CBasePlayerWeapon::RetireWeapon( void )
+{
+	UTIL_GetNextBestWeapon( m_pPlayer, this );
 }
 
 void CBasePlayerWeapon::FireRemaining(int &shotsFired, float &shootTime, BOOL isGlock18)
@@ -562,7 +621,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		FireRemaining(m_iFamasShotsFired, m_flFamasShoot, FALSE);
 	}
 
-	if (m_flNextPrimaryAttack <= 0.0f)
+	if (m_flNextPrimaryAttack <= UTIL_WeaponTimeBase())
 	{
 		if (m_pPlayer->m_bResumeZoom)
 		{
@@ -649,18 +708,13 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 			m_iShotsFired = 0;
 
 
-		if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN))
+		if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN) &&
+				m_iClip == 0 && !(iFlags() & ITEM_FLAG_NOAUTORELOAD) &&
+				m_flNextPrimaryAttack < UTIL_WeaponTimeBase() &&
+				m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
 		{
-
-			if (m_iClip == 0 && !(iFlags() & ITEM_FLAG_NOAUTORELOAD)
-					&& m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
-			{
-				if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
-				{
-					Reload();
-					return;
-				}
-			}
+			Reload();
+			return;
 		}
 
 		WeaponIdle();
@@ -1226,20 +1280,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	// If we are running events/etc. go ahead and see if we
 	//  managed to die between last frame and this one
 	// If so, run the appropriate player killed or spawn function
-	if ( g_runfuncs )
-	{
-		if ( to->client.health <= 0 && lasthealth > 0 )
-		{
-			player.Killed( NULL, 0 );
 
-		}
-		else if ( to->client.health > 0 && lasthealth <= 0 )
-		{
-			player.Spawn();
-		}
-
-		lasthealth = to->client.health;
-	}
 
 	// We are not predicting the current weapon, just bow out here.
 	if ( !pWeapon )
@@ -1267,10 +1308,13 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pCurrent->m_iWeaponState		= pfrom->m_iWeaponState;
 		pCurrent->m_flLastFire			= pfrom->m_fAimedDamage;
 		pCurrent->m_iShotsFired			= pfrom->m_fInZoom;
-		pCurrent->m_iSecondaryAmmoType		= (int)from->client.vuser3[ 2 ];
-		pCurrent->m_iPrimaryAmmoType		= (int)from->client.vuser4[ 0 ];
-		player.m_rgAmmo[ pCurrent->m_iPrimaryAmmoType ]	= (int)from->client.vuser4[ 1 ];
 	}
+
+	pWeapon->m_iPrimaryAmmoType		= (int)from->client.vuser4.x;
+	if( pWeapon->m_iPrimaryAmmoType < 0 || pWeapon->m_iPrimaryAmmoType > MAX_AMMO_TYPES )
+		pWeapon->m_iPrimaryAmmoType = 0;
+	else
+		player.m_rgAmmo[ pWeapon->m_iPrimaryAmmoType ]	= (int)from->client.vuser4.y;
 
 	if( pWeapon )
 		g_iWeaponFlags = pWeapon->m_iWeaponState;
@@ -1309,16 +1353,18 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	g_flPlayerSpeed		= from->client.velocity.Length();
 
 	//Stores all our ammo info, so the client side weapons can use them.
-	player.ammo_9mm			= (int)from->client.ammo_nails;
-	player.ammo_556nato		= (int)from->client.ammo_cells;
-	player.ammo_buckshot	= (int)from->client.ammo_shells;
-	player.ammo_556natobox	= (int)from->client.ammo_rockets;
-	player.ammo_762nato		= (int)from->client.vuser2.x;
-	player.ammo_45acp		= (int)from->client.vuser2.y;
-	player.ammo_50ae		= (int)from->client.vuser2.z;
-	player.ammo_338mag		= (int)from->client.vuser3.x;
-	player.ammo_57mm		= (int)from->client.vuser3.y;
-	player.ammo_357sig		= (int)from->client.vuser3.z;
+	player.ammo_9mm			= from->client.ammo_nails;
+	player.ammo_556nato		= from->client.ammo_cells;
+	player.ammo_buckshot	= from->client.ammo_shells;
+	player.ammo_556natobox	= from->client.ammo_rockets;
+
+	player.ammo_762nato		= (signed int) floor(from->client.vuser2.x);
+	player.ammo_45acp		= (signed int) floor(from->client.vuser2.y);
+	player.ammo_50ae		= (signed int) floor(from->client.vuser2.z);
+
+	player.ammo_338mag		= (signed int) floor(from->client.vuser3.x);
+	player.ammo_57mm		= (signed int) floor(from->client.vuser3.y);
+	player.ammo_357sig		= (signed int) floor(from->client.vuser3.z);
 
 	cl_entity_t *pplayer = gEngfuncs.GetLocalPlayer();
 	if( pplayer )
@@ -1346,19 +1392,28 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	if ( ( player.pev->deadflag != ( DEAD_DISCARDBODY + 1 ) ) &&
 		 !CL_IsDead() && player.pev->viewmodel && !g_iUser1 )
 	{
-		/*if( g_bHoldingKnife && pWeapon->m_iClientWeaponState &&
+		if( g_bHoldingKnife && pWeapon->m_iClientWeaponState &&
 				player.pev->button & IN_FORWARD )
 			player.m_flNextAttack = 0;
-		else if( player.m_flNextAttack > 0 )
-		{
-
-		}*/
-		if ( player.m_flNextAttack <= 0 )
+		else if( player.m_flNextAttack <= 0 )
 		{
 			pWeapon->ItemPostFrame();
 		}
 	}
+	if ( g_runfuncs )
+	{
+		if ( to->client.health <= 0 && lasthealth > 0 )
+		{
+			player.Killed( NULL, 0 );
 
+		}
+		else if ( to->client.health > 0 && lasthealth <= 0 )
+		{
+			player.Spawn();
+		}
+
+		lasthealth = to->client.health;
+	}
 	// Assume that we are not going to switch weapons
 	to->client.m_iId					= from->client.m_iId;
 
