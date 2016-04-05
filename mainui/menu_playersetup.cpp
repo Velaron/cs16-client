@@ -31,98 +31,97 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define ART_BANNER		"gfx/shell/head_customize"
 
-#define ID_BACKGROUND	0
-#define ID_BANNER		1
-#define ID_DONE		2
-#define ID_ADVOPTIONS	3
-#define ID_VIEW		4
-#define ID_NAME		5
-#define ID_MODEL		6
-#define ID_TOPCOLOR		7
-#define ID_BOTTOMCOLOR	8
-#define ID_HIMODELS		9
-#define ID_SHOWMODELS	10
+#undef ID_BACKGROUND
+enum
+{
+	ID_BACKGROUND = 0,
+	ID_BANNER,
+	ID_DONE,
+	ID_ADVOPTIONS,
+	ID_NAME,
+	ID_CROSSHAIRVIEW,
+	ID_CROSSHAIRSIZE,
+	ID_CROSSHAIRTRANSLUCENCY,
+	ID_CROSSHAIRCOLOR,
+	ID_SPRAYVIEW,
+	ID_SPRAYDECAL,
+	ID_SPRAYCOLOR
+};
 
-#define MAX_PLAYERMODELS	100
+#define MAX_SPRAYDECALS	50
 
 typedef struct
 {
-	char		models[MAX_PLAYERMODELS][CS_SIZE];
-	int		num_models;
-	char		currentModel[CS_SIZE];
-
-	ref_params_t	refdef;
-	cl_entity_t	*ent;
-	
 	menuFramework_s	menu;
-
 	menuBitmap_s	background;
 	menuBitmap_s	banner;
 
+	menuField_s	name;
 	menuPicButton_s	done;
 	menuPicButton_s	AdvOptions;
-	menuBitmap_s	view;
 
-	menuCheckBox_s	showModels;
-	menuCheckBox_s	hiModels;
-	menuSlider_s	topColor;
-	menuSlider_s	bottomColor;
+	menuBitmap_s	  crosshairView;
+	menuSpinControl_s crosshairSize;
+	menuSpinControl_s crosshairColor;
+	menuCheckBox_s    crosshairTranslucent;
 
-	menuField_s	name;
-	menuSpinControl_s	model;
+#if 0
+	char	sprays[MAX_SPRAYDECALS][CS_SIZE];
+	int		num_sprays;
+	char	currentspray[CS_SIZE];
+
+	menuBitmap_s	  sprayView;
+	menuSpinControl_s sprayDecals;
+	menuSpinControl_s sprayColor;
+#endif
 } uiPlayerSetup_t;
 
 static uiPlayerSetup_t	uiPlayerSetup;
-static HIMAGE		playerImage = 0;	// keep actual
-static char		lastImage[256];
+
+static char g_szCrosshairAvailColors[6][CS_SIZE] =
+{
+	"Green", "Red", "Blue", "Yellow", "Ltblue", ""
+};
+static byte g_iCrosshairAvailColors[6][3] =
+{
+	{ 50,  250, 50  },
+	{ 250, 50,  50  },
+	{ 50,  50,  250 },
+	{ 250, 250, 50  },
+	{ 50,  250, 250 },
+	{ 0,   0,   0   }
+};
+static char g_szCrosshairAvailSizes[4][CS_SIZE] =
+{
+	"auto", "small", "medium", "large"
+};
 
 /*
 =================
-UI_PlayerSetup_CalcFov
-
-assume refdef is valid
+UI_PlayerSetup_FindSprayDecals
 =================
 */
-static void UI_PlayerSetup_CalcFov( ref_params_t *fd )
+#if 0
+static void UI_PlayerSetup_FindSprayDecals( void )
 {
-	float x = fd->viewport[2] / tan( DEG2RAD( fd->fov_x ) * 0.5f );
-	float half_fov_y = atan( fd->viewport[3] / x );
-	fd->fov_y = RAD2DEG( half_fov_y ) * 2;
-}
-
-/*
-=================
-UI_PlayerSetup_FindModels
-=================
-*/
-static void UI_PlayerSetup_FindModels( void )
-{
-	char	name[256], path[256];
 	char	**filenames;
-	int	i, numFiles;
-	
-	uiPlayerSetup.num_models = 0;
+	int	numFiles;
+
+	uiPlayerSetup.num_sprays = 0;
 
 	// Get file list
-	filenames = FS_SEARCH(  "models/player/*", &numFiles, TRUE );
-	if( !numFiles ) filenames = FS_SEARCH(  "models/player/*", &numFiles, FALSE ); 
-#if 1
-	// add default singleplayer model
-	strcpy( uiPlayerSetup.models[uiPlayerSetup.num_models], "player" );
-	uiPlayerSetup.num_models++;
-#endif
-	// build the model list
-	for( i = 0; i < numFiles; i++ )
-	{
-		COM_FileBase( filenames[i], name );
-		sprintf( path, "models/player/%s/%s.mdl", name, name );
-		if( !FILE_EXISTS( path )) continue;
+	filenames = FS_SEARCH( "logos/*.bmp", &numFiles, FALSE );
 
-		strcpy( uiPlayerSetup.models[uiPlayerSetup.num_models], name );
-		uiPlayerSetup.num_models++;
+	// build the spray list
+	for( int i = 0; i < numFiles; i++ )
+	{
+		if( !FILE_EXISTS( filenames[i] )) continue;
+
+		strcpy( uiPlayerSetup.sprays[uiPlayerSetup.num_sprays], filenames[i] );
+		uiPlayerSetup.num_sprays++;
 	}
 }
-
+#endif
 /*
 =================
 UI_PlayerSetup_GetConfig
@@ -130,37 +129,60 @@ UI_PlayerSetup_GetConfig
 */
 static void UI_PlayerSetup_GetConfig( void )
 {
-	int	i;
-
 	strncpy( uiPlayerSetup.name.buffer, CVAR_GET_STRING( "name" ), sizeof( uiPlayerSetup.name.buffer ));
 
-	// find models
-	UI_PlayerSetup_FindModels();
+	char curColor[CS_SIZE];
+	int rgb[3];
+	strncpy( curColor, CVAR_GET_STRING("cl_crosshair_color"), CS_SIZE);
+	sscanf( curColor, "%d %d %d", rgb, rgb + 1, rgb + 2 );
 
-	// select current model
-	for( i = 0; i < uiPlayerSetup.num_models; i++ )
+	// check for custom colors
+	int i;
+	for( i = 0; i < 5; i++)
 	{
-		if( !stricmp( uiPlayerSetup.models[i], CVAR_GET_STRING( "model" )))
+		if( rgb[0] == g_iCrosshairAvailColors[i][0] &&
+			rgb[1] == g_iCrosshairAvailColors[i][1] &&
+			rgb[2] == g_iCrosshairAvailColors[i][2] )
 		{
-			uiPlayerSetup.model.curValue = (float)i;
 			break;
 		}
 	}
 
-	if( gMenu.m_gameinfo.flags & GFL_NOMODELS )
-		uiPlayerSetup.model.curValue = 0.0f; // force to default
+	if( i == 5 )
+	{
+		strcpy( g_szCrosshairAvailColors[i], curColor );
+		g_iCrosshairAvailColors[i][0] = rgb[0];
+		g_iCrosshairAvailColors[i][1] = rgb[1];
+		g_iCrosshairAvailColors[i][2] = rgb[2];
+		uiPlayerSetup.crosshairColor.maxValue = 5;
+	}
+	else
+	{
+		g_szCrosshairAvailColors[5][0] = '\0'; // mark that we're not used custom colors
+		uiPlayerSetup.crosshairColor.maxValue = 4;
+	}
 
-	strcpy( uiPlayerSetup.currentModel, uiPlayerSetup.models[(int)uiPlayerSetup.model.curValue] );
-	uiPlayerSetup.model.maxValue = (float)(uiPlayerSetup.num_models - 1);
+	uiPlayerSetup.crosshairColor.generic.name = g_szCrosshairAvailColors[i];
+	uiPlayerSetup.crosshairColor.curValue = i;
 
-	uiPlayerSetup.topColor.curValue = CVAR_GET_FLOAT( "topcolor" ) / 255;
-	uiPlayerSetup.bottomColor.curValue = CVAR_GET_FLOAT( "bottomcolor" ) / 255;
-
-	if( CVAR_GET_FLOAT( "cl_himodels" ))
-		uiPlayerSetup.hiModels.enabled = 1;
-
-	if( CVAR_GET_FLOAT( "ui_showmodels" ))
-		uiPlayerSetup.showModels.enabled = 1;
+	static char crosshairSize[CS_SIZE];
+	strncpy( crosshairSize, CVAR_GET_STRING( "cl_crosshair_size" ), CS_SIZE );
+	for( int i = 0; i < 4; i++ )
+	{
+		if( !stricmp( crosshairSize, g_szCrosshairAvailSizes[i] ) )
+		{
+			uiPlayerSetup.crosshairSize.generic.name = g_szCrosshairAvailSizes[i];
+			break;
+		}
+	}
+	// fix possible errors
+	if( i == 4 )
+	{
+		uiPlayerSetup.crosshairSize.generic.name = g_szCrosshairAvailSizes[0];
+		CVAR_SET_STRING( "cl_crosshair_size", "auto" );
+	}
+	if( CVAR_GET_FLOAT( "cl_crosshair_translucent") )
+		uiPlayerSetup.crosshairTranslucent.enabled = 1;
 }
 
 /*
@@ -170,12 +192,17 @@ UI_PlayerSetup_SetConfig
 */
 static void UI_PlayerSetup_SetConfig( void )
 {
-	CVAR_SET_STRING( "name", uiPlayerSetup.name.buffer );
-	CVAR_SET_STRING( "model", uiPlayerSetup.currentModel );
-	CVAR_SET_FLOAT( "topcolor", (int)(uiPlayerSetup.topColor.curValue * 255 ));
-	CVAR_SET_FLOAT( "bottomcolor", (int)(uiPlayerSetup.bottomColor.curValue * 255 ));
-	CVAR_SET_FLOAT( "cl_himodels", uiPlayerSetup.hiModels.enabled );
-	CVAR_SET_FLOAT( "ui_showmodels", uiPlayerSetup.showModels.enabled );
+	//CVAR_SET_STRING( "name", uiPlayerSetup.name.buffer );
+	char curColor[CS_SIZE];
+	int i = uiPlayerSetup.crosshairColor.curValue;
+	snprintf( curColor, CS_SIZE, "%i %i %i",
+			  g_iCrosshairAvailColors[i][0],
+			  g_iCrosshairAvailColors[i][1],
+			  g_iCrosshairAvailColors[i][2]
+			);
+	CVAR_SET_STRING( "cl_crosshair_color", curColor );
+	CVAR_SET_STRING( "cl_crosshair_size", uiPlayerSetup.crosshairSize.generic.name );
+	CVAR_SET_FLOAT( "cl_crosshair_translucent", uiPlayerSetup.crosshairTranslucent.enabled );
 }
 
 /*
@@ -185,73 +212,22 @@ UI_PlayerSetup_UpdateConfig
 */
 static void UI_PlayerSetup_UpdateConfig( void )
 {
-	char	path[256], name[256];
-	char	newImage[256];
-	int	topColor, bottomColor;
+	//CVAR_SET_STRING( "name", uiPlayerSetup.name.buffer );
+	char curColor[CS_SIZE];
+	int i = uiPlayerSetup.crosshairColor.curValue;
+	snprintf( curColor, CS_SIZE, "%i %i %i",
+			  g_iCrosshairAvailColors[i][0],
+			  g_iCrosshairAvailColors[i][1],
+			  g_iCrosshairAvailColors[i][2]
+			);
+	CVAR_SET_STRING( "cl_crosshair_color", curColor );
+	uiPlayerSetup.crosshairColor.generic.name = g_szCrosshairAvailColors[i];
 
-	// see if the model has changed
-	if( stricmp( uiPlayerSetup.currentModel, uiPlayerSetup.models[(int)uiPlayerSetup.model.curValue] ))
-	{
-		strcpy( uiPlayerSetup.currentModel, uiPlayerSetup.models[(int)uiPlayerSetup.model.curValue] );
-	}
+	i = uiPlayerSetup.crosshairSize.curValue;
+	uiPlayerSetup.crosshairSize.generic.name = g_szCrosshairAvailSizes[i];
 
-	uiPlayerSetup.model.generic.name = uiPlayerSetup.models[(int)uiPlayerSetup.model.curValue];
-	strcpy( name, uiPlayerSetup.models[(int)uiPlayerSetup.model.curValue] );
-
-	if( !stricmp( name, "player" ))
-	{
-		strcpy( path, "models/player.mdl" );
-		newImage[0] = '\0';
-	}
-	else
-	{
-		sprintf( path, "models/player/%s/%s.mdl", name, name );
-		sprintf( newImage, "models/player/%s/%s.bmp", name, name );
-	}
-
-	topColor = (int)(uiPlayerSetup.topColor.curValue * 255 );
-	bottomColor = (int)(uiPlayerSetup.bottomColor.curValue * 255 );
-
-	CVAR_SET_STRING( "model", uiPlayerSetup.currentModel );
-	CVAR_SET_FLOAT( "cl_himodels", uiPlayerSetup.hiModels.enabled );
-	CVAR_SET_FLOAT( "ui_showmodels", uiPlayerSetup.showModels.enabled );
-	CVAR_SET_FLOAT( "topcolor", topColor );
-	CVAR_SET_FLOAT( "bottomcolor", bottomColor );
-
-	// IMPORTANT: always set default model becuase we need to have something valid here
-	// if you wish draw your playermodel as normal studiomodel please change "models/player.mdl" to path
-	if( uiPlayerSetup.ent )
-		ENGINE_SET_MODEL( uiPlayerSetup.ent, "models/player.mdl" );
-
-	if( !ui_showmodels->value )
-	{
-		if( stricmp( lastImage, newImage ))
-		{
-			if( lastImage[0] && playerImage )
-			{
-				// release old image
-				PIC_Free( lastImage );
-				lastImage[0] = '\0';
-				playerImage = 0;
-			}
-
-			if( stricmp( name, "player" ))
-			{
-				sprintf( lastImage, "models/player/%s/%s.bmp", name, name );
-				playerImage = PIC_Load( lastImage, PIC_KEEP_8BIT ); // if present of course
-			}
-			else if( lastImage[0] && playerImage )
-			{
-				// release old image
-				PIC_Free( lastImage );
-				lastImage[0] = '\0';
-				playerImage = 0;
-			}
-		}
-
-		if( playerImage != 0 ) // update remap colors
-			PIC_Remap( playerImage, topColor, bottomColor );
-	}
+	CVAR_SET_STRING( "cl_crosshair_size", uiPlayerSetup.crosshairSize.generic.name );
+	CVAR_SET_FLOAT( "cl_crosshair_translucent", uiPlayerSetup.crosshairTranslucent.enabled );
 }
 
 /*
@@ -263,15 +239,12 @@ static void UI_PlayerSetup_Callback( void *self, int event )
 {
 	menuCommon_s	*item = (menuCommon_s *)self;
 
-	switch( item->id )
+	/*if( item->id >= ID_DONE || item->id <= ID_SPRAYCOLOR )
 	{
-	case ID_HIMODELS:
-	case ID_SHOWMODELS:
 		if( event == QM_PRESSED )
 			((menuCheckBox_s *)self)->focusPic = UI_CHECKBOX_PRESSED;
 		else ((menuCheckBox_s *)self)->focusPic = UI_CHECKBOX_FOCUS;
-		break;
-	}
+	}*/
 
 	if( event == QM_CHANGED )
 	{
@@ -309,25 +282,57 @@ static void UI_PlayerSetup_Ownerdraw( void *self )
 
 	// draw the rectangle
 	UI_DrawRectangle( item->x, item->y, item->width, item->height, uiInputFgColor );
+}
 
-	if( !ui_showmodels->value && playerImage != 0 )
+static void UI_Crosshair_Ownerdraw( void *self )
+{
+	menuBitmap_s *item = (menuBitmap_s*)self;
+
+	UI_DrawPic(item->generic.x, item->generic.y, item->generic.width, item->generic.height, 0x00FFFFFF, "gfx/vgui/crosshair" );
+
+
+	int l;
+	switch( (int)uiPlayerSetup.crosshairSize.curValue )
 	{
-		PIC_Set( playerImage, 255, 255, 255, 255 );
-		PIC_Draw( item->x, item->y, item->width, item->height );
+	case 1:
+		l = 10;
+		break;
+	case 2:
+		l = 20;
+		break;
+	case 3:
+		l = 30;
+		break;
+	case 0:
+		if( ScreenWidth < 640 )
+			l = 30;
+		else if( ScreenWidth < 1024 )
+			l = 20;
+		else l = 10;
 	}
-	else
-	{
-		R_ClearScene ();
 
-		// update renderer timings
-		uiPlayerSetup.refdef.time = gpGlobals->time;
-		uiPlayerSetup.refdef.frametime = gpGlobals->frametime;
-		uiPlayerSetup.ent->curstate.body = 0; // clearing body each frame
+	int x = item->generic.x, // xpos
+		y = item->generic.y, // ypos
+		w = item->generic.width, // width
+		h = item->generic.height, // height
+		// delta distance
+		d = (item->generic.width / 2 - l) * 0.5,
+		// alpha. Simulate non-additive.
+		a = uiPlayerSetup.crosshairTranslucent.enabled ? 180 : 255,
+		// red
+		r = g_iCrosshairAvailColors[(int)uiPlayerSetup.crosshairColor.curValue][0],
+		// green
+		g = g_iCrosshairAvailColors[(int)uiPlayerSetup.crosshairColor.curValue][1],
+		// blue
+		b = g_iCrosshairAvailColors[(int)uiPlayerSetup.crosshairColor.curValue][2];
 
-		// draw the player model
-		R_AddEntity( ET_NORMAL, uiPlayerSetup.ent );
-		R_RenderFrame( &uiPlayerSetup.refdef );
-	}
+	// verical
+	FillRGBA(x + w / 2, y + d,         1, l, r, g, b, a);
+	FillRGBA(x + w / 2, y + h / 2 + d, 1, l, r, g, b, a);
+
+	// horizontal
+	FillRGBA(x + d,         y + h / 2, l, 1, r, g, b, a);
+	FillRGBA(x + w / 2 + d, y + h / 2, l, 1, r, g, b, a);
 }
 
 /*
@@ -337,17 +342,7 @@ UI_PlayerSetup_Init
 */
 static void UI_PlayerSetup_Init( void )
 {
-	bool game_hlRally = FALSE;
-	int addFlags = 0;
-
 	memset( &uiPlayerSetup, 0, sizeof( uiPlayerSetup_t ));
-
-	// disable playermodel preview for HLRally to prevent crash
-	if( !stricmp( gMenu.m_gameinfo.gamefolder, "hlrally" ))
-		game_hlRally = TRUE;
-
-	if( gMenu.m_gameinfo.flags & GFL_NOMODELS )
-		addFlags |= QMF_INACTIVE;
 
 	uiPlayerSetup.menu.vidInitFunc = UI_PlayerSetup_Init;
 
@@ -391,15 +386,6 @@ static void UI_PlayerSetup_Init( void )
 
 	UI_UtilSetupPicButton( &uiPlayerSetup.AdvOptions, PC_ADV_OPT );
 
-	uiPlayerSetup.view.generic.id = ID_VIEW;
-	uiPlayerSetup.view.generic.type = QMTYPE_BITMAP;
-	uiPlayerSetup.view.generic.flags = QMF_INACTIVE;
-	uiPlayerSetup.view.generic.x = 660;
-	uiPlayerSetup.view.generic.y = 260;
-	uiPlayerSetup.view.generic.width = 260;
-	uiPlayerSetup.view.generic.height = 320;
-	uiPlayerSetup.view.generic.ownerdraw = UI_PlayerSetup_Ownerdraw;
-
 	uiPlayerSetup.name.generic.id = ID_NAME;
 	uiPlayerSetup.name.generic.type = QMTYPE_FIELD;
 	uiPlayerSetup.name.generic.flags = QMF_CENTER_JUSTIFY|QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
@@ -411,62 +397,52 @@ static void UI_PlayerSetup_Init( void )
 	uiPlayerSetup.name.generic.statusText = "Enter your multiplayer display name";
 	uiPlayerSetup.name.maxLength = 32;
 
-	uiPlayerSetup.model.generic.id = ID_MODEL;
-	uiPlayerSetup.model.generic.type = QMTYPE_SPINCONTROL;
-	uiPlayerSetup.model.generic.flags = QMF_CENTER_JUSTIFY|QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|addFlags;
-	uiPlayerSetup.model.generic.x = game_hlRally ? 320 : 702;
-	uiPlayerSetup.model.generic.y = game_hlRally ? 320 : 590;
-	uiPlayerSetup.model.generic.width = game_hlRally ? 256 : 176;
-	uiPlayerSetup.model.generic.height = game_hlRally ? 36 : 32;
-	uiPlayerSetup.model.generic.callback = UI_PlayerSetup_Callback;
-	uiPlayerSetup.model.generic.statusText = "Select a model for representation in multiplayer";
-	uiPlayerSetup.model.minValue = 0;
-	uiPlayerSetup.model.maxValue = 1;
-	uiPlayerSetup.model.range  = 1;
+	uiPlayerSetup.crosshairView.generic.id = ID_CROSSHAIRVIEW;
+	uiPlayerSetup.crosshairView.generic.type = QMTYPE_BITMAP;
+	uiPlayerSetup.crosshairView.generic.flags = QMF_INACTIVE;
+	uiPlayerSetup.crosshairView.generic.x = 320;
+	uiPlayerSetup.crosshairView.generic.y = 310;
+	uiPlayerSetup.crosshairView.generic.width = 96;
+	uiPlayerSetup.crosshairView.generic.height = 96;
+	uiPlayerSetup.crosshairView.generic.callback = UI_PlayerSetup_Callback;
+	uiPlayerSetup.crosshairView.generic.ownerdraw = UI_Crosshair_Ownerdraw;
+	uiPlayerSetup.crosshairView.generic.statusText = "Choose dynamic crosshair";
+	uiPlayerSetup.crosshairView.pic = "gfx/vgui/crosshair";
 
-	uiPlayerSetup.topColor.generic.id = ID_TOPCOLOR;
-	uiPlayerSetup.topColor.generic.type = QMTYPE_SLIDER;
-	uiPlayerSetup.topColor.generic.flags = QMF_PULSEIFFOCUS|QMF_DROPSHADOW|addFlags;
-	uiPlayerSetup.topColor.generic.name = "Top color";
-	uiPlayerSetup.topColor.generic.x = 250;
-	uiPlayerSetup.topColor.generic.y = 550;
-	uiPlayerSetup.topColor.generic.width = 300;
-	uiPlayerSetup.topColor.generic.callback = UI_PlayerSetup_Callback;
-	uiPlayerSetup.topColor.generic.statusText = "Set a player model top color";
-	uiPlayerSetup.topColor.minValue = 0.0;
-	uiPlayerSetup.topColor.maxValue = 1.0;
-	uiPlayerSetup.topColor.range = 0.05f;
+	uiPlayerSetup.crosshairSize.generic.id = ID_CROSSHAIRSIZE;
+	uiPlayerSetup.crosshairSize.generic.type = QMTYPE_SPINCONTROL;
+	uiPlayerSetup.crosshairSize.generic.flags = QMF_CENTER_JUSTIFY|QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
+	uiPlayerSetup.crosshairSize.generic.x = 480;
+	uiPlayerSetup.crosshairSize.generic.y = 315;
+	uiPlayerSetup.crosshairSize.generic.height = 26;
+	uiPlayerSetup.crosshairSize.generic.width = 256;
+	uiPlayerSetup.crosshairSize.generic.callback = UI_PlayerSetup_Callback;
+	uiPlayerSetup.crosshairSize.generic.statusText = "Set crosshair size";
+	uiPlayerSetup.crosshairSize.minValue = 0;
+	uiPlayerSetup.crosshairSize.maxValue = 3;
+	uiPlayerSetup.crosshairSize.range	 = 1;
 
-	uiPlayerSetup.bottomColor.generic.id = ID_BOTTOMCOLOR;
-	uiPlayerSetup.bottomColor.generic.type = QMTYPE_SLIDER;
-	uiPlayerSetup.bottomColor.generic.flags = QMF_PULSEIFFOCUS|QMF_DROPSHADOW|addFlags;
-	uiPlayerSetup.bottomColor.generic.name = "Bottom color";
-	uiPlayerSetup.bottomColor.generic.x = 250;
-	uiPlayerSetup.bottomColor.generic.y = 620;
-	uiPlayerSetup.bottomColor.generic.width = 300;
-	uiPlayerSetup.bottomColor.generic.callback = UI_PlayerSetup_Callback;
-	uiPlayerSetup.bottomColor.generic.statusText = "Set a player model bottom color";
-	uiPlayerSetup.bottomColor.minValue = 0.0;
-	uiPlayerSetup.bottomColor.maxValue = 1.0;
-	uiPlayerSetup.bottomColor.range = 0.05f;
+	uiPlayerSetup.crosshairColor.generic.id = ID_CROSSHAIRCOLOR;
+	uiPlayerSetup.crosshairColor.generic.type = QMTYPE_SPINCONTROL;
+	uiPlayerSetup.crosshairColor.generic.flags = QMF_CENTER_JUSTIFY|QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
+	uiPlayerSetup.crosshairColor.generic.x = 480;
+	uiPlayerSetup.crosshairColor.generic.y = 375;
+	uiPlayerSetup.crosshairColor.generic.height = 26;
+	uiPlayerSetup.crosshairColor.generic.width = 256;
+	uiPlayerSetup.crosshairColor.generic.callback = UI_PlayerSetup_Callback;
+	uiPlayerSetup.crosshairColor.generic.statusText = "Set crosshair color";
+	uiPlayerSetup.crosshairColor.minValue = 0;
+	uiPlayerSetup.crosshairColor.maxValue = 4;
+	uiPlayerSetup.crosshairColor.range	  = 1;
 
-	uiPlayerSetup.showModels.generic.id = ID_SHOWMODELS;
-	uiPlayerSetup.showModels.generic.type = QMTYPE_CHECKBOX;
-	uiPlayerSetup.showModels.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_MOUSEONLY|QMF_DROPSHADOW|addFlags;
-	uiPlayerSetup.showModels.generic.name = "Show 3D Preview";
-	uiPlayerSetup.showModels.generic.x = 72;
-	uiPlayerSetup.showModels.generic.y = 380;
-	uiPlayerSetup.showModels.generic.callback = UI_PlayerSetup_Callback;
-	uiPlayerSetup.showModels.generic.statusText = "show 3D player models instead of preview thumbnails";
-
-	uiPlayerSetup.hiModels.generic.id = ID_HIMODELS;
-	uiPlayerSetup.hiModels.generic.type = QMTYPE_CHECKBOX;
-	uiPlayerSetup.hiModels.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_MOUSEONLY|QMF_DROPSHADOW|addFlags;
-	uiPlayerSetup.hiModels.generic.name = "High quality models";
-	uiPlayerSetup.hiModels.generic.x = 72;
-	uiPlayerSetup.hiModels.generic.y = 430;
-	uiPlayerSetup.hiModels.generic.callback = UI_PlayerSetup_Callback;
-	uiPlayerSetup.hiModels.generic.statusText = "show hi-res models in multiplayer";
+	uiPlayerSetup.crosshairTranslucent.generic.id = ID_CROSSHAIRCOLOR;
+	uiPlayerSetup.crosshairTranslucent.generic.type = QMTYPE_CHECKBOX;
+	uiPlayerSetup.crosshairTranslucent.generic.flags = QMF_HIGHLIGHTIFFOCUS | QMF_ACT_ONRELEASE | QMF_MOUSEONLY | QMF_DROPSHADOW;
+	uiPlayerSetup.crosshairTranslucent.generic.x = 320;
+	uiPlayerSetup.crosshairTranslucent.generic.y = 420;
+	uiPlayerSetup.crosshairTranslucent.generic.callback = UI_PlayerSetup_Callback;
+	uiPlayerSetup.crosshairTranslucent.generic.name = "Translucent crosshair";
+	uiPlayerSetup.crosshairTranslucent.generic.statusText = "Set additive render crosshair";
 
 	UI_PlayerSetup_GetConfig();
 
@@ -474,54 +450,12 @@ static void UI_PlayerSetup_Init( void )
 	UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.banner );
 	UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.done );
 	UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.AdvOptions );
-	// disable playermodel preview for HLRally to prevent crash
-	if( game_hlRally == FALSE )
-		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.view );
 	UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.name );
+	UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.crosshairView );
+	UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.crosshairSize );
+	UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.crosshairTranslucent );
+	UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.crosshairColor );
 
-	if( !gMenu.m_gameinfo.flags & GFL_NOMODELS )
-	{
-		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.model );
-		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.topColor );
-		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.bottomColor );
-		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.showModels );
-		UI_AddItem( &uiPlayerSetup.menu, (void *)&uiPlayerSetup.hiModels );
-	}
-	// setup render and actor
-	uiPlayerSetup.refdef.fov_x = 40;
-
-	// NOTE: must be called after UI_AddItem whan we sure what UI_ScaleCoords is done
-	uiPlayerSetup.refdef.viewport[0] = uiPlayerSetup.view.generic.x;
-	uiPlayerSetup.refdef.viewport[1] = uiPlayerSetup.view.generic.y;
-	uiPlayerSetup.refdef.viewport[2] = uiPlayerSetup.view.generic.width;
-	uiPlayerSetup.refdef.viewport[3] = uiPlayerSetup.view.generic.height;
-
-	UI_PlayerSetup_CalcFov( &uiPlayerSetup.refdef );
-	uiPlayerSetup.ent = GET_MENU_EDICT ();
-
-	if( !uiPlayerSetup.ent )
-		return;
-
-	// adjust entity params
-	uiPlayerSetup.ent->curstate.number = 1;	// IMPORTANT: always set playerindex to 1
-	uiPlayerSetup.ent->curstate.animtime = gpGlobals->time;	// start animation
-	uiPlayerSetup.ent->curstate.sequence = 1;
-	uiPlayerSetup.ent->curstate.scale = 1.0f;
-	uiPlayerSetup.ent->curstate.frame = 0.0f;
-	uiPlayerSetup.ent->curstate.framerate = 1.0f;
-	uiPlayerSetup.ent->curstate.effects |= EF_FULLBRIGHT;
-	uiPlayerSetup.ent->curstate.controller[0] = 127;
-	uiPlayerSetup.ent->curstate.controller[1] = 127;
-	uiPlayerSetup.ent->curstate.controller[2] = 127;
-	uiPlayerSetup.ent->curstate.controller[3] = 127;
-	uiPlayerSetup.ent->latched.prevcontroller[0] = 127;
-	uiPlayerSetup.ent->latched.prevcontroller[1] = 127;
-	uiPlayerSetup.ent->latched.prevcontroller[2] = 127;
-	uiPlayerSetup.ent->latched.prevcontroller[3] = 127;
-	uiPlayerSetup.ent->origin[0] = uiPlayerSetup.ent->curstate.origin[0] = 45.0f / tan( DEG2RAD( uiPlayerSetup.refdef.fov_y / 2.0f ));
-	uiPlayerSetup.ent->origin[2] = uiPlayerSetup.ent->curstate.origin[2] = 2.0f;
-	uiPlayerSetup.ent->angles[1] = uiPlayerSetup.ent->curstate.angles[1] = 180.0f;
-	uiPlayerSetup.ent->player = true; // yes, draw me as playermodel
 }
 
 /*
@@ -531,6 +465,7 @@ UI_PlayerSetup_Precache
 */
 void UI_PlayerSetup_Precache( void )
 {
+	PIC_Load( "gfx/vgui/crosshair" );
 	PIC_Load( ART_BACKGROUND );
 	PIC_Load( ART_BANNER );
 }

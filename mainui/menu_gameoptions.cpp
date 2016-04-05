@@ -26,23 +26,46 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define ART_BANNER			"gfx/shell/head_advoptions"
 
-#define ID_BACKGROUND		0
-#define ID_BANNER			1
-
-#define ID_DONE			2
-#define ID_CANCEL			3
-#define ID_MAXFPS			4
-#define ID_MAXFPSMESSAGE		5
-#define ID_HAND			6
-#define ID_ALLOWDOWNLOAD		7
-#define ID_ALWAYSRUN		8
+#undef ID_BACKGROUND
+enum
+{
+	ID_BACKGROUND = 0,
+	ID_BANNER,
+	ID_DONE,
+	ID_CANCEL,
+	// cs16-client
+	ID_CORSPESTAY,
+	ID_DECALS,
+	ID_MAXSHELLS,
+	ID_MAXPUFFS,
+	ID_SG_GREN_TYPE,
+	ID_HAND,
+	ID_OLDSTYLEMENU,
+	ID_EXTENDEDMENU,
+	ID_AUTOWEPSWITCH,
+	ID_CENTERID,
+	ID_AUTOHELP,
+	ID_ENDGAME_SCREENSHOT,
+	ID_OBSERVERCROSSHAIR,
+	ID_TRANSPARENTRADAR
+};
 
 typedef struct
 {
-	float		maxFPS;
-	int		hand;
-	int		allowDownload;
-	int		alwaysRun;
+	float	cl_corpsestay;
+	float	mp_decals;
+	//float	max_sheels;
+	//float	max_smoke_puffs;
+	bool	fast_smoke_gas;
+	bool	hand;
+	bool	oldstylemenu;
+	bool	extendedmenus;
+	bool	cl_autowepswitch;
+	bool	hud_centerid;
+	bool	auto_help;
+	//bool	endgame_screenshot;
+	//bool	observer_crosshair;
+	bool	radar_type;
 } uiGameValues_t;
 
 typedef struct
@@ -55,11 +78,21 @@ typedef struct
 	menuPicButton_s	done;
 	menuPicButton_s	cancel;
 
-	menuSpinControl_s	maxFPS;
-	menuAction_s	maxFPSmessage;
+	menuSpinControl_s		cl_corpsestay;
+	menuAction_s	cl_corpsestay_message;
+	menuSpinControl_s		mp_decals;
+	menuAction_s    mp_decals_message;
+
+	menuCheckBox_s	fast_smoke_gas;
 	menuCheckBox_s	hand;
-	menuCheckBox_s	allowDownload;
-	menuCheckBox_s	alwaysRun;
+	menuCheckBox_s	oldstylemenu;
+	menuCheckBox_s  extendedmenus;
+	menuCheckBox_s	cl_autowepswitch;
+	menuCheckBox_s	hud_centerid;
+	menuCheckBox_s	auto_help;
+	//menuCheckBox_s	endgame_screenshot;
+	//menuCheckBox_s	observer_crosshair;
+	menuCheckBox_s	radar_type;
 } uiGameOptions_t;
 
 static uiGameOptions_t	uiGameOptions;
@@ -72,15 +105,27 @@ UI_GameOptions_UpdateConfig
 */
 static void UI_GameOptions_UpdateConfig( void )
 {
-	static char	fpsText[8];
+	static char	corpseStayText[8];
 
-	sprintf( fpsText, "%.f", uiGameOptions.maxFPS.curValue );
-	uiGameOptions.maxFPS.generic.name = fpsText;
+	sprintf( corpseStayText, "%.f", uiGameOptions.cl_corpsestay.curValue );
+	uiGameOptions.cl_corpsestay.generic.name = corpseStayText;
+
 
 	CVAR_SET_FLOAT( "hand", uiGameOptions.hand.enabled );
-	CVAR_SET_FLOAT( "sv_allow_download", uiGameOptions.allowDownload.enabled );
-	CVAR_SET_FLOAT( "fps_max", uiGameOptions.maxFPS.curValue );
-	CVAR_SET_FLOAT( "cl_run", uiGameOptions.alwaysRun.enabled );
+	CVAR_SET_FLOAT( "cl_corpsestay", uiGameOptions.cl_corpsestay.curValue );
+	CVAR_SET_FLOAT( "mp_decals", uiGameOptions.mp_decals.curValue );
+	//CVAR_SET_FLOAT( "") maxshells
+	//CVAR_SET_FLOAT( "") max_smoke_puffs;
+	CVAR_SET_FLOAT( "cl_fastsmoke", uiGameOptions.fast_smoke_gas.enabled );
+	CVAR_SET_FLOAT( "_vgui_menus", uiGameOptions.oldstylemenu.enabled );
+	CVAR_SET_FLOAT( "_extended_menus", uiGameOptions.extendedmenus.enabled );
+	CVAR_SET_FLOAT( "_cl_autowepswitch", uiGameOptions.cl_autowepswitch.enabled );
+	CVAR_SET_FLOAT( "hud_centerid", uiGameOptions.hud_centerid.enabled );
+	CVAR_SET_FLOAT( "_ah", uiGameOptions.auto_help.enabled );
+	//CVAR_SET_FLOAT( "_extended_menus", uiGameOptions.endgame_screenshot.enabled );
+	//CVAR_SET_FLOAT( "", uiGameOptions.observer_crosshair.enabled );
+	CVAR_SET_FLOAT( "cl_radartype", uiGameOptions.radar_type.enabled );
+
 }
 
 /*
@@ -91,9 +136,19 @@ UI_GameOptions_DiscardChanges
 static void UI_GameOptions_DiscardChanges( void )
 {
 	CVAR_SET_FLOAT( "hand", uiGameInitial.hand );
-	CVAR_SET_FLOAT( "sv_allow_download", uiGameInitial.allowDownload );
-	CVAR_SET_FLOAT( "fps_max", uiGameInitial.maxFPS );
-	CVAR_SET_FLOAT( "cl_run", uiGameInitial.alwaysRun );
+	CVAR_SET_FLOAT( "cl_corpsestay", uiGameInitial.cl_corpsestay );
+	CVAR_SET_FLOAT( "mp_decals", uiGameInitial.mp_decals );
+	//CVAR_SET_FLOAT( "") maxshells
+	//CVAR_SET_FLOAT( "") max_smoke_puffs;
+	CVAR_SET_FLOAT( "cl_fastsmoke", uiGameInitial.fast_smoke_gas );
+	CVAR_SET_FLOAT( "_vgui_menus", uiGameInitial.oldstylemenu );
+	CVAR_SET_FLOAT( "_extended_menus", uiGameInitial.extendedmenus );
+	CVAR_SET_FLOAT( "_cl_autowepswitch", uiGameInitial.cl_autowepswitch );
+	CVAR_SET_FLOAT( "hud_centerid", uiGameInitial.hud_centerid );
+	CVAR_SET_FLOAT( "_ah", uiGameInitial.auto_help );
+	//CVAR_SET_FLOAT( "_extended_menus", uiGameOptions.endgame_screenshot.enabled );
+	//CVAR_SET_FLOAT( "", uiGameInitial.observer_crosshair );
+	CVAR_SET_FLOAT( "cl_radartype", uiGameInitial.radar_type );
 }
 
 /*
@@ -103,7 +158,11 @@ UI_GameOptions_KeyFunc
 */
 static const char *UI_GameOptions_KeyFunc( int key, int down )
 {
-	if( down && key == K_ESCAPE )
+	if( down && key == K_ESCAPE
+#ifdef __ANDROID__
+		|| key == 236 // ANDROID_K_MENU
+#endif
+		)
 		UI_GameOptions_DiscardChanges ();
 	return UI_DefaultKey( &uiGameOptions.menu, key, down );
 }
@@ -115,16 +174,25 @@ UI_GameOptions_GetConfig
 */
 static void UI_GameOptions_GetConfig( void )
 {
-	uiGameInitial.maxFPS = uiGameOptions.maxFPS.curValue = CVAR_GET_FLOAT( "fps_max" );
+	uiGameOptions.cl_corpsestay.curValue = uiGameInitial.cl_corpsestay = CVAR_GET_FLOAT( "cl_corpsestay" );
+	uiGameOptions.mp_decals.curValue = uiGameInitial.mp_decals = CVAR_GET_FLOAT( "mp_decals" );
 
 	if( CVAR_GET_FLOAT( "hand" ))
 		uiGameInitial.hand = uiGameOptions.hand.enabled = 1;
-
-	if( CVAR_GET_FLOAT( "cl_run" ))
-		uiGameInitial.alwaysRun = uiGameOptions.alwaysRun.enabled = 1;
-
-	if( CVAR_GET_FLOAT( "sv_allow_download" ))
-		uiGameInitial.allowDownload = uiGameOptions.allowDownload.enabled = 1;
+	if( CVAR_GET_FLOAT( "cl_fastsmoke" ))
+		uiGameInitial.fast_smoke_gas = uiGameOptions.fast_smoke_gas.enabled = 1;
+	if( CVAR_GET_FLOAT( "_vgui_menus" ))
+		uiGameInitial.oldstylemenu = uiGameOptions.oldstylemenu.enabled = 1;
+	if( CVAR_GET_FLOAT( "_extended_menus" ))
+		uiGameInitial.extendedmenus = uiGameOptions.extendedmenus.enabled = 1;
+	if( CVAR_GET_FLOAT( "_cl_autowepswitch" ))
+		uiGameInitial.cl_autowepswitch = uiGameOptions.cl_autowepswitch.enabled = 1;
+	if( CVAR_GET_FLOAT( "hud_centerid" ))
+		uiGameInitial.hud_centerid = uiGameOptions.hud_centerid.enabled = 1;
+	if( CVAR_GET_FLOAT( "_ah" ))
+		uiGameInitial.auto_help = uiGameOptions.auto_help.enabled = 1;
+	if( CVAR_GET_FLOAT( "cl_radartype" ))
+		uiGameInitial.radar_type = uiGameOptions.radar_type.enabled = 1;
 
 	UI_GameOptions_UpdateConfig ();
 }
@@ -138,15 +206,11 @@ static void UI_GameOptions_Callback( void *self, int event )
 {
 	menuCommon_s	*item = (menuCommon_s *)self;
 
-	switch( item->id )
+	if( item->id >= ID_HAND && item->id <= ID_TRANSPARENTRADAR )
 	{
-	case ID_HAND:
-	case ID_ALLOWDOWNLOAD:
-	case ID_ALWAYSRUN:
 		if( event == QM_PRESSED )
 			((menuCheckBox_s *)self)->focusPic = UI_CHECKBOX_PRESSED;
 		else ((menuCheckBox_s *)self)->focusPic = UI_CHECKBOX_FOCUS;
-		break;
 	}
 
 	if( event == QM_CHANGED )
@@ -172,11 +236,31 @@ static void UI_GameOptions_Callback( void *self, int event )
 
 /*
 =================
+UI_GenItemInit
+=================
+*/
+inline void UI_GenItemInit( menuCommon_s &item, int id, menuType_t type, unsigned int flags,
+	int x, int y, const char *name, const char *statusText )
+{
+	item.id = id;
+	item.type = type;
+	item.flags = flags;
+	item.x = x;
+	item.y = y;
+	item.name = name;
+	item.callback = UI_GameOptions_Callback;
+	item.statusText = statusText;
+}
+
+/*
+=================
 UI_GameOptions_Init
 =================
 */
 static void UI_GameOptions_Init( void )
 {
+	static unsigned int iTypicalFlags = QMF_HIGHLIGHTIFFOCUS | QMF_ACT_ONRELEASE | QMF_MOUSEONLY | QMF_DROPSHADOW;
+	const int gap = 50;
 	memset( &uiGameInitial, 0, sizeof( uiGameValues_t ));
 	memset( &uiGameOptions, 0, sizeof( uiGameOptions_t ));
 
@@ -201,88 +285,75 @@ static void UI_GameOptions_Init( void )
 	uiGameOptions.banner.generic.height = UI_BANNER_HEIGHT;
 	uiGameOptions.banner.pic = ART_BANNER;
 
-	uiGameOptions.done.generic.id	= ID_DONE;
-	uiGameOptions.done.generic.type = QMTYPE_BM_BUTTON;
-	uiGameOptions.done.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW; 
-	uiGameOptions.done.generic.x = 72;
-	uiGameOptions.done.generic.y = 230;
-	uiGameOptions.done.generic.name = "Done";
-	uiGameOptions.done.generic.statusText = "Save changes and go back to the Customize Menu";
-	uiGameOptions.done.generic.callback = UI_GameOptions_Callback;
+	int x = 72, y = 180;
 
+	UI_GenItemInit( uiGameOptions.hand.generic, ID_HAND, QMTYPE_CHECKBOX, iTypicalFlags,
+		x, y += gap, "Use left hand", "Draw gun at left side" );
+	UI_GenItemInit( uiGameOptions.fast_smoke_gas.generic, ID_SG_GREN_TYPE, QMTYPE_CHECKBOX, iTypicalFlags,
+		x, y += gap, "Low quality smoke", "Use low quality smoke, for slow devices" );
+	UI_GenItemInit( uiGameOptions.oldstylemenu.generic,	ID_OLDSTYLEMENU, QMTYPE_CHECKBOX, iTypicalFlags,
+		x, y += gap, "Old style menus", "Use old-styled numerical buy menu" );
+	UI_GenItemInit( uiGameOptions.extendedmenus.generic, ID_EXTENDEDMENU, QMTYPE_CHECKBOX, iTypicalFlags,
+		x, y += gap, "Extended touch menu", "Force touch menus for radio" );
+	UI_GenItemInit( uiGameOptions.cl_autowepswitch.generic, ID_AUTOWEPSWITCH, QMTYPE_CHECKBOX, iTypicalFlags,
+		x, y += gap, "Automatic weapon switch", "Enable automatic weapon switch" );
+	UI_GenItemInit( uiGameOptions.hud_centerid.generic, ID_CENTERID, QMTYPE_CHECKBOX, iTypicalFlags,
+		x, y += gap, "Center player names", "" );
+	UI_GenItemInit( uiGameOptions.auto_help.generic, ID_AUTOHELP, QMTYPE_CHECKBOX, iTypicalFlags,
+		x, y += gap, "Auto-help", "Do you need to know how to play Counter-Strike?" );
+	UI_GenItemInit( uiGameOptions.radar_type.generic, ID_TRANSPARENTRADAR, QMTYPE_CHECKBOX, iTypicalFlags,
+		x, y += gap, "Transparent radar", "Draw gun at left side" );
+
+
+	UI_GenItemInit( uiGameOptions.cl_corpsestay_message.generic, 10000, QMTYPE_ACTION, QMF_SMALLFONT| QMF_INACTIVE|QMF_DROPSHADOW,
+		400, y = 240, "Time before dead bodies disappear:", NULL);
+	uiGameOptions.cl_corpsestay_message.generic.color = uiColorHelp;
+
+	UI_GenItemInit( uiGameOptions.cl_corpsestay.generic, ID_CORSPESTAY, QMTYPE_SPINCONTROL, QMF_CENTER_JUSTIFY|QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW,
+		430, y += gap, "600", NULL );
+	uiGameOptions.cl_corpsestay.generic.height = 26;
+	uiGameOptions.cl_corpsestay.generic.width = 168;
+	uiGameOptions.cl_corpsestay.minValue = 0;
+	uiGameOptions.cl_corpsestay.maxValue = 1000;
+	uiGameOptions.cl_corpsestay.range	 = 50;
+
+	UI_GenItemInit( uiGameOptions.mp_decals_message.generic, 10000, QMTYPE_ACTION, QMF_SMALLFONT|QMF_INACTIVE|QMF_DROPSHADOW,
+		400, y += gap, "Multiplayer decal limit:", NULL);
+	uiGameOptions.mp_decals_message.generic.color = uiColorHelp;
+	UI_GenItemInit( uiGameOptions.mp_decals.generic, ID_CORSPESTAY, QMTYPE_SPINCONTROL, QMF_CENTER_JUSTIFY|QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW,
+		430, y += gap, "300", NULL );
+	uiGameOptions.mp_decals.generic.height = 26;
+	uiGameOptions.mp_decals.generic.width = 168;
+	uiGameOptions.mp_decals.minValue = 0;
+	uiGameOptions.mp_decals.maxValue = 1000;
+	uiGameOptions.mp_decals.range	 = 50;
+
+	UI_GenItemInit( uiGameOptions.done.generic, ID_DONE, QMTYPE_BM_BUTTON, QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW,
+		430, y += gap * 3 - 10, "Done", "Save changes and go back to the Customize Menu");
 	UI_UtilSetupPicButton( &uiGameOptions.done, PC_DONE );
 
-	uiGameOptions.cancel.generic.id = ID_CANCEL;
-	uiGameOptions.cancel.generic.type = QMTYPE_BM_BUTTON;
-	uiGameOptions.cancel.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
-	uiGameOptions.cancel.generic.x = 72;
-	uiGameOptions.cancel.generic.y = 280;
-	uiGameOptions.cancel.generic.name = "Cancel";
-	uiGameOptions.cancel.generic.statusText = "Go back to the Customize Menu";
-	uiGameOptions.cancel.generic.callback = UI_GameOptions_Callback;
-
+	UI_GenItemInit( uiGameOptions.cancel.generic, ID_CANCEL, QMTYPE_BM_BUTTON, QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW,
+		430, y += gap, "Cancel", "Go back to the Customize Menu");
 	UI_UtilSetupPicButton( &uiGameOptions.cancel, PC_CANCEL );
-
-	uiGameOptions.maxFPS.generic.id = ID_MAXFPS;
-	uiGameOptions.maxFPS.generic.type = QMTYPE_SPINCONTROL;
-	uiGameOptions.maxFPS.generic.flags = QMF_CENTER_JUSTIFY|QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
-	uiGameOptions.maxFPS.generic.x = 315;
-	uiGameOptions.maxFPS.generic.y = 270;
-	uiGameOptions.maxFPS.generic.width = 168;
-	uiGameOptions.maxFPS.generic.height = 26;
-	uiGameOptions.maxFPS.generic.callback = UI_GameOptions_Callback;
-	uiGameOptions.maxFPS.generic.statusText = "Cap your game frame rate";
-	uiGameOptions.maxFPS.minValue = 20;
-	uiGameOptions.maxFPS.maxValue = 500;
-	uiGameOptions.maxFPS.range = 20;
-
-	uiGameOptions.maxFPSmessage.generic.id = ID_MAXFPSMESSAGE;
-	uiGameOptions.maxFPSmessage.generic.type = QMTYPE_ACTION;
-	uiGameOptions.maxFPSmessage.generic.flags = QMF_SMALLFONT|QMF_INACTIVE|QMF_DROPSHADOW;
-	uiGameOptions.maxFPSmessage.generic.x = 280;
-	uiGameOptions.maxFPSmessage.generic.y = 230;
-	uiGameOptions.maxFPSmessage.generic.name = "Limit game fps";
-	uiGameOptions.maxFPSmessage.generic.color = uiColorHelp;
-
-	uiGameOptions.hand.generic.id = ID_HAND;
-	uiGameOptions.hand.generic.type = QMTYPE_CHECKBOX;
-	uiGameOptions.hand.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_MOUSEONLY|QMF_DROPSHADOW;
-	uiGameOptions.hand.generic.x = 280;
-	uiGameOptions.hand.generic.y = 330;
-	uiGameOptions.hand.generic.name = "Use left hand";
-	uiGameOptions.hand.generic.callback = UI_GameOptions_Callback;
-	uiGameOptions.hand.generic.statusText = "Draw gun at left side";
-
-	uiGameOptions.allowDownload.generic.id = ID_ALLOWDOWNLOAD;
-	uiGameOptions.allowDownload.generic.type = QMTYPE_CHECKBOX;
-	uiGameOptions.allowDownload.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_MOUSEONLY|QMF_DROPSHADOW;
-	uiGameOptions.allowDownload.generic.x = 280;
-	uiGameOptions.allowDownload.generic.y = 390;
-	uiGameOptions.allowDownload.generic.name = "Allow download";
-	uiGameOptions.allowDownload.generic.callback = UI_GameOptions_Callback;
-	uiGameOptions.allowDownload.generic.statusText = "Allow download of files from servers";
-
-	uiGameOptions.alwaysRun.generic.id = ID_ALWAYSRUN;
-	uiGameOptions.alwaysRun.generic.type = QMTYPE_CHECKBOX;
-	uiGameOptions.alwaysRun.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_MOUSEONLY|QMF_DROPSHADOW;
-	uiGameOptions.alwaysRun.generic.x = 280;
-	uiGameOptions.alwaysRun.generic.y = 450;
-	uiGameOptions.alwaysRun.generic.name = "Always run";
-	uiGameOptions.alwaysRun.generic.callback = UI_GameOptions_Callback;
-	uiGameOptions.alwaysRun.generic.statusText = "Switch between run/step models when pressed 'run' button";
 
 	UI_GameOptions_GetConfig();
 
 	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.background );
 	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.banner );
-
-	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.maxFPS );
-	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.maxFPSmessage );
-	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.hand );
-	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.alwaysRun );
-	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.allowDownload );
 	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.done );
 	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.cancel );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.cl_corpsestay );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.cl_corpsestay_message );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.mp_decals );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.mp_decals_message );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.hand );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.fast_smoke_gas );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.extendedmenus );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.oldstylemenu );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.cl_autowepswitch );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.hud_centerid );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.auto_help );
+	UI_AddItem( &uiGameOptions.menu, (void *)&uiGameOptions.radar_type );
 }
 
 /*
