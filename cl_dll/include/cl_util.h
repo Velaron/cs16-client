@@ -141,4 +141,6 @@ HSPRITE LoadSprite(const char *pszName);
 float *GetClientColor( int clientIndex );
 void GetTeamColor( int &r, int &g, int &b, int teamIndex );
 #define bound( min, num, max ) ((num) >= (min) ? ((num) < (max) ? (num) : (max)) : (min))
+#define RAD2DEG( x )	((float)(x) * (float)(180.f / M_PI))
+#define DEG2RAD( x )	((float)(x) * (float)(M_PI / 180.f))
 

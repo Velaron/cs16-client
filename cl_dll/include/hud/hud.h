@@ -814,6 +814,7 @@ public:
 
 	bool m_bBombPlanted;
 	int m_iPlayerLastPointedAt;
+	static float m_fTextScale;
 
 private:	
 	// szMapName is 64 bytes only. Removing "maps/" and ".bsp" gived me this result

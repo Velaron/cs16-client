@@ -336,12 +336,13 @@ int DrawUtils::TextMessageDrawChar( int x, int y, int number, int r, int g, int 
 	int ret;
 	if( scale && g_iMobileAPIVersion )
 	{
-		ret = gMobileAPI.pfnDrawScaledCharacter( x, y, number, r, g, b, scale );
+		ret = gMobileAPI.pfnDrawScaledCharacter( x, y, number, r, g, b, scale ) * scale;
 	}
 	else
 	{
 		ret = gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b );
 	}
+	return ret;
 }
 
 void DrawUtils::Draw2DQuad( float x1, float y1, float x2, float y2 )

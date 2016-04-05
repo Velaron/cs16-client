@@ -883,7 +883,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 			return;
 		}
 
-		if ( !g_iUser2 && (iNewMainMode !=OBS_ROAMING ) )	// make sure we have a target
+		if ( !g_iUser2 && (iNewMainMode != OBS_ROAMING ) )	// make sure we have a target
 		{
 			// choose last Director object if still available
 			if ( IsActivePlayer( gEngfuncs.GetEntityByIndex( m_lastPrimaryObject ) ) )
