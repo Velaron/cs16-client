@@ -206,8 +206,8 @@ include_directories (
 add_library (${CLDLL_LIBRARY} SHARED ${CLDLL_SOURCES})
 add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT
 	-DLINUX -D_LINUX -DCLIENT_WEAPONS -DCLIENT_DLL
-	-D_DEBUG -DVECTORIZE_SINCOS
-	-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp)
+	-D_DEBUG -DVECTORIZE_SINCOS -D_CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
+	-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp )
 target_link_libraries( ${CLDLL_LIBRARY} ${CMAKE_DL_LIBS} -L/usr/lib/i386-linux-gnu -lSDL2 )
 
 

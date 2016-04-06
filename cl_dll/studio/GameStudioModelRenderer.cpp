@@ -826,10 +826,53 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 	if (m_nPlayerIndex < 0 || m_nPlayerIndex >= gEngfuncs.GetMaxClients())
 		return 0;
 
-	m_pRenderModel = IEngineStudio.SetupPlayerModel(m_nPlayerIndex);
+	/*m_pRenderModel = IEngineStudio.SetupPlayerModel(m_nPlayerIndex);
 
 	if (m_pRenderModel == NULL)
+		return 0;*/
+
+	if( cl_minmodels && cl_minmodels->value > 0.0f )
+	{
+		int team = g_PlayerExtraInfo[ pplayer->number ].teamnumber;
+		if( team == TEAM_TERRORIST )
+		{
+			// set leet if model isn't valid
+			int modelIdx = cl_min_t && BIsValidTModelIndex(cl_min_t->value) ? cl_min_t->value : 1;
+
+			m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[ modelIdx ], NULL );
+		}
+		else if( team == TEAM_CT )
+		{
+			if( g_PlayerExtraInfo[ pplayer->number ].vip )
+				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[3], NULL );
+			else
+			{
+				// set gign, if model isn't valud
+				int modelIdx = cl_min_t && BIsValidTModelIndex(cl_min_t->value) ? cl_min_t->value : 2;
+
+				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[ modelIdx ], NULL );
+			}
+		}
+	}
+	else
+	{
+		m_pRenderModel = IEngineStudio.SetupPlayerModel( m_nPlayerIndex );
+
+		if( !m_pRenderModel ) // player have a unloadable shit in userinfo, so load appropriate to his team model
+		{
+			if( g_PlayerExtraInfo[ pplayer->number ].teamnumber == TEAM_CT )
+				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[2], NULL ); // gign
+			else if( g_PlayerExtraInfo[ pplayer->number].teamnumber == TEAM_TERRORIST )
+				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[1], NULL ); // leet
+
+			// if we cannot load gign or leet model, player have a shit inside his gamedata, so we can't deal with it
+		}
+	}
+
+	if( !m_pRenderModel )
+	{
 		return 0;
+	}
 
 	m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(m_pRenderModel);
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
