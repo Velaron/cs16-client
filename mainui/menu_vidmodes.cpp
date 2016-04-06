@@ -91,7 +91,7 @@ UI_VidModes_GetModesList
 */
 static void UI_VidModes_GetConfig( void )
 {
-	int i;
+	unsigned int i;
 
 	for( i = 0; i < MAX_VIDMODES-1; i++ )
 		uiVidModes.videoModesPtr[i] = uiVideoModes[i];
@@ -231,6 +231,10 @@ static void UI_VidModes_Init( void )
 	uiVidModes.vidList.generic.id = ID_VIDMODELIST;
 	uiVidModes.vidList.generic.type = QMTYPE_SCROLLLIST;
 	uiVidModes.vidList.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_SMALLFONT;
+#if defined(__ANDROID__) // it's impossible to change resolution on Android, so grey it out
+	uiVidModes.vidList.generic.flags = QMF_INACTIVE;
+	uiVidModes.vidList.generic.color = uiColorDkGrey;
+#endif
 	uiVidModes.vidList.generic.x = 400;
 	uiVidModes.vidList.generic.y = 300;
 	uiVidModes.vidList.generic.width = 560;

@@ -178,21 +178,21 @@ static void UI_GameOptions_GetConfig( void )
 	uiGameOptions.mp_decals.curValue = uiGameInitial.mp_decals = CVAR_GET_FLOAT( "mp_decals" );
 
 	if( CVAR_GET_FLOAT( "hand" ))
-		uiGameInitial.hand = uiGameOptions.hand.enabled = 1;
+		uiGameInitial.hand = uiGameOptions.hand.enabled = true;
 	if( CVAR_GET_FLOAT( "cl_fastsmoke" ))
-		uiGameInitial.fast_smoke_gas = uiGameOptions.fast_smoke_gas.enabled = 1;
+		uiGameInitial.fast_smoke_gas = uiGameOptions.fast_smoke_gas.enabled = true;
 	if( CVAR_GET_FLOAT( "_vgui_menus" ))
-		uiGameInitial.oldstylemenu = uiGameOptions.oldstylemenu.enabled = 1;
+		uiGameInitial.oldstylemenu = uiGameOptions.oldstylemenu.enabled = true;
 	if( CVAR_GET_FLOAT( "_extended_menus" ))
-		uiGameInitial.extendedmenus = uiGameOptions.extendedmenus.enabled = 1;
+		uiGameInitial.extendedmenus = uiGameOptions.extendedmenus.enabled = true;
 	if( CVAR_GET_FLOAT( "_cl_autowepswitch" ))
-		uiGameInitial.cl_autowepswitch = uiGameOptions.cl_autowepswitch.enabled = 1;
+		uiGameInitial.cl_autowepswitch = uiGameOptions.cl_autowepswitch.enabled = true;
 	if( CVAR_GET_FLOAT( "hud_centerid" ))
-		uiGameInitial.hud_centerid = uiGameOptions.hud_centerid.enabled = 1;
+		uiGameInitial.hud_centerid = uiGameOptions.hud_centerid.enabled = true;
 	if( CVAR_GET_FLOAT( "_ah" ))
-		uiGameInitial.auto_help = uiGameOptions.auto_help.enabled = 1;
+		uiGameInitial.auto_help = uiGameOptions.auto_help.enabled = true;
 	if( CVAR_GET_FLOAT( "cl_radartype" ))
-		uiGameInitial.radar_type = uiGameOptions.radar_type.enabled = 1;
+		uiGameInitial.radar_type = uiGameOptions.radar_type.enabled = true;
 
 	UI_GameOptions_UpdateConfig ();
 }

@@ -208,7 +208,7 @@ char *Info_ValueForKey( const char *s, const char *key )
 		o = pkey;
 		while( *s != '\\' && *s != '\n' )
 		{
-			if( !*s ) return "";
+			if( !*s ) return (char*)"";
 			*o++ = *s++;
 		}
 
@@ -219,14 +219,14 @@ char *Info_ValueForKey( const char *s, const char *key )
 
 		while( *s != '\\' && *s != '\n' && *s )
 		{
-			if( !*s ) return "";
+			if( !*s ) return (char*)"";
 			*o++ = *s++;
 		}
 		*o = 0;
 
 		if( !strcmp( key, pkey ))
 			return value[valueindex];
-		if( !*s ) return "";
+		if( !*s ) return (char*)"";
 		s++;
 	}
 }
@@ -1164,7 +1164,7 @@ UI_Slider_Key
 */
 const char *UI_Slider_Key( menuSlider_s *sl, int key, int down )
 {
-	int	sliderX;
+	int sliderX;
 
 	if( !down )
 	{

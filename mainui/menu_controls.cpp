@@ -172,7 +172,7 @@ static void UI_Controls_ParseKeysList( void )
 
 		if( !stricmp( token, "blank" ))
 		{
-			// seperator
+			// separator
 			pfile = COM_ParseFile( pfile, token );
 			if( !pfile ) break;	// technically an error
 
@@ -271,7 +271,6 @@ static void UI_Controls_ResetKeysList( void )
 	char *afile = (char *)LOAD_FILE( "gfx/shell/kb_def.lst", NULL );
 	char *pfile = afile;
 	char token[1024];
-	int i = 0;
 
 	if( !afile )
 	{

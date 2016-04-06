@@ -119,6 +119,7 @@ static void UI_Background_Ownerdraw( void *self )
 	logoPosY = 70 * scaleY;	// 70 it's empirically determined value (magic number)
 
 	DRAW_LOGO( "logo.avi", 0, logoPosY, logoWidth, logoHeight );
+	//UI_DrawPic( 0, logoPosY, logoWidth, logoHeight)
 }
 
 static void UI_QuitDialog( void )
@@ -291,13 +292,7 @@ UI_Main_Init
 */
 static void UI_Main_Init( void )
 {
-	bool bCustomGame;
-
 	memset( &uiMain, 0, sizeof( uiMain_t ));
-
-	if( CVAR_GET_FLOAT( "host_allow_changegame" ))
-		bCustomGame = true;
-	else bCustomGame = false;
 
 	// precache .avi file and get logo width and height
 	PRECACHE_LOGO( "logo.avi" );

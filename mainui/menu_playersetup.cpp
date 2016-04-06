@@ -270,20 +270,9 @@ static void UI_PlayerSetup_Callback( void *self, int event )
 
 /*
 =================
-UI_PlayerSetup_Ownerdraw
+UI_Crosshair_Ownerdraw
 =================
 */
-static void UI_PlayerSetup_Ownerdraw( void *self )
-{
-	menuCommon_s	*item = (menuCommon_s *)self;
-
-	// draw the background
-	UI_FillRect( item->x, item->y, item->width, item->height, uiPromptBgColor );
-
-	// draw the rectangle
-	UI_DrawRectangle( item->x, item->y, item->width, item->height, uiInputFgColor );
-}
-
 static void UI_Crosshair_Ownerdraw( void *self )
 {
 	menuBitmap_s *item = (menuBitmap_s*)self;

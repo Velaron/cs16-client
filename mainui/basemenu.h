@@ -259,7 +259,7 @@ typedef struct
 typedef struct
 {
 	menuCommon_s	generic;
-	int		enabled;
+	bool		enabled;
 	const char	*emptyPic;
 	const char	*focusPic;	// can be replaced with pressPic manually
 	const char	*checkPic;
