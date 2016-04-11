@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_activity_launcher">Лаунчер cs16-client</string>
+    <string name="launch_button">Запустить cs16-client!</string>
+    <string name="cmd_args_text">Аргументы командной строки:</string>
+	<string name="cmd_args_text2">Не трогайте, если не знаете нужно ли оно вам.</string>
+    <string name="not_found_msg">Ничего не найдено. Проверьте вашу установку.</string>
+    <string name="not_found_title">Что-то пошло не так...</string>
+    <string name="not_implemented_msg">Данная функция не реализована.</string>
+    <string name="not_implemented_title">Не реализовано!</string>
+	<string name="enablezbot">Включить ботов ZBot.</string>
+	<string name="enableyapb">Включить ботов YaPB.</string>
+	<string name="basedir_text">Путь до игры:</string>
+	<string name="basedir_text2">Оставьте пустым, чтобы использовать настройки Xash3D Android.</string>
+</resources>
