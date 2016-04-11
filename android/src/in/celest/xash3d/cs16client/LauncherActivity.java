@@ -40,9 +40,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.CompoundButton;
-import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.os.Environment;
 
 import java.io.FileOutputStream;
 import java.io.File;
@@ -83,7 +82,7 @@ public class LauncherActivity extends Activity {
 		// get preferences
 		mPref          = getSharedPreferences("mod", 0);
 		
-		mCmdArgs       = (EditText)findViewById(R.id.cmdargs);
+		mCmdArgs       = (EditText)findViewById(R.id.cmdArgs);
 		mBaseDir       = (EditText)findViewById(R.id.basedir);
 		mEnableZBot    = (CheckBox)findViewById(R.id.enablezbot);
 		mEnableYaPB    = (CheckBox)findViewById(R.id.enableyapb);
