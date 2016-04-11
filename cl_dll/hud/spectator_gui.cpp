@@ -229,13 +229,13 @@ int CHudSpectatorGui::Draw( float flTime )
 		}
 	}
 
-	if( !label.m_szNameAndHealth[0] )
-	{
+	//if( !label.m_szNameAndHealth[0] )
+	//{
 		int iLen = DrawUtils::HudStringLen( label.m_szNameAndHealth, m_fTextScale );
 		GetTeamColor( r, g, b, g_PlayerExtraInfo[ g_iUser2 ].teamnumber );
 		DrawUtils::DrawHudString( ScreenWidth * 0.5 - iLen * 0.5, INT_YPOS(9) - gHUD.GetCharHeight() * 0.5 * m_fTextScale, ScreenWidth,
 								  label.m_szNameAndHealth, r, g, b, m_fTextScale );
-	}
+	//}
 
 	return 1;
 }
@@ -285,12 +285,8 @@ void CHudSpectatorGui::CalcAllNeededData( )
 		hud_player_info_t sInfo;
 		GetPlayerInfo( g_iUser2, &sInfo );
 
-		if( sInfo.name )
-		{
-			snprintf( label.m_szNameAndHealth, sizeof( label.m_szNameAndHealth ),
-					  "%s (%i)",  sInfo.name, g_PlayerExtraInfo[g_iUser2].health );
-			return;
-		}
+		snprintf( label.m_szNameAndHealth, sizeof( label.m_szNameAndHealth ),
+				  "%s (%i)",  sInfo.name, g_PlayerExtraInfo[g_iUser2].health );
 	}
 	else label.m_szNameAndHealth[0] = '\0';
 }
