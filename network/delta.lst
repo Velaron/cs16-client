@@ -23,15 +23,15 @@ clientdata_t none
 
 	DEFINE_DELTA( m_iId, DT_INTEGER, 5, 1.0 ),
 
-	DEFINE_DELTA( punchangle[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
+	DEFINE_DELTA( punchangle[2], DT_SIGNED | DT_FLOAT, 21, 8.0 ),
 	DEFINE_DELTA( flags, DT_INTEGER, 32, 1.0 ), // Cut to 3 bits?
 	DEFINE_DELTA( weaponanim, DT_INTEGER, 8, 1.0 ),
 	DEFINE_DELTA( health, DT_SIGNED | DT_FLOAT, 10, 1.0 ), // Cut # of bits?
 	DEFINE_DELTA( maxspeed, DT_FLOAT, 16, 10.0 ),
 	DEFINE_DELTA( flDuckTime, DT_INTEGER, 10, 1.0 ),
 	DEFINE_DELTA( view_ofs[2], DT_SIGNED | DT_FLOAT, 10, 4.0 ),
-	DEFINE_DELTA( punchangle[0], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
-	DEFINE_DELTA( punchangle[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
+	DEFINE_DELTA( punchangle[0], DT_SIGNED | DT_FLOAT, 26, 8192.0 ),
+	DEFINE_DELTA( punchangle[1], DT_SIGNED | DT_FLOAT, 26, 8192.0 ),
 	DEFINE_DELTA( viewmodel, DT_INTEGER, 10, 1.0 ),
 	DEFINE_DELTA( weapons, DT_INTEGER, 32, 1.0 ),
 
@@ -44,32 +44,31 @@ clientdata_t none
 	DEFINE_DELTA( waterjumptime, DT_INTEGER, 15, 1.0 ),
 	DEFINE_DELTA( waterlevel, DT_INTEGER, 2, 1.0 ),
 
-	DEFINE_DELTA( vuser1[0], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	DEFINE_DELTA( vuser1[1], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	DEFINE_DELTA( vuser1[2], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
+	DEFINE_DELTA( iuser1, DT_INTEGER, 3, 1.0 ),
+	DEFINE_DELTA( iuser2, DT_INTEGER, 6, 1.0 ),
+	DEFINE_DELTA( iuser3, DT_INTEGER, 8, 1.0 ),
+	DEFINE_DELTA( iuser4, DT_INTEGER, 2, 1.0 ),
 
-	DEFINE_DELTA( vuser2[0], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	DEFINE_DELTA( vuser2[1], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	DEFINE_DELTA( vuser2[2], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
+	DEFINE_DELTA( vuser2[0], DT_FLOAT, 9, 1.0 ),
+	DEFINE_DELTA( vuser2[1], DT_FLOAT, 9, 1.0 ),
+	DEFINE_DELTA( vuser2[2], DT_FLOAT, 9, 1.0 ),
 
-	DEFINE_DELTA( vuser3[0], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	DEFINE_DELTA( vuser3[1], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	DEFINE_DELTA( vuser3[2], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
+	DEFINE_DELTA( vuser3[0], DT_FLOAT, 9, 1.0 ),
+	DEFINE_DELTA( vuser3[1], DT_FLOAT, 9, 1.0 ),
+	DEFINE_DELTA( vuser3[2], DT_FLOAT, 9, 1.0 ),
 
-	DEFINE_DELTA( vuser4[0], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	DEFINE_DELTA( vuser4[1], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	DEFINE_DELTA( vuser4[2], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	
-	DEFINE_DELTA( fuser1, DT_SIGNED | DT_FLOAT, 22, 128.0 ),
-	DEFINE_DELTA( fuser2, DT_SIGNED | DT_FLOAT, 10, 128.0 ),
-	DEFINE_DELTA( fuser3, DT_SIGNED | DT_FLOAT, 10, 128.0 ),
-	DEFINE_DELTA( fuser4, DT_SIGNED | DT_FLOAT, 2, 128.0 )
+	DEFINE_DELTA( vuser4[0], DT_FLOAT, 9, 1.0 ),
+	DEFINE_DELTA( vuser4[1], DT_FLOAT, 9, 1.0 ),
+
+	DEFINE_DELTA( fuser1, DT_FLOAT, 9, 1.0 ),
+	DEFINE_DELTA( fuser2, DT_FLOAT, 14, 1.0 ),
+	DEFINE_DELTA( fuser3, DT_FLOAT, 10, 1.0 )
 }
 
 entity_state_t gamedll Entity_Encode
 {
 	DEFINE_DELTA( animtime, DT_TIMEWINDOW_8, 8, 1.0 ),
-	DEFINE_DELTA( frame, DT_FLOAT, 10, 4.0 ),
+	DEFINE_DELTA( frame, DT_FLOAT, 8, 1.0 ),
 	DEFINE_DELTA( origin[0], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( angles[0], DT_ANGLE, 16, 1.0 ),
 	DEFINE_DELTA( angles[1], DT_ANGLE, 16, 1.0 ),
@@ -122,9 +121,7 @@ entity_state_t gamedll Entity_Encode
 	DEFINE_DELTA( basevelocity[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( basevelocity[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 
-	// Playerclass signifies it's a decalable glass item when referring to an object
-
-	DEFINE_DELTA( playerclass, DT_INTEGER, 1, 1.0 )
+	DEFINE_DELTA( iuser4, DT_INTEGER, 2, 1.0 )
 }
 
 entity_state_player_t gamedll Player_Encode
@@ -148,8 +145,8 @@ entity_state_player_t gamedll Player_Encode
 	DEFINE_DELTA( maxs[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( maxs[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( weaponmodel, DT_INTEGER, 10, 1.0 ),
-	DEFINE_DELTA( team, DT_INTEGER, 4, 1.0 )
-	DEFINE_DELTA( playerclass, DT_INTEGER, 4, 1.0 )
+	// DEFINE_DELTA( team, DT_INTEGER, 4, 1.0 )
+	// DEFINE_DELTA( playerclass, DT_INTEGER, 4, 1.0 )
 	DEFINE_DELTA( owner, DT_INTEGER, 5, 1.0 ),
 	DEFINE_DELTA( effects, DT_INTEGER, 8, 1.0 ),
 	DEFINE_DELTA( angles[2], DT_ANGLE, 16, 1.0 ),
@@ -178,6 +175,8 @@ entity_state_player_t gamedll Player_Encode
 	DEFINE_DELTA( basevelocity[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( basevelocity[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( spectator, DT_INTEGER, 1, 1.0 )
+
+	DEFINE_DELTA( iuser4, DT_INTEGER, 2, 1.0 )
 }
 
 custom_entity_state_t gamedll Custom_Encode
@@ -234,32 +233,30 @@ weapon_data_t none
 	DEFINE_DELTA( m_fInSpecialReload, DT_INTEGER, 2, 1.0 ),
 	DEFINE_DELTA( m_fReloadTime, DT_FLOAT, 16, 100.0 ),
 	DEFINE_DELTA( m_fInReload, DT_INTEGER, 1, 1.0 ),
-	DEFINE_DELTA( m_fAimedDamage, DT_FLOAT, 6, 0.1 ),
-	DEFINE_DELTA( m_fInZoom, DT_INTEGER, 1, 1.0 ),
-	DEFINE_DELTA( m_iWeaponState, DT_INTEGER, 2, 1.0 ),
-	DEFINE_DELTA( m_iId, DT_INTEGER, 5, 1.0 ),
-	DEFINE_DELTA( iuser1, DT_SIGNED | DT_INTEGER, 10, 1.0  ),
-	DEFINE_DELTA( iuser2, DT_SIGNED | DT_INTEGER, 10, 1.0  ),
-	DEFINE_DELTA( iuser3, DT_SIGNED | DT_INTEGER, 10, 1.0  ),
+	DEFINE_DELTA( m_fAimedDamage, DT_FLOAT, 22, 1000.0 ),
+	DEFINE_DELTA( m_fInZoom, DT_INTEGER, 8, 1.0 ),
+	DEFINE_DELTA( m_iWeaponState, DT_INTEGER, 7, 1.0 )
+	DEFINE_DELTA( m_iId, DT_INTEGER, 5, 1.0 )
 	DEFINE_DELTA( fuser1, DT_SIGNED | DT_FLOAT, 22, 1000.0 ),
 	DEFINE_DELTA( fuser2, DT_SIGNED | DT_FLOAT, 22, 128.0  ),
-	DEFINE_DELTA( fuser3, DT_SIGNED | DT_FLOAT, 22, 128.0  )
+	DEFINE_DELTA( fuser3, DT_SIGNED | DT_FLOAT, 22, 128.0  ),
+	DEFINE_DELTA( iuser1, DT_SIGNED | DT_INTEGER, 16, 128.0 )
 }
 
 event_t none
 {
-	DEFINE_DELTA( entindex, DT_INTEGER, 10, 1.0 ),
+	DEFINE_DELTA( entindex, DT_INTEGER, 11, 1.0 ),
 	DEFINE_DELTA( bparam1, DT_INTEGER, 1, 1.0 ),
 	DEFINE_DELTA( bparam2, DT_INTEGER, 1, 1.0 ),
-	DEFINE_DELTA( origin[0], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
-	DEFINE_DELTA( origin[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
-	DEFINE_DELTA( origin[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
+	DEFINE_DELTA( origin[0], DT_SIGNED | DT_FLOAT, 26, 8192.0 ),
+	DEFINE_DELTA( origin[1], DT_SIGNED | DT_FLOAT, 26, 8192.0 ),
+	DEFINE_DELTA( origin[2], DT_SIGNED | DT_FLOAT, 26, 8192.0 ),
 	DEFINE_DELTA( fparam1, DT_FLOAT | DT_SIGNED, 20, 100.0 ),
 	DEFINE_DELTA( fparam2, DT_FLOAT | DT_SIGNED, 20, 100.0 ),
-	DEFINE_DELTA( iparam1, DT_INTEGER | DT_SIGNED, 16, 1.0 ),
-	DEFINE_DELTA( iparam2, DT_INTEGER | DT_SIGNED, 16, 1.0 ),
-	DEFINE_DELTA( angles[0], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
-	DEFINE_DELTA( angles[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
-	DEFINE_DELTA( angles[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
+	DEFINE_DELTA( iparam1, DT_INTEGER | DT_SIGNED, 18, 1.0 ),
+	DEFINE_DELTA( iparam2, DT_INTEGER | DT_SIGNED, 18, 1.0 ),
+	DEFINE_DELTA( angles[0], DT_SIGNED | DT_FLOAT, 26, 8192.0 ),
+	DEFINE_DELTA( angles[1], DT_SIGNED | DT_FLOAT, 26, 8192.0 ),
+	DEFINE_DELTA( angles[2], DT_SIGNED | DT_FLOAT, 26, 8192.0 ),
 	DEFINE_DELTA( ducking, DT_INTEGER, 1, 1.0 )
 }
