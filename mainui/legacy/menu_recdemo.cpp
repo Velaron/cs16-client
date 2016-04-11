@@ -76,6 +76,7 @@ typedef struct
 } uiRecDemo_t;
 
 static uiRecDemo_t		uiRecDemo;
+static const char *uiEmptyString = "";
 
 /*
 =================

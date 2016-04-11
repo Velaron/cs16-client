@@ -32,14 +32,14 @@ static const char *uiCreditsDefault[] =
 	"mittorn",
 	"jeefo",
 	"",
-	"Touch & GFX: "
+	"Touch & GFX: ",
 	"SergioPoverony",
 	"ahsim",
 	"",
 	"Beta-testers:",
 	"1.kirill",
 	"Romka_ZVO",
-	"WolfReiser"
+	"WolfReiser",
 	"MakcuM56",
 	"Mr.Lightning Bolt",
 	"Kirpich",

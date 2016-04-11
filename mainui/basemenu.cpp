@@ -1395,6 +1395,9 @@ void UI_Precache( void )
 	UI_TouchButtons_Precache();
 	UI_TouchEdit_Precache();
 	UI_FileDialog_Precache();
+	UI_PlayDemo_Precache();
+	UI_PlayRec_Precache();
+	UI_RecDemo_Precache();
 }
 
 void UI_ParseColor( char *&pfile, int *outColor )
@@ -1591,6 +1594,10 @@ void UI_Init( void )
 	Cmd_AddCommand( "menu_touchbuttons", UI_TouchButtons_Menu );
 	Cmd_AddCommand( "menu_touchedit", UI_TouchEdit_Menu );
 	Cmd_AddCommand( "menu_filedialog", UI_FileDialog_Menu );
+	Cmd_AddCommand( "menu_playrec", UI_PlayRec_Menu );
+	Cmd_AddCommand( "menu_playdemo", UI_PlayDemo_Menu );
+	Cmd_AddCommand( "menu_recdemo", UI_RecDemo_Menu );
+
 
 	CHECK_MAP_LIST( TRUE );
 

@@ -52,7 +52,11 @@ LOCAL_SRC_FILES := basemenu.cpp \
 	   menu_touchbuttons.cpp \
            udll_int.cpp \
            ui_title_anim.cpp \
-	   utils.cpp
+	   utils.cpp \
+	   legacy/menu_playrec.cpp \
+	   legacy/menu_playdemo.cpp \
+	   legacy/menu_recdemo.cpp 
+
 #ifeq ($(XASH_SDL),1)
 #LOCAL_SHARED_LIBRARIES += SDL2
 #endif

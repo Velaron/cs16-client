@@ -76,6 +76,7 @@ typedef struct
 } uiPlayDemo_t;
 
 static uiPlayDemo_t		uiPlayDemo;
+static const char *uiEmptyString = "";
 
 /*
 =================

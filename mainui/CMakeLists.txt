@@ -36,8 +36,8 @@ endif()
 
 set (MAINUI_LIBRARY xashmenu)
 
-file (GLOB MAINUI_SOURCES *.cpp)
-include_directories (../common ../engine ../pm_shared)
+file (GLOB MAINUI_SOURCES *.cpp legacy/*.cpp)
+include_directories (../common ../engine ../pm_shared ../mainui)
 add_library (${MAINUI_LIBRARY} SHARED ${MAINUI_SOURCES})
 
 set_target_properties (${MAINUI_SHARED} PROPERTIES

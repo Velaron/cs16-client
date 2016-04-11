@@ -58,7 +58,7 @@ typedef struct
 	menuPicButton_s	console;
 	menuPicButton_s	resumeGame;
 	menuPicButton_s	configuration;
-        menuPicButton_s credits;
+	menuPicButton_s credits;
 	menuPicButton_s	multiPlayer;
 	menuPicButton_s	quit;
 
@@ -368,7 +368,7 @@ static void UI_Main_Init( void )
 	uiMain.credits.generic.y = 580;
 	uiMain.credits.generic.callback = UI_Main_Callback;
 
-	UI_UtilSetupPicButton( &uiMain.credits, PC_VIEW_README );
+	UI_UtilSetupPicButton( &uiMain.credits, PC_VIEW_README );	
 
 	if ( gMenu.m_gameinfo.gamemode == GAME_SINGLEPLAYER_ONLY )
 		uiMain.multiPlayer.generic.flags |= QMF_GRAYED;
