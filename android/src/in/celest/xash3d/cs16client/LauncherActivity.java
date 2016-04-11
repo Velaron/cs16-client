@@ -54,35 +54,50 @@ import com.google.android.gms.ads.*;
 import in.celest.xash3d.cs16client.R;
 
 public class LauncherActivity extends Activity {
-	private static final int PAK_VERSION = 1;
+	private static final int PAK_VERSION = 2;
 	public final static String TAG = "LauncherActivity";
 	
-	static EditText cmdArgs;
 	static SharedPreferences mPref;
-	static Spinner mServerSpinner;
-	static AdView mAdView;
+	
+	static EditText mCmdArgs;
+	static EditText mBaseDir;
+	static CheckBox mEnableZBot;
+	static CheckBox mEnableYaPB;
+	static AdView   mAdView;
 	
 	static Boolean isExtracting = false;
 
+	String getDefaultPath()
+	{
+		File dir = Environment.getExternalStorageDirectory();
+		if( dir != null && dir.exists() )
+			return dir.getPath() + "/xash";
+		return "/sdcard/xash";
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_launcher);
+		
+		// get preferences
 		mPref          = getSharedPreferences("mod", 0);
-		cmdArgs        = (EditText)findViewById(R.id.cmdArgs);
-		mServerSpinner = (Spinner) findViewById(R.id.serverSpinner);
+		
+		mCmdArgs       = (EditText)findViewById(R.id.cmdargs);
+		mBaseDir       = (EditText)findViewById(R.id.basedir);
+		mEnableZBot    = (CheckBox)findViewById(R.id.enablezbot);
+		mEnableYaPB    = (CheckBox)findViewById(R.id.enableyapb);
+		//mEnableCZero   = (CheckBox)findViewById(R.id.enableczero); // TODO
 		mAdView        = (AdView)  findViewById(R.id.adView);
 
-		cmdArgs.setText(mPref.getString("argv","-dev 5 -log"));
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-			R.array.avail_servers, android.R.layout.simple_spinner_item);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-		mServerSpinner.setAdapter(adapter);
-		mServerSpinner.setSelection(mPref.getInt("serverSpinner", 0));
-
+		mCmdArgs.   setText   (mPref.getString ("argv"   , "-console"));
+		mBaseDir.   setText   (mPref.getString ("basedir", getDefaultPath()));
+		mEnableZBot.setChecked(mPref.getBoolean("zbots"  , true ));
+		mEnableYaPB.setChecked(mPref.getBoolean("yapbs"  , false));
+		//mEnableCZero.setChecked(mPref.getBoolean("czero" , false)); // TODO
+		
 		AdRequest adRequest = new AdRequest.Builder()
 			.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-			.addTestDevice("B1F9AE0E2DC2387F53BE815077840D9B")
 			.build();
 		mAdView.loadAd(adRequest);
 	}
@@ -90,25 +105,20 @@ public class LauncherActivity extends Activity {
 	public void startXash(View view)
 	{
 		SharedPreferences.Editor editor = mPref.edit();
-		String argv = cmdArgs.getText().toString();
+		String argv    = mCmdArgs.getText().toString();
+		String basedir = mBaseDir.getText().toString();
 
 		editor.putString("argv", argv);
-		editor.putInt("serverSpinner", mServerSpinner.getSelectedItemPosition());
+		editor.putString("basedir", basedir );
+		editor.putBoolean("zbots", mEnableZBot.isChecked());
+		editor.putBoolean("yapbs", mEnableYaPB.isChecked());
 		editor.commit();
 		editor.apply();
 
 		extractPAK(this, false);
 
-		switch(mServerSpinner.getSelectedItemPosition())
+		if( mEnableYaPB.isChecked() )
 		{
-		case 0:
-			argv = argv + " -dll censored";
-			break;
-		case 1:
-			// Engine will load libserver.so by himself
-			argv = argv + " -bots";
-			break;
-		case 2:
 			String fullPath = getFilesDir().getAbsolutePath().replace("/files","/lib");
 			File yapb_hardfp = new File( fullPath + "/libyapb_hardfp.so" );
 			File yapb = new File( fullPath + "/libyapb.so" );
@@ -122,28 +132,37 @@ public class LauncherActivity extends Activity {
 				AlertDialog.Builder notFoundDialogBuilder = new AlertDialog.Builder(this);
 				notFoundDialogBuilder.setMessage(R.string.not_found_msg)
 					.setTitle(R.string.not_found_title);
-				notFoundDialogBuilder.create();
+				notFoundDialogBuilder.create().show();
 				return;
 			}
-			break;
-		//case 3:
-		//case 4:
-		//	AlertDialog.Builder notImplementedDialogBuilder = new AlertDialog.Builder(this);
-		//	notImplementedDialogBuilder.setMessage(R.string.not_implemented_msg)
-		//		.setTitle(R.string.not_implemented_title);
-		//	notImplementedDialogBuilder.create();
-		//	return;
 		}
+		
+		if( mEnableZBot.isChecked() )
+		{
+			argv = argv + " -bots";
+		}
+		
+		/*if( mEnableCZero.isChecked() ) // TODO
+		{
+			AlertDialog.Builder notImplementedDialogBuilder = new AlertDialog.Builder(this);
+			notImplementedDialogBuilder.setMessage(R.string.not_implemented_msg)
+				.setTitle(R.string.not_implemented_title);
+			notImplementedDialogBuilder.create().show();
+			return;
+			
+			gamedir = "czero"; // use when czero will be done
+		}*/
 		
 		Intent intent = new Intent();
 		intent.setAction("in.celest.xash3d.START");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-		if(cmdArgs.length() != 0)
-			intent.putExtra("argv", argv);
-		intent.putExtra("gamedir", "cstrike");
+		intent.putExtra("argv",       argv);
+		intent.putExtra("gamedir",    "cstrike" );
+		if( basedir != null && !basedir.isEmpty() )
+			intent.putExtra("basedir",    mBaseDir.getText().toString() );
 		intent.putExtra("gamelibdir", getFilesDir().getAbsolutePath().replace("/files","/lib"));
-		intent.putExtra("pakfile", getFilesDir().getAbsolutePath() + "/extras.pak" );
+		intent.putExtra("pakfile",    getFilesDir().getAbsolutePath() + "/extras.pak" );
 		startActivity(intent);
 	}
 
