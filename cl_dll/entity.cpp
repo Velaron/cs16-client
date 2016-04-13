@@ -30,7 +30,6 @@ void Game_AddObjects( void );
 
 extern vec3_t v_origin;
 
-int g_iAlive = 1;
 int iOnTrain[MAX_PLAYERS];
 
 extern "C" 
@@ -189,53 +188,42 @@ Because we can predict an arbitrary number of frames before the server responds 
 */
 void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd )
 {
-	ps->oldbuttons				= pps->oldbuttons;
-	ps->flFallVelocity			= pps->flFallVelocity;
-	ps->iStepLeft				= pps->iStepLeft;
-	ps->playerclass				= pps->playerclass;
-	ps->iuser4					= pps->iuser4;
+	ps->oldbuttons = pps->oldbuttons;
+	ps->flFallVelocity = pps->flFallVelocity;
+	ps->iStepLeft = pps->iStepLeft;
+	ps->playerclass	= pps->playerclass;
+	ps->iuser4 = pps->iuser4;
 
-	pcd->viewmodel				= ppcd->viewmodel;
-	pcd->m_iId					= ppcd->m_iId;
-	pcd->ammo_shells			= ppcd->ammo_shells;
-	pcd->ammo_nails				= ppcd->ammo_nails;
-	pcd->ammo_cells				= ppcd->ammo_cells;
-	pcd->ammo_rockets			= ppcd->ammo_rockets;
-	pcd->m_flNextAttack			= ppcd->m_flNextAttack;
-	pcd->fov					= ppcd->fov;
-	pcd->weaponanim				= ppcd->weaponanim;
-	pcd->tfstate				= ppcd->tfstate;
-	pcd->maxspeed				= ppcd->maxspeed;
-
-	pcd->deadflag				= ppcd->deadflag;
-	// Spectator
-	pcd->iuser1					= ppcd->iuser1;
-	pcd->iuser2					= ppcd->iuser2;
-	// Duck prevention
-	pcd->iuser3					= ppcd->iuser3;
-	// Spectating or not dead == get control over view angles.
-	g_iAlive = ( ppcd->iuser1 || ( pcd->deadflag == DEAD_NO ) ) ? 1 : 0;
-
-
-	if ( gEngfuncs.IsSpectateOnly() )
+	pcd->viewmodel = ppcd->viewmodel;
+	pcd->m_iId = ppcd->m_iId;
+	pcd->ammo_shells = ppcd->ammo_shells;
+	pcd->ammo_nails	= ppcd->ammo_nails;
+	pcd->ammo_cells	= ppcd->ammo_cells;
+	pcd->ammo_rockets = ppcd->ammo_rockets;
+	pcd->m_flNextAttack	= ppcd->m_flNextAttack;
+	pcd->fov = ppcd->fov;
+	pcd->weaponanim = ppcd->weaponanim;
+	pcd->tfstate = ppcd->tfstate;
+	pcd->maxspeed = ppcd->maxspeed;
+	pcd->deadflag = ppcd->deadflag;
+	if( gEngfuncs.IsSpectateOnly() )
 	{
-		// in specator mode we tell the engine who we want to spectate and how
-		// iuser3 is not used for duck prevention (since the spectator can't duck at all)
 		pcd->iuser1 = g_iUser1;	// observer mode
 		pcd->iuser2 = g_iUser2; // first target
 		pcd->iuser3 = g_iUser3; // second target
 	}
-
-	// Fire prevention
-	pcd->iuser4					= ppcd->iuser4;
-
-	pcd->fuser2					= ppcd->fuser2;
-	pcd->fuser3					= ppcd->fuser3;
-
-	VectorCopy( ppcd->vuser1, pcd->vuser1 );
-	VectorCopy( ppcd->vuser2, pcd->vuser2 );
-	VectorCopy( ppcd->vuser3, pcd->vuser3 );
-	VectorCopy( ppcd->vuser4, pcd->vuser4 );
+	else
+	{
+		pcd->iuser1	= ppcd->iuser1;
+		pcd->iuser2	= ppcd->iuser2;
+		pcd->iuser3 = ppcd->iuser3;
+	}
+	pcd->iuser4 = ppcd->iuser4;
+	pcd->fuser2	= ppcd->fuser2;
+	pcd->fuser3	= ppcd->fuser3;
+	pcd->vuser2 = ppcd->vuser2;
+	pcd->vuser3 = ppcd->vuser3;
+	pcd->vuser4 = ppcd->vuser4;
 
 	memcpy( wd, pwd, sizeof( weapon_data_t ) * 32 );
 }

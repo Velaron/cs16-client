@@ -552,3 +552,15 @@ int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 #endif
    return 0;
 }
+
+/*
+============
+CL_IsDead
+
+Returns 1 if health is <= 0
+============
+*/
+bool CL_IsDead( void )
+{
+	return gHUD.m_Health.m_iHealth <= 0;
+}

@@ -28,7 +28,7 @@ extern "C"
 #include <ctype.h>
 
 #include "vgui_parser.h"
-
+#include "com_weapons.h"
 
 extern "C" 
 {
@@ -37,8 +37,6 @@ extern "C"
 	void DLLEXPORT HUD_Shutdown( void );
 	int DLLEXPORT HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding );
 }
-
-extern int g_iAlive;
 
 extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
@@ -751,28 +749,16 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	gEngfuncs.GetViewAngles( (float *)viewangles );
 	// Set current view angles.
 
-	if ( g_iAlive )
+	if ( CL_IsDead() )
+	{
+		VectorCopy( oldangles, cmd->viewangles );
+	}
+	else
 	{
 		VectorCopy( viewangles, cmd->viewangles );
 		VectorCopy( viewangles, oldangles );
 	}
-	else
-	{
-		VectorCopy( oldangles, cmd->viewangles );
-	}
 
-}
-
-/*
-============
-CL_IsDead
-
-Returns 1 if health is <= 0
-============
-*/
-bool CL_IsDead( void )
-{
-	return gHUD.m_Health.m_iHealth <= 0;
 }
 
 /*
