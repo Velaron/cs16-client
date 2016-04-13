@@ -236,6 +236,8 @@ void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct
 	VectorCopy( ppcd->vuser2, pcd->vuser2 );
 	VectorCopy( ppcd->vuser3, pcd->vuser3 );
 	VectorCopy( ppcd->vuser4, pcd->vuser4 );
+
+	memcpy( wd, pwd, sizeof( weapon_data_t ) * 32 );
 }
 
 /*

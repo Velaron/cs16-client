@@ -1076,8 +1076,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	int i;
 	int buttonsChanged;
 	CBasePlayerWeapon *pWeapon = NULL;
-	CBasePlayerWeapon *pCurrent;
-	weapon_data_t *pto;
 	static int lasthealth;
 	int flags;
 
@@ -1242,7 +1240,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 	for ( i = 0; i < MAX_WEAPONS; i++ )
 	{
-		pCurrent = g_pWpns[ i ];
+		CBasePlayerWeapon *pCurrent = g_pWpns[ i ];
 		if ( !pCurrent )
 		{
 			continue;
@@ -1432,9 +1430,9 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 	for ( i = 0; i < MAX_WEAPONS; i++ )
 	{
-		pCurrent = g_pWpns[ i ];
+		CBasePlayerWeapon *pCurrent = g_pWpns[ i ];
 
-		pto = &to->weapondata[ i ];
+		weapon_data_t *pto = to->weapondata + i;
 
 		if ( !pCurrent )
 		{

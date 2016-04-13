@@ -235,6 +235,8 @@ CGrenade *CGrenade::ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecV
 CGrenade *CGrenade::ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, int iTeam, unsigned short usEvent) { return 0; }
 CGrenade *CGrenade::ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent) { return 0; }
 
+void CBasePlayerWeapon::RetireWeapon() {}
+
 // CS16 END
 
 void ClearMultiDamage(void) { }
