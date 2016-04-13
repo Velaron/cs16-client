@@ -86,7 +86,7 @@ static void UI_MultiPlayer_Callback( void *self, int event )
 		UI_PopMenu();
 		break;
 	case ID_DEMOS:
-		//UI_PlayRec_Menu();
+		UI_PlayRec_Menu();
 		break;
 	}
 }
@@ -177,14 +177,12 @@ static void UI_MultiPlayer_Init( void )
 
 	uiMultiPlayer.demos.generic.id = ID_DEMOS;
 	uiMultiPlayer.demos.generic.type = QMTYPE_BM_BUTTON;
-	uiMultiPlayer.demos.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY|QMF_GRAYED;
+	uiMultiPlayer.demos.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
 	uiMultiPlayer.demos.generic.x = 72;
 	uiMultiPlayer.demos.generic.y = 480;
 	uiMultiPlayer.demos.generic.name = "Demos";
 	uiMultiPlayer.demos.generic.statusText = "Play or record the demos";
 	uiMultiPlayer.demos.generic.callback = UI_MultiPlayer_Callback;
-
-	//UI_UtilSetupPicButton( &uiMultiPlayer.demos, PC_DONE );
 
 	uiMultiPlayer.done.generic.id = ID_DONE;
 	uiMultiPlayer.done.generic.type = QMTYPE_BM_BUTTON;

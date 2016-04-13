@@ -111,20 +111,20 @@ static void UI_GameOptions_UpdateConfig( void )
 	uiGameOptions.cl_corpsestay.generic.name = corpseStayText;
 
 
-	CVAR_SET_FLOAT( "hand", uiGameOptions.hand.enabled );
+	CVAR_SET_FLOAT( "hand",          !uiGameOptions.hand.enabled );
 	CVAR_SET_FLOAT( "cl_corpsestay", uiGameOptions.cl_corpsestay.curValue );
-	CVAR_SET_FLOAT( "mp_decals", uiGameOptions.mp_decals.curValue );
+	CVAR_SET_FLOAT( "mp_decals",     uiGameOptions.mp_decals.curValue );
 	//CVAR_SET_FLOAT( "") maxshells
 	//CVAR_SET_FLOAT( "") max_smoke_puffs;
-	CVAR_SET_FLOAT( "cl_fastsmoke", uiGameOptions.fast_smoke_gas.enabled );
-	CVAR_SET_FLOAT( "_vgui_menus", uiGameOptions.oldstylemenu.enabled );
+	CVAR_SET_FLOAT( "cl_fastsmoke",  uiGameOptions.fast_smoke_gas.enabled );
+	CVAR_SET_FLOAT( "_vgui_menus",   !uiGameOptions.oldstylemenu.enabled );
 	CVAR_SET_FLOAT( "_extended_menus", uiGameOptions.extendedmenus.enabled );
 	CVAR_SET_FLOAT( "_cl_autowepswitch", uiGameOptions.cl_autowepswitch.enabled );
-	CVAR_SET_FLOAT( "hud_centerid", uiGameOptions.hud_centerid.enabled );
-	CVAR_SET_FLOAT( "_ah", uiGameOptions.auto_help.enabled );
-	//CVAR_SET_FLOAT( "_extended_menus", uiGameOptions.endgame_screenshot.enabled );
+	CVAR_SET_FLOAT( "hud_centerid",  uiGameOptions.hud_centerid.enabled );
+	CVAR_SET_FLOAT( "_ah",           uiGameOptions.auto_help.enabled );
+	//CVAR_SET_FLOAT( "", uiGameOptions.endgame_screenshot.enabled );
 	//CVAR_SET_FLOAT( "", uiGameOptions.observer_crosshair.enabled );
-	CVAR_SET_FLOAT( "cl_radartype", uiGameOptions.radar_type.enabled );
+	CVAR_SET_FLOAT( "cl_radartype",  uiGameOptions.radar_type.enabled );
 
 }
 
@@ -135,20 +135,20 @@ UI_GameOptions_DiscardChanges
 */
 static void UI_GameOptions_DiscardChanges( void )
 {
-	CVAR_SET_FLOAT( "hand", uiGameInitial.hand );
+	CVAR_SET_FLOAT( "hand",          !uiGameInitial.hand );
 	CVAR_SET_FLOAT( "cl_corpsestay", uiGameInitial.cl_corpsestay );
-	CVAR_SET_FLOAT( "mp_decals", uiGameInitial.mp_decals );
+	CVAR_SET_FLOAT( "mp_decals",     uiGameInitial.mp_decals );
 	//CVAR_SET_FLOAT( "") maxshells
 	//CVAR_SET_FLOAT( "") max_smoke_puffs;
-	CVAR_SET_FLOAT( "cl_fastsmoke", uiGameInitial.fast_smoke_gas );
-	CVAR_SET_FLOAT( "_vgui_menus", uiGameInitial.oldstylemenu );
+	CVAR_SET_FLOAT( "cl_fastsmoke",  uiGameInitial.fast_smoke_gas );
+	CVAR_SET_FLOAT( "_vgui_menus",   !uiGameInitial.oldstylemenu );
 	CVAR_SET_FLOAT( "_extended_menus", uiGameInitial.extendedmenus );
 	CVAR_SET_FLOAT( "_cl_autowepswitch", uiGameInitial.cl_autowepswitch );
-	CVAR_SET_FLOAT( "hud_centerid", uiGameInitial.hud_centerid );
-	CVAR_SET_FLOAT( "_ah", uiGameInitial.auto_help );
+	CVAR_SET_FLOAT( "hud_centerid",  uiGameInitial.hud_centerid );
+	CVAR_SET_FLOAT( "_ah",           uiGameInitial.auto_help );
 	//CVAR_SET_FLOAT( "_extended_menus", uiGameOptions.endgame_screenshot.enabled );
 	//CVAR_SET_FLOAT( "", uiGameInitial.observer_crosshair );
-	CVAR_SET_FLOAT( "cl_radartype", uiGameInitial.radar_type );
+	CVAR_SET_FLOAT( "cl_radartype",  uiGameInitial.radar_type );
 }
 
 /*
@@ -177,12 +177,11 @@ static void UI_GameOptions_GetConfig( void )
 	uiGameOptions.cl_corpsestay.curValue = uiGameInitial.cl_corpsestay = CVAR_GET_FLOAT( "cl_corpsestay" );
 	uiGameOptions.mp_decals.curValue = uiGameInitial.mp_decals = CVAR_GET_FLOAT( "mp_decals" );
 
-	if( CVAR_GET_FLOAT( "hand" ))
-		uiGameInitial.hand = uiGameOptions.hand.enabled = true;
+	uiGameInitial.hand = uiGameOptions.hand.enabled = !CVAR_GET_FLOAT( "hand" );
+	uiGameInitial.oldstylemenu = uiGameOptions.oldstylemenu.enabled = !CVAR_GET_FLOAT( "_vgui_menus" );
+
 	if( CVAR_GET_FLOAT( "cl_fastsmoke" ))
 		uiGameInitial.fast_smoke_gas = uiGameOptions.fast_smoke_gas.enabled = true;
-	if( CVAR_GET_FLOAT( "_vgui_menus" ))
-		uiGameInitial.oldstylemenu = uiGameOptions.oldstylemenu.enabled = true;
 	if( CVAR_GET_FLOAT( "_extended_menus" ))
 		uiGameInitial.extendedmenus = uiGameOptions.extendedmenus.enabled = true;
 	if( CVAR_GET_FLOAT( "_cl_autowepswitch" ))
@@ -302,7 +301,7 @@ static void UI_GameOptions_Init( void )
 	UI_GenItemInit( uiGameOptions.auto_help.generic, ID_AUTOHELP, QMTYPE_CHECKBOX, iTypicalFlags,
 		x, y += gap, "Auto-help", "Do you need to know how to play Counter-Strike?" );
 	UI_GenItemInit( uiGameOptions.radar_type.generic, ID_TRANSPARENTRADAR, QMTYPE_CHECKBOX, iTypicalFlags,
-		x, y += gap, "Transparent radar", "Draw gun at left side" );
+		x, y += gap, "Opaque radar", "Opaque or transparent radar. Useful for slow devices." );
 
 
 	UI_GenItemInit( uiGameOptions.cl_corpsestay_message.generic, 10000, QMTYPE_ACTION, QMF_SMALLFONT| QMF_INACTIVE|QMF_DROPSHADOW,

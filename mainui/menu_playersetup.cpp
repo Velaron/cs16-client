@@ -50,7 +50,7 @@ enum
 
 #define MAX_SPRAYDECALS	50
 
-typedef struct
+struct uiPlayerSetup_t
 {
 	menuFramework_s	menu;
 	menuBitmap_s	background;
@@ -74,7 +74,9 @@ typedef struct
 	menuSpinControl_s sprayDecals;
 	menuSpinControl_s sprayColor;
 #endif
-} uiPlayerSetup_t;
+
+	HIMAGE uiWhite;
+};
 
 static uiPlayerSetup_t	uiPlayerSetup;
 
@@ -300,14 +302,16 @@ static void UI_Crosshair_Ownerdraw( void *self )
 		else l = 10;
 	}
 
+	l *= ScreenHeight / 768.0f;
+
 	int x = item->generic.x, // xpos
 		y = item->generic.y, // ypos
 		w = item->generic.width, // width
 		h = item->generic.height, // height
 		// delta distance
 		d = (item->generic.width / 2 - l) * 0.5,
-		// alpha. Simulate non-additive.
-		a = uiPlayerSetup.crosshairTranslucent.enabled ? 180 : 255,
+		// alpha
+		a = 180,
 		// red
 		r = g_iCrosshairAvailColors[(int)uiPlayerSetup.crosshairColor.curValue][0],
 		// green
@@ -315,6 +319,40 @@ static void UI_Crosshair_Ownerdraw( void *self )
 		// blue
 		b = g_iCrosshairAvailColors[(int)uiPlayerSetup.crosshairColor.curValue][2];
 
+	if( uiPlayerSetup.crosshairTranslucent.enabled )
+	{
+		// verical
+		PIC_Set(uiPlayerSetup.uiWhite, r, g, b, a);
+		PIC_DrawTrans(x + w / 2, y + d,         1, l );
+
+		PIC_Set(uiPlayerSetup.uiWhite, r, g, b, a);
+		PIC_DrawTrans(x + w / 2, y + h / 2 + d, 1, l );
+
+		// horizontal
+		PIC_Set(uiPlayerSetup.uiWhite, r, g, b, a);
+		PIC_DrawTrans(x + d,         y + h / 2, l, 1 );
+
+		PIC_Set(uiPlayerSetup.uiWhite, r, g, b, a);
+		PIC_DrawTrans(x + w / 2 + d, y + h / 2, l, 1 );
+	}
+	else
+	{
+		// verical
+		PIC_Set(uiPlayerSetup.uiWhite, r, g, b, a);
+		PIC_DrawAdditive(x + w / 2, y + d,         1, l );
+
+		PIC_Set(uiPlayerSetup.uiWhite, r, g, b, a);
+		PIC_DrawAdditive(x + w / 2, y + h / 2 + d, 1, l );
+
+		// horizontal
+		PIC_Set(uiPlayerSetup.uiWhite, r, g, b, a);
+		PIC_DrawAdditive(x + d,         y + h / 2, l, 1 );
+
+		PIC_Set(uiPlayerSetup.uiWhite, r, g, b, a);
+		PIC_DrawAdditive(x + w / 2 + d, y + h / 2, l, 1 );
+	}
+
+#if 0
 	// verical
 	FillRGBA(x + w / 2, y + d,         1, l, r, g, b, a);
 	FillRGBA(x + w / 2, y + h / 2 + d, 1, l, r, g, b, a);
@@ -322,6 +360,7 @@ static void UI_Crosshair_Ownerdraw( void *self )
 	// horizontal
 	FillRGBA(x + d,         y + h / 2, l, 1, r, g, b, a);
 	FillRGBA(x + w / 2 + d, y + h / 2, l, 1, r, g, b, a);
+#endif
 }
 
 /*
@@ -334,6 +373,8 @@ static void UI_PlayerSetup_Init( void )
 	memset( &uiPlayerSetup, 0, sizeof( uiPlayerSetup_t ));
 
 	uiPlayerSetup.menu.vidInitFunc = UI_PlayerSetup_Init;
+
+	uiPlayerSetup.uiWhite = PIC_Load("*white");
 
 	uiPlayerSetup.background.generic.id = ID_BACKGROUND;
 	uiPlayerSetup.background.generic.type = QMTYPE_BITMAP;

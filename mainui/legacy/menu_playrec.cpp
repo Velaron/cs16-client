@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "basemenu.h"
 #include "utils.h"
 
+#include "menu_btnsbmp_table.h"
+
 #define ART_BANNER		"gfx/shell/head_saveload"
 
 #define ID_BACKGROUND	0
@@ -36,13 +38,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 typedef struct
 {
 	menuFramework_s	menu;
+	menuFramework_s fake;
 
 	menuBitmap_s	background;
 	menuBitmap_s	banner;
 
-	menuAction_s	record;
-	menuAction_s	play;
-	menuAction_s	done;
+	menuPicButton_s	record;
+	menuPicButton_s	play;
+	menuPicButton_s	done;
 
 	menuAction_s	hintMessage;
 	char		hintText[MAX_HINT_TEXT];
@@ -50,6 +53,7 @@ typedef struct
 
 static uiPlayRec_t	uiPlayRec;
 static const char *uiEmptyString = "";
+bool ignore = false;
 
 /*
 =================
@@ -72,6 +76,7 @@ static void UI_PlayRec_Callback( void *self, int event )
 		UI_RecDemo_Menu();
 		break;
 	case ID_DONE:
+		ignore = true;
 		UI_PopMenu();
 		break;
 	}

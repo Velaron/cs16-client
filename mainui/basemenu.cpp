@@ -718,11 +718,18 @@ void UI_DrawMenu( menuFramework_s *menu )
 UI_DefaultKey
 =================
 */
+extern bool ignore;
 const char *UI_DefaultKey( menuFramework_s *menu, int key, int down )
 {
 	const char	*sound = NULL;
 	menuCommon_s	*item;
 	int		cursorPrev;
+
+	if( ignore )
+	{
+		ignore = false;
+		return 0;
+	}
 
 	// menu system key
 	if( down && key == K_ESCAPE )
