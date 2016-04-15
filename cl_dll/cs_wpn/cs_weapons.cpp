@@ -47,8 +47,6 @@
 #define max(a,b)  (((a) > (b)) ? (a) : (b))
 #endif
 
-#define CanAttack( x, y, z ) ((x) <= (y))
-
 extern "C" char PM_FindTextureType( char *name );
 
 extern globalvars_t *gpGlobals;

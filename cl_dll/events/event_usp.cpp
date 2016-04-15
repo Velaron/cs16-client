@@ -128,7 +128,7 @@ void EV_FireUSP( event_args_t *args )
 	}
 
 
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/shotgunshell.mdl");
+	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
 
 	if( !silencer_on )
