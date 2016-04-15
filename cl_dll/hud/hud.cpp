@@ -123,6 +123,7 @@ void CHud :: Init( void )
 	default_fov  = CVAR_CREATE( "default_fov", "90", 0 );
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
+	fastsprites = CVAR_CREATE( "fastsprites", "0", FCVAR_ARCHIVE );
 
 
 
@@ -344,6 +345,8 @@ void CHud :: VidInit( void )
 		m_flScale = 1;
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
+
+	m_hGasPuff = SPR_Load("sprites/gas_puff_01.spr");
 
 	m_Ammo.VidInit();
 	m_Health.VidInit();

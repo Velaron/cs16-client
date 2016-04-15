@@ -116,7 +116,7 @@ static void UI_GameOptions_UpdateConfig( void )
 	CVAR_SET_FLOAT( "mp_decals",     uiGameOptions.mp_decals.curValue );
 	//CVAR_SET_FLOAT( "") maxshells
 	//CVAR_SET_FLOAT( "") max_smoke_puffs;
-	CVAR_SET_FLOAT( "cl_fastsmoke",  uiGameOptions.fast_smoke_gas.enabled );
+	CVAR_SET_FLOAT( "fastsprites",  uiGameOptions.fast_smoke_gas.enabled );
 	CVAR_SET_FLOAT( "_vgui_menus",   !uiGameOptions.oldstylemenu.enabled );
 	CVAR_SET_FLOAT( "_extended_menus", uiGameOptions.extendedmenus.enabled );
 	CVAR_SET_FLOAT( "_cl_autowepswitch", uiGameOptions.cl_autowepswitch.enabled );
@@ -140,7 +140,7 @@ static void UI_GameOptions_DiscardChanges( void )
 	CVAR_SET_FLOAT( "mp_decals",     uiGameInitial.mp_decals );
 	//CVAR_SET_FLOAT( "") maxshells
 	//CVAR_SET_FLOAT( "") max_smoke_puffs;
-	CVAR_SET_FLOAT( "cl_fastsmoke",  uiGameInitial.fast_smoke_gas );
+	CVAR_SET_FLOAT( "fastsprites",  uiGameInitial.fast_smoke_gas );
 	CVAR_SET_FLOAT( "_vgui_menus",   !uiGameInitial.oldstylemenu );
 	CVAR_SET_FLOAT( "_extended_menus", uiGameInitial.extendedmenus );
 	CVAR_SET_FLOAT( "_cl_autowepswitch", uiGameInitial.cl_autowepswitch );
@@ -180,7 +180,7 @@ static void UI_GameOptions_GetConfig( void )
 	uiGameInitial.hand = uiGameOptions.hand.enabled = !CVAR_GET_FLOAT( "hand" );
 	uiGameInitial.oldstylemenu = uiGameOptions.oldstylemenu.enabled = !CVAR_GET_FLOAT( "_vgui_menus" );
 
-	if( CVAR_GET_FLOAT( "cl_fastsmoke" ))
+	if( CVAR_GET_FLOAT( "fastsprites" ))
 		uiGameInitial.fast_smoke_gas = uiGameOptions.fast_smoke_gas.enabled = true;
 	if( CVAR_GET_FLOAT( "_extended_menus" ))
 		uiGameInitial.extendedmenus = uiGameOptions.extendedmenus.enabled = true;

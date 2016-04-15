@@ -883,11 +883,13 @@ public:
 	int		m_iFOV;
 	int		m_Teamplay;
 	int		m_iRes;
-	int		RealSize;
 	float   m_flScale;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
 	cvar_t *cl_shadows;
+	cvar_t *fastsprites;
+
+	HSPRITE m_hGasPuff;
 
 	int m_iFontHeight;
 	CHudAmmo		m_Ammo;

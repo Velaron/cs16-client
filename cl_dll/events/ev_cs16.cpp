@@ -338,6 +338,84 @@ void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName, char chTextu
 	}
 }
 
+
+void EV_WallPuff_Wind( struct tempent_s *te, float frametime, float currenttime )
+{
+	static bool xWindDirection = true;
+	static bool yWindDirection = true;
+	static float xWindMagnitude;
+	static float yWindMagnitude;
+
+	if ( te->entity.curstate.frame > 7.0 )
+	{
+		te->entity.baseline.origin.x = 0.97 * te->entity.baseline.origin.x;
+		te->entity.baseline.origin.y = 0.97 * te->entity.baseline.origin.y;
+		te->entity.baseline.origin.z = 0.97 * te->entity.baseline.origin.z + 0.7;
+		if ( te->entity.baseline.origin.z > 70.0 )
+			te->entity.baseline.origin.z = 70.0;
+	}
+
+	if ( te->entity.curstate.frame > 6.0 )
+	{
+		xWindMagnitude += 0.075;
+		if ( xWindMagnitude > 5.0 )
+			xWindMagnitude = 5.0;
+
+		yWindMagnitude += 0.075;
+		if ( yWindMagnitude > 5.0 )
+			yWindMagnitude = 5.0;
+
+		if( xWindDirection )
+			te->entity.baseline.origin.x += xWindMagnitude;
+		else
+			te->entity.baseline.origin.x -= xWindMagnitude;
+
+		if( yWindDirection )
+			te->entity.baseline.origin.y += yWindMagnitude;
+		else
+			te->entity.baseline.origin.y -= yWindMagnitude;
+
+		if ( !gEngfuncs.pfnRandomLong(0, 10) && yWindMagnitude > 3.0 )
+		{
+			yWindMagnitude = 0;
+			yWindDirection = !yWindDirection;
+		}
+		if ( !gEngfuncs.pfnRandomLong(0, 10) && xWindMagnitude > 3.0 )
+		{
+			xWindMagnitude = 0;
+			xWindDirection = !xWindDirection;
+		}
+	}
+}
+
+void EV_HugWalls(TEMPENTITY *te, pmtrace_s *ptr)
+{
+	Vector norm = te->entity.baseline.origin.Normalize();
+	float len = te->entity.baseline.origin.Length();
+
+	Vector v =
+	{
+		ptr->plane.normal.y * norm.x - norm.y * ptr->plane.normal.x,
+		ptr->plane.normal.x * norm.z - norm.x * ptr->plane.normal.z,
+		ptr->plane.normal.z * norm.y - norm.z * ptr->plane.normal.y
+	};
+	Vector v2 =
+	{
+		ptr->plane.normal.y * v.z - v.y * ptr->plane.normal.x,
+		ptr->plane.normal.x * v.x - v.z * ptr->plane.normal.z,
+		ptr->plane.normal.z * v.y - v.x * ptr->plane.normal.y
+	};
+
+	if( len <= 2000.0f )
+		len *= 1.5;
+	else len = 3000.0f;
+
+	te->entity.baseline.origin.x = v2.z * len * 1.5;
+	te->entity.baseline.origin.y = v2.y * len * 1.5;
+	te->entity.baseline.origin.z = v2.x * len * 1.5;
+}
+
+
 void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r, int g, int b, bool bCreateWallPuff, bool bCreateSparks, char cTextureType)
 {
 	physent_t *pe;
@@ -359,18 +437,32 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 
 		if( bCreateWallPuff )
 		{
-			TEMPENTITY *te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos,
-								gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff1.spr"), 30.0f );
+			TEMPENTITY *te = NULL;
+			if( gHUD.fastsprites && !gHUD.fastsprites->value )
+			{
+				char path[] = "sprites/wall_puff1.spr";
+
+				path[17] += gEngfuncs.pfnRandomLong(0, 3);
+				te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos,
+									gEngfuncs.pEventAPI->EV_FindModelIndex(path), 30.0f );
+			}
+			else
+			{
+				te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos,
+									gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/fast_wallpuff1.spr"), 30.0f );
+			}
 			if( te )
 			{
-				te->flags = FTENT_SPRANIMATE | FTENT_FADEOUT;
+				te->callback = EV_WallPuff_Wind;
+				te->hitcallback = EV_HugWalls;
+				te->flags |= FTENT_COLLIDEALL | FTENT_CLIENTCUSTOM;
 				te->entity.curstate.rendermode = kRenderTransAdd;
 				te->entity.curstate.rendercolor.r = r;
 				te->entity.curstate.rendercolor.g = g;
 				te->entity.curstate.rendercolor.b = b;
-				te->entity.curstate.renderamt = 255;
-				te->entity.curstate.scale = 0.33;
-				te->entity.baseline.origin = 20 * pTrace->plane.normal;
+				te->entity.curstate.renderamt = gEngfuncs.pfnRandomLong( 100, 180 );
+				te->entity.curstate.scale = 0.5;
+				te->entity.baseline.origin = (25 + gEngfuncs.pfnRandomLong( 0, 4 ) ) * pTrace->plane.normal;
 			}
 		}
 	}

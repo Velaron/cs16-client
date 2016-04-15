@@ -48,7 +48,7 @@ void EV_CreateSmoke(event_args_s *args)
 
 	if( !args->bparam2 ) //first explosion
 	{
-		const model_t *pGasModel = gEngfuncs.GetSpritePointer(SPR_Load("sprites/gas_puff_01.spr"));
+		const model_t *pGasModel = gEngfuncs.GetSpritePointer(gHUD.m_hGasPuff);
 
 		for( int i = 0; i < SMOKE_CLOUDS; i++ )
 		{
