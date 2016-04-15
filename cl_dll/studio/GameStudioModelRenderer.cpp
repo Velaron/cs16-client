@@ -831,9 +831,11 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 	if (m_pRenderModel == NULL)
 		return 0;*/
 
+	extra_player_info_t *pExtra = g_PlayerExtraInfo + pplayer->number;
+
 	if( cl_minmodels && cl_minmodels->value > 0.0f )
 	{
-		int team = g_PlayerExtraInfo[ pplayer->number ].teamnumber;
+		int team = pExtra->teamnumber;
 		if( team == TEAM_TERRORIST )
 		{
 			// set leet if model isn't valid
@@ -843,12 +845,12 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 		}
 		else if( team == TEAM_CT )
 		{
-			if( g_PlayerExtraInfo[ pplayer->number ].vip )
+			if( pExtra->vip )
 				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[3], NULL );
 			else
 			{
 				// set gign, if model isn't valud
-				int modelIdx = cl_min_t && BIsValidTModelIndex(cl_min_t->value) ? cl_min_t->value : 2;
+				int modelIdx = cl_min_ct && BIsValidCTModelIndex(cl_min_ct->value) ? cl_min_ct->value : 2;
 
 				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[ modelIdx ], NULL );
 			}
@@ -860,10 +862,14 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 
 		if( !m_pRenderModel ) // player have a unloadable shit in userinfo, so load appropriate to his team model
 		{
-			if( g_PlayerExtraInfo[ pplayer->number ].teamnumber == TEAM_CT )
+			if( pExtra->teamnumber == TEAM_CT && pExtra->vip )
+				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[3], NULL ); // vip
+			else if( pExtra->teamnumber == TEAM_CT )
 				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[2], NULL ); // gign
-			else if( g_PlayerExtraInfo[ pplayer->number].teamnumber == TEAM_TERRORIST )
+			else if( pExtra->teamnumber == TEAM_TERRORIST )
 				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[1], NULL ); // leet
+			else
+				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[0], NULL ); // player.mdl
 
 			// if we cannot load gign or leet model, player have a shit inside his gamedata, so we can't deal with it
 		}
