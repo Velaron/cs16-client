@@ -8,8 +8,8 @@
     <string name="not_found_title">Что-то пошло не так...</string>
     <string name="not_implemented_msg">Данная функция не реализована.</string>
     <string name="not_implemented_title">Не реализовано!</string>
-	<string name="enablezbot">Включить ботов ZBot.</string>
-	<string name="enableyapb">Включить ботов YaPB.</string>
+	<string name="enablezbot">Включить ZBot ботов.</string>
+	<string name="enableyapb">Включить YaPB ботов.</string>
 	<string name="basedir_text">Путь до игры:</string>
 	<string name="basedir_text2">Оставьте пустым, чтобы использовать настройки Xash3D Android.</string>
 </resources>
