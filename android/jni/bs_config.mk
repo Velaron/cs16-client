@@ -1,3 +1,6 @@
+#LOCAL_LDFLAGS += -fopenmp
+#LOCAL_CFLAGS += -ftree-parallelize-loops=4 -fopenmp
+
 LOCAL_CFLAGS += $(CFLAGS_OPT)
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a-hard)
 LOCAL_CFLAGS += $(CFLAGS_OPT_ARM) $(CFLAGS_HARDFP)
