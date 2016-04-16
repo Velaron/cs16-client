@@ -45,14 +45,20 @@ int CHudSniperScope::VidInit()
 {
 	if( g_iXash == 0 )
 	{
-		ConsolePrint("^3No Xash Found Warning^7: CHudSniperScope is disabled! ");
+		ConsolePrint("^3No Xash Found Warning^7: CHudSniperScope is disabled!\n");
 		m_iFlags = 0;
 		return 0;
 	}
+
 	m_iScopeArc[0] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_nw.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
 	m_iScopeArc[1] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_ne.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
-	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga",    NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
 	m_iScopeArc[3] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_sw.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP);
+
+	if( !m_iScopeArc[0] || !m_iScopeArc[1] || !m_iScopeArc[2] || !m_iScopeArc[3] )
+	{
+		gRenderAPI.Host_Error( "^3Error^7: Cannot load Sniper Scope arcs. Check sprites/scope_arc*.tga files\n" );
+	}
 	left = (TrueWidth - TrueHeight)/2;
 	right = left + TrueHeight;
 	centerx = TrueWidth/2;
@@ -68,6 +74,8 @@ int CHudSniperScope::Draw(float flTime)
 	gEngfuncs.pTriAPI->Brightness(1.0);
 	gEngfuncs.pTriAPI->Color4ub(0, 0, 0, 255);
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+
+	gRenderAPI.GL_SelectTexture(0);
 
 	gRenderAPI.GL_Bind(0, m_iScopeArc[0]);
 	DrawUtils::Draw2DQuad(left, 0, centerx, centery);

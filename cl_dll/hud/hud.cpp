@@ -77,19 +77,17 @@ GHUD_DECLARE_MESSAGE(BombPickup)
 GHUD_DECLARE_MESSAGE(HostagePos)
 GHUD_DECLARE_MESSAGE(ShadowIdx)
 
-#ifdef _CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
 void __CmdFunc_InputCommandSpecial()
 {
+#ifdef _CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
 	gEngfuncs.pfnClientCmd("_special");
-}
 #endif
+}
 
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
-#ifdef _CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
 	HOOK_COMMAND( "special", InputCommandSpecial );
-#endif
 
 	HOOK_MESSAGE( Logo );
 	HOOK_MESSAGE( ResetHUD );
@@ -115,17 +113,15 @@ void CHud :: Init( void )
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
 	cl_righthand = CVAR_CREATE( "hand", "1", FCVAR_ARCHIVE );
 	cl_weather   = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE );
-	cl_minmodels = CVAR_CREATE( "cl_minmodels", "1", FCVAR_ARCHIVE );
+	cl_minmodels = CVAR_CREATE( "cl_minmodels", "0", FCVAR_ARCHIVE );
 	cl_min_t     = CVAR_CREATE( "cl_min_t", "1", FCVAR_ARCHIVE );
-	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "1", FCVAR_ARCHIVE );
+	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "2", FCVAR_ARCHIVE );
 	cl_lw        = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 	cl_shadows   = CVAR_CREATE( "cl_shadows", "1", FCVAR_ARCHIVE );
 	default_fov  = CVAR_CREATE( "default_fov", "90", 0 );
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
-	fastsprites = CVAR_CREATE( "fastsprites", "0", FCVAR_ARCHIVE );
-
-
+	fastsprites  = CVAR_CREATE( "fastsprites", "0", FCVAR_ARCHIVE );
 
 	m_iLogo = 0;
 	m_iFOV = 0;
@@ -188,6 +184,22 @@ void CHud :: Init( void )
 	InitRain();
 
 	//ServersInit();
+
+	gEngfuncs.Cvar_SetValue( "hand", 1 );
+	gEngfuncs.Cvar_SetValue( "sv_skipshield", 1.0f );
+#ifdef __ANDROID__
+	gEngfuncs.Cvar_SetValue( "hud_fastswitch", 1 );
+#endif
+
+	if( g_iMobileAPIVersion )
+	{
+		static byte color[] = {255, 255, 255, 255};
+		gMobileAPI.pfnTouchResetDefaultButtons();
+		gMobileAPI.pfnTouchAddDefaultButton("_settings", "touch_defaults/settings.tga", "menu_touchoptions",
+			0.4, 0.4, 0.6, 0.6, color, 0, 1.0f, TOUCH_FL_NOEDIT | TOUCH_FL_DEF_SHOW );
+		gEngfuncs.pfnClientCmd("alias touch_loaddefaults menu_touchoptions");
+	}
+
 
 	MsgFunc_ResetHUD(0, 0, NULL );
 }
@@ -272,6 +284,7 @@ void CHud :: VidInit( void )
 		gEngfuncs.Cvar_SetValue("hud_scale", 1.0f );
 	}
 	GetScreenInfo(&m_scrinfo);
+
 	m_iRes = 640;
 
 	// Only load this once
