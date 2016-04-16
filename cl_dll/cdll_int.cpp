@@ -38,9 +38,9 @@ extern "C"
 #define DLLEXPORT
 #endif
 
-cl_enginefunc_t gEngfuncs;
-render_api_t gRenderAPI;
-mobile_engfuncs_t gMobileAPI;
+cl_enginefunc_t gEngfuncs = { 0 };
+render_api_t gRenderAPI = { 0 };
+mobile_engfuncs_t gMobileAPI = { 0 };
 CHud gHUD;
 int g_iXash = 0; // indicates a buildnum
 int g_iMobileAPIVersion = 0;
@@ -335,6 +335,14 @@ int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, re
 	// we didn't send callbacks to engine, because we don't use it
 	// *callback = renderInterface;
 
+	// we have here a Host_Error, so check Xash for version
+#ifdef __ANDROID__
+	if( g_iXash < 3224 )
+	{
+		gRenderAPI.Host_Error("Xash3D Android version check failed!\nPlease update your Xash3D Android!\n");
+	}
+#endif
+
 	return true;
 }
 
@@ -347,12 +355,20 @@ int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 {
 	if( mobileapi->version != MOBILITY_API_VERSION )
 	{
+#ifdef __ANDROID__
+		if( gRenderAPI.Host_Error )
+		{
+			gRenderAPI.Host_Error("Xash3D Android version check failed!\nPlease update your Xash3D Android!\n");
+		}
+#endif
 		gEngfuncs.Con_Printf("Client Error: Mobile API version mismatch. Got: %i, want: %i\n", mobileapi->version, MOBILITY_API_VERSION);
 		return 1;
 	}
 
 	g_iMobileAPIVersion = MOBILITY_API_VERSION;
 	gMobileAPI = *mobileapi;
+
+
 
 	return 0;
 }
