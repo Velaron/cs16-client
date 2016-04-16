@@ -336,7 +336,12 @@ int DrawUtils::TextMessageDrawChar( int x, int y, int number, int r, int g, int 
 	int ret;
 	if( scale && g_iMobileAPIVersion )
 	{
-		ret = gMobileAPI.pfnDrawScaledCharacter( x, y, number, r, g, b, scale ) * scale;
+		ret = gMobileAPI.pfnDrawScaledCharacter( x, y, number, r, g, b, scale );
+
+		// due to bug of pfnDrawScaledCharater, we need to check is scaled width we got
+		// TODO: Remove when bug will be fixed!
+		if( ret == gHUD.GetCharWidth(number) )
+			ret *= scale;
 	}
 	else
 	{
