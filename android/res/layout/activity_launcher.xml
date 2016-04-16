@@ -75,7 +75,9 @@
 		android:onClick="startXash"
 		android:layout_column="6"
 		android:layout_gravity="right"
-		android:layout_weight="0.0" />
+		android:layout_weight="0.0" >
+	<requestFocus/>
+	<Button />
 	
 	<com.google.android.gms.ads.AdView
 		android:id="@+id/adView"
