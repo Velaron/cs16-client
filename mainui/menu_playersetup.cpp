@@ -169,7 +169,7 @@ static void UI_PlayerSetup_GetConfig( void )
 
 	static char crosshairSize[CS_SIZE];
 	strncpy( crosshairSize, CVAR_GET_STRING( "cl_crosshair_size" ), CS_SIZE );
-	for( int i = 0; i < 4; i++ )
+    for( i = 0; i < 4; i++ )
 	{
 		if( !stricmp( crosshairSize, g_szCrosshairAvailSizes[i] ) )
 		{
@@ -194,7 +194,7 @@ UI_PlayerSetup_SetConfig
 */
 static void UI_PlayerSetup_SetConfig( void )
 {
-	//CVAR_SET_STRING( "name", uiPlayerSetup.name.buffer );
+    CVAR_SET_STRING( "name", uiPlayerSetup.name.buffer );
 	char curColor[CS_SIZE];
 	int i = uiPlayerSetup.crosshairColor.curValue;
 	snprintf( curColor, CS_SIZE, "%i %i %i",
@@ -214,7 +214,7 @@ UI_PlayerSetup_UpdateConfig
 */
 static void UI_PlayerSetup_UpdateConfig( void )
 {
-	//CVAR_SET_STRING( "name", uiPlayerSetup.name.buffer );
+    CVAR_SET_STRING( "name", uiPlayerSetup.name.buffer );
 	char curColor[CS_SIZE];
 	int i = uiPlayerSetup.crosshairColor.curValue;
 	snprintf( curColor, CS_SIZE, "%i %i %i",
