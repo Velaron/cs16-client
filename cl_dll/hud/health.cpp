@@ -560,7 +560,9 @@ CL_IsDead
 Returns 1 if health is <= 0
 ============
 */
-bool CL_IsDead( void )
+bool CL_IsDead()
 {
-	return gHUD.m_Health.m_iHealth <= 0;
+    if( gHUD.m_Health.m_iHealth <= 0 )
+        return true;
+    return false;
 }
