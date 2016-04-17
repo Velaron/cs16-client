@@ -1348,15 +1348,22 @@ void CHudAmmo::CalcCrosshairSize()
 
 	if( !stricmp(size, "auto") )
 	{
-		if( ScreenWidth < 640 )
+		if( ScreenWidth <= 640 )
+		{
 			m_iCrosshairScaleBase = 1024;
-		else if( ScreenWidth < 1024 )
+		}
+		else if( ScreenWidth <= 1024 )
+		{
 			m_iCrosshairScaleBase = 800;
-		else m_iCrosshairScaleBase = 640;
+		}
+		else
+		{
+			m_iCrosshairScaleBase = 640;
+		}
 	}
 	else if( !stricmp( size, "small" ))
 	{
-		m_iCrosshairScaleBase = 640;
+		m_iCrosshairScaleBase = 1024;
 	}
 	else if( !stricmp( size, "medium" ))
 	{
@@ -1364,7 +1371,7 @@ void CHudAmmo::CalcCrosshairSize()
 	}
 	else if( !stricmp( size, "large" ))
 	{
-		m_iCrosshairScaleBase = 1024;
+		m_iCrosshairScaleBase = 640;
 	}
 	return;
 }
