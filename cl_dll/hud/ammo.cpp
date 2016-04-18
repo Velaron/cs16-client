@@ -67,7 +67,7 @@ enum WeaponIdType
 };
 //#include "vgui_TeamFortressViewport.h"
 
-#ifdef _MSC_VER
+#ifndef __linux__
 
 void sincosf (float rad, float *sine, float *cosine)
 {
