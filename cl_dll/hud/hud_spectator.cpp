@@ -967,16 +967,13 @@ bool CHudSpectator::IsActivePlayer(cl_entity_t * ent)
 
 bool CHudSpectator::ParseOverviewFile( )
 {
-	char filename[255];
-	char levelname[255];
-	char token[1024];
+	char filename[255] = { 0 };
+	char levelname[255] = { 0 };
+	char token[1024] = { 0 };
 	float height;
 
 	char *pfile  = NULL;
 
-	memset( filename, 0, 255 );
-	memset( levelname, 0, 255 );
-	memset( token, 0, 1024 );
 	memset( &m_OverviewData, 0, sizeof(m_OverviewData));
 
 	// fill in standrd values
