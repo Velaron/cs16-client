@@ -45,12 +45,12 @@ float rel_yaw;
 float rel_pitch;
 bool bMouseInUse = false;
 
-#define F 1<<0	// Forward
-#define B 1<<1	// Back
-#define L 1<<2	// Left
-#define R 1<<3	// Right
-#define T 1<<4	// Forward stop
-#define S 1<<5	// Side stop
+#define F 1U<<0	// Forward
+#define B 1U<<1	// Back
+#define L 1U<<2	// Left
+#define R 1U<<3	// Right
+#define T 1U<<4	// Forward stop
+#define S 1U<<5	// Side stop
 
 #define BUTTON_DOWN		1
 #define IMPULSE_DOWN	2
