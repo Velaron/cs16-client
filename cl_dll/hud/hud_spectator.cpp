@@ -757,7 +757,7 @@ void CHudSpectator::HandleButtonsDown( int ButtonPressed )
 		return;
 
 	if ( !g_iUser1 )
-		return; // dont do anything if not in spectator mode
+		return; // don't do anything if not in spectator mode
 
 	// don't handle buttons during normal demo playback
 	if ( gEngfuncs.pDemoAPI->IsPlayingback() && !gEngfuncs.IsSpectateOnly() )
@@ -847,7 +847,7 @@ void CHudSpectator::HandleButtonsUp( int ButtonPressed )
 	return;
 
 	//	if ( !gViewPort->m_pSpectatorPanel->isVisible() )
-	//	return; // dont do anything if not in spectator mode
+	//	return; // don't do anything if not in spectator mode
 
 	if ( ButtonPressed & (IN_FORWARD | IN_BACK) )
 		m_zoomDelta = 0.0f;
@@ -1060,7 +1060,7 @@ bool CHudSpectator::ParseOverviewFile( )
 				}
 				else
 				{
-					gEngfuncs.Con_Printf("Error parsing overview file %s. (%s unkown)\n", filename, token );
+					gEngfuncs.Con_Printf("Error parsing overview file %s. (%s unknown)\n", filename, token );
 					return false;
 				}
 
@@ -1106,7 +1106,7 @@ bool CHudSpectator::ParseOverviewFile( )
 				}
 				else
 				{
-					gEngfuncs.Con_Printf("Error parsing overview file %s. (%s unkown)\n", filename, token );
+					gEngfuncs.Con_Printf("Error parsing overview file %s. (%s unknown)\n", filename, token );
 					return false;
 				}
 
@@ -1135,7 +1135,7 @@ void CHudSpectator::LoadMapSprites()
 		m_MapSprite = gEngfuncs.LoadMapSprite( m_OverviewData.layersImages[0] );
 	}
 	else
-		m_MapSprite = NULL; // the standard "unkown map" sprite will be used instead
+		m_MapSprite = NULL; // the standard "unknown map" sprite will be used instead
 }
 
 void CHudSpectator::DrawOverviewLayer()
@@ -1638,7 +1638,7 @@ void CHudSpectator::CheckSettings()
 
 
 	// if we are a real player on server don't allow inset window
-	// in First Person mode since this is our resticted forcecamera mode 2
+	// in First Person mode since this is our restricted forcecamera mode 2
 	// team number 3 = SPECTATOR see player.h
 
 	if ( ( (g_iTeamNumber == 1) || (g_iTeamNumber == 2)) && (g_iUser1 == OBS_IN_EYE) )

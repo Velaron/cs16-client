@@ -776,7 +776,7 @@ void IN_Commands (void)
 	DWORD	buttonstate, povstate;
 	
 	// loop through the joystick buttons
-	// key a joystick event or auxillary event for higher number buttons for each state change
+	// key a joystick event or auxiliary event for higher number buttons for each state change
 	buttonstate = 0;
 	for ( i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++ )
 	{
@@ -813,7 +813,7 @@ void IN_Commands (void)
 		// this avoids any potential problems related to moving from one
 		// direction to another without going through the center position
 		povstate = 0;
-		// determine which bits have changed and key an auxillary event for each change
+		// determine which bits have changed and key an auxiliary event for each change
 		for (i=0 ; i < 4 ; i++)
 		{
 			if ( (povstate & (1<<i)) && !(joy_oldpovstate & (1<<i)) )
