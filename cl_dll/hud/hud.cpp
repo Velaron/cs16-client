@@ -117,9 +117,12 @@ void CHud :: Init( void )
 	cl_min_t     = CVAR_CREATE( "cl_min_t", "1", FCVAR_ARCHIVE );
 	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "2", FCVAR_ARCHIVE );
 	cl_lw        = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
+	cl_predict   = gEngfuncs.pfnGetCvarPointer( "cl_predict" );
+#ifdef __ANDROID__
+	cl_android_force_defaults  = CVAR_CREATE( "cl_android_force_defaults", "1", FCVAR_ARCHIVE );
+#endif
 	cl_shadows   = CVAR_CREATE( "cl_shadows", "1", FCVAR_ARCHIVE );
 	default_fov  = CVAR_CREATE( "default_fov", "90", 0 );
-	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	fastsprites  = CVAR_CREATE( "fastsprites", "0", FCVAR_ARCHIVE );
 
@@ -273,7 +276,6 @@ void CHud :: VidInit( void )
 	//	m_hsprFont = LoadSprite("sprites/%d_font.spr");
 	
 	m_hsprLogo = 0;
-	m_hsprCursor = 0;
 
 	if( ScreenWidth < 640 && CVAR_GET_FLOAT("hud_scale") <= 1.0f )
 	{
@@ -352,10 +354,6 @@ void CHud :: VidInit( void )
 
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
 	m_HUD_number_0 = GetSpriteIndex( "number_0" );
-
-	m_flScale = gEngfuncs.pfnGetCvarFloat("hud_scale");
-	if(m_flScale < 0.01)
-		m_flScale = 1;
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
 

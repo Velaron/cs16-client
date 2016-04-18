@@ -872,10 +872,9 @@ public:
 	}
 
 
-	HSPRITE						m_hsprCursor;
-	float m_flTime;	   // the current client time
-	float m_fOldTime;  // the time at which the HUD was last redrawn
-	double m_flTimeDelta; // the difference between flTime and fOldTime
+	float   m_flTime;	   // the current client time
+	float   m_fOldTime;  // the time at which the HUD was last redrawn
+	double  m_flTimeDelta; // the difference between flTime and fOldTime
 	Vector	m_vecOrigin;
 	Vector	m_vecAngles;
 	int		m_iKeyBits;
@@ -883,11 +882,10 @@ public:
 	int		m_iFOV;
 	int		m_Teamplay;
 	int		m_iRes;
-	float   m_flScale;
-	cvar_t  *m_pCvarStealMouse;
-	cvar_t	*m_pCvarDraw;
+	cvar_t *m_pCvarDraw;
 	cvar_t *cl_shadows;
 	cvar_t *fastsprites;
+	cvar_t *cl_predict;
 
 	HSPRITE m_hGasPuff;
 
@@ -918,8 +916,6 @@ public:
 	CHudRadar	m_Radar;
 	CHudSpectatorGui m_SpectatorGui;
 
-
-
 	// user messages
 	CHudMsgFunc(Damage);
 	CHudMsgFunc(GameMode);
@@ -935,7 +931,6 @@ public:
 	CHudMsgFunc(HostagePos);
 	CHudMsgFunc(HostageK);
 	CHudMsgFunc(ShadowIdx);
-
 
 	// Screen information
 	SCREENINFO	m_scrinfo;
@@ -971,7 +966,9 @@ private:
 	char *m_rgszSpriteNames; /*[HUD_SPRITE_COUNT][MAX_SPRITE_NAME_LENGTH]*/
 
 	struct cvar_s *default_fov;
-
+#ifdef __ANDROID__
+	cvar_t *cl_android_force_defaults;
+#endif
 };
 
 extern CHud gHUD;

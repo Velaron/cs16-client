@@ -1058,7 +1058,7 @@ void CHudAmmo::UserCmd_Rebuy()
 
 int CHudAmmo::Draw(float flTime)
 {
-	wrect_t nullrc;
+	wrect_t nullrc = { 0, 0, 0, 0 };
 	int a, x, y, r, g, b;
 	int AmmoWidth;
 
@@ -1638,14 +1638,16 @@ int CHudAmmo::DrawWList(float flTime)
 }
 
 
-/* =================================
+/*
+=================================
 	GetSpriteList
 
 Finds and returns the matching 
 sprite name 'psz' and resolution 'iRes'
 in the given sprite list 'pList'
 iCount is the number of items in the pList
-================================= */
+=================================
+*/
 client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount)
 {
 	if (!pList)

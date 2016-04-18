@@ -36,6 +36,7 @@ extern int g_iVisibleMouse;
 float HUD_GetFOV( void );
 
 extern cvar_t *sensitivity;
+extern cvar_t *cl_lw;
 
 // Think
 void CHud::Think(void)
@@ -91,6 +92,22 @@ int CHud :: Redraw( float flTime, int intermission )
 	m_flTime = flTime;
 	m_flTimeDelta = (double)m_flTime - m_fOldTime;
 	static int m_flShotTime = 0;
+
+#ifdef __ANDROID__
+	if( cl_android_force_defaults && cl_android_force_defaults->value )
+	{
+		if( cl_lw && !cl_lw->value )
+		{
+			ConsolePrint( "cl_lw is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
+			gEngfuncs.Cvar_SetValue( "cl_lw", 1.0f );
+		}
+		if( cl_predict && !cl_predict->value )
+		{
+			ConsolePrint( "cl_predict is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
+			gEngfuncs.Cvar_SetValue( "cl_predict", 1.0f );
+		}
+	}
+#endif
 	
 	// Clock was reset, reset delta
 	if ( m_flTimeDelta < 0 )
