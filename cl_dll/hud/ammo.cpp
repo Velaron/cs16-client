@@ -30,6 +30,41 @@
 #include "eventscripts.h"
 #include "com_weapons.h"
 
+enum WeaponIdType
+{
+	WEAPON_NONE,
+	WEAPON_P228,
+	WEAPON_GLOCK,
+	WEAPON_SCOUT,
+	WEAPON_HEGRENADE,
+	WEAPON_XM1014,
+	WEAPON_C4,
+	WEAPON_MAC10,
+	WEAPON_AUG,
+	WEAPON_SMOKEGRENADE,
+	WEAPON_ELITE,
+	WEAPON_FIVESEVEN,
+	WEAPON_UMP45,
+	WEAPON_SG550,
+	WEAPON_GALIL,
+	WEAPON_FAMAS,
+	WEAPON_USP,
+	WEAPON_GLOCK18,
+	WEAPON_AWP,
+	WEAPON_MP5N,
+	WEAPON_M249,
+	WEAPON_M3,
+	WEAPON_M4A1,
+	WEAPON_TMP,
+	WEAPON_G3SG1,
+	WEAPON_FLASHBANG,
+	WEAPON_DEAGLE,
+	WEAPON_SG552,
+	WEAPON_AK47,
+	WEAPON_KNIFE,
+	WEAPON_P90,
+	WEAPON_SHIELDGUN = 99
+};
 //#include "vgui_TeamFortressViewport.h"
 
 #ifdef _MSC_VER
@@ -1225,6 +1260,8 @@ void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
 	int iLength;
 	float flCrosshairDistance;
 
+	if( weaponid == WEAPON_AWP || weaponid == WEAPON_SCOUT || weaponid == WEAPON_SG550 || weaponid == WEAPON_G3SG1 )
+		return;
 
 	if ( g_iWeaponFlags & WPNSTATE_SHIELD_DRAWN )
 		return;
@@ -1255,16 +1292,16 @@ void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
 
 				switch( weaponid )
 				{
-				case 30: // p90
+				case WEAPON_P90: // p90
 					iWeaponSpeed = 170;
 					break;
-				case 8: // aug
-				case 14: // galil
-				case 15: // famas
-				case 20: // m249
-				case 22: // m4a1
-				case 27: // sg552
-				case 28: // ak47
+				case WEAPON_AUG: // aug
+				case WEAPON_GALIL: // galil
+				case WEAPON_FAMAS: // famas
+				case WEAPON_M249: // m249
+				case WEAPON_M4A1: // m4a1
+				case WEAPON_SG552: // sg552
+				case WEAPON_AK47: // ak47
 					iWeaponSpeed = 140;
 					break;
 				}
