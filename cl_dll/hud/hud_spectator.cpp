@@ -971,9 +971,12 @@ bool CHudSpectator::ParseOverviewFile( )
 	char levelname[255];
 	char token[1024];
 	float height;
-	
+
 	char *pfile  = NULL;
 
+	memset( filename, 0, 255 );
+	memset( levelname, 0, 255 );
+	memset( token, 0, 1024 );
 	memset( &m_OverviewData, 0, sizeof(m_OverviewData));
 
 	// fill in standrd values
