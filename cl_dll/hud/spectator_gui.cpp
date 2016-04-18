@@ -254,7 +254,7 @@ void CHudSpectatorGui::CalcAllNeededData( )
 	}
 
 	// team
-	label.m_iTerrorists        = 0;
+	/*label.m_iTerrorists        = 0;
 	label.m_iCounterTerrorists = 0;
 	for( int i = 0; i < MAX_PLAYERS; i++ )
 	{
@@ -267,6 +267,21 @@ void CHudSpectatorGui::CalcAllNeededData( )
 			label.m_iCounterTerrorists++;
 		case TEAM_TERRORIST:
 			label.m_iTerrorists++;
+		}
+	}*/
+
+	label.m_iCounterTerrorists = 0;
+	label.m_iTerrorists = 0;
+	for( int i = 0; i < gHUD.m_Scoreboard.m_iNumTeams; i++ )
+	{
+		switch( g_TeamInfo[i].teamnumber )
+		{
+		case TEAM_CT:
+			label.m_iCounterTerrorists = g_TeamInfo[i].frags;
+			break;
+		case TEAM_TERRORIST:
+			label.m_iTerrorists = g_TeamInfo[i].frags;
+			break;
 		}
 	}
 

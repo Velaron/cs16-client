@@ -319,11 +319,11 @@ public:
 	CHudMsgFunc(TeamNames);
 
 	int m_iPlayerNum;
+	int m_iNumTeams;
 
 private:
 	int m_iLastKilledBy;
 	int m_fLastKillTime;
-	int m_iNumTeams;
 	RGBA m_colors;
 	bool m_bDrawStroke;
 	bool m_bForceDraw; // if called by showscoreboard2
