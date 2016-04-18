@@ -125,7 +125,7 @@ int CHudScoreboard :: Draw( float flTime )
 {
 	if( !m_bForceDraw )
 	{
-		if ( (!m_bShowscoresHeld && !CL_IsDead() && !gHUD.m_iIntermission) )
+		if ( (!m_bShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission) )
 			return 1;
 		else
 		{
