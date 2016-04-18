@@ -1,0 +1,13 @@
+diff --git a/source/interface.cpp b/source/interface.cpp
+index 2911690..c160ba4 100644
+--- a/source/interface.cpp
++++ b/source/interface.cpp
+@@ -3029,7 +3029,7 @@ DLL_GIVEFNPTRSTODLL GiveFnptrsToDll (enginefuncs_t *functionTable, globalvars_t
+    g_gameLib = new Library (gameDLLName);
+ 
+    if (!g_gameLib->IsLoaded ())
+-      AddLogEntry (true, LL_FATAL | LL_IGNORE, "Unable to load gamedll \"%s\". Exiting... (gamedir: %s)", gameDLLName, GetModName ());
++      AddLogEntry (true, LL_FATAL | LL_IGNORE, "Unable to load gamedll \"%s\". Exiting... (gamedir: %s)", gameDLLName, engine.GetModName ());
+ #else
+    static struct ModSupport
+    {
