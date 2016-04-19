@@ -173,7 +173,7 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	char *msg_text = LookupString( READ_STRING(), &msg_dest );
 	msg_text = strncpy( szBuf[0], msg_text, MAX_TEXTMSG_STRING );
 
-	// keep reading strings and using C format strings for subsituting the strings into the localised text string
+	// keep reading strings and using C format strings for substituting the strings into the localised text string
 	char *sstr1 = LookupString( READ_STRING() );
 	sstr1 = strncpy( szBuf[1], sstr1, MAX_TEXTMSG_STRING );
 	StripEndNewlineFromString( sstr1 );  // these strings are meant for subsitution into the main strings, so cull the automatic end newlines

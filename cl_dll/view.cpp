@@ -532,7 +532,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	gEngfuncs.V_ApplyShake( pparams->vieworg, pparams->viewangles, 1.0 );
 
 	// never let view origin sit exactly on a node line, because a water plane can
-	// dissapear when viewed with the eye exactly on it.
+	// disappear when viewed with the eye exactly on it.
 	// FIXME, we send origin at 1/128 now, change this?
 	// the server protocol only specifies to 1/16 pixel, so add 1/32 in each axis
 
@@ -776,7 +776,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 				VectorSubtract( ViewInterp.Origins[ ( foundidx + 1 ) & ORIGIN_MASK ], ViewInterp.Origins[ foundidx & ORIGIN_MASK ], delta );
 				VectorMA( ViewInterp.Origins[ foundidx & ORIGIN_MASK ], frac, delta, neworg );
 
-				// Dont interpolate large changes
+				// Don't interpolate large changes
 				if ( Length( delta ) < 64 )
 				{
 					VectorSubtract( neworg, pparams->simorg, delta );
@@ -837,7 +837,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 
 void V_SmoothInterpolateAngles( float * startAngle, float * endAngle, float * finalAngle, float degreesPerSec )
 {
-	float absd,frac,d,threshhold;
+	float absd,frac,d,threshold;
 
 	NormalizeAngles( startAngle );
 	NormalizeAngles( endAngle );
@@ -861,11 +861,11 @@ void V_SmoothInterpolateAngles( float * startAngle, float * endAngle, float * fi
 		{
 			frac = degreesPerSec * v_frametime;
 
-			threshhold= degreesPerSec / 4;
+			threshold= degreesPerSec / 4;
 
-			if ( absd < threshhold )
+			if ( absd < threshold )
 			{
-				float h = absd / threshhold;
+				float h = absd / threshold;
 				h *= h;
 				frac*= h;  // slow down last degrees
 			}
@@ -1117,7 +1117,7 @@ void V_GetDoubleTargetsCam(cl_entity_t	 * ent1, cl_entity_t * ent2,float * angle
 	VectorAngles( newAngle, newAngle );
 	newAngle[0] = -newAngle[0];
 
-	// set angle diffrent in Dramtaic scenes
+	// set angle different in Dramtaic scenes
 	newAngle[0]+= 12.5f * dfactor; // lower angle if dramatic
 
 	if ( flags & DRC_FLAG_SIDE )
@@ -1319,7 +1319,7 @@ void V_GetInEyePos(int target, float * origin, float * angles )
 	else if (ent->curstate.usehull == 1 )
 		origin[2]+= 12; // VEC_DUCK_VIEW;
 	else
-		// exacty eye position can't be caluculated since it depends on
+		// exacty eye position can't be calculated since it depends on
 		// client values like cl_bobcycle, this offset matches the default values
 		origin[2]+= 28; // DEFAULT_VIEWHEIGHT
 }
@@ -1604,7 +1604,7 @@ void V_CalcThirdPersonRefdef( ref_params_t *pparams )
 	v_lastAngles = pparams->viewangles;
 
 	// never let view origin sit exactly on a node line, because a water plane can
-	// dissapear when viewed with the eye exactly on it.
+	// disappear when viewed with the eye exactly on it.
 	// FIXME, we send origin at 1/128 now, change this?
 	// the server protocol only specifies to 1/16 pixel, so add 1/32 in each axis
 	pparams->vieworg[0] += 1.0f / 32;

@@ -620,7 +620,7 @@ enum
 #define PC_SCOUT_MOTION_MIN_MOVE	50 		// Minimum vlen of player velocity to be picked up by motion detector
 #define PC_SCOUT_SCAN_TIME			2		// # of seconds between each scan pulse
 #define PC_SCOUT_SCAN_RANGE			100		// Default scanner range
-#define PC_SCOUT_SCAN_COST			2		// Default scanner cell useage per scan
+#define PC_SCOUT_SCAN_COST			2		// Default scanner cell usage per scan
 
 // Class Details for SNIPER
 #define PC_SNIPER_SKIN				5 
@@ -1076,7 +1076,7 @@ float already_chosen_map;
 // TOGGLEFLAGS
 /*==================================================*/
 // Some of the toggleflags aren't used anymore, but the bits are still
-// there to provide compatability with old maps
+// there to provide compatibility with old maps
 #define TFLAG_CLASS_PERSIST			(1 << 0)  		// Persistent Classes Bit
 #define TFLAG_CHEATCHECK			(1 << 1) 		// Cheatchecking Bit
 #define TFLAG_RESPAWNDELAY			(1 << 2) 		// RespawnDelay bit

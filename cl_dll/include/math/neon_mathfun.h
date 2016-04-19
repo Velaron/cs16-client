@@ -146,7 +146,7 @@ v4sf exp_ps(v4sf x) {
   /* perform a floorf */
   tmp = vcvtq_f32_s32(vcvtq_s32_f32(fx));
 
-  /* if greater, substract 1 */
+  /* if greater, subtract 1 */
   v4su mask = vcgtq_f32(tmp, fx);    
   mask = vandq_u32(mask, vreinterpretq_u32_f32(one));
 

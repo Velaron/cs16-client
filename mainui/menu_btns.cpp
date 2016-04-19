@@ -182,8 +182,8 @@ void UI_LoadBmpButtons( void )
 
 	if ( pInfoHdr->biBitCount <= 8 )
 	{
-		byte* pallete=&bmp_buffer[sizeof( bmphdr_t ) + pInfoHdr->biSize];
-		byte* firstpixel_col=&pallete[img_data[0]*4];
+		byte* palette=&bmp_buffer[sizeof( bmphdr_t ) + pInfoHdr->biSize];
+		byte* firstpixel_col=&palette[img_data[0]*4];
 		firstpixel_col[0]=firstpixel_col[1]=firstpixel_col[2]=0;
 	}
 
