@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="app_name">CS16Client</string>
+  <string name="title_activity_launcher">CS16-Client اجرا کننده</string>
+  <string name="launch_button">!CS16-client اجرای</string>
+  <string name="cmd_args_text">Command line arguments:</string>
+  <string name="cmd_args_text2">!اگر نمی دانید چرا به این نیاز دارید دست کاری نکنید</string>
+  <string name="not_found_msg">خود را چک کنید یا سرور دیگری را انتخاب کنیدAPK .موردی یافت نشد</string>
+  <string name="not_found_title">...اشکالی رخ داد</string>
+  <string name="not_implemented_msg">...این ویژگی هنوز پشتیبانی نمی شود</string>
+  <string name="not_implemented_title">!پشتیبانی نمیشود</string>
+  <string name="enablezbot">ZBot فعال کردن بات های</string>
+  <string name="enableyapb">YaPB فعال کردن بات های</string>
+  <string name="defCmdArgs">-console -game cstrike -bots, etc</string>
+  <string name="basedir_text">:مسیرمحل بازی</string>
+  <string name="basedir_text2">.استفاده شود Xash3D Android خالی بگذارید تا از تنظیمات</string>
+</resources>

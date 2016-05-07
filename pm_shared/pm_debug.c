@@ -53,7 +53,7 @@ void PM_ShowClipBox(void)
 		return;
 
 	// More debugging, draw the particle bbox for player and for the entity we are looking directly at.
-	//  aslo prints entity info to the console overlay.
+	//  also prints entity info to the console overlay.
 	//if ( !pmove->server )
 	//	return;
 

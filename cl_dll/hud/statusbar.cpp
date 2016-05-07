@@ -253,7 +253,7 @@ int CHudStatusBar :: Draw( float fTime )
 // ( slotnum ([a..z] [%pX] [%iX])*)*
 // where slotnum is an index into the Value table (see below)
 // if slotnum is 0, the string is always drawn
-// if StatusValue[slotnum] != 0, the following string is drawn, upto the next newline - otherwise the text is skipped upto next newline
+// if StatusValue[slotnum] != 0, the following string is drawn, up to the next newline - otherwise the text is skipped up to next newline
 // %pX, where X is an integer, will substitute a player name here, getting the player index from StatusValue[X]
 // %iX, where X is an integer, will substitute a number here, getting the number from StatusValue[X]
 int CHudStatusBar :: MsgFunc_StatusText( const char *pszName, int iSize, void *pbuf )

@@ -67,7 +67,7 @@ enum WeaponIdType
 };
 //#include "vgui_TeamFortressViewport.h"
 
-#ifdef _MSC_VER
+#ifndef __linux__
 
 void sincosf (float rad, float *sine, float *cosine)
 {
@@ -1556,7 +1556,7 @@ int CHudAmmo::DrawWList(float flTime)
 		DrawUtils::ScaleColors(r, g, b, 255);
 		SPR_Set(gHUD.GetSprite(m_HUD_bucket0 + i), r, g, b );
 
-		// make active slot wide enough to accomodate gun pictures
+		// make active slot wide enough to accommodate gun pictures
 		if ( i == iActiveSlot )
 		{
 			WEAPON *p = gWR.GetFirstPos(iActiveSlot);

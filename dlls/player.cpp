@@ -3835,7 +3835,7 @@ void CBasePlayer::PostThink(void)
 
 	ItemPostFrame();
 
-	if ((pev->flags & FL_ONGROUND) && pev->health > 0 && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
+	if ((pev->flags & FL_ONGROUND) && pev->health > 0 && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHOLD)
 	{
 		if (pev->watertype != CONTENT_WATER)
 		{

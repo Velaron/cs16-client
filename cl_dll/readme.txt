@@ -102,6 +102,6 @@ Drawing functions:
 			use HOOK_COMMAND( "+showscores", ShowScores );
 
 		DECLARE_COMMAND( command_name )
-			For each HOOK_COMMAND you must have an equivelant DECLARE_COMMAND.  This creates
+			For each HOOK_COMMAND you must have an equivalent DECLARE_COMMAND.  This creates
 			a function which passes the hooked commands into the CHud object.
 		

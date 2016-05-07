@@ -152,7 +152,7 @@ qboolean GetToken (qboolean crossline)
 {
 	char    *token_p;
 
-	if (tokenready)                         // is a token allready waiting?
+	if (tokenready)                         // is a token already waiting?
 	{
 		tokenready = false;
 		return true;

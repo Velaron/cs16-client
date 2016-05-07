@@ -127,7 +127,7 @@ hull_t;
 
 #define PLAYER_MIN_BOUNCE_SPEED 350
 
-#define PLAYER_FALL_PUNCH_THRESHHOLD (float)250
+#define PLAYER_FALL_PUNCH_THRESHOLD (float)250
 
 #define PLAYER_LONGJUMP_SPEED 350
 
@@ -2215,7 +2215,7 @@ void PM_CheckWaterJump(void)
 
 void PM_CheckFalling(void)
 {
-	if (pmove->onground != -1 && !pmove->dead && pmove->flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
+	if (pmove->onground != -1 && !pmove->dead && pmove->flFallVelocity >= PLAYER_FALL_PUNCH_THRESHOLD)
 	{
 		float fvol = 0.5;
 
