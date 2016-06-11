@@ -426,16 +426,16 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 	{
 		EV_HLDM_GunshotDecalTrace( pTrace, EV_HLDM_DamageDecal( pe ), cTextureType );
 
-		if( bCreateSparks )
+		if( gHUD.cl_weapon_sparks && gHUD.cl_weapon_sparks->value && bCreateSparks )
 		{
 			Vector dir = pTrace->plane.normal;
 			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			dir.y = dir.y * dir.y * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			dir.z = dir.z * dir.z * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
-			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, gEngfuncs.pfnRandomLong( 15, 30 ), dir.z, -75.0f, 75.0f );
+			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, gEngfuncs.pfnRandomLong( 5, 10 ), dir.z, -75.0f, 75.0f );
 		}
 
-		if( bCreateWallPuff )
+		if( gHUD.cl_weapon_wallpuff && gHUD.cl_weapon_wallpuff->value && bCreateWallPuff )
 		{
 			TEMPENTITY *te = NULL;
 			if( gHUD.fastsprites && !gHUD.fastsprites->value )
@@ -451,6 +451,7 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 				te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos,
 									gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/fast_wallpuff1.spr"), 30.0f );
 			}
+
 			if( te )
 			{
 				te->callback = EV_WallPuff_Wind;
@@ -706,28 +707,13 @@ void EV_HLDM_FireBullets(int idx,
 				vecEnd[i]     = vecShotSrc[i] + flDistance        * vecDir[i];
 			}
 
-			Vector vStartPos, vEndPos;
+
+			// trace back, so we will have a decal on the other side of solid area
 			pmtrace_t trOriginal;
-			int i;
-			for( i = 1; i <= iPenetrationPower; i++ )
-			{
-				for( int j = 0; j < 3; j++ )
-				{
-					vStartPos[j] = tr.endpos[j] + i * vecDir[j];
-					vEndPos[j] = vecDir[j] + vStartPos[j];
-				}
-				gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-				gEngfuncs.pEventAPI->EV_PlayerTrace(vStartPos, vEndPos, 0, -1, &trOriginal);
-				if ( trOriginal.startsolid && trOriginal.inopen )
-					break;
-			}
-			if( i != iPenetrationPower )
-			{
-				gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-				gEngfuncs.pEventAPI->EV_PlayerTrace(vEndPos, vStartPos, 0, -1, &trOriginal);
-				// draw wallpuff, only if start was been in non-solid area
-				EV_HLDM_DecalGunshot( &trOriginal, iBulletType, 0, r_smoke, g_smoke, b_smoke, !trOriginal.startsolid, bSparks, cTextureType );
-			}
+			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+			gEngfuncs.pEventAPI->EV_PlayerTrace(vecShotSrc, vecSrc, 0, -1, &trOriginal);
+			if( !trOriginal.startsolid )
+				EV_HLDM_DecalGunshot( &trOriginal, iBulletType, 0, r_smoke, g_smoke, b_smoke, true, bSparks, cTextureType );
 		}
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}

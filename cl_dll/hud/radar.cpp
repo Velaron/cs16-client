@@ -137,13 +137,12 @@ int CHudRadar::Draw(float flTime)
 		}
 
 		// calc radar position
-		Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
+		Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
 
 
-		float zdiff = gHUD.m_vecOrigin.z - g_PlayerExtraInfo[i].origin.z;
 		if( !g_PlayerExtraInfo[i].radarflashon )
 		{
-			if( zdiff < 20 && zdiff > -20 )
+			if( pos.z < 20 && pos.z > -20 )
 			{
 				DrawRadarDot( pos.x, pos.y, 4, r, g, b, 255 );
 			}
@@ -173,7 +172,7 @@ int CHudRadar::Draw(float flTime)
 
 			if( g_PlayerExtraInfo[i].nextflash )
 			{
-				if( zdiff < 20 && zdiff > -20 )
+				if( pos.z < 20 && pos.z > -20 )
 				{
 					DrawRadarDot( pos.x, pos.y, 4, r, g, b, 255 );
 				}
@@ -192,7 +191,7 @@ int CHudRadar::Draw(float flTime)
 	// Terrorist specific code( C4 Bomb )
 	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST && g_PlayerExtraInfo[33].radarflashon)
 	{
-		Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[33].origin, gHUD.m_vecAngles);
+		Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[33].origin, gHUD.m_vecAngles);
 		if( g_PlayerExtraInfo[33].radarflashes )
 		{
 			float timer = (flTime - g_PlayerExtraInfo[33].radarflash);
@@ -226,7 +225,7 @@ int CHudRadar::Draw(float flTime)
 			if( !g_HostageInfo[i].radarflashon || g_HostageInfo[i].dead )
 				continue;
 
-			Vector2D pos = WorldToRadar(gHUD.m_vecOrigin, g_HostageInfo[i].origin, gHUD.m_vecAngles);
+			Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_HostageInfo[i].origin, gHUD.m_vecAngles);
 			if( g_HostageInfo[i].radarflashes )
 			{
 				float timer = (flTime - g_HostageInfo[i].radarflash);
@@ -280,38 +279,37 @@ void CHudRadar::DrawFlippedT(int x, int y, int size, int r, int g, int b, int a)
 	FillRGBA( 62.5f + x - size, 62.5 + y + size, 3*size, size, r, g, b, a);
 }
 
-Vector2D CHudRadar::WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles  )
+Vector CHudRadar::WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles  )
 {
-	Vector2D diff = vObjectOrigin.Make2D() - vPlayerOrigin.Make2D();
+	float xdiff = vObjectOrigin.x - vPlayerOrigin.x;
+	float ydiff = vObjectOrigin.y - vPlayerOrigin.y;
 
 	// Supply epsilon values to avoid divide-by-zero
-	if(diff.x == 0)
-		diff.x = 0.00001f;
-	if(diff.y == 0)
-		diff.y = 0.00001f;
+	if(xdiff == 0)
+		xdiff = 0.00001f;
+	if(ydiff == 0)
+		ydiff = 0.00001f;
 
 	int iMaxRadius = (m_hRadar.rect.right - m_hRadar.rect.left) / 2.0f;
 
-	float flOffset = atan(diff.y / diff.x) * 180.0f / M_PI;
+	float flOffset = atan(ydiff / xdiff) * 180.0f / M_PI;
 
-	if ((diff.x < 0) && (diff.y >= 0))
+	if ((xdiff < 0) && (ydiff >= 0))
 		flOffset += 180;
-	else if ((diff.x < 0) && (diff.y < 0))
+	else if ((xdiff < 0) && (ydiff < 0))
 		flOffset += 180;
-	else if ((diff.x >= 0) && (diff.y < 0))
+	else if ((xdiff >= 0) && (ydiff < 0))
 		flOffset += 360;
 
 	// this magic 32.0f just scales position on radar
-	float iRadius = -diff.Length() / 32.0f;
+	float iRadius = -( sqrt( xdiff*xdiff + ydiff*ydiff ) ) / 32.0f;
 	if( -iRadius > iMaxRadius)
 		iRadius = -iMaxRadius;
 
 	flOffset = (vAngles.y - flOffset) * M_PI / 180.0f;
 
 	// transform origin difference to radar source
-	Vector2D new_diff;
-	new_diff.x = -iRadius * sin(flOffset);
-	new_diff.y =  iRadius * cos(flOffset);
-
-	return new_diff;
+	return { -iRadius * sin(flOffset),
+				   iRadius * cos(flOffset),
+				   vPlayerOrigin.z - vObjectOrigin.z };
 }

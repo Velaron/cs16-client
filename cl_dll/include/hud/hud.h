@@ -133,7 +133,7 @@ public:
 	void Think(void);
 	void Reset(void);
 
-	void DrawCrosshair( float flTime, int weaponId );
+	void DrawCrosshair(float flTime);
 	void CalcCrosshairSize();
 	void CalcCrosshairDrawMode();
 	void CalcCrosshairColor();
@@ -886,6 +886,8 @@ public:
 	cvar_t *cl_shadows;
 	cvar_t *fastsprites;
 	cvar_t *cl_predict;
+	cvar_t *cl_weapon_wallpuff;
+	cvar_t *cl_weapon_sparks;
 
 	HSPRITE m_hGasPuff;
 

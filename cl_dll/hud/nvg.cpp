@@ -64,7 +64,7 @@ int CHudNVG::Draw(float flTime)
 	dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight ( 0 );
 	VectorCopy ( gHUD.m_vecOrigin, dl->origin );
 	dl->radius = gEngfuncs.pfnRandomFloat( 750, 800 );
-	dl->die = flTime + 0.1;
+	dl->die = flTime + 0.1f;
 	dl->color.r = 50;
 	dl->color.g = 255;
 	dl->color.b = 50;

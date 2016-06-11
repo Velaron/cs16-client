@@ -1093,12 +1093,33 @@ void CHudAmmo::UserCmd_Rebuy()
 
 int CHudAmmo::Draw(float flTime)
 {
-	wrect_t nullrc = { 0, 0, 0, 0 };
+	wrect_t nullrc = { 0 };
 	int a, x, y, r, g, b;
 	int AmmoWidth;
+	static bool switchCrosshairType = false;
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
 		return 1;
+
+	// place it here, so pretty dynamic crosshair will work even in spectator!
+	if( gHUD.m_iFOV > 40 )
+	{
+		if( switchCrosshairType )
+		{
+			gEngfuncs.pfnSetCrosshair( 0, nullrc, 0, 0, 0);
+			switchCrosshairType = false;
+		}
+		// draw a dynamic crosshair
+		DrawCrosshair(flTime);
+	}
+	else
+	{
+		if( !switchCrosshairType )
+		{
+			SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
+			switchCrosshairType = true;
+		}
+	}
 
 	if ( (gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL )) )
 		return 1;
@@ -1115,16 +1136,6 @@ int CHudAmmo::Draw(float flTime)
 	if (!m_pWeapon)
 		return 0;
 
-	if( gHUD.m_iFOV > 40 )
-	{
-		SetCrosshair( 0, nullrc, 0, 0, 0);
-		DrawCrosshair(flTime, m_pWeapon->iId); // draw a dynamic crosshair
-	}
-	else
-	{
-		SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
-	}
-
 	WEAPON *pw = m_pWeapon; // shorthand
 
 	// SPR_Draw Ammo
@@ -1140,9 +1151,9 @@ int CHudAmmo::Draw(float flTime)
 	if (m_fFade > 0)
 		m_fFade -= (gHUD.m_flTimeDelta * 20);
 
-	DrawUtils::DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
+	DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 
-	DrawUtils::DrawUtils::ScaleColors(r, g, b, a );
+	DrawUtils::ScaleColors(r, g, b, a );
 
 	// Does this weapon have a clip?
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/2;
@@ -1253,12 +1264,15 @@ int Distances[30][2] =
 { 7, 3 }, // 29
 };
 
-void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
+void CHudAmmo::DrawCrosshair( float flTime )
 {
-	int flags;
-	int iDeltaDistance, iDistance;
-	int iLength;
+	int flags, iDeltaDistance, iDistance, iLength, weaponid;
 	float flCrosshairDistance;
+
+	if( !m_pWeapon )
+		return;
+
+	weaponid = m_pWeapon->iId;
 
 	if( weaponid == WEAPON_AWP || weaponid == WEAPON_SCOUT || weaponid == WEAPON_SG550 || weaponid == WEAPON_G3SG1 )
 		return;
@@ -1273,7 +1287,6 @@ void CHudAmmo::DrawCrosshair( float flTime, int weaponid )
 	}
 	else
 	{
-		// TODO: Get an info about crosshair for weapon
 		iDistance = Distances[weaponid-1][0];
 		iDeltaDistance = Distances[weaponid-1][1];
 	}
