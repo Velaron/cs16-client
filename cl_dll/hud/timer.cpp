@@ -230,7 +230,10 @@ int CHudProgressBar::MsgFunc_BotProgress(const char *pszName, int iSize, void *p
 			m_fPercent = fNewPercent;
 		}
 		strncpy(m_szHeader, READ_STRING(), sizeof(m_szHeader));
-		m_szLocalizedHeader = Localize(m_szHeader + 1);
+		if( m_szHeader[0] == '#' )
+			m_szLocalizedHeader = Localize(m_szHeader + 1);
+		else
+			m_szLocalizedHeader = m_szHeader;
 		break;
 	case REMOVE_BOTPROGRESS:
 	default:

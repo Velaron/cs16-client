@@ -28,69 +28,111 @@ version.
 #include "hud.h"
 #include "parsemsg.h"
 #include "cl_util.h"
+#include "r_efx.h"
+#include "event_api.h"
+#include "com_model.h"
 #include <string.h>
 
 DECLARE_MESSAGE( m_Radio, SendAudio )
 DECLARE_MESSAGE( m_Radio, ReloadSound )
+DECLARE_MESSAGE( m_Radio, BotVoice )
 
 int CHudRadio::Init( )
 {
 	HOOK_MESSAGE( SendAudio );
 	HOOK_MESSAGE( ReloadSound );
-	gHUD.AddHudElem(this);
+	HOOK_MESSAGE( BotVoice );
+	gHUD.AddHudElem( this );
 	m_iFlags = 0;
 	return 1;
 }
 
-int CHudRadio::Draw(float flTime)
-{
-	if( m_sentence[0] == '%' )
-		PlaySound( &m_sentence[1], m_iPitch );
-	else
-		PlaySound( m_sentence, m_iPitch );
-
-	m_iFlags = 0;
-
-	return 1;
-}
-
-int CHudRadio::VidInit()
-{
-	return 1;
-}
-
-int CHudRadio::MsgFunc_SendAudio(const char *pszName, int iSize, void *pbuf)
+int CHudRadio::MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
-	m_iSenderID = READ_BYTE( );
-	strncpy( m_sentence, READ_STRING( ), sizeof(m_sentence));
-	m_iPitch = READ_SHORT( );
-	m_iFlags = HUD_ACTIVE;
+	char sentence[64];
+	int SenderID = READ_BYTE( );
+	strncpy( sentence, READ_STRING( ), sizeof( sentence ) );
+	int pitch = READ_SHORT( );
 
-	g_PlayerExtraInfo[m_iSenderID].radarflashes = 22;
-	g_PlayerExtraInfo[m_iSenderID].radarflash = gHUD.m_flTime;
-	g_PlayerExtraInfo[m_iSenderID].radarflashon = 1;
+	if ( sentence[0] == '%' && sentence[1] == '!' )
+		gEngfuncs.pfnPlaySoundByNameAtPitch( &sentence[1], 1.0f, pitch );
+	else
+		gEngfuncs.pfnPlaySoundVoiceByName( sentence, 1.0f, pitch );
+
+	g_PlayerExtraInfo[SenderID].radarflashes = 22;
+	g_PlayerExtraInfo[SenderID].radarflash   = gHUD.m_flTime;
+	g_PlayerExtraInfo[SenderID].radarflashon = 1;
 	return 1;
 }
 
-int CHudRadio::MsgFunc_ReloadSound(const char *pszName, int iSize, void *pbuf)
+int CHudRadio::MsgFunc_ReloadSound( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
-	m_iPitch = READ_BYTE();
-	int isNotShotgun = READ_BYTE();
-
-	strncpy( m_sentence,  (char*)(isNotShotgun? "weapons/generic_reload.wav" : "weapons/generic_shot_reload.wav"), sizeof(m_sentence));
-	m_iFlags = HUD_ACTIVE;
-
-   return 0;
+	int vol = READ_BYTE( );
+	if ( READ_BYTE( ) )
+	{
+		gEngfuncs.pfnPlaySoundByName( "weapon/generic_reload.wav", vol / 255.0f );
+	}
+	else
+	{
+		gEngfuncs.pfnPlaySoundByName( "weapon/generic_shot_reload.wav", vol / 255.0f );
+	}
+	return 1;
 }
 
-void Broadcast( const char *sentence )
+void Broadcast( const char *msg )
 {
-	if( sentence[0] == '%' )
-		PlaySound( (char*)&sentence[1], 100.0 );
+	if ( msg[0] == '%' && msg[1] == '!' )
+		PlaySound( &msg[1], 1.0f );
 	else
-		PlaySound( (char*)sentence, 100.0 );
+		PlaySound( msg, 1.0f );
+}
+
+void VoiceIconCallback(struct tempent_s *ent, float frametime, float currenttime)
+{
+	int entIndex = ent->clientIndex;
+	if( !g_PlayerExtraInfo[entIndex].talking )
+		ent->die = 0.0f;
+}
+
+int CHudRadio::MsgFunc_BotVoice( const char *pszName, int iSize, void *buf )
+{
+	BEGIN_READ( buf, iSize );
+
+	int enable   = READ_BYTE();
+	int entIndex = READ_BYTE();
+
+
+	if( entIndex < 0 || entIndex > 32 )
+		return 0;
+
+	if( !enable )
+	{
+		g_PlayerExtraInfo[entIndex].talking = false;
+		ConsolePrint("Removing bot voice icon\n");
+		return 1;
+	}
+
+	int spr = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/voiceicon.spr" );
+	if( !spr )
+		return 0;
+
+	TEMPENTITY *temp = gEngfuncs.pEfxAPI->R_DefaultSprite( vec3_origin, spr, 0 );
+
+	if( !temp )
+		return 0;
+
+	temp->flags = FTENT_SPRANIMATELOOP | FTENT_CLIENTCUSTOM | FTENT_PLYRATTACHMENT;
+	temp->tentOffset.z = 40;
+	temp->clientIndex = entIndex;
+	temp->callback = VoiceIconCallback;
+	temp->entity.curstate.scale = 0.60f;
+	temp->entity.curstate.rendermode = kRenderTransAdd;
+	temp->die = gHUD.m_flTime + 60.0f; // 60 seconds must be enough?
+	g_PlayerExtraInfo[entIndex].talking = true;
+
+	return 1;
 }

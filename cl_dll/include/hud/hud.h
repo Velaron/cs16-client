@@ -378,6 +378,7 @@ struct extra_player_info_t
 	bool showhealth;
 	bool nextflash;
 	bool radarflashon;
+	bool talking;
 	Vector origin;
 	int health;
 	int radarflashes;
@@ -689,8 +690,6 @@ class CHudRadio: public CHudBase
 {
 public:
 	int Init( void );
-	int VidInit( void );
-	int Draw( float flTime );
 	// play a sentence from a radio
 	// [byte] unknown (always 1)
 	// [string] sentence name
@@ -698,10 +697,6 @@ public:
 	CHudMsgFunc(SendAudio);
 	CHudMsgFunc(ReloadSound);
 	CHudMsgFunc(BotVoice);
-private:
-	int m_iSenderID;
-	char m_sentence[64];
-	int m_iPitch;
 };
 
 //
