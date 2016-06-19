@@ -30,10 +30,10 @@ int CHudBattery::Init( void )
 	m_iBat = 0;
 	m_fFade = 0;
 	m_iFlags = 0;
+	m_enArmorType = Vest;
 
 	HOOK_MESSAGE( Battery );
-	HOOK_MESSAGE( ArmorType )
-
+	HOOK_MESSAGE( ArmorType );
 	gHUD.AddHudElem( this );
 
 	return 1;
@@ -47,7 +47,6 @@ int CHudBattery::VidInit( void )
 	m_hFull[VestHelm].SetSpriteByName("suithelmet_full");
 
 	m_iHeight = m_hFull[Vest].rect.bottom - m_hEmpty[Vest].rect.top;
-	m_enArmorType = Vest;
 	m_fFade = 0;
 
 	return 1;
