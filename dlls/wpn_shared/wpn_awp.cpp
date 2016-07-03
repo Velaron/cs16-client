@@ -125,8 +125,8 @@ void CAWP::AWPFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 		m_pPlayer->m_iLastZoom = m_pPlayer->m_iFOV;
 		m_pPlayer->m_iFOV = m_pPlayer->pev->fov = 90;
 	}
-	else
-		flCycleTime += 0.08;
+	else // not zoomed, so bullets diverts more
+		flSpread += 0.08;
 
 	if (m_iClip <= 0)
 	{
