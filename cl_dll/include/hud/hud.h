@@ -26,12 +26,16 @@
 #define RGB_GREENISH 0x0000A000 //0,160,0
 #define RGB_WHITE 0x00FFFFFF
 
+#include <assert.h>
+#include <string.h>
+
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
 
 #include "csprite.h"
 #include "draw_util.h"
+
 
 #define MIN_ALPHA	 100	
 
@@ -55,6 +59,7 @@ extern cvar_t *cl_minmodels;
 extern cvar_t *cl_min_t;
 extern cvar_t *cl_min_ct;
 extern const char *sPlayerModelFiles[];
+extern wrect_t nullrc;
 
 class CClientSprite;
 
@@ -79,8 +84,10 @@ inline bool BIsValidCTModelIndex( int i )
 		return false;
 }
 
-#define HUD_ACTIVE	1
-#define HUD_INTERMISSION 2
+#define HUD_DRAW         (1 << 0)
+#define HUD_THINK        (1 << 1)
+#define HUD_ACTIVE       (HUD_DRAW | HUD_THINK)
+#define HUD_INTERMISSION (1 << 2)
 
 #define MAX_PLAYER_NAME_LENGTH		32
 
@@ -92,7 +99,6 @@ inline bool BIsValidCTModelIndex( int i )
 class CHudBase
 {
 public:
-	int   m_type;
 	int	  m_iFlags; // active, moving,
 	virtual		~CHudBase() {}
 	virtual int Init( void ) {return 0;}
@@ -852,10 +858,36 @@ public:
 	int UpdateClientData( client_data_t *cdata, float time );
 	void AddHudElem(CHudBase *p);
 
-	float GetSensitivity();
-	HSPRITE GetSprite( int index );
-	wrect_t& GetSpriteRect( int index );
-	int GetSpriteIndex( const char *SpriteName );	// gets a sprite index, for use in the m_rghSprites[] array
+	inline float GetSensitivity() { return m_flMouseSensitivity; }
+	inline HSPRITE GetSprite( int index )
+	{
+		assert( index >= -1 && index <= m_iSpriteCount );
+
+		return (index >= 0) ? m_rghSprites[index] : 0;
+	}
+
+	inline wrect_t& GetSpriteRect( int index )
+	{
+		assert( index >= -1 && index <= m_iSpriteCount );
+
+		return (index >= 0) ? m_rgrcRects[index]: nullrc;
+	}
+
+	// GetSpriteIndex()
+	// searches through the sprite list loaded from hud.txt for a name matching SpriteName
+	// returns an index into the gHUD.m_rghSprites[] array
+	// returns -1 if sprite not found
+	inline int GetSpriteIndex( const char *SpriteName )
+	{
+		// look through the loaded sprite name list for SpriteName
+		for ( int i = 0; i < m_iSpriteCount; i++ )
+		{
+			if ( strncmp( SpriteName, m_rgszSpriteNames + (i * MAX_SPRITE_NAME_LENGTH), MAX_SPRITE_NAME_LENGTH ) == 0 )
+				return i;
+		}
+
+		return -1; // invalid sprite
+	}
 
 	inline short GetCharWidth ( unsigned char ch )
 	{
@@ -883,6 +915,7 @@ public:
 	cvar_t *cl_predict;
 	cvar_t *cl_weapon_wallpuff;
 	cvar_t *cl_weapon_sparks;
+	cvar_t *zoom_sens_ratio;
 
 	HSPRITE m_hGasPuff;
 

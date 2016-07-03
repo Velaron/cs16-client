@@ -45,26 +45,27 @@ enum m4a1_e
 	M4A1_DETACH_SILENCER
 };
 
+static const char *SOUNDS_NAME[] =
+{
+	"weapons/m4a1-1.wav",
+	"weapons/m4a1_unsil-1.wav",
+	"weapons/m4a1_unsil-2.wav"
+};
+
 void EV_FireM4A1( event_args_t *args )
 {
-	int idx;
-	vec3_t origin;
-	vec3_t angles;
-	vec3_t velocity;
-
 	vec3_t ShellVelocity;
 	vec3_t ShellOrigin;
-	int shell, sequence;
 	vec3_t vecSrc, vecAiming;
-	vec3_t up, right, forward;
-	const char *szSoundName;
-	idx = args->entindex;
-	VectorCopy( args->origin, origin );
-	angles.x = (long double)args->iparam1 / 100 + args->angles[0];
-	angles.y = (long double)args->iparam2 / 100 + args->angles[1];
-	angles.z = args->angles[2];
-	
-	VectorCopy( args->velocity, velocity );
+	int    sequence, idx = args->entindex;
+	Vector origin( args->origin );
+	Vector angles(
+		args->iparam1 / 100.0f + args->angles[0],
+		args->iparam2 / 100.0f + args->angles[1],
+		args->angles[2]
+		);
+	Vector velocity( args->velocity );
+	Vector forward, right, up;
 
 	AngleVectors( angles, forward, right, up );
 
@@ -74,11 +75,11 @@ void EV_FireM4A1( event_args_t *args )
 		EV_MuzzleFlash();
 		if( args->bparam1 )
 		{
-			sequence = gEngfuncs.pfnRandomLong( M4A1_SHOOT1, M4A1_SHOOT3 );
+			sequence = Com_RandomLong( M4A1_SHOOT1, M4A1_SHOOT3 );
 		}
 		else
 		{
-			sequence = gEngfuncs.pfnRandomLong( M4A1_SHOOT1_UNSIL, M4A1_SHOOT3_UNSIL );
+			sequence = Com_RandomLong( M4A1_SHOOT1_UNSIL, M4A1_SHOOT3_UNSIL );
 		}
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(sequence, 2);
 		if( !cl_righthand->value )
@@ -96,21 +97,9 @@ void EV_FireM4A1( event_args_t *args )
 	}
 
 
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
-	if( args->bparam1 )
-	{
-		szSoundName = "weapons/m4a1-1.wav";
-	}
-	else
-	{
-		szSoundName = gEngfuncs.pfnRandomLong( 0, 1) ? "weapons/m4a1_unsil-1.wav" : "weapons/m4a1_unsil-2.wav";
-	}
-	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
-									   szSoundName,
-									   1, ATTN_NORM, 0,
-									   94 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], g_iRShell, TE_BOUNCE_SHELL);
 
+	PLAY_EVENT_SOUND( args->bparam1 ? SOUNDS_NAME[0] : SOUNDS_NAME[Com_RandomLong( 1, 2 )]);
 
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );

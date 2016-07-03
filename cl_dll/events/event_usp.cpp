@@ -60,29 +60,29 @@ enum usp_shield_e
 	USP_SHIELD_DOWN
 };
 
+static const char *SOUNDS_NAME[] =
+{
+	"weapons/usp1.wav",
+	"weapons/usp2.wav",
+	"weapons/usp_unsil-1.wav",
+};
 void EV_FireUSP( event_args_t *args )
 {
-	int idx;
-	vec3_t origin;
-	vec3_t angles;
-	vec3_t velocity;
-
 	vec3_t ShellVelocity;
 	vec3_t ShellOrigin;
-	int shell;
 	vec3_t vecSrc, vecAiming;
-	vec3_t up, right, forward;
-	const char *szSoundName;
 
-	idx = args->entindex;
 	bool silencer_on = !args->bparam2;
 	bool empty		 = !args->bparam1;
-	VectorCopy( args->origin, origin );
-	angles.x = (long double)args->iparam1 / 100 + args->angles[0];
-	angles.y = (long double)args->iparam2 / 100 + args->angles[1];
-	angles.z = args->angles[2];
-	
-	VectorCopy( args->velocity, velocity );
+	int    idx = args->entindex;
+	Vector origin( args->origin );
+	Vector angles(
+		args->iparam1 / 100.0f + args->angles[0],
+		args->iparam2 / 100.0f + args->angles[1],
+		args->angles[2]
+		);
+	Vector velocity( args->velocity );
+	Vector forward, right, up;
 
 	AngleVectors( angles, forward, right, up );
 
@@ -93,20 +93,20 @@ void EV_FireUSP( event_args_t *args )
 		if( g_bHoldingShield )
 		{
 			if( !empty )
-				seq = gEngfuncs.pfnRandomLong(USP_SHIELD_SHOOT1, USP_SHIELD_SHOOT2);
+				seq = Com_RandomLong(USP_SHIELD_SHOOT1, USP_SHIELD_SHOOT2);
 			else seq = USP_SHIELD_SHOOT_EMPTY;
 		}
 		else if ( silencer_on )
 		{
 			if( !empty )
-				seq = gEngfuncs.pfnRandomLong(USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
+				seq = Com_RandomLong(USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
 			else seq = USP_UNSIL_SHOOT_EMPTY;
 		}
 		else
 		{
 			EV_MuzzleFlash();
 			if( !empty )
-				seq = gEngfuncs.pfnRandomLong(USP_SHOOT1, USP_SHOOT3);
+				seq = Com_RandomLong(USP_SHOOT1, USP_SHOOT3);
 			else seq = USP_SHOOT_EMPTY;
 		}
 
@@ -128,22 +128,9 @@ void EV_FireUSP( event_args_t *args )
 	}
 
 
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], g_iPShell, TE_BOUNCE_SHELL);
 
-	if( !silencer_on )
-	{
-		szSoundName = gEngfuncs.pfnRandomLong( 0, 1 ) ? "weapons/usp1.wav" : "weapons/usp2.wav";
-	}
-	else
-	{
-		szSoundName = "weapons/usp_unsil-1.wav";
-	}
-
-	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
-									   szSoundName,
-									   1, ATTN_NORM, 0,
-									   94 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
+	PLAY_EVENT_SOUND( silencer_on? SOUNDS_NAME[2] : SOUNDS_NAME[Com_RandomLong(0, 1)] );
 
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );

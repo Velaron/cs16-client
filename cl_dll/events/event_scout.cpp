@@ -36,21 +36,20 @@ enum scout_e
 	SCOUT_DRAW
 };
 
+static const char *SOUNDS_NAME = "weapons/scout_fire-1.wav";
+
 void EV_FireScout(event_args_s *args)
 {
-	int idx;
-	vec3_t origin;
-	vec3_t angles;
-	vec3_t velocity;
 	vec3_t vecSrc, vecAiming;
-	vec3_t up, right, forward;
 
-	idx = args->entindex;
-	VectorCopy( args->origin, origin );
-	angles.x = (long double)args->iparam1 / 100 + args->angles[0];
-	angles.y = (long double)args->iparam2 / 100 + args->angles[1];
-	angles.z = args->angles[2];
-	VectorCopy( args->velocity, velocity );
+	int    idx = args->entindex;
+	Vector origin( args->origin );
+	Vector angles(
+		args->iparam1 / 100.0f + args->angles[0],
+		args->iparam2 / 100.0f + args->angles[1],
+		args->angles[2]
+		);
+	Vector forward, right, up;
 
 	AngleVectors( angles, forward, right, up );
 
@@ -58,21 +57,10 @@ void EV_FireScout(event_args_s *args)
 	{
 		++g_iShotsFired;
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( gEngfuncs.pfnRandomLong(SCOUT_SHOOT, SCOUT_SHOOT2), 2 );
+		gEngfuncs.pEventAPI->EV_WeaponAnimation( Com_RandomLong(SCOUT_SHOOT, SCOUT_SHOOT2), 2 );
 	}
-#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
-	else
-	{
-		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
-		origin = ent->origin;
-	}
-#endif
 
-	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
-									   "weapons/scout_fire-1.wav",
-									   1, ATTN_NORM, 0,
-									   94 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
-
+	PLAY_EVENT_SOUND( SOUNDS_NAME );
 
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );

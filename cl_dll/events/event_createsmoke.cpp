@@ -38,7 +38,7 @@ void EV_Smoke_FadeOut( struct tempent_s *te, float frametime, float currenttime 
 		te->entity.curstate.renderamt = 255.0f - (currenttime - te->entity.curstate.fuser3) * te->entity.baseline.renderamt ;
 		if( te->entity.curstate.renderamt < 0 ) te->entity.curstate.renderamt = 0;
 	}
-	EV_CS16Client_KillEveryRound(te, frametime, currenttime );
+	EV_CS16Client_KillEveryRound( te, frametime, currenttime );
 }
 
 
@@ -70,21 +70,21 @@ void EV_CreateSmoke(event_args_s *args)
 
 				pTemp->entity.curstate.renderamt = 255;
 				pTemp->entity.curstate.rendermode = kRenderTransTexture;
-				pTemp->entity.curstate.rendercolor.r = gEngfuncs.pfnRandomLong(210, 230);
-				pTemp->entity.curstate.rendercolor.g = gEngfuncs.pfnRandomLong(210, 230);
-				pTemp->entity.curstate.rendercolor.b = gEngfuncs.pfnRandomLong(210, 230);
+				pTemp->entity.curstate.rendercolor.r = Com_RandomLong(210, 230);
+				pTemp->entity.curstate.rendercolor.g = Com_RandomLong(210, 230);
+				pTemp->entity.curstate.rendercolor.b = Com_RandomLong(210, 230);
 				pTemp->entity.curstate.scale = 5.0f;
 
 				// make it move slowly
-				pTemp->entity.baseline.origin.x = gEngfuncs.pfnRandomLong(-5, 5);
-				pTemp->entity.baseline.origin.y = gEngfuncs.pfnRandomLong(-5, 5);
+				pTemp->entity.baseline.origin.x = Com_RandomLong(-5, 5);
+				pTemp->entity.baseline.origin.y = Com_RandomLong(-5, 5);
 				pTemp->entity.baseline.renderamt = 18;
 			}
 		}
 	}
 	else // second and other
 	{
-		pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite( args->origin, gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/black_smoke4.spr" ), 6.0f );
+		pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite( args->origin, g_iBlackSmoke, 6.0f );
 
 		if( pTemp )
 		{
@@ -94,12 +94,12 @@ void EV_CreateSmoke(event_args_s *args)
 
 			pTemp->entity.curstate.rendermode = kRenderTransTexture;
 			pTemp->entity.curstate.renderfx = kRenderFxNone;
-			pTemp->entity.curstate.rendercolor.r = gEngfuncs.pfnRandomLong(210, 230);
-			pTemp->entity.curstate.rendercolor.g = gEngfuncs.pfnRandomLong(210, 230);
-			pTemp->entity.curstate.rendercolor.b = gEngfuncs.pfnRandomLong(210, 230);
-			pTemp->entity.curstate.renderamt = gEngfuncs.pfnRandomLong(180, 200);
+			pTemp->entity.curstate.rendercolor.r = Com_RandomLong(210, 230);
+			pTemp->entity.curstate.rendercolor.g = Com_RandomLong(210, 230);
+			pTemp->entity.curstate.rendercolor.b = Com_RandomLong(210, 230);
+			pTemp->entity.curstate.renderamt = Com_RandomLong(180, 200);
 
-			pTemp->entity.baseline.origin[0] = gEngfuncs.pfnRandomLong(10, 30);
+			pTemp->entity.baseline.origin[0] = Com_RandomLong(10, 30);
 		}
 	}
 }

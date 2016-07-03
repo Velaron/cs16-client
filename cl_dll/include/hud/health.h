@@ -87,13 +87,12 @@
 #define DMG_CONCUSS				DMG_SONIC
 
 
-
-typedef struct
+struct DAMAGE_IMAGE
 {
 	float fExpire;
 	float fBaseline;
 	int	x, y;
-} DAMAGE_IMAGE;
+};
 	
 //
 //-----------------------------------------------------
@@ -115,19 +114,23 @@ public:
 	int m_iHealth;
 	int m_HUD_dmg_bio;
 	int m_HUD_cross;
-	float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
+	//float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
+	float m_fAttack[4];
 	void GetPainColor( int &r, int &g, int &b );
 	float m_fFade;
 private:
 	HSPRITE m_hSprite;
 	HSPRITE m_hDamage;
+	Vector2D m_vAttackPos[4];
+
 	
 	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
 	float m_flTimeFlash;
 	int	m_bitsDamage;
-	int DrawPain(float fTime);
-	int DrawDamage(float fTime);
-	void CalcDamageDirection(vec3_t vecFrom);
-	void UpdateTiles(float fTime, long bits);
+	void DrawPain( float fTime );
+	void DrawDamage( float fTime );
+	void DrawHealthBar( float flTime );
+	void CalcDamageDirection( Vector vecFrom );
+	void UpdateTiles( float fTime, long bits );
 	void DrawPlayerLocation( void );
 };

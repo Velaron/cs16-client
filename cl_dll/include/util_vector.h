@@ -106,6 +106,7 @@ public:
 		return Vec2;
 	}
 	inline float Length2D(void) const					{ return (float)sqrt(x*x + y*y); }
+	inline bool IsNull(void) const { return !x && !y && !z; }
 
 	// Members
 	vec_t x, y, z;

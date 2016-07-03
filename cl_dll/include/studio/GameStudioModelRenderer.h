@@ -31,7 +31,7 @@ enum BoneIndex
 	BONE_MAX,
 };
 
-typedef struct
+struct client_anim_state_t
 {
 	vec3_t origin;
 	vec3_t angles;
@@ -51,7 +51,7 @@ typedef struct
 	byte blending[2];
 
 	latchedvars_t lv;
-}client_anim_state_t;
+};
 
 class CGameStudioModelRenderer : public CStudioModelRenderer
 {

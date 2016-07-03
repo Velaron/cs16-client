@@ -59,26 +59,26 @@ enum glock18_shield_e
 	GLOCK18_SHIELD_DOWN
 };
 
+static const char *SOUNDS_NAME[] =
+{
+	"weapons/glock18-1.wav", "weapons/glock18-2.wav"
+};
+
 void EV_Fireglock18( event_args_t *args )
 {
-	int idx;
-	vec3_t origin;
-	vec3_t angles;
-	vec3_t velocity;
-
 	vec3_t ShellVelocity;
 	vec3_t ShellOrigin;
-	int shell;
 	vec3_t vecSrc, vecAiming;
-	vec3_t up, right, forward;
 
-	idx = args->entindex;
-	VectorCopy( args->origin, origin );
-	angles.x = (long double)args->iparam1 / 100 + args->angles[0];
-	angles.y = (long double)args->iparam2 / 100 + args->angles[1];
-	angles.z = args->angles[2];
-	
-	VectorCopy( args->velocity, velocity );
+	int    idx = args->entindex;
+	Vector origin( args->origin );
+	Vector angles(
+		args->iparam1 / 100.0f + args->angles[0],
+		args->iparam2 / 100.0f + args->angles[1],
+		args->angles[2]
+		);
+	Vector velocity( args->velocity );
+	Vector forward, right, up;
 
 	AngleVectors( angles, forward, right, up );
 
@@ -117,12 +117,10 @@ void EV_Fireglock18( event_args_t *args )
 	}
 
 
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/pshell.mdl");
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
-	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
-		(g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE) != 0 || g_bGlockBurstMode ? "weapons/glock18-1.wav": "weapons/glock18-2.wav",
-		1, ATTN_NORM, 0,
-		94 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], g_iPShell, TE_BOUNCE_SHELL);
+
+	PLAY_EVENT_SOUND( (g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE) != 0 || g_bGlockBurstMode ? SOUNDS_NAME[0] : SOUNDS_NAME[1] );
+
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 	Vector vSpread;

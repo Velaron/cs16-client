@@ -53,17 +53,19 @@
 #define	ROLL	2
 #endif
 
-extern "C" char PM_FindTextureType( char *name );
-
-void V_PunchAxis( int axis, float punch );
-void VectorAngles( const float *forward, float *angles );
-
-
 #define DECLARE_EVENT( x ) void EV_##x( struct event_args_s *args )
 #define HOOK_EVENT( x, y ) gEngfuncs.pfnHookEvent( "events/" #x ".sc", EV_##y )
 
+#define PLAY_EVENT_SOUND( x ) gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, (x), VOL_NORM, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong( 0, 15 ) )
+
+
 // enable it until fix isn't applied in Xash3D
 //#define _CS16CLIENT_FIX_EVENT_ORIGIN
+
+extern int g_iPShell;
+extern int g_iRShell;
+extern int g_iShotgunShell;
+extern int g_iBlackSmoke;
 
 extern "C"
 {

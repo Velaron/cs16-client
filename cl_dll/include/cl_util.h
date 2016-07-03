@@ -89,6 +89,9 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 #define ClientCmd (*gEngfuncs.pfnClientCmd)
 #define SetCrosshair (*gEngfuncs.pfnSetCrosshair)
 #define AngleVectors (*gEngfuncs.pfnAngleVectors)
+#define Com_RandomLong (*gEngfuncs.pfnRandomLong)
+#define Com_RandomFloat (*gEngfuncs.pfnRandomFloat)
+
 extern float color[3]; // hud.cpp
 
 // Gets the height & width of a sprite,  at the specified frame

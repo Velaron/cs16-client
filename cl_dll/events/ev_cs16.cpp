@@ -38,9 +38,9 @@
 
 #include <assert.h>
 
-extern float g_flRoundTime;
+#include "pm_shared.h"
 
-extern "C" char PM_FindTextureType( char *name );
+extern float g_flRoundTime;
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
@@ -83,7 +83,7 @@ void EV_HLDM_NewExplode( float x, float y, float z, float ScaleExplode1 )
 	{
 		int  iSmokeSprite = gEngfuncs.pEventAPI->EV_FindModelIndex ("sprites/smoke.spr");
 		TEMPENTITY *pTemp = gEngfuncs.pEfxAPI->R_TempSprite( Vector( x, y, z ),
-															 Vector( (int)gEngfuncs.pfnRandomLong( -100, 100 ), (int)gEngfuncs.pfnRandomLong( -100, 100 ), (int)gEngfuncs.pfnRandomLong( -100, 100 ) ),
+															 Vector( (int)Com_RandomLong( -100, 100 ), (int)Com_RandomLong( -100, 100 ), (int)Com_RandomLong( -100, 100 ) ),
 															 5, iSmokeSprite, kRenderTransAlpha, kRenderFxNone, 1.0, 0.5, FTENT_FADEOUT | FTENT_PERSIST );
 
 		if(pTemp)
@@ -91,7 +91,7 @@ void EV_HLDM_NewExplode( float x, float y, float z, float ScaleExplode1 )
 			pTemp->fadeSpeed = 0.6;
 			pTemp->entity.curstate.framerate = 1;
 			pTemp->entity.curstate.renderamt = 255;
-			int Color = gEngfuncs.pfnRandomLong( 0, 140 );
+			int Color = Com_RandomLong( 0, 140 );
 			pTemp->entity.curstate.rendercolor.r = Color;
 			pTemp->entity.curstate.rendercolor.g = Color;
 			pTemp->entity.curstate.rendercolor.b = Color;
@@ -261,7 +261,7 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	}
 
 	// play material hit sound
-	gEngfuncs.pEventAPI->EV_PlaySound( 0, ptr->endpos, CHAN_STATIC, rgsz[gEngfuncs.pfnRandomLong(0,cnt-1)], fvol, fattn, 0, 96 + gEngfuncs.pfnRandomLong(0,0xf) );
+	gEngfuncs.pEventAPI->EV_PlaySound( 0, ptr->endpos, CHAN_STATIC, rgsz[Com_RandomLong(0,cnt-1)], fvol, fattn, 0, 96 + Com_RandomLong(0,0xf) );
 
 	return chTextureType;
 }
@@ -273,7 +273,7 @@ char *EV_HLDM_DamageDecal( physent_t *pe )
 
 	if ( pe->classnumber == 1 )
 	{
-		idx = gEngfuncs.pfnRandomLong( 0, 2 );
+		idx = Com_RandomLong( 0, 2 );
 		sprintf( decalname, "{break%i", idx + 1 );
 	}
 	else if ( pe->rendermode != kRenderNormal )
@@ -282,7 +282,7 @@ char *EV_HLDM_DamageDecal( physent_t *pe )
 	}
 	else
 	{
-		idx = gEngfuncs.pfnRandomLong( 0, 4 );
+		idx = Com_RandomLong( 0, 4 );
 		sprintf( decalname, "{shot%i", idx + 1 );
 	}
 	return decalname;
@@ -296,7 +296,7 @@ void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName, char chTextu
 	gEngfuncs.pEfxAPI->R_BulletImpactParticles( pTrace->endpos );
 
 
-	iRand = gEngfuncs.pfnRandomLong(0,0x7FFF);
+	iRand = Com_RandomLong(0,0x7FFF);
 	if ( iRand < (0x7fff/2) )// not every bullet makes a sound.
 	{
 		if( chTextureType == CHAR_TEX_VENT || chTextureType == CHAR_TEX_METAL )
@@ -375,12 +375,12 @@ void EV_WallPuff_Wind( struct tempent_s *te, float frametime, float currenttime 
 		else
 			te->entity.baseline.origin.y -= yWindMagnitude;
 
-		if ( !gEngfuncs.pfnRandomLong(0, 10) && yWindMagnitude > 3.0 )
+		if ( !Com_RandomLong(0, 10) && yWindMagnitude > 3.0 )
 		{
 			yWindMagnitude = 0;
 			yWindDirection = !yWindDirection;
 		}
-		if ( !gEngfuncs.pfnRandomLong(0, 10) && xWindMagnitude > 3.0 )
+		if ( !Com_RandomLong(0, 10) && xWindMagnitude > 3.0 )
 		{
 			xWindMagnitude = 0;
 			xWindDirection = !xWindDirection;
@@ -432,7 +432,7 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			dir.y = dir.y * dir.y * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			dir.z = dir.z * dir.z * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
-			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, gEngfuncs.pfnRandomLong( 5, 10 ), dir.z, -75.0f, 75.0f );
+			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, Com_RandomLong( 5, 10 ), dir.z, -75.0f, 75.0f );
 		}
 
 		if( gHUD.cl_weapon_wallpuff && gHUD.cl_weapon_wallpuff->value && bCreateWallPuff )
@@ -442,7 +442,7 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 			{
 				char path[] = "sprites/wall_puff1.spr";
 
-				path[17] += gEngfuncs.pfnRandomLong(0, 3);
+				path[17] += Com_RandomLong(0, 3);
 				te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos,
 									gEngfuncs.pEventAPI->EV_FindModelIndex(path), 30.0f );
 			}
@@ -461,9 +461,9 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 				te->entity.curstate.rendercolor.r = r;
 				te->entity.curstate.rendercolor.g = g;
 				te->entity.curstate.rendercolor.b = b;
-				te->entity.curstate.renderamt = gEngfuncs.pfnRandomLong( 100, 180 );
+				te->entity.curstate.renderamt = Com_RandomLong( 100, 180 );
 				te->entity.curstate.scale = 0.5;
-				te->entity.baseline.origin = (25 + gEngfuncs.pfnRandomLong( 0, 4 ) ) * pTrace->plane.normal;
+				te->entity.baseline.origin = (25 + Com_RandomLong( 0, 4 ) ) * pTrace->plane.normal;
 			}
 		}
 	}
@@ -473,13 +473,12 @@ int EV_HLDM_CheckTracer( int idx, float *vecSrc, float *end, float *forward, flo
 {
 	int tracer = 0;
 	int i;
-	qboolean player = idx >= 1 && idx <= gEngfuncs.GetMaxClients() ? true : false;
 
 	if ( iTracerFreq != 0 && ( (*tracerCount)++ % iTracerFreq) == 0 )
 	{
 		vec3_t vecTracerSrc;
 
-		if ( player )
+		if ( EV_IsPlayer( idx ) )
 		{
 			vec3_t offset( 0, 0, -4 );
 
@@ -718,54 +717,6 @@ void EV_HLDM_FireBullets(int idx,
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
 
-}
-
-void EV_TrainPitchAdjust( event_args_t *args )
-{
-	int idx;
-	vec3_t origin;
-
-	unsigned short us_params;
-	int noise;
-	float m_flVolume;
-	int pitch;
-	int stop;
-
-	char sz[ 256 ];
-
-	idx = args->entindex;
-
-	VectorCopy( args->origin, origin );
-
-	us_params = (unsigned short)args->iparam1;
-	stop	  = args->bparam1;
-
-	m_flVolume	= (float)(us_params & 0x003f)/40.0;
-	noise		= (int)(((us_params) >> 12 ) & 0x0007);
-	pitch		= (int)( 10.0 * (float)( ( us_params >> 6 ) & 0x003f ) );
-
-	switch ( noise )
-	{
-	case 1: strncpy( sz, "plats/ttrain1.wav", sizeof(sz)); break;
-	case 2: strncpy( sz, "plats/ttrain2.wav", sizeof(sz)); break;
-	case 3: strncpy( sz, "plats/ttrain3.wav", sizeof(sz)); break;
-	case 4: strncpy( sz, "plats/ttrain4.wav", sizeof(sz)); break;
-	case 5: strncpy( sz, "plats/ttrain6.wav", sizeof(sz)); break;
-	case 6: strncpy( sz, "plats/ttrain7.wav", sizeof(sz)); break;
-	default:
-		// no sound
-		strncpy( sz, "",  sizeof(sz) );
-		return;
-	}
-
-	if ( stop )
-	{
-		gEngfuncs.pEventAPI->EV_StopSound( idx, CHAN_STATIC, sz );
-	}
-	else
-	{
-		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_STATIC, sz, m_flVolume, ATTN_NORM, 0, pitch );
-	}
 }
 
 void EV_CS16Client_KillEveryRound( TEMPENTITY *te, float frametime, float current_time )

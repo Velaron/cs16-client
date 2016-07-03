@@ -39,24 +39,16 @@ enum knife_e
 	KNIFE_MIDSLASH2
 };
 
+static const char *SOUNDS_NAME = "weapons/knife_miss1.wav";
+
 void EV_Knife( struct event_args_s *args )
 {
-	int idx;
-	vec3_t origin;
-
-	idx = args->entindex;
-	VectorCopy( args->origin, origin );
+	int    idx = args->entindex;
+	Vector origin( args->origin );
 
 	if( EV_IsLocal( idx ))
 		gEngfuncs.pEventAPI->EV_WeaponAnimation( args->iparam1, 2 );
-#if defined(_CS16CLIENT_FIX_EVENT_ORIGIN)
-	else
-	{
-		cl_entity_t *ent = gEngfuncs.GetEntityByIndex(idx);
-		origin = ent->origin;
-	}
-#endif
 
 	//Play Swing sound
-	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/knife_miss1.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+	PLAY_EVENT_SOUND( SOUNDS_NAME );
 }

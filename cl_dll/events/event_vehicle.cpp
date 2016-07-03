@@ -29,50 +29,71 @@
 
 #include <string.h>
 
+static const char *SOUNDS_NAME[] =
+{
+	"plats/vehicle1.wav",
+	"plats/vehicle2.wav",
+	"plats/vehicle3.wav",
+	"plats/vehicle4.wav",
+	"plats/vehicle6.wav",
+	"plats/vehicle7.wav"
+};
+
+static const char *SOUNDS_NAME_TRAIN[] =
+{
+	"plats/ttrain1.wav",
+	"plats/ttrain2.wav",
+	"plats/ttrain3.wav",
+	"plats/ttrain4.wav",
+	"plats/ttrain6.wav",
+	"plats/ttrain7.wav"
+};
+
+
 void EV_Vehicle(event_args_s *args)
 {
-	int idx;
-	vec3_t origin;
+	Vector origin(args->origin);
+	int idx = args->entindex;
+	unsigned short us_params = (unsigned short)args->iparam1;
+	int stop	  = args->bparam1;
+	float m_flVolume	= (float)(us_params & 0x003f)/40.0;
+	int noise		= (int)(((us_params) >> 12 ) & 0x0007);
+	int pitch		= (int)( 10.0 * (float)( ( us_params >> 6 ) & 0x003f ) );
 
-	unsigned short us_params;
-	int noise;
-	float m_flVolume;
-	int pitch;
-	int stop;
 
-	char sz[ 256 ];
-
-	idx = args->entindex;
-
-	VectorCopy( args->origin, origin );
-
-	us_params = (unsigned short)args->iparam1;
-	stop	  = args->bparam1;
-
-	m_flVolume	= (float)(us_params & 0x003f)/40.0;
-	noise		= (int)(((us_params) >> 12 ) & 0x0007);
-	pitch		= (int)( 10.0 * (float)( ( us_params >> 6 ) & 0x003f ) );
-
-	switch ( noise )
-	{
-	case 1: strncpy( sz, "plats/vehicle1.wav", sizeof(sz)); break;
-	case 2: strncpy( sz, "plats/vehicle2.wav", sizeof(sz)); break;
-	case 3: strncpy( sz, "plats/vehicle3.wav", sizeof(sz)); break;
-	case 4: strncpy( sz, "plats/vehicle4.wav", sizeof(sz)); break;
-	case 5: strncpy( sz, "plats/vehicle6.wav", sizeof(sz)); break;
-	case 6: strncpy( sz, "plats/vehicle7.wav", sizeof(sz)); break;
-	default:
-		// no sound
-		strncpy( sz, "",  sizeof(sz) );
+	if( noise < 0 || noise > 5 )
 		return;
-	}
 
 	if ( stop )
 	{
-		gEngfuncs.pEventAPI->EV_StopSound( idx, CHAN_STATIC, sz );
+		gEngfuncs.pEventAPI->EV_StopSound( idx, CHAN_STATIC, SOUNDS_NAME[noise] );
 	}
 	else
 	{
-		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_STATIC, sz, m_flVolume, ATTN_NORM, 0, pitch );
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_STATIC, SOUNDS_NAME[noise], m_flVolume, ATTN_NORM, 0, pitch );
+	}
+}
+
+
+void EV_TrainPitchAdjust( event_args_t *args )
+{
+	Vector origin(args->origin);
+	int idx = args->entindex;
+	unsigned short us_params = (unsigned short)args->iparam1;
+	int stop	  = args->bparam1;
+	float m_flVolume	= (float)(us_params & 0x003f)/40.0;
+	int noise		= (int)(((us_params) >> 12 ) & 0x0007);
+	int pitch		= (int)( 10.0 * (float)( ( us_params >> 6 ) & 0x003f ) );
+
+	if( noise < 0 || noise > 5 )
+		return;
+
+	if ( stop )
+	{
+		gEngfuncs.pEventAPI->EV_StopSound( idx, CHAN_STATIC, SOUNDS_NAME_TRAIN[noise] );
+	}
+	else
+	{
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_STATIC, SOUNDS_NAME_TRAIN[noise], m_flVolume, ATTN_NORM, 0, pitch );
 	}
 }

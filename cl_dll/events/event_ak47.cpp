@@ -37,27 +37,31 @@ enum ak47_e
 	AK47_SHOOT3
 };
 
+static const char *SOUNDS_NAME[] =
+{
+	"weapons/ak47-1.wav",
+	"weapons/ak47-2.wav"
+};
+
 void EV_FireAK47( event_args_t *args )
 {
-	vec3_t origin, angles, velocity;
-
 	vec3_t ShellVelocity, ShellOrigin;
 	vec3_t vecSrc, vecAiming;
-	vec3_t up, right, forward;
-	int shell, idx;
 
-	idx = args->entindex;
-	VectorCopy( args->origin, origin );
-	angles.x = (long double)args->iparam1 / 100 + args->angles[0];
-	angles.y = (long double)args->iparam2 / 100 + args->angles[1];
-	angles.z = args->angles[2];
-	VectorCopy( args->velocity, velocity );
+	int idx = args->entindex;
+	Vector origin( args->origin );
+	Vector angles(
+		args->iparam1 / 100.0f + args->angles[0],
+		args->iparam2 / 100.0f + args->angles[1],
+		args->angles[2] );
+	Vector velocity( args->velocity );
+	Vector forward, right, up;
 	AngleVectors( angles, forward, right, up );
 
 	if ( EV_IsLocal( args->entindex ) )
 	{
 		++g_iShotsFired;
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(gEngfuncs.pfnRandomLong(AK47_SHOOT1, AK47_SHOOT3), 2);
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(Com_RandomLong(AK47_SHOOT1, AK47_SHOOT3), 2);
 		EV_MuzzleFlash();
 		if( !cl_righthand->value )
 		{
@@ -74,21 +78,15 @@ void EV_FireAK47( event_args_t *args )
 	}
 
 
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex ("models/rshell.mdl");
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], shell, TE_BOUNCE_SHELL);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[ YAW ], g_iRShell, TE_BOUNCE_SHELL);
 
-	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON,
-		gEngfuncs.pfnRandomLong(0, 1) ? "weapons/ak47-1.wav" : "weapons/ak47-2.wav",
-		1, ATTN_NORM, 0,
-		94 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
+	PLAY_EVENT_SOUND( SOUNDS_NAME[Com_RandomLong(0, 1)] );
 
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	Vector vSpread;
+	Vector vSpread( args->fparam1, args->fparam2, 0.0f );
 	int tracerCount;
-	vSpread.x = args->fparam1;
-	vSpread.y = args->fparam2;
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		1, vecSrc, vecAiming,

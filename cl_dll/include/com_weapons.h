@@ -70,7 +70,6 @@ extern int g_iFreezeTimeOver;
 extern bool g_bHoldingShield;
 extern bool g_bHoldingKnife;
 extern int g_iPlayerFlags;
-extern vec3_t g_vPlayerVelocity;
 extern float g_flPlayerSpeed;
 extern struct local_state_s *g_curstate;
 extern struct local_state_s *g_finalstate;
