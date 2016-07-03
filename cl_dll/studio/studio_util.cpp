@@ -56,6 +56,7 @@ AngleMatrix
 
 ====================
 */
+/* // defined in pm_math.cpp
 void AngleMatrix (const float *angles, float (*matrix)[4] )
 {
 	float		sr, sp, sy, cr, cp, cy;
@@ -95,13 +96,13 @@ void AngleMatrix (const float *angles, float (*matrix)[4] )
 	matrix[1][3] = 0.0;
 	matrix[2][3] = 0.0;
 }
-
+*/
 /*
 ====================
 VectorCompare
 
 ====================
-*/
+*//* //defined in pm_math.cpp
 int VectorCompare (const float *v1, const float *v2)
 {
 	int		i;
@@ -112,7 +113,7 @@ int VectorCompare (const float *v1, const float *v2)
 			
 	return 1;
 }
-
+*/
 /*
 ====================
 CrossProduct
@@ -131,13 +132,13 @@ void CrossProduct (const float *v1, const float *v2, float *cross)
 VectorTransform
 
 ====================
-*/
+*/ /* defined in pm_math.cpp
 void VectorTransform (const float *in1, float in2[3][4], float *out)
 {
 	out[0] = DotProduct(in1, in2[0]) + in2[0][3];
 	out[1] = DotProduct(in1, in2[1]) + in2[1][3];
 	out[2] = DotProduct(in1, in2[2]) + in2[2][3];
-}
+}*/
 
 /*
 ================

@@ -41,24 +41,21 @@ int		iIsSpectator;
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
 
-extern "C"
-{
-int CL_IsThirdPerson( void );
+void PM_ParticleLine( float *start, float *end, int pcolor, float life, float vert);
+int	 PM_GetVisEntInfo( int ent );
+int	 PM_GetPhysEntInfo( int ent );
+extern "C" int  CL_IsThirdPerson( void );
 void CL_CameraOffset( float *ofs );
 
-void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
+extern "C" void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
 
-void PM_ParticleLine( float *start, float *end, int pcolor, float life, float vert);
-int		PM_GetVisEntInfo( int ent );
-int		PM_GetPhysEntInfo( int ent );
 void	InterpolateAngles(  float * start, float * end, float * output, float frac );
 void	NormalizeAngles( float * angles );
 float	Distance(const float * v1, const float * v2);
 float	AngleBetweenVectors(  const float * v1,  const float * v2 );
 
-float	vJumpOrigin[3];
-float	vJumpAngles[3];
-}
+extern float	vJumpOrigin[3];
+extern float	vJumpAngles[3];
 
 
 void V_GetChaseOrigin( float * angles, float * origin, float distance, float * returnvec );
@@ -85,14 +82,12 @@ extern cvar_t	*cl_vsmoothing;
 #define	CAM_MODE_RELAX		1
 #define CAM_MODE_FOCUS		2
 
-vec3_t		v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
-float		v_frametime, v_lastDistance;
-float		v_cameraRelaxAngle	= 5.0f;
-float		v_cameraFocusAngle	= 35.0f;
-int			v_cameraMode = CAM_MODE_FOCUS;
-qboolean	v_resetCamera = 1;
-
-vec3_t ev_punchangle;
+vec3_t v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles, ev_punchangle;
+float  v_frametime, v_lastDistance;
+float  v_cameraRelaxAngle	= 5.0f;
+float  v_cameraFocusAngle	= 35.0f;
+int	   v_cameraMode = CAM_MODE_FOCUS;
+bool   v_resetCamera = 1;
 
 cvar_t	*scr_ofsx;
 cvar_t	*scr_ofsy;
@@ -470,7 +465,7 @@ void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 #define ORIGIN_BACKUP 64
 #define ORIGIN_MASK ( ORIGIN_BACKUP - 1 )
 
-typedef struct
+struct viewinterp_t
 {
 	float Origins[ ORIGIN_BACKUP ][3];
 	float OriginTime[ ORIGIN_BACKUP ];
@@ -480,7 +475,7 @@ typedef struct
 
 	int CurrentOrigin;
 	int CurrentAngle;
-} viewinterp_t;
+};
 
 /*
 ==================
@@ -998,7 +993,7 @@ void V_GetSingleTargetCam(cl_entity_t * ent1, float * angle, float * origin)
 	int flags 	   = gHUD.m_Spectator.m_iObserverFlags;
 
 	// see is target is a dead player
-	qboolean deadPlayer = ent1->player && (ent1->curstate.solid == SOLID_NOT);
+	bool deadPlayer = ent1->player && (ent1->curstate.solid == SOLID_NOT);
 
 	float dfactor   = ( flags & DRC_FLAG_DRAMATIC )? -1.0f : 1.0f;
 
@@ -1692,18 +1687,6 @@ void V_DropPunchAngle ( float frametime, float *ev_punchangle )
 	len -= (10.0 + len * 0.5) * frametime;
 	len = max( len, 0.0 );
 	VectorScale ( ev_punchangle, len, ev_punchangle );
-}
-
-/*
-=============
-V_PunchAxis
-
-Client side punch effect
-=============
-*/
-void V_PunchAxis( int axis, float punch )
-{
-	ev_punchangle[ axis ] = punch;
 }
 
 /*

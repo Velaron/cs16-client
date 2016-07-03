@@ -42,7 +42,7 @@ extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
 
 // Defined in pm_math.c
-extern "C" float anglemod( float a );
+float anglemod( float a );
 
 void IN_Init (void);
 void IN_Move ( float frametime, usercmd_t *cmd);
@@ -123,12 +123,12 @@ kbutton_t	in_score;
 kbutton_t	in_break;
 kbutton_t	in_graph;  // Display the netgraph
 
-typedef struct kblist_s
+struct kblist_t
 {
-	struct kblist_s *next;
+	kblist_t *next;
 	kbutton_t *pkey;
 	char name[32];
-} kblist_t;
+};
 
 kblist_t *g_kbkeys = NULL;
 

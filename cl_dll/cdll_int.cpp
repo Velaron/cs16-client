@@ -21,11 +21,9 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
+#include "pmtrace.h"
 
-extern "C"
-{
 #include "pm_shared.h"
-}
 
 #include <string.h>
 #include "interface.h"
@@ -229,7 +227,7 @@ redraw the HUD.
 
 int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
-	 gHUD.Redraw( time, intermission );
+	gHUD.Redraw( time, intermission );
 
 	return 1;
 }

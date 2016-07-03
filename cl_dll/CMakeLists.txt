@@ -24,14 +24,13 @@ cmake_minimum_required(VERSION 2.6.0)
 project (CLDLL)
 
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wl,--no-undefined")
+set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wl,--no-undefined -ggdb")
 set (CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 set (CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  -O3")
 set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Os")
 set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -ggdb -O3")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -static-stdc++")
-set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}  -std=c++11")
+set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -static-libstdc++")
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} ")
@@ -162,9 +161,9 @@ set (STUDIORENDER_SRCS
 )
 
 set (PLAYERMOVE_SRCS
-	../pm_shared/pm_debug.c
-	../pm_shared/pm_math.c
-	../pm_shared/pm_shared.c
+	../pm_shared/pm_debug.cpp
+	../pm_shared/pm_math.cpp
+	../pm_shared/pm_shared.cpp
 )
 
 set (CLDLL_SOURCES
@@ -206,7 +205,7 @@ include_directories (
 add_library (${CLDLL_LIBRARY} SHARED ${CLDLL_SOURCES})
 add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT
 	-DLINUX -D_LINUX -DCLIENT_WEAPONS -DCLIENT_DLL
-	-D_DEBUG -DVECTORIZE_SINCOS -D_CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
+	-D_DEBUG  -D_CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
 	-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp )
 target_link_libraries( ${CLDLL_LIBRARY} ${CMAKE_DL_LIBS} -L/usr/lib/i386-linux-gnu -lSDL2 )
 

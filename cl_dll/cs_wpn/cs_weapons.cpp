@@ -14,6 +14,7 @@
 ****/
 
 #include "port.h"
+
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -39,6 +40,8 @@
 
 #include "cl_entity.h"
 
+#include "pm_shared.h"
+
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
 #endif
@@ -47,15 +50,13 @@
 #define max(a,b)  (((a) > (b)) ? (a) : (b))
 #endif
 
-extern "C" char PM_FindTextureType( char *name );
-
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
 extern bool g_bGlockBurstMode;
 extern int g_rseq;
 extern int g_gaitseq;
-extern vec3_t g_clorg;
-extern vec3_t g_clang;
+extern Vector g_clorg;
+extern Vector g_clang;
 
 // Pool of client side entities/entvars_t
 static entvars_t	ev[ 32 ];
@@ -101,14 +102,13 @@ static CUMP45 g_UMP45;
 static CUSP g_USP;
 static CXM1014 g_XM1014;
 
-int g_iWeaponFlags;
-bool g_bInBombZone;
-int g_iFreezeTimeOver;
-bool g_bHoldingShield;
-bool g_bHoldingKnife;
-vec3_t g_vPlayerVelocity;
-float g_flPlayerSpeed;
-int g_iPlayerFlags;
+int    g_iWeaponFlags;
+bool   g_bInBombZone;
+int    g_iFreezeTimeOver;
+bool   g_bHoldingShield;
+bool   g_bHoldingKnife;
+float  g_flPlayerSpeed;
+int    g_iPlayerFlags;
 
 /*
 ======================
@@ -757,80 +757,6 @@ void UTIL_TraceLine( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTE
 #endif
 }
 
-/*
-=====================
-UTIL_ParticleBox
-
-For debugging, draw a box around a player made out of particles
-=====================
-*/
-void UTIL_ParticleBox( CBasePlayer *player, float *mins, float *maxs, float life, unsigned char r, unsigned char g, unsigned char b )
-{
-	int i;
-	vec3_t mmin, mmax;
-
-	for ( i = 0; i < 3; i++ )
-	{
-		mmin[ i ] = player->pev->origin[ i ] + mins[ i ];
-		mmax[ i ] = player->pev->origin[ i ] + maxs[ i ];
-	}
-
-	gEngfuncs.pEfxAPI->R_ParticleBox( (float *)&mmin, (float *)&mmax, 5.0, 0, 255, 0 );
-}
-
-/*
-=====================
-UTIL_ParticleBoxes
-
-For debugging, draw boxes for other collidable players
-=====================
-*/
-void UTIL_ParticleBoxes( void )
-{
-	int idx;
-	physent_t *pe;
-	cl_entity_t *player;
-	vec3_t mins, maxs;
-
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction( false, true );
-
-	// Store off the old count
-	gEngfuncs.pEventAPI->EV_PushPMStates();
-
-	player = gEngfuncs.GetLocalPlayer();
-	// Now add in all of the players.
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers ( player->index - 1 );
-
-	for ( idx = 1; idx < 100; idx++ )
-	{
-		pe = gEngfuncs.pEventAPI->EV_GetPhysent( idx );
-		if ( !pe )
-			break;
-
-		if ( pe->info >= 1 && pe->info <= gEngfuncs.GetMaxClients() )
-		{
-			mins = pe->origin + pe->mins;
-			maxs = pe->origin + pe->maxs;
-
-			gEngfuncs.pEfxAPI->R_ParticleBox( (float *)&mins, (float *)&maxs, 0, 0, 255, 2.0 );
-		}
-	}
-
-	gEngfuncs.pEventAPI->EV_PopPMStates();
-}
-
-/*
-=====================
-UTIL_ParticleLine
-
-For debugging, draw a line made out of particles
-=====================
-*/
-void UTIL_ParticleLine( CBasePlayer *player, float *start, float *end, float life, unsigned char r, unsigned char g, unsigned char b )
-{
-	gEngfuncs.pEfxAPI->R_ParticleLine( start, end, r, g, b, life );
-}
-
 char UTIL_TextureHit(TraceResult *ptr, Vector vecSrc, Vector vecEnd)
 {
 	char chTextureType;
@@ -1220,14 +1146,9 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	if ( g_runfuncs )
 	{
 		if ( to->client.health <= 0 && lasthealth > 0 )
-		{
 			player.Killed( NULL, 0 );
-
-		}
 		else if ( to->client.health > 0 && lasthealth <= 0 )
-		{
 			player.Spawn();
-		}
 
 		lasthealth = to->client.health;
 	}
@@ -1240,9 +1161,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	{
 		CBasePlayerWeapon *pCurrent = g_pWpns[ i ];
 		if ( !pCurrent )
-		{
 			continue;
-		}
 
 		weapon_data_t *pfrom = from->weapondata + i;
 
@@ -1261,10 +1180,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	}
 
 	if( from->client.vuser4.x < 0 || from->client.vuser4.x > MAX_AMMO_TYPES )
-	{
 		pWeapon->m_iPrimaryAmmoType = 0;
-
-	}
 	else
 	{
 		pWeapon->m_iPrimaryAmmoType = (int)from->client.vuser4.x;
@@ -1293,25 +1209,24 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.pev->button = cmd->buttons;
 
 	player.pev->velocity = from->client.velocity;
-	g_iPlayerFlags = player.pev->flags = from->client.flags;
 
-	player.pev->deadflag = from->client.deadflag;
+	player.pev->deadflag   = from->client.deadflag;
 	player.pev->waterlevel = from->client.waterlevel;
-	player.pev->maxspeed    = from->client.maxspeed;
+	player.pev->maxspeed   = from->client.maxspeed;
 	player.pev->punchangle = from->client.punchangle;
-	player.pev->fov = from->client.fov;
+	player.pev->fov        = from->client.fov;
 	player.pev->weaponanim = from->client.weaponanim;
-	player.pev->viewmodel = from->client.viewmodel;
-	player.m_flNextAttack = from->client.m_flNextAttack;
+	player.pev->viewmodel  = from->client.viewmodel;
+	player.m_flNextAttack  = from->client.m_flNextAttack;
 
-	g_vPlayerVelocity	= from->client.velocity;
-	g_flPlayerSpeed		= from->client.velocity.Length();
+	g_iPlayerFlags    = player.pev->flags = from->client.flags;
+	g_flPlayerSpeed	  = from->client.velocity.Length();
 
 	//Stores all our ammo info, so the client side weapons can use them.
-	player.ammo_9mm			= (int)from->client.ammo_nails;
-	player.ammo_556nato		= (int)from->client.ammo_cells;
-	player.ammo_buckshot	= (int)from->client.ammo_shells;
-	player.ammo_556natobox	= (int)from->client.ammo_rockets;
+	player.ammo_9mm			= from->client.ammo_nails;
+	player.ammo_556nato		= from->client.ammo_cells;
+	player.ammo_buckshot	= from->client.ammo_shells;
+	player.ammo_556natobox	= from->client.ammo_rockets;
 	player.ammo_762nato		= (int)from->client.vuser2.x;
 	player.ammo_45acp		= (int)from->client.vuser2.y;
 	player.ammo_50ae		= (int)from->client.vuser2.z;
@@ -1336,9 +1251,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 	// Point to current weapon object
 	if ( from->client.m_iId )
-	{
 		player.m_pActiveItem = pWeapon;
-	}
 
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
@@ -1438,12 +1351,14 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 			continue;
 		}
 
-		pto->m_fInReload				= pCurrent->m_fInReload;
-		pto->m_fInSpecialReload			= pCurrent->m_fInSpecialReload;
 		pto->m_iClip					= pCurrent->m_iClip;
+
 		pto->m_flNextPrimaryAttack		= pCurrent->m_flNextPrimaryAttack;
 		pto->m_flNextSecondaryAttack	= pCurrent->m_flNextSecondaryAttack;
 		pto->m_flTimeWeaponIdle			= pCurrent->m_flTimeWeaponIdle;
+
+		pto->m_fInReload				= pCurrent->m_fInReload;
+		pto->m_fInSpecialReload			= pCurrent->m_fInSpecialReload;
 		pto->m_flNextReload				= pCurrent->m_flNextReload;
 		pto->fuser2						= pCurrent->m_flStartThrow;
 		pto->fuser3						= pCurrent->m_flReleaseThrow;

@@ -135,8 +135,14 @@ void VectorAngles( const vec3_t forward, vec3_t angles );
 int InvertMatrix( const float * m, float *out );
 
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
-float	anglemod(float a);
+float anglemod(float a);
 
+// up / down
+#define	PITCH	0
+// left / right
+#define	YAW		1
+// fall over
+#define	ROLL	2
 
 
 #define BOX_ON_PLANE_SIDE(emins, emaxs, p)	\

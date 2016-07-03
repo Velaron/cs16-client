@@ -167,7 +167,9 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 	}
 	dst->fuser2					= src->fuser2;
 	if( src->number > 0 && src->number < MAX_PLAYERS )
+	{
 		iOnTrain[src->number]		= src->iuser4;
+	}
 }
 
 /*

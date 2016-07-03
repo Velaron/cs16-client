@@ -519,25 +519,25 @@ void CStudioModelRenderer::StudioFxTransform(cl_entity_t *ent, float transform[3
 		case kRenderFxDistort:
 		case kRenderFxHologram:
 		{
-			if (gEngfuncs.pfnRandomLong(0, 49) == 0)
+			if (Com_RandomLong(0, 49) == 0)
 			{
-				int axis = gEngfuncs.pfnRandomLong(0, 1);
+				int axis = Com_RandomLong(0, 1);
 
 				if (axis == 1)
 					axis = 2;
 
 				VectorScale( transform[axis], gEngfuncs.pfnRandomFloat(1,1.484), transform[axis] );
 			}
-			else if (gEngfuncs.pfnRandomLong(0, 49) == 0)
+			else if (Com_RandomLong(0, 49) == 0)
 			{
 				float offset;
-				int axis = gEngfuncs.pfnRandomLong(0, 1);
+				int axis = Com_RandomLong(0, 1);
 
 				if (axis == 1)
 					axis = 2;
 
 				offset = gEngfuncs.pfnRandomFloat(-10, 10);
-				transform[gEngfuncs.pfnRandomLong(0, 2)][3] += offset;
+				transform[Com_RandomLong(0, 2)][3] += offset;
 			}
 
 			break;
