@@ -358,7 +358,7 @@ int CHudAmmo::Init(void)
 	m_pClCrosshairSize = CVAR_CREATE( "cl_crosshair_size", "auto", FCVAR_ARCHIVE );
 	m_pClDynamicCrosshair = CVAR_CREATE("cl_dynamiccrosshair", "1", FCVAR_ARCHIVE);
 
-	m_iFlags |= HUD_ACTIVE; //!!!
+	m_iFlags = HUD_DRAW | HUD_THINK; //!!!
 	m_R = 50;
 	m_G = 250;
 	m_B = 50;
@@ -379,7 +379,6 @@ int CHudAmmo::Init(void)
 void CHudAmmo::Reset(void)
 {
 	m_fFade = 0;
-	m_iFlags |= HUD_ACTIVE; //!!!
 
 	gpActiveSel = NULL;
 	gHUD.m_iHideHUDDisplay = 0;
@@ -626,7 +625,6 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 
 	if ( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_ALL ) )
 	{
-		static wrect_t nullrc = {0, 0, 0, 0};
 		gpActiveSel = NULL;
 		SetCrosshair( 0, nullrc, 0, 0, 0 );
 	}
@@ -646,8 +644,6 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 //
 int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 {
-	static wrect_t nullrc;
-
 	BEGIN_READ( pbuf, iSize );
 
 	int iState = READ_BYTE();
@@ -703,8 +699,7 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 
 
 	m_fFade = 200.0f; //!!!
-	m_iFlags |= HUD_ACTIVE;
-	
+
 	return 1;
 }
 
@@ -1093,7 +1088,6 @@ void CHudAmmo::UserCmd_Rebuy()
 
 int CHudAmmo::Draw(float flTime)
 {
-	wrect_t nullrc = { 0 };
 	int a, x, y, r, g, b;
 	int AmmoWidth;
 	static bool switchCrosshairType = false;
@@ -1106,7 +1100,7 @@ int CHudAmmo::Draw(float flTime)
 	{
 		if( switchCrosshairType )
 		{
-			gEngfuncs.pfnSetCrosshair( 0, nullrc, 0, 0, 0);
+			SetCrosshair( 0, nullrc, 0, 0, 0);
 			switchCrosshairType = false;
 		}
 		// draw a dynamic crosshair
@@ -1129,9 +1123,6 @@ int CHudAmmo::Draw(float flTime)
 
 	// Draw ammo pickup history
 	gHR.DrawAmmoHistory( flTime );
-
-	if (!(m_iFlags & HUD_ACTIVE))
-		return 0;
 
 	if (!m_pWeapon)
 		return 0;

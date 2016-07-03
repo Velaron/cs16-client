@@ -108,13 +108,13 @@ int CHudTimer::MsgFunc_RoundTime(const char *pszName, int iSize, void *pbuf)
 	BEGIN_READ( pbuf, iSize );
 	m_iTime = READ_SHORT();
 	m_fStartTime = gHUD.m_flTime;
-	m_iFlags = HUD_ACTIVE;
+	m_iFlags = HUD_DRAW;
 	return 1;
 }
 
 int CHudTimer::MsgFunc_ShowTimer(const char *pszName, int iSize, void *pbuf)
 {
-	m_iFlags = HUD_ACTIVE;
+	m_iFlags = HUD_DRAW;
 	return 1;
 }
 
@@ -193,7 +193,7 @@ int CHudProgressBar::MsgFunc_BarTime(const char *pszName, int iSize, void *pbuf)
 
 	m_fStartTime = gHUD.m_flTime;
 
-	m_iFlags = HUD_ACTIVE;
+	m_iFlags = HUD_DRAW;
 	return 1;
 }
 
@@ -206,7 +206,7 @@ int CHudProgressBar::MsgFunc_BarTime2(const char *pszName, int iSize, void *pbuf
 
 	m_fStartTime = gHUD.m_flTime;
 
-	m_iFlags = HUD_ACTIVE;
+	m_iFlags = HUD_DRAW;
 	return 1;
 }
 
@@ -214,7 +214,7 @@ int CHudProgressBar::MsgFunc_BotProgress(const char *pszName, int iSize, void *p
 {
 	BEGIN_READ( pbuf, iSize );
 	m_iDuration = 0.0f; // don't update our progress bar
-	m_iFlags = HUD_ACTIVE;
+	m_iFlags = HUD_DRAW;
 
 	float fNewPercent;
 	int flag = READ_BYTE();

@@ -89,7 +89,7 @@ int CHudMenu :: Draw( float flTime )
 		if ( m_flShutoffTime <= gHUD.m_flTime )
 		{  // times up, shutoff
 			m_fMenuDisplayed = 0;
-			m_iFlags &= ~HUD_ACTIVE;
+			m_iFlags &= ~HUD_DRAW;
 			return 1;
 		}
 	}
@@ -140,7 +140,7 @@ void CHudMenu :: SelectMenuItem( int menu_item )
 
 		// remove the menu
 		m_fMenuDisplayed = 0;
-		m_iFlags &= ~HUD_ACTIVE;
+		m_iFlags &= ~HUD_DRAW;
 	}
 }
 
@@ -170,7 +170,7 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 	if ( !m_bitsValidSlots )
 	{
 		m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
-		m_iFlags &= ~HUD_ACTIVE;
+		m_iFlags &= ~HUD_DRAW;
 		ClientCmd("touch_removebutton _menu_*");
 		return 1;
 	}
@@ -231,7 +231,7 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 	}
 
 	m_fMenuDisplayed = 1;
-	m_iFlags |= HUD_ACTIVE;
+	m_iFlags |= HUD_DRAW;
 
 	m_fWaitingForMore = NeedMore;
 
@@ -274,7 +274,7 @@ void CHudMenu::UserCmd_OldStyleMenuOpen()
 void CHudMenu::UserCmd_OldStyleMenuClose()
 {
 	m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
-	m_iFlags &= ~HUD_ACTIVE;
+	m_iFlags &= ~HUD_DRAW;
 	gMobileAPI.pfnTouchRemoveButton("_menu_*");
 }
 

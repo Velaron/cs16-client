@@ -46,7 +46,7 @@ int CHudRadar::Init()
 	HOOK_COMMAND( "drawradar", ShowRadar );
 	HOOK_COMMAND( "hideradar", HideRadar );
 
-	m_iFlags = HUD_ACTIVE;
+	m_iFlags = HUD_DRAW;
 
 	cl_radartype = CVAR_CREATE( "cl_radartype", "0", FCVAR_ARCHIVE );
 
@@ -74,12 +74,12 @@ int CHudRadar::VidInit(void)
 
 void CHudRadar::UserCmd_HideRadar()
 {
-	m_iFlags = 0;
+	m_iFlags &= ~HUD_DRAW;
 }
 
 void CHudRadar::UserCmd_ShowRadar()
 {
-	m_iFlags = HUD_ACTIVE;
+	m_iFlags |= HUD_DRAW;
 }
 
 int CHudRadar::MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf )

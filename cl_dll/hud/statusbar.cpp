@@ -68,7 +68,7 @@ void CHudStatusBar :: Reset( void )
 {
 	int i = 0;
 
-	m_iFlags &= ~HUD_ACTIVE;  // start out inactive
+	m_iFlags &= ~HUD_DRAW;  // start out inactive
 	for ( i = 0; i < MAX_STATUSBAR_LINES; i++ )
 		m_szStatusText[i][0] = 0;
 	memset( m_iStatusValues, 0, sizeof m_iStatusValues );
@@ -269,9 +269,9 @@ int CHudStatusBar :: MsgFunc_StatusText( const char *pszName, int iSize, void *p
 	m_szStatusText[line][MAX_STATUSTEXT_LENGTH-1] = 0;  // ensure it's null terminated ( strncpy() won't null terminate if read string too long)
 
 	if ( m_szStatusText[0] == 0 )
-		m_iFlags &= ~HUD_ACTIVE;
+		m_iFlags &= ~HUD_DRAW;
 	else
-		m_iFlags |= HUD_ACTIVE;  // we have status text, so turn on the status bar
+		m_iFlags |= HUD_DRAW;  // we have status text, so turn on the status bar
 
 	m_bReparseString = TRUE;
 

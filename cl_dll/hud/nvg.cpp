@@ -45,7 +45,7 @@ int CHudNVG::Init()
 	HOOK_COMMAND("-nvgadjust", NVGAdjustDown);
 
 	gHUD.AddHudElem(this);
-	m_iFlags = HUD_ACTIVE;
+	m_iFlags = HUD_DRAW;
 	m_iEnable = 0;
 	m_iAlpha = 110; // 220 is max, 30 is min
 

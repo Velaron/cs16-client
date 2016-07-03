@@ -53,10 +53,12 @@ int CHudGeiger::MsgFunc_Geiger(const char *pszName,  int iSize, void *pbuf)
 	BEGIN_READ( pbuf, iSize );
 
 	// update geiger data
-	m_iGeigerRange = READ_BYTE();
-	m_iGeigerRange = m_iGeigerRange << 2;
-	
-	m_iFlags |= HUD_ACTIVE;
+	m_iGeigerRange = READ_BYTE() << 2;
+
+	if( m_iGeigerRange < 0 || m_iGeigerRange > 1000 )
+		m_iFlags &= ~HUD_DRAW;
+	else
+		m_iFlags |= HUD_DRAW;
 
 	return 1;
 }

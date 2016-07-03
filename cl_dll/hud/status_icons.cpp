@@ -47,7 +47,7 @@ int CHudStatusIcons::VidInit( void )
 void CHudStatusIcons::Reset( void )
 {
 	memset( m_IconList, 0, sizeof m_IconList );
-	m_iFlags &= ~HUD_ACTIVE;
+	m_iFlags &= ~HUD_DRAW;
 }
 
 // Draw status icons along the left-hand side of the screen
@@ -96,7 +96,7 @@ int CHudStatusIcons::MsgFunc_StatusIcon( const char *pszName, int iSize, void *p
 		int g = READ_BYTE();
 		int b = READ_BYTE();
 		EnableIcon( pszIconName, r, g, b );
-		m_iFlags |= HUD_ACTIVE;
+		m_iFlags |= HUD_DRAW;
 	}
 	else
 	{

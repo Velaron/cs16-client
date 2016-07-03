@@ -42,24 +42,15 @@ extern cvar_t *cl_lw;
 void CHud::Think(void)
 {
 	int newfov;
-	HUDLIST *pList = m_pHudList;
 
-	while (pList)
+	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 	{
-		if (pList->p->m_iFlags & HUD_ACTIVE)
+		if( pList->p->m_iFlags & HUD_THINK )
 			pList->p->Think();
-		pList = pList->pNext;
 	}
 
 	newfov = HUD_GetFOV();
-	if ( newfov == 0 )
-	{
-		m_iFOV = default_fov->value;
-	}
-	else
-	{
-		m_iFOV = newfov;
-	}
+	m_iFOV = newfov ? newfov : default_fov->value;
 
 	// the clients fov is actually set in the client data update section of the hud
 
@@ -72,7 +63,7 @@ void CHud::Think(void)
 	else
 	{  
 		// set a new sensitivity that is proportional to the change from the FOV default
-		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)default_fov->value) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
+		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)default_fov->value) * zoom_sens_ratio->value;
 	}
 
 	// think about default fov
@@ -113,31 +104,6 @@ int CHud :: Redraw( float flTime, int intermission )
 	if ( m_flTimeDelta < 0 )
 		m_flTimeDelta = 0;
 
-	// Bring up the scoreboard during intermission
-	/*if (gViewPort)
-	{
-		if ( m_iIntermission && !intermission )
-		{
-			// Have to do this here so the scoreboard goes away
-			m_iIntermission = intermission;
-			gViewPort->HideCommandMenu();
-			gViewPort->HideScoreBoard();
-			gViewPort->UpdateSpectatorPanel();
-		}
-		else if ( !m_iIntermission && intermission )
-		{
-			m_iIntermission = intermission;
-			gViewPort->HideCommandMenu();
-			gViewPort->HideVGUIMenu();
-			gViewPort->ShowScoreBoard();
-			gViewPort->UpdateSpectatorPanel();
-
-			// Take a screenshot if the client's got the cvar set
-			if ( CVAR_GET_FLOAT( "hud_takesshots" ) != 0 )
-				m_flShotTime = flTime + 1.0;	// Take a screenshot in a second
-		}
-	}*/
-
 	if (m_flShotTime && m_flShotTime < flTime)
 	{
 		gEngfuncs.pfnClientCmd("snapshot\n");
@@ -146,24 +112,17 @@ int CHud :: Redraw( float flTime, int intermission )
 
 	m_iIntermission = intermission;
 
-	if ( m_pCvarDraw->value )
+	if ( m_pCvarDraw->value && (intermission || !(m_iHideHUDDisplay & HIDEHUD_ALL) ) )
 	{
-		HUDLIST *pList = m_pHudList;
-
-		while (pList)
+		for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 		{
-			if ( !intermission )
+			if( pList->p->m_iFlags & HUD_DRAW )
 			{
-				if ( (pList->p->m_iFlags & HUD_ACTIVE) && !(m_iHideHUDDisplay & HIDEHUD_ALL) )
-					pList->p->Draw(flTime);
-			}
-			else
-			{  // it's an intermission,  so only draw hud elements that are set to draw during intermissions
-				if ( pList->p->m_iFlags & HUD_INTERMISSION )
-					pList->p->Draw( flTime );
-			}
+				if( intermission && !(pList->p->m_iFlags & HUD_INTERMISSION) )
+					continue; // skip no-intermission during intermission
 
-			pList = pList->pNext;
+				pList->p->Draw( flTime );
+			}
 		}
 	}
 

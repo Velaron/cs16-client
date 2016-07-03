@@ -113,7 +113,7 @@ void CHudScoreboard :: InitHUDData( void )
 	m_iNumTeams = 0;
 	memset( g_TeamInfo, 0, sizeof g_TeamInfo );
 
-	m_iFlags &= ~HUD_ACTIVE;  // starts out inactive
+	m_iFlags &= ~HUD_DRAW;  // starts out inactive
 
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 }
@@ -426,7 +426,7 @@ void CHudScoreboard :: GetAllPlayersInfo( void )
 
 int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *pbuf )
 {
-	m_iFlags |= HUD_ACTIVE;
+	m_iFlags |= HUD_DRAW;
 
 	BEGIN_READ( pbuf, iSize );
 	short cl = READ_BYTE();

@@ -29,9 +29,9 @@
 #pragma warning(disable: 4244)
 #endif
 
-extern "C" int		iJumpSpectator;
-extern "C" float	vJumpOrigin[3];
-extern "C" float	vJumpAngles[3]; 
+extern int		iJumpSpectator;
+extern float	vJumpOrigin[3];
+extern float	vJumpAngles[3];
 
 
 extern void V_GetInEyePos(int entity, float * origin, float * angles );
@@ -165,7 +165,7 @@ int CHudSpectator::Init()
 {
 	gHUD.AddHudElem(this);
 
-	m_iFlags |= HUD_ACTIVE;
+	m_iFlags |= HUD_DRAW | HUD_THINK;
 	m_flNextObserverInput = 0.0f;
 	m_zoomDelta	= 0.0f;
 	m_moveDelta = 0.0f;
@@ -1142,11 +1142,9 @@ void CHudSpectator::DrawOverviewLayer()
 {
 	float screenaspect, xs, ys, xStep, yStep, x,y,z;
 	int ix,iy,i,xTiles,yTiles,frame;
-
-	qboolean	hasMapImage = m_MapSprite?TRUE:FALSE;
 	model_t *   dummySprite = (struct model_s *)gEngfuncs.GetSpritePointer( m_hsprUnkownMap);
 
-	if ( hasMapImage)
+	if ( m_MapSprite )
 	{
 		i = m_MapSprite->numframes / (4*3);
 		i = sqrt(i);
@@ -1188,7 +1186,7 @@ void CHudSpectator::DrawOverviewLayer()
 
 			for (ix = 0; ix < xTiles; ix++)
 			{
-				if (hasMapImage)
+				if ( m_MapSprite )
 					gEngfuncs.pTriAPI->SpriteTexture( m_MapSprite, frame );
 				else
 					gEngfuncs.pTriAPI->SpriteTexture( dummySprite, 0 );
@@ -1231,7 +1229,7 @@ void CHudSpectator::DrawOverviewLayer()
 
 			for (iy = 0; iy < xTiles; iy++)
 			{
-				if (hasMapImage)
+				if ( m_MapSprite )
 					gEngfuncs.pTriAPI->SpriteTexture( m_MapSprite, frame );
 				else
 					gEngfuncs.pTriAPI->SpriteTexture( dummySprite, 0 );

@@ -52,6 +52,7 @@ int CHudDeathNotice :: Init( void )
 	HOOK_MESSAGE( DeathMsg );
 
 	hud_deathnotice_time = CVAR_CREATE( "hud_deathnotice_time", "6", 0 );
+	m_iFlags = 0;
 
 	return 1;
 }
@@ -73,9 +74,9 @@ int CHudDeathNotice :: VidInit( void )
 
 int CHudDeathNotice :: Draw( float flTime )
 {
-	int x, y, r, g, b;
+	int x, y, r, g, b, i;
 
-	for ( int i = 0; i < MAX_DEATHNOTICES; i++ )
+	for( i = 0; i < MAX_DEATHNOTICES; i++ )
 	{
 		if ( rgDeathNoticeList[i].iId == 0 )
 			break;  // we've gone through them all
@@ -88,7 +89,7 @@ int CHudDeathNotice :: Draw( float flTime )
 			continue;
 		}
 
-		rgDeathNoticeList[i].flDisplayTime = min( rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME );
+		rgDeathNoticeList[i].flDisplayTime = min( rgDeathNoticeList[i].flDisplayTime, flTime + DEATHNOTICE_DISPLAY_TIME );
 
 		// Hide when scoreboard drawing. It will break triapi
 		//if ( gViewPort && gViewPort->AllowedToPrintText() )
@@ -148,13 +149,16 @@ int CHudDeathNotice :: Draw( float flTime )
 		}
 	}
 
+	if( i == 0 )
+		m_iFlags &= ~HUD_DRAW; // disable hud item
+
 	return 1;
 }
 
 // This message handler may be better off elsewhere
 int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *pbuf )
 {
-	m_iFlags |= HUD_ACTIVE;
+	m_iFlags |= HUD_DRAW;
 
 	BEGIN_READ( pbuf, iSize );
 

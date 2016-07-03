@@ -98,7 +98,7 @@ int CHudSpectatorGui::Init()
 	HOOK_COMMAND( "_spec_find_next_player", FindNextPlayer );
 
 	gHUD.AddHudElem(this);
-	m_iFlags = HUD_ACTIVE;
+	m_iFlags = HUD_DRAW;
 	m_menuFlags = 0;
 	m_fTextScale = 1.0f;
 
@@ -109,8 +109,8 @@ int CHudSpectatorGui::VidInit()
 {
 	if( !g_iXash )
 	{
-		ConsolePrint("Warning: CHudSpectatorGui is disabled! Dude, you are running me on old GoldSrc?\n");
-		m_iFlags = HUD_ACTIVE;
+		ConsolePrint("Warning: CHudSpectatorGui is disabled! Dude, are you running me on old GoldSrc?\n");
+		m_iFlags = 0;
 		return 0;
 	}
 

@@ -119,7 +119,7 @@ int CHudSayText :: Draw( float flTime )
 		}
 		else
 		{ // buffer is empty,  just disable drawing of this section
-			m_iFlags &= ~HUD_ACTIVE;
+			m_iFlags &= ~HUD_DRAW;
 		}
 	}
 
@@ -291,7 +291,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 		flScrollTime = gHUD.m_flTime + m_HUD_saytext_time->value;
 	}
 
-	m_iFlags |= HUD_ACTIVE;
+	m_iFlags |= HUD_DRAW;
 	PlaySound( "misc/talk.wav", 1 );
 
 	if ( ScreenHeight >= 480 )

@@ -61,7 +61,7 @@ int CHudBattery:: MsgFunc_Battery(const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
-	m_iFlags |= HUD_ACTIVE;
+	m_iFlags |= HUD_DRAW;
 	int x = READ_SHORT();
 
 	if( x != m_iBat )

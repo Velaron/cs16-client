@@ -45,8 +45,8 @@ int CHudMoney::Init( )
 	HOOK_MESSAGE( Money );
 	HOOK_MESSAGE( BlinkAcct );
 	gHUD.AddHudElem(this);
-	m_iFlags = HUD_ACTIVE;
 	m_fFade = 0;
+	m_iFlags = 0;
 	return 1;
 }
 
@@ -151,6 +151,7 @@ int CHudMoney::MsgFunc_Money(const char *pszName, int iSize, void *pbuf)
 	m_iMoneyCount = READ_LONG();
 	m_iDelta = m_iMoneyCount - iOldCount;
 	m_fFade = 5.0f; //fade for 5 seconds
+	m_iFlags |= HUD_DRAW;
 	return 1;
 }
 

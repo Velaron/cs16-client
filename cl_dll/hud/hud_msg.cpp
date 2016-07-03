@@ -30,6 +30,8 @@
 
 #include <cstring>
 
+#include "events.h"
+
 #define MAX_CLIENTS 32
 
 extern float g_flRoundTime;
@@ -38,8 +40,6 @@ extern float g_flRoundTime;
 
 int CHud :: MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf )
 {
-	ASSERT( iSize == 0 );
-
 	// clear all hud data
 	HUDLIST *pList = m_pHudList;
 
@@ -86,7 +86,13 @@ int CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 	ResetRain();
 
 	// reset round time
-	g_flRoundTime = 0.0f;
+	g_flRoundTime   = 0.0f;
+
+	// reinitialize models. We assume that server already precached all models.
+	g_iRShell       = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/rshell.mdl" );
+	g_iPShell       = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/pshell.mdl" );
+	g_iShotgunShell = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/shotgunshell.mdl" );
+	g_iBlackSmoke   = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/black_smoke4.spr" );
 
 	return 1;
 }

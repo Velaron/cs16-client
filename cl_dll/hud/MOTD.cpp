@@ -36,7 +36,7 @@ int CHudMOTD :: Init( void )
 
 	m_bShow = false;
 
-	m_iFlags &= ~HUD_ACTIVE;  // start out inactive
+	m_iFlags &= ~HUD_DRAW;  // start out inactive
 	m_szMOTD[0] = 0;
 	cl_hide_motd = CVAR_CREATE("cl_hide_motd", "1", FCVAR_ARCHIVE); // hide motd
 
@@ -51,7 +51,7 @@ int CHudMOTD :: VidInit( void )
 
 void CHudMOTD :: Reset( void )
 {
-	m_iFlags &= ~HUD_ACTIVE;  // start out inactive
+	m_iFlags &= ~HUD_DRAW;  // start out inactive
 	m_szMOTD[0] = 0;
 	m_iLines = 0;
 	m_bShow = 0;
@@ -67,7 +67,7 @@ int CHudMOTD :: Draw( float fTime )
 	if( !m_bShow )
 		return 1;
 
-	if( cl_hide_motd->value != 0.0f )
+	if( cl_hide_motd->value )
 	{
 		Reset();
 		return 1;
@@ -127,7 +127,10 @@ int CHudMOTD :: Draw( float fTime )
 
 int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 {
-	if ( m_iFlags & HUD_ACTIVE )
+	if( cl_hide_motd->value )
+		return 1;
+
+	if ( m_iFlags & HUD_DRAW )
 	{
 		Reset(); // clear the current MOTD in prep for this one
 	}
@@ -142,7 +145,7 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 		int length = 0;
 		
 		m_iMaxLength = 0;
-		m_iFlags |= HUD_ACTIVE;
+		m_iFlags |= HUD_DRAW;
 
 
 		for ( char *sz = m_szMOTD; *sz != 0; sz++ )  // count the number of lines in the MOTD

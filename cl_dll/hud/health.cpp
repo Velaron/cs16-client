@@ -35,7 +35,7 @@ DECLARE_MESSAGE(m_Health, ClCorpse )
 
 #define PAIN_NAME "sprites/%d_pain.spr"
 #define DAMAGE_NAME "sprites/%d_dmg.spr"
-
+#define EPSILON 0.4f
 cvar_t *cl_radartype;
 
 int giDmgHeight, giDmgWidth;
@@ -69,9 +69,11 @@ int CHudHealth::Init(void)
 	m_fFade = 0;
 	m_iFlags = 0;
 	m_bitsDamage = 0;
-	m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
 	giDmgHeight = 0;
 	giDmgWidth = 0;
+
+	for( int i = 0; i < 4; i++ )
+		m_fAttack[i] = 0;
 
 	memset(m_dmg, 0, sizeof(DAMAGE_IMAGE) * NUM_DMG_TYPES);
 
@@ -83,7 +85,8 @@ int CHudHealth::Init(void)
 void CHudHealth::Reset( void )
 {
 	// make sure the pain compass is cleared when the player respawns
-	m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
+	for( int i = 0; i < 4; i++ )
+		m_fAttack[i] = 0;
 
 
 	// force all the flashing damage icons to expire
@@ -96,7 +99,35 @@ void CHudHealth::Reset( void )
 
 int CHudHealth::VidInit(void)
 {
-	m_hSprite = 0;
+	m_hSprite = LoadSprite(PAIN_NAME);
+
+
+	for( int i = 0; i < 4; i++ )
+	{
+		m_vAttackPos[i].x = ScreenWidth / 2;
+		m_vAttackPos[i].y = ScreenHeight / 2;
+
+		if( i & 1 )
+		{
+			if( i & 2 )
+				m_vAttackPos[i].x -= SPR_Width( m_hSprite, i ) * 3;
+			else
+				m_vAttackPos[i].x += SPR_Width( m_hSprite, i ) * 2;
+
+
+			m_vAttackPos[i].y -= SPR_Height( m_hSprite, i ) / 2;
+		}
+		else
+		{
+			if( i & 2 )
+				m_vAttackPos[i].y += SPR_Height( m_hSprite, i ) * 2;
+			else
+				m_vAttackPos[i].y -= SPR_Height( m_hSprite, i ) * 3;
+
+			m_vAttackPos[i].x -= SPR_Width( m_hSprite, i ) / 2;
+		}
+	}
+
 
 	m_HUD_dmg_bio = gHUD.GetSpriteIndex( "dmg_bio" ) + 1;
 	m_HUD_cross = gHUD.GetSpriteIndex( "cross" );
@@ -113,7 +144,7 @@ int CHudHealth:: MsgFunc_Health(const char *pszName,  int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 	int x = READ_BYTE();
 
-	m_iFlags |= HUD_ACTIVE;
+	m_iFlags |= HUD_DRAW;
 
 	// Only update the fade if we've changed health
 	if (x != m_iHealth)
@@ -195,18 +226,25 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 #endif 
 }
 
+
 int CHudHealth::Draw(float flTime)
+{
+	if( !(gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH ) && !gEngfuncs.IsSpectateOnly() )
+	{
+		DrawHealthBar( flTime );
+		DrawDamage( flTime );
+		DrawPain( flTime );
+	}
+
+	return 1;
+}
+
+void CHudHealth::DrawHealthBar( float flTime )
 {
 	int r, g, b;
 	int a = 0, x, y;
 	int HealthWidth;
 
-	if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly() )
-		return 1;
-
-	if ( !m_hSprite )
-		m_hSprite = LoadSprite(PAIN_NAME);
-	
 	// Has health changed? Flash the health #
 	if (m_fFade)
 	{
@@ -218,9 +256,7 @@ int CHudHealth::Draw(float flTime)
 		}
 
 		// Fade the health number back to dim
-
 		a = MIN_ALPHA +  (m_fFade/FADE_TIME) * 128;
-
 	}
 	else
 		a = MIN_ALPHA;
@@ -247,158 +283,82 @@ int CHudHealth::Draw(float flTime)
 		x = CrossWidth + HealthWidth / 2;
 
 		x = DrawUtils::DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
-
-		x += HealthWidth/2;
-
-		int iHeight = gHUD.m_iFontHeight;
-		int iWidth = HealthWidth/10;
-		FillRGBA(x, y, iWidth, iHeight, 255, 160, 0, a);
 	}
-
-	DrawDamage(flTime);
-	return DrawPain(flTime);
 }
 
-void CHudHealth::CalcDamageDirection(vec3_t vecFrom)
+void CHudHealth::CalcDamageDirection( Vector vecFrom )
 {
-	vec3_t	forward, right, up;
-	float	side, front;
-	vec3_t vecOrigin, vecAngles;
+	Vector	forward, right, up;
+	float	side, front, flDistToTarget;
 
-	if (!vecFrom[0] && !vecFrom[1] && !vecFrom[2])
+	if( vecFrom.IsNull() )
 	{
-		m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
+		for( int i = 0; i < 4; i++ )
+			m_fAttack[i] = 0;
 		return;
 	}
 
-
-	memcpy(vecOrigin, gHUD.m_vecOrigin, sizeof(vec3_t));
-	memcpy(vecAngles, gHUD.m_vecAngles, sizeof(vec3_t));
-
-
-	VectorSubtract (vecFrom, vecOrigin, vecFrom);
-
-	float flDistToTarget = vecFrom.Length();
-
+	vecFrom = vecFrom - gHUD.m_vecOrigin;
+	flDistToTarget = vecFrom.Length();
 	vecFrom = vecFrom.Normalize();
-	AngleVectors (vecAngles, forward, right, up);
+	AngleVectors (gHUD.m_vecAngles, forward, right, up);
 
 	front = DotProduct (vecFrom, right);
 	side = DotProduct (vecFrom, forward);
 
 	if (flDistToTarget <= 50)
 	{
-		m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 1;
+		for( int i = 0; i < 4; i++ )
+			m_fAttack[i] = 1;
 	}
 	else
 	{
-		if (side > 0)
-		{
-			if (side > 0.3)
-				m_fAttackFront = max(m_fAttackFront, side);
-		}
-		else
-		{
-			float f = fabs(side);
-			if (f > 0.3)
-				m_fAttackRear = max(m_fAttackRear, f);
-		}
-
-		if (front > 0)
-		{
-			if (front > 0.3)
-				m_fAttackRight = max(m_fAttackRight, front);
-		}
-		else
-		{
-			float f = fabs(front);
-			if (f > 0.3)
-				m_fAttackLeft = max(m_fAttackLeft, f);
-		}
+		if (side > EPSILON)
+			m_fAttack[0] = max(m_fAttack[0], side);
+		if (side < -EPSILON)
+			m_fAttack[1] = max(m_fAttack[1], side * -1 );
+		if (front > EPSILON)
+			m_fAttack[2] = max(m_fAttack[2], front);
+		if (front < -EPSILON)
+			m_fAttack[3] = max(m_fAttack[3], front * -1 );
 	}
 }
 
-int CHudHealth::DrawPain(float flTime)
+void CHudHealth::DrawPain(float flTime)
 {
-	if (!(m_fAttackFront || m_fAttackRear || m_fAttackLeft || m_fAttackRight))
-		return 1;
+	if (m_fAttack[0] == 0 &&
+		m_fAttack[1] == 0 &&
+		m_fAttack[2] == 0 &&
+		m_fAttack[3] == 0)
+		return;
 
-	int r, g, b;
-	int x, y, a, shade;
+	float a, fFade = gHUD.m_flTimeDelta * 2;
 
-	// TODO:  get the shift value of the health
-	a = 255;	// max brightness until then
-
-	float fFade = gHUD.m_flTimeDelta * 2;
-	
-	// SPR_Draw top
-	if (m_fAttackFront > 0.4)
+	for( int i = 0; i < 4; i++ )
 	{
-		GetPainColor(r,g,b);
-		shade = a * max( m_fAttackFront, 0.5 );
-		DrawUtils::ScaleColors(r, g, b, shade);
-		SPR_Set(m_hSprite, r, g, b );
+		if( m_fAttack[i] > EPSILON )
+		{
+			/*GetPainColor(r, g, b);
+			shade = a * max( m_fAttack[i], 0.5 );
+			DrawUtils::ScaleColors(r, g, b, shade);*/
 
-		x = ScreenWidth/2 - SPR_Width(m_hSprite, 0)/2;
-		y = ScreenHeight/2 - SPR_Height(m_hSprite,0) * 3;
-		SPR_DrawAdditive(0, x, y, NULL);
-		m_fAttackFront = max( 0, m_fAttackFront - fFade );
-	} else
-		m_fAttackFront = 0;
+			a = max( m_fAttack[i], 0.5 );
 
-	if (m_fAttackRight > 0.4)
-	{
-		GetPainColor(r,g,b);
-		shade = a * max( m_fAttackRight, 0.5 );
-		DrawUtils::ScaleColors(r, g, b, shade);
-		SPR_Set(m_hSprite, r, g, b );
-
-		x = ScreenWidth/2 + SPR_Width(m_hSprite, 1) * 2;
-		y = ScreenHeight/2 - SPR_Height(m_hSprite,1)/2;
-		SPR_DrawAdditive(1, x, y, NULL);
-		m_fAttackRight = max( 0, m_fAttackRight - fFade );
-	} else
-		m_fAttackRight = 0;
-
-	if (m_fAttackRear > 0.4)
-	{
-		GetPainColor(r,g,b);
-		shade = a * max( m_fAttackRear, 0.5 );
-		DrawUtils::ScaleColors(r, g, b, shade);
-		SPR_Set(m_hSprite, r, g, b );
-
-		x = ScreenWidth/2 - SPR_Width(m_hSprite, 2)/2;
-		y = ScreenHeight/2 + SPR_Height(m_hSprite,2) * 2;
-		SPR_DrawAdditive(2, x, y, NULL);
-		m_fAttackRear = max( 0, m_fAttackRear - fFade );
-	} else
-		m_fAttackRear = 0;
-
-	if (m_fAttackLeft > 0.4)
-	{
-		GetPainColor(r,g,b);
-		shade = a * max( m_fAttackLeft, 0.5 );
-		DrawUtils::ScaleColors(r, g, b, shade);
-		SPR_Set(m_hSprite, r, g, b );
-
-		x = ScreenWidth/2 - SPR_Width(m_hSprite, 3) * 3;
-		y = ScreenHeight/2 - SPR_Height(m_hSprite,3)/2;
-		SPR_DrawAdditive(3, x, y, NULL);
-
-		m_fAttackLeft = max( 0, m_fAttackLeft - fFade );
-	} else
-		m_fAttackLeft = 0;
-
-	return 1;
+			SPR_Set( m_hSprite, 255 * a, 255 * a, 255 * a);
+			SPR_DrawAdditive( i, m_vAttackPos[i].x, m_vAttackPos[i].y, NULL );
+			m_fAttack[i] = max( 0, m_fAttack[i] - fFade );
+		}
+		else
+			m_fAttack[i] = 0;
+	}
 }
 
-int CHudHealth::DrawDamage(float flTime)
+void CHudHealth::DrawDamage(float flTime)
 {
 	int r, g, b, a;
-	DAMAGE_IMAGE *pdmg;
 
 	if (!m_bitsDamage)
-		return 1;
+		return;
 
 	DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
 	
@@ -411,7 +371,7 @@ int CHudHealth::DrawDamage(float flTime)
 	{
 		if (m_bitsDamage & giDmgFlags[i])
 		{
-			pdmg = &m_dmg[i];
+			DAMAGE_IMAGE *pdmg = &m_dmg[i];
 			SPR_Set(gHUD.GetSprite(m_HUD_dmg_bio + i), r, g, b );
 			SPR_DrawAdditive(0, pdmg->x, pdmg->y, &gHUD.GetSpriteRect(m_HUD_dmg_bio + i));
 		}
@@ -448,8 +408,6 @@ int CHudHealth::DrawDamage(float flTime)
 			}
 		}
 	}
-
-	return 1;
 }
 
 

@@ -35,8 +35,7 @@ int CHudTextMessage::Init(void)
 	HOOK_MESSAGE( TextMsg );
 
 	gHUD.AddHudElem( this );
-
-	Reset();
+	m_iFlags = 0;
 
 	return 1;
 };

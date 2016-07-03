@@ -37,7 +37,7 @@ version.
 int CHudSniperScope::Init()
 {
 	gHUD.AddHudElem(this);
-	m_iFlags = HUD_ACTIVE;
+	m_iFlags = HUD_DRAW;
 	return 1;
 }
 

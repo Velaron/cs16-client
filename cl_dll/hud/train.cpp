@@ -77,9 +77,9 @@ int CHudTrain::MsgFunc_Train(const char *pszName,  int iSize, void *pbuf)
 	m_iPos = READ_BYTE();
 
 	if (m_iPos)
-		m_iFlags |= HUD_ACTIVE;
+		m_iFlags |= HUD_DRAW;
 	else
-		m_iFlags &= ~HUD_ACTIVE;
+		m_iFlags &= ~HUD_DRAW;
 
 	return 1;
 }

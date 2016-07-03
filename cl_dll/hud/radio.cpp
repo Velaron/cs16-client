@@ -121,7 +121,6 @@ int CHudRadio::MsgFunc_BotVoice( const char *pszName, int iSize, void *buf )
 		return 0;
 
 	TEMPENTITY *temp = gEngfuncs.pEfxAPI->R_DefaultSprite( vec3_origin, spr, 0 );
-
 	if( !temp )
 		return 0;
 

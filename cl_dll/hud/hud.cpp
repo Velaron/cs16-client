@@ -32,6 +32,9 @@
 
 #include "camera.h"
 
+#include <new>
+#include <unordered_map>
+
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 
 extern cvar_t *sensitivity;
@@ -108,7 +111,6 @@ void CHud :: Init( void )
 	CVAR_CREATE( "_cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_ah", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
-	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
 
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
 	cl_righthand = CVAR_CREATE( "hand", "1", FCVAR_ARCHIVE );
@@ -127,6 +129,7 @@ void CHud :: Init( void )
 	fastsprites  = CVAR_CREATE( "fastsprites", "0", FCVAR_ARCHIVE );
 	cl_weapon_sparks = CVAR_CREATE( "cl_weapon_sparks", "1", FCVAR_ARCHIVE );
 	cl_weapon_wallpuff = CVAR_CREATE( "cl_weapon_wallpuff", "1", FCVAR_ARCHIVE );
+	zoom_sens_ratio = CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
 
 	m_iLogo = 0;
 	m_iFOV = 0;
@@ -135,17 +138,12 @@ void CHud :: Init( void )
 	m_pSpriteList = NULL;
 
 	// Clear any old HUD list
-	if ( m_pHudList )
+	for( HUDLIST *pList = m_pHudList; pList; pList = m_pHudList )
 	{
-		HUDLIST *pList;
-		while ( m_pHudList )
-		{
-			pList = m_pHudList;
-			m_pHudList = m_pHudList->pNext;
-			free( pList );
-		}
-		m_pHudList = NULL;
+		m_pHudList = m_pHudList->pNext;
+		delete pList;
 	}
+	m_pHudList = NULL;
 
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;
@@ -217,51 +215,17 @@ CHud :: ~CHud()
 	delete [] m_rgrcRects;
 	delete [] m_rgszSpriteNames;
 
-	if ( m_pHudList )
+	// Clear any old HUD list
+	for( HUDLIST *pList = m_pHudList; pList; pList = m_pHudList )
 	{
-		HUDLIST *pList;
-		while ( m_pHudList )
-		{
-			pList = m_pHudList;
-			m_pHudList = m_pHudList->pNext;
-			free( pList );
-		}
-		m_pHudList = NULL;
+		m_pHudList = m_pHudList->pNext;
+		delete pList;
 	}
+	m_pHudList = NULL;
 
 	//Localize_Free();
 
 	//ServersShutdown();
-}
-
-// GetSpriteIndex()
-// searches through the sprite list loaded from hud.txt for a name matching SpriteName
-// returns an index into the gHUD.m_rghSprites[] array
-// returns -1 if sprite not found
-int CHud :: GetSpriteIndex( const char *SpriteName )
-{
-	// look through the loaded sprite name list for SpriteName
-	for ( int i = 0; i < m_iSpriteCount; i++ )
-	{
-		if ( strncmp( SpriteName, m_rgszSpriteNames + (i * MAX_SPRITE_NAME_LENGTH), MAX_SPRITE_NAME_LENGTH ) == 0 )
-			return i;
-	}
-
-	return -1; // invalid sprite
-}
-
-HSPRITE CHud :: GetSprite( int index )
-{
-	assert( index >= -1 && index <= m_iSpriteCount );
-
-	return (index >= 0) ? m_rghSprites[index] : 0;
-}
-
-wrect_t& CHud :: GetSpriteRect( int index )
-{
-	assert( index >= -1 && index <= m_iSpriteCount );
-
-	return (index >= 0) ? m_rgrcRects[index] : nullrc;
 }
 
 void CHud :: VidInit( void )
@@ -313,7 +277,7 @@ void CHud :: VidInit( void )
 			// allocated memory for sprite handle arrays
 			m_rghSprites = new HSPRITE[m_iSpriteCount];
 			m_rgrcRects = new wrect_t[m_iSpriteCount];
-			m_rgszSpriteNames = new char[m_iSpriteCount * MAX_SPRITE_NAME_LENGTH];
+			m_rgszSpriteNames = new char[m_iSpriteCount * MAX_SPRITE_NAME_LENGTH];;
 
 			p = m_pSpriteList;
 			int index = 0;
@@ -473,14 +437,12 @@ float HUD_GetFOV( void )
 	if ( gEngfuncs.pDemoAPI->IsRecording() )
 	{
 		// Write it
-		int i = 0;
-		unsigned char buf[ 100 ];
+		unsigned char buf[ sizeof(float) ];
 
 		// Active
-		*( float * )&buf[ i ] = g_lastFOV;
-		i += sizeof( float );
+		*( float * )&buf = g_lastFOV;
 
-		Demo_WriteBuffer( TYPE_ZOOM, i, buf );
+		Demo_WriteBuffer( TYPE_ZOOM, sizeof(float), buf );
 	}
 
 	if ( gEngfuncs.pDemoAPI->IsPlayingback() )
@@ -495,55 +457,40 @@ int CHud::MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf)
 	BEGIN_READ( pbuf, iSize );
 
 	int newfov = READ_BYTE();
-	int def_fov = CVAR_GET_FLOAT( "default_fov" );
+	int def_fov = default_fov->value;
 
 	//Weapon prediction already takes care of changing the fog. ( g_lastFOV ).
 	if ( cl_lw && cl_lw->value )
 		return 1;
 
 	g_lastFOV = newfov;
-
-	if ( newfov == 0 )
-	{
-		m_iFOV = def_fov;
-	}
-	else
-	{
-		m_iFOV = newfov;
-	}
+	m_iFOV = newfov ? newfov : def_fov;
 
 	// the clients fov is actually set in the client data update section of the hud
 
-	// Set a new sensitivity
-	if ( m_iFOV == def_fov )
-	{
-		// reset to saved sensitivity
+	if ( m_iFOV == def_fov ) // reset to saved sensitivity
 		m_flMouseSensitivity = 0;
-	}
-	else
-	{
-		// set a new sensitivity that is proportional to the change from the FOV default
-		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)def_fov) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
-	}
+	else // set a new sensitivity that is proportional to the change from the FOV default
+		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)def_fov) * zoom_sens_ratio->value;
 
 	return 1;
 }
 
 void CHud::AddHudElem(CHudBase *phudelem)
 {
+	assert( phudelem );
+
 	HUDLIST *pdl, *ptemp;
 
-	//phudelem->Think();
-
-	if (!phudelem)
+	pdl = new(std::nothrow) HUDLIST;
+	if( !pdl )
+	{
+		ConsolePrint( "Cannot allocate memory!\n" );
 		return;
+	}
 
-	pdl = (HUDLIST *)malloc(sizeof(HUDLIST));
-	if (!pdl)
-		return;
-
-	memset(pdl, 0, sizeof(HUDLIST));
 	pdl->p = phudelem;
+	pdl->pNext = NULL;
 
 	if (!m_pHudList)
 	{
@@ -551,15 +498,8 @@ void CHud::AddHudElem(CHudBase *phudelem)
 		return;
 	}
 
-	ptemp = m_pHudList;
-
-	while (ptemp->pNext)
-		ptemp = ptemp->pNext;
+	// find last
+	for( ptemp = m_pHudList; ptemp->pNext; ptemp = ptemp->pNext );
 
 	ptemp->pNext = pdl;
-}
-
-float CHud::GetSensitivity( void )
-{
-	return m_flMouseSensitivity;
 }
