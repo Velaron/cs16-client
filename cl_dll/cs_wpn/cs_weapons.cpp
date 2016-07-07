@@ -66,7 +66,7 @@ static int			num_ents = 0;
 static CBasePlayer	player;
 
 // Local version of game .dll global variables ( time, etc. )
-static globalvars_t	Globals = { 0 };
+static globalvars_t	Globals = { };
 
 static CBasePlayerWeapon *g_pWpns[ 32 ];
 
@@ -1435,7 +1435,7 @@ runfuncs is 1 if this is the first time we've predicted this command.  If so, so
 be ignored
 =====================
 */
-void _DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed )
+void DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed )
 {
 	g_runfuncs = runfuncs;
 //#if defined( CLIENT_WEAPONS )

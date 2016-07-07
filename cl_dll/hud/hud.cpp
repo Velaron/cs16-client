@@ -37,15 +37,8 @@
 
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 
-extern cvar_t *sensitivity;
-cvar_t *hud_textmode;
-cvar_t *cl_righthand;
-cvar_t *cl_weather;
-cvar_t *cl_min_t;
-cvar_t *cl_min_ct;
-cvar_t *cl_minmodels;
-cvar_t *cl_lw = NULL;
 wrect_t nullrc = { 0, 0, 0, 0 };
+
 const char *sPlayerModelFiles[12] =
 {
 	"models/player.mdl",
@@ -352,10 +345,10 @@ void CHud :: VidInit( void )
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
 	// update Train data
-	m_iLogo = READ_BYTE();
+	m_iLogo = reader.ReadByte();
 
 	return 1;
 }
@@ -454,9 +447,9 @@ float HUD_GetFOV( void )
 
 int CHud::MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf)
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int newfov = READ_BYTE();
+	int newfov = reader.ReadByte();
 	int def_fov = default_fov->value;
 
 	//Weapon prediction already takes care of changing the fog. ( g_lastFOV ).

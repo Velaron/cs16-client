@@ -60,7 +60,7 @@ void EV_FireMAC10(event_args_s *args)
 		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(Com_RandomLong(MAC10_SHOOT1, MAC10_SHOOT3), 2);
 		EV_MuzzleFlash();
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -9.0, -11.0, 0);
 		}

@@ -50,10 +50,10 @@ int CHudGeiger::VidInit(void)
 int CHudGeiger::MsgFunc_Geiger(const char *pszName,  int iSize, void *pbuf)
 {
 
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
 	// update geiger data
-	m_iGeigerRange = READ_BYTE() << 2;
+	m_iGeigerRange = reader.ReadByte() << 2;
 
 	if( m_iGeigerRange < 0 || m_iGeigerRange > 1000 )
 		m_iFlags &= ~HUD_DRAW;

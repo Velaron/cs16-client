@@ -58,7 +58,7 @@ void EV_FireAUG( struct event_args_s *args )
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(Com_RandomLong(AUG_SHOOT1, AUG_SHOOT3), 2);
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 17.0, -8.0, -14.0, 0);
 		}

@@ -25,6 +25,7 @@
 #include <stdio.h>
 
 #include "ammohistory.h"
+#include "draw_util.h"
 
 HistoryResource gHR;
 

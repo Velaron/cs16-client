@@ -28,6 +28,8 @@
 #include <string.h>
 #include "eventscripts.h"
 
+#include "draw_util.h"
+
 DECLARE_MESSAGE(m_Health, Health )
 DECLARE_MESSAGE(m_Health, Damage )
 DECLARE_MESSAGE(m_Health, ScoreAttrib )
@@ -36,7 +38,6 @@ DECLARE_MESSAGE(m_Health, ClCorpse )
 #define PAIN_NAME "sprites/%d_pain.spr"
 #define DAMAGE_NAME "sprites/%d_dmg.spr"
 #define EPSILON 0.4f
-cvar_t *cl_radartype;
 
 int giDmgHeight, giDmgWidth;
 
@@ -141,8 +142,8 @@ int CHudHealth::VidInit(void)
 int CHudHealth:: MsgFunc_Health(const char *pszName,  int iSize, void *pbuf )
 {
 	// TODO: update local health data
-	BEGIN_READ( pbuf, iSize );
-	int x = READ_BYTE();
+	BufferReader reader( pbuf, iSize );
+	int x = reader.ReadByte();
 
 	m_iFlags |= HUD_DRAW;
 
@@ -159,16 +160,16 @@ int CHudHealth:: MsgFunc_Health(const char *pszName,  int iSize, void *pbuf )
 
 int CHudHealth:: MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int armor = READ_BYTE();	// armor
-	int damageTaken = READ_BYTE();	// health
-	long bitsDamage = READ_LONG(); // damage bits
+	int armor = reader.ReadByte();	// armor
+	int damageTaken = reader.ReadByte();	// health
+	long bitsDamage = reader.ReadLong(); // damage bits
 
 	vec3_t vecFrom;
 
 	for ( int i = 0 ; i < 3 ; i++)
-		vecFrom[i] = READ_COORD();
+		vecFrom[i] = reader.ReadCoord();
 
 	UpdateTiles(gHUD.m_flTime, bitsDamage);
 
@@ -189,10 +190,10 @@ int CHudHealth:: MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf )
 
 int CHudHealth:: MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int index = READ_BYTE();
-	unsigned char flags = READ_BYTE();
+	int index = reader.ReadByte();
+	unsigned char flags = reader.ReadByte();
 	g_PlayerExtraInfo[index].dead   = !!(flags & PLAYER_DEAD);
 	g_PlayerExtraInfo[index].has_c4 = !!(flags & PLAYER_HAS_C4);
 	g_PlayerExtraInfo[index].vip    = !!(flags & PLAYER_VIP);
@@ -461,24 +462,24 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 {
 #if 0
-	BEGIN_READ(pbuf, iSize);
+	BufferReader reader(pbuf, iSize);
 
 	char szModel[64];
 
-	char *pModel = READ_STRING();
+	char *pModel = reader.ReadString();
 	Vector origin;
-	origin.x = READ_LONG() / 128.0f;
-	origin.y = READ_LONG() / 128.0f;
-	origin.z = READ_LONG() / 128.0f;
+	origin.x = reader.ReadLong() / 128.0f;
+	origin.y = reader.ReadLong() / 128.0f;
+	origin.z = reader.ReadLong() / 128.0f;
 	Vector angles;
-	angles.x = READ_COORD();
-	angles.y = READ_COORD();
-	angles.z = READ_COORD();
-	float delay = READ_LONG() / 100.0f;
-	int sequence = READ_BYTE();
-	int classID = READ_BYTE();
-	int teamID = READ_BYTE();
-	int playerID = READ_BYTE();
+	angles.x = reader.ReadCoord();
+	angles.y = reader.ReadCoord();
+	angles.z = reader.ReadCoord();
+	float delay = reader.ReadLong() / 100.0f;
+	int sequence = reader.ReadByte();
+	int classID = reader.ReadByte();
+	int teamID = reader.ReadByte();
+	int playerID = reader.ReadByte();
 
 	if( !cl_minmodels->value )
 	{

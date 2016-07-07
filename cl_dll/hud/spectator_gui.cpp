@@ -35,6 +35,8 @@ version.
 
 #include "vgui_parser.h"
 #include "triangleapi.h"
+#include "draw_util.h"
+
 /*
  * We will draw all elements inside a box. It's size 16x10.
  */
@@ -325,9 +327,9 @@ void CHudSpectatorGui::Reset()
 
 int CHudSpectatorGui::MsgFunc_SpecHealth(const char *pszName, int iSize, void *buf)
 {
-	BEGIN_READ( buf, iSize );
+	BufferReader reader( buf, iSize );
 
-	int health = READ_BYTE();
+	int health = reader.ReadByte();
 
 	g_PlayerExtraInfo[g_iUser2].health = health;
 	m_iPlayerLastPointedAt = g_iUser2;
@@ -337,10 +339,10 @@ int CHudSpectatorGui::MsgFunc_SpecHealth(const char *pszName, int iSize, void *b
 
 int CHudSpectatorGui::MsgFunc_SpecHealth2(const char *pszName, int iSize, void *buf)
 {
-	BEGIN_READ( buf, iSize );
+	BufferReader reader( buf, iSize );
 
-	int health = READ_BYTE();
-	int client = READ_BYTE();
+	int health = reader.ReadByte();
+	int client = reader.ReadByte();
 
 	g_PlayerExtraInfo[client].health = health;
 	m_iPlayerLastPointedAt = g_iUser2;

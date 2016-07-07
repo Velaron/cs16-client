@@ -49,12 +49,12 @@ int CHudRadio::Init( )
 
 int CHudRadio::MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
 	char sentence[64];
-	int SenderID = READ_BYTE( );
-	strncpy( sentence, READ_STRING( ), sizeof( sentence ) );
-	int pitch = READ_SHORT( );
+	int SenderID = reader.ReadByte( );
+	strncpy( sentence, reader.ReadString( ), sizeof( sentence ) );
+	int pitch = reader.ReadShort( );
 
 	if ( sentence[0] == '%' && sentence[1] == '!' )
 		gEngfuncs.pfnPlaySoundByNameAtPitch( &sentence[1], 1.0f, pitch );
@@ -69,10 +69,10 @@ int CHudRadio::MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf )
 
 int CHudRadio::MsgFunc_ReloadSound( const char *pszName, int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int vol = READ_BYTE( );
-	if ( READ_BYTE( ) )
+	int vol = reader.ReadByte( );
+	if ( reader.ReadByte( ) )
 	{
 		gEngfuncs.pfnPlaySoundByName( "weapon/generic_reload.wav", vol / 255.0f );
 	}
@@ -100,10 +100,10 @@ void VoiceIconCallback(struct tempent_s *ent, float frametime, float currenttime
 
 int CHudRadio::MsgFunc_BotVoice( const char *pszName, int iSize, void *buf )
 {
-	BEGIN_READ( buf, iSize );
+	BufferReader reader( buf, iSize );
 
-	int enable   = READ_BYTE();
-	int entIndex = READ_BYTE();
+	int enable   = reader.ReadByte();
+	int entIndex = reader.ReadByte();
 
 
 	if( entIndex < 0 || entIndex > 32 )

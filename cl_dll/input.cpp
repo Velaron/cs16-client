@@ -14,10 +14,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "camera.h"
-extern "C"
-{
 #include "kbutton.h"
-}
 #include "cvardef.h"
 #include "usercmd.h"
 #include "const.h"
@@ -29,14 +26,6 @@ extern "C"
 
 #include "vgui_parser.h"
 #include "com_weapons.h"
-
-extern "C" 
-{
-	struct kbutton_s DLLEXPORT *KB_Find( const char *name );
-	void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int active );
-	void DLLEXPORT HUD_Shutdown( void );
-	int DLLEXPORT HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding );
-}
 
 extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;

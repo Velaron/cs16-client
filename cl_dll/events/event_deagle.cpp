@@ -72,7 +72,7 @@ void EV_FireDEAGLE( event_args_t *args )
 		{
 			gEngfuncs.pEventAPI->EV_WeaponAnimation( DEAGLE_SHOOT_EMPTY, 2 );
 		}
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -11.0, -16.0, 0);
 		}

@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "draw_util.h"
 
 
 DECLARE_MESSAGE(m_Flash, FlashBat)
@@ -65,8 +66,8 @@ int CHudFlashlight::VidInit(void)
 
 int CHudFlashlight:: MsgFunc_FlashBat(const char *pszName,  int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
-	int x = READ_BYTE();
+	BufferReader reader( pbuf, iSize );
+	int x = reader.ReadByte();
 	m_iBat = x;
 	m_flBat = ((float)x)/100.0;
 
@@ -75,9 +76,9 @@ int CHudFlashlight:: MsgFunc_FlashBat(const char *pszName,  int iSize, void *pbu
 
 int CHudFlashlight:: MsgFunc_Flashlight(const char *pszName,  int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
-	m_fOn = READ_BYTE();
-	int x = READ_BYTE();
+	BufferReader reader( pbuf, iSize );
+	m_fOn = reader.ReadByte();
+	int x = reader.ReadByte();
 	m_iBat = x;
 	m_flBat = ((float)x)/100.0;
 

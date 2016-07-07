@@ -19,13 +19,6 @@
 #endif
 float CL_KeyState (kbutton_t *key);
 
-extern "C" 
-{
-	void DLLEXPORT CAM_Think( void );
-	int DLLEXPORT CL_IsThirdPerson( void );
-	void DLLEXPORT CL_CameraOffset( float *ofs );
-}
-
 extern cl_enginefunc_t gEngfuncs;
 
 //-------------------------------------------------- Constants
@@ -66,7 +59,6 @@ cvar_t	*c_mindistance;
 
 // pitch, yaw, dist
 vec3_t cam_ofs;
-
 
 // In third person
 int cam_thirdperson;

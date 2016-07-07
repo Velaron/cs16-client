@@ -66,7 +66,7 @@ void EV_FireGALIL( event_args_t *args )
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(GALIL_SHOOT1 + Com_RandomLong(0,2), 2);
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0, 0);
 		}

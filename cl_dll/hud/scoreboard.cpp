@@ -27,12 +27,12 @@
 
 #include <string.h>
 #include <stdio.h>
+#include "draw_util.h"
 
-cvar_t *cl_showpacketloss;
-hud_player_info_t		g_PlayerInfoList[MAX_PLAYERS+1] = { 0 };	// player info from the engine
-extra_player_info_t		g_PlayerExtraInfo[MAX_PLAYERS+1] = { 0 };	// additional player info sent directly to the client dll
-team_info_t		g_TeamInfo[MAX_TEAMS+1]  = { 0 };
-hostage_info_t	g_HostageInfo[MAX_HOSTAGES+1]  = { 0 };
+hud_player_info_t   g_PlayerInfoList[MAX_PLAYERS+1]  = { }; // player info from the engine
+extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS+1] = { }; // additional player info sent directly to the client dll
+team_info_t         g_TeamInfo[MAX_TEAMS+1]          = { };
+hostage_info_t      g_HostageInfo[MAX_HOSTAGES+1]    = { };
 int g_iUser1;
 int g_iUser2;
 int g_iUser3;
@@ -428,12 +428,12 @@ int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *p
 {
 	m_iFlags |= HUD_DRAW;
 
-	BEGIN_READ( pbuf, iSize );
-	short cl = READ_BYTE();
-	short frags = READ_SHORT();
-	short deaths = READ_SHORT();
-	short playerclass = READ_SHORT();
-	short teamnumber = READ_SHORT();
+	BufferReader reader( pbuf, iSize );
+	short cl = reader.ReadByte();
+	short frags = reader.ReadShort();
+	short deaths = reader.ReadShort();
+	short playerclass = reader.ReadShort();
+	short teamnumber = reader.ReadShort();
 
 	if ( cl > 0 && cl <= MAX_PLAYERS )
 	{
@@ -454,15 +454,15 @@ int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *p
 //		string: client team name
 int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
-	short cl = READ_BYTE();
+	BufferReader reader( pbuf, iSize );
+	short cl = reader.ReadByte();
 	int teamNumber = 0;
 
 	if ( cl > 0 && cl <= MAX_PLAYERS )
 	{
 		// set the players team
 		char teamName[MAX_TEAM_NAME];
-		strncpy( teamName, READ_STRING(), MAX_TEAM_NAME );
+		strncpy( teamName, reader.ReadString(), MAX_TEAM_NAME );
 
 		if( !stricmp( teamName, "TERRORIST") )
 			teamNumber = TEAM_TERRORIST;
@@ -549,8 +549,8 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 // if this message is never received, then scores will simply be the combined totals of the players.
 int CHudScoreboard :: MsgFunc_TeamScore( const char *pszName, int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
-	char *TeamName = READ_STRING();
+	BufferReader reader( pbuf, iSize );
+	char *TeamName = reader.ReadString();
 	int i;
 
 	// find the team matching the name
@@ -564,8 +564,8 @@ int CHudScoreboard :: MsgFunc_TeamScore( const char *pszName, int iSize, void *p
 
 	// use this new score data instead of combined player scores
 	g_TeamInfo[i].scores_overriden = TRUE;
-	g_TeamInfo[i].frags = READ_SHORT();
-	g_TeamInfo[i].deaths = READ_SHORT();
+	g_TeamInfo[i].frags = reader.ReadShort();
+	g_TeamInfo[i].deaths = reader.ReadShort();
 	
 	return 1;
 }

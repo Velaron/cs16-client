@@ -412,7 +412,7 @@ void PM_UpdateStepSound()
 	float fvol;
 	vec3_t knee;
 	vec3_t feet;
-	vec3_t center;
+	//vec3_t center;
 	float height;
 	float speed;
 	int fLadder;
@@ -444,7 +444,7 @@ void PM_UpdateStepSound()
 	{
 		PM_CatagorizeTextureType();
 
-		VectorCopy(pmove->origin, center);
+		//VectorCopy(pmove->origin, center);
 		VectorCopy(pmove->origin, knee);
 		VectorCopy(pmove->origin, feet);
 
@@ -906,7 +906,7 @@ void PM_Accelerate(vec_t *wishdir, float wishspeed, float accel)
 
 void PM_WalkMove()
 {
-	int clip;
+	//int clip;
 	int oldonground;
 	int i;
 
@@ -1024,7 +1024,7 @@ void PM_WalkMove()
 	VectorCopy(pmove->velocity, originalvel);
 
 	// Slide move
-	clip = PM_FlyMove();
+	/*clip = */PM_FlyMove();
 
 	// Copy the results out
 	VectorCopy(pmove->origin, down);
@@ -1050,7 +1050,7 @@ void PM_WalkMove()
 	}
 
 	// slide move the rest of the way.
-	clip = PM_FlyMove();
+	/*clip = */PM_FlyMove();
 
 	// Now try going back down from the end point
 	//  press down the stepheight
@@ -1846,8 +1846,8 @@ void PM_Duck()
 	int buttonsChanged = (pmove->oldbuttons ^ pmove->cmd.buttons);	// These buttons have changed this frame
 	int nButtonPressed =  buttonsChanged & pmove->cmd.buttons;	// The changed ones still down are "pressed"
 
-	int duckchange = buttonsChanged & IN_DUCK ? 1 : 0;
-	int duckpressed = nButtonPressed & IN_DUCK ? 1 : 0;
+	/*int duckchange = buttonsChanged & IN_DUCK ? 1 : 0;
+	int duckpressed = nButtonPressed & IN_DUCK ? 1 : 0;*/
 
 	if (pmove->cmd.buttons & IN_DUCK)
 	{

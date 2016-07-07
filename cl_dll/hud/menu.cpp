@@ -23,6 +23,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include "draw_util.h"
 
 //#include "vgui_TeamFortressViewport.h"
 
@@ -156,11 +157,11 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 {
 	char *temp = NULL, *menustring;
 
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	m_bitsValidSlots = READ_SHORT();
-	int DisplayTime = READ_CHAR();
-	int NeedMore = READ_BYTE();
+	m_bitsValidSlots = reader.ReadShort();
+	int DisplayTime = reader.ReadChar();
+	int NeedMore = reader.ReadByte();
 
 	if ( DisplayTime > 0 )
 		m_flShutoffTime = DisplayTime + gHUD.m_flTime;
@@ -175,7 +176,7 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 		return 1;
 	}
 
-	menustring = READ_STRING();
+	menustring = reader.ReadString();
 
 	// menu will be replaced by scripted touch config
 	// so execute it and exit
@@ -240,10 +241,10 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 
 int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 {
-	BEGIN_READ(pbuf, iSize);
+	BufferReader reader(pbuf, iSize);
 
-	int menuType = READ_BYTE();
-	m_bitsValidSlots = READ_SHORT(); // is ignored
+	int menuType = reader.ReadByte();
+	m_bitsValidSlots = reader.ReadShort(); // is ignored
 
 	ShowVGUIMenu(menuType);
 	return 1;
@@ -258,9 +259,9 @@ int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 
 int CHudMenu::MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	m_bAllowSpec = !!READ_BYTE();
+	m_bAllowSpec = !!reader.ReadByte();
 
 	return 1;
 }

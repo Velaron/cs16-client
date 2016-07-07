@@ -62,7 +62,7 @@ void EV_FireM249(event_args_s *args)
 		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(Com_RandomLong(M249_SHOOT1, M249_SHOOT2), 2);
 		EV_MuzzleFlash();
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -10.0, -13.0, 0);
 		}

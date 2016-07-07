@@ -32,7 +32,7 @@
 
 //vec3_t vec3_origin( 0, 0, 0 );
 
-double sqrt(double x);
+//double sqrt(double x);
 
 float rsqrt( float number )
 {

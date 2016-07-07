@@ -19,13 +19,14 @@ typedef unsigned char byte;
 #define true 1
 
 #include <stddef.h>
-
+#include "parsemsg.h"
+/*
 static byte *gpBuf;
 static size_t giSize;
 static size_t giRead;
 static bool giBadRead;
 
-void BEGIN_READ( void *buf, int size )
+void BufferReader reader( void *buf, int size )
 {
 	giRead = 0;
 	giBadRead = false;
@@ -33,7 +34,7 @@ void BEGIN_READ( void *buf, int size )
 	gpBuf = (byte*)buf;
 }
 
-int READ_CHAR( void )
+int reader.ReadChar( void )
 {
 	int     c;
 	
@@ -49,7 +50,7 @@ int READ_CHAR( void )
 	return c;
 }
 
-int READ_BYTE( void )
+int reader.ReadByte( void )
 {
 	int     c;
 	
@@ -65,7 +66,7 @@ int READ_BYTE( void )
 	return c;
 }
 
-int READ_SHORT( void )
+int reader.ReadShort( void )
 {
 	int     c;
 	
@@ -82,13 +83,13 @@ int READ_SHORT( void )
 	return c;
 }
 
-int READ_WORD( void )
+int reader.ReadWord( void )
 {
-	return READ_SHORT();
+	return reader.ReadShort();
 }
 
 
-int READ_LONG( void )
+int reader.ReadLong( void )
 {
 	int     c;
 	
@@ -105,7 +106,7 @@ int READ_LONG( void )
 	return c;
 }
 
-float READ_FLOAT( void )
+float reader.ReadFloat( void )
 {
 	union
 	{
@@ -125,7 +126,7 @@ float READ_FLOAT( void )
 	return dat.f;   
 }
 
-char* READ_STRING( void )
+char* reader.ReadString( void )
 {
 	static char     string[2048];
 	int             c;
@@ -137,7 +138,7 @@ char* READ_STRING( void )
 		if ( giRead+1 > giSize )
 			break; // no more characters
 
-		c = READ_CHAR();
+		c = reader.ReadChar();
 		if (c == -1 || c == 0)
 			break;
 		string[l] = c;
@@ -149,17 +150,18 @@ char* READ_STRING( void )
 	return string;
 }
 
-float READ_COORD( void )
+float reader.ReadCoord( void )
 {
-	return (float)(READ_SHORT() * (1.0/8));
+	return (float)(reader.ReadShort() * (1.0/8));
 }
 
-float READ_ANGLE( void )
+float reader.ReadAngle( void )
 {
-	return (float)(READ_CHAR() * (360.0/256));
+	return (float)(reader.ReadChar() * (360.0/256));
 }
 
-float READ_HIRESANGLE( void )
+float reader.ReadHiResAngle( void )
 {
-	return (float)(READ_SHORT() * (360.0/65536));
+	return (float)(reader.ReadShort() * (360.0/65536));
 }
+*/

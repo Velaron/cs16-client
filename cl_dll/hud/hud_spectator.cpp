@@ -24,6 +24,7 @@
 #include "event_api.h"
 #include "studio_util.h"
 #include "screenfade.h"
+#include "draw_util.h"
 
 #ifdef MSC_VER
 #pragma warning(disable: 4244)
@@ -538,9 +539,9 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 	float	value;
 	char *	string;
 
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int cmd = READ_BYTE();
+	int cmd = reader.ReadByte();
 
 	switch ( cmd )	// director command byte
 	{
@@ -555,9 +556,9 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 		break;
 
 	case DRC_CMD_EVENT	:
-		m_lastPrimaryObject		=	READ_WORD();
-		m_lastSecondaryObject	=	READ_WORD();
-		m_iObserverFlags		=	READ_LONG();
+		m_lastPrimaryObject		=	reader.ReadWord();
+		m_lastSecondaryObject	=	reader.ReadWord();
+		m_iObserverFlags		=	reader.ReadLong();
 
 		if ( m_autoDirector->value )
 		{
@@ -574,20 +575,20 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 	case DRC_CMD_MODE  :
 		if ( m_autoDirector->value )
 		{
-			SetModes( READ_BYTE(), -1 );
+			SetModes( reader.ReadByte(), -1 );
 		}
 		break;
 
 	case DRC_CMD_CAMERA	:
 		if ( m_autoDirector->value )
 		{
-			vJumpOrigin[0] = READ_COORD();	// position
-			vJumpOrigin[1] = READ_COORD();
-			vJumpOrigin[2] = READ_COORD();
+			vJumpOrigin[0] = reader.ReadCoord();	// position
+			vJumpOrigin[1] = reader.ReadCoord();
+			vJumpOrigin[2] = reader.ReadCoord();
 
-			vJumpAngles[0] = READ_COORD();	// view angle
-			vJumpAngles[1] = READ_COORD();
-			vJumpAngles[2] = READ_COORD();
+			vJumpAngles[0] = reader.ReadCoord();	// view angle
+			vJumpAngles[1] = reader.ReadCoord();
+			vJumpAngles[2] = reader.ReadCoord();
 
 			gEngfuncs.SetViewAngles( vJumpAngles );
 
@@ -599,23 +600,23 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 	{
 		client_textmessage_t * msg = &m_HUDMessages[m_lastHudMessage];
 
-		msg->effect = READ_BYTE();		// effect
+		msg->effect = reader.ReadByte();		// effect
 
-		DrawUtils::UnpackRGB( (int&)msg->r1, (int&)msg->g1, (int&)msg->b1, READ_LONG() );		// color
+		DrawUtils::UnpackRGB( (int&)msg->r1, (int&)msg->g1, (int&)msg->b1, reader.ReadLong() );		// color
 		msg->r2 = msg->r1;
 		msg->g2 = msg->g1;
 		msg->b2 = msg->b1;
 		msg->a2 = msg->a1 = 0xFF;	// not transparent
 
-		msg->x = READ_FLOAT();	// x pos
-		msg->y = READ_FLOAT();	// y pos
+		msg->x = reader.ReadFloat();	// x pos
+		msg->y = reader.ReadFloat();	// y pos
 
-		msg->fadein		= READ_FLOAT();	// fadein
-		msg->fadeout	= READ_FLOAT();	// fadeout
-		msg->holdtime	= READ_FLOAT();	// holdtime
-		msg->fxtime		= READ_FLOAT();	// fxtime;
+		msg->fadein		= reader.ReadFloat();	// fadein
+		msg->fadeout	= reader.ReadFloat();	// fadeout
+		msg->holdtime	= reader.ReadFloat();	// holdtime
+		msg->fxtime		= reader.ReadFloat();	// fxtime;
 
-		strncpy( m_HUDMessageText[m_lastHudMessage], READ_STRING(), 128 );
+		strncpy( m_HUDMessageText[m_lastHudMessage], reader.ReadString(), 128 );
 		m_HUDMessageText[m_lastHudMessage][127]=0;	// text
 
 		msg->pMessage = m_HUDMessageText[m_lastHudMessage];
@@ -631,8 +632,8 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 		break;
 
 	case DRC_CMD_SOUND :
-		string = READ_STRING();
-		value =  READ_FLOAT();
+		string = reader.ReadString();
+		value =  reader.ReadFloat();
 
 		// gEngfuncs.Con_Printf("DRC_CMD_FX_SOUND: %s %.2f\n", string, value );
 		gEngfuncs.pEventAPI->EV_PlaySound(0, v_origin, CHAN_BODY, string, value, ATTN_NORM, 0, PITCH_NORM );
@@ -640,22 +641,22 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 		break;
 
 	case DRC_CMD_TIMESCALE	:
-		value = READ_FLOAT();
+		value = reader.ReadFloat();
 		break;
 
 
 
 	case DRC_CMD_STATUS:
-		READ_LONG(); // total number of spectator slots
-		m_iSpectatorNumber = READ_LONG(); // total number of spectator
-		READ_WORD(); // total number of relay proxies
+		reader.ReadLong(); // total number of spectator slots
+		m_iSpectatorNumber = reader.ReadLong(); // total number of spectator
+		reader.ReadWord(); // total number of relay proxies
 
 		//gViewPort->UpdateSpectatorPanel();
 		break;
 
 	case DRC_CMD_BANNER:
-		// gEngfuncs.Con_DPrintf("GUI: Banner %s\n",READ_STRING() ); // name of banner tga eg gfx/temp/7454562234563475.tga
-		//gViewPort->m_pSpectatorPanel->m_TopBanner->LoadImage( READ_STRING() );
+		// gEngfuncs.Con_DPrintf("GUI: Banner %s\n",reader.ReadString() ); // name of banner tga eg gfx/temp/7454562234563475.tga
+		//gViewPort->m_pSpectatorPanel->m_TopBanner->LoadImage( reader.ReadString() );
 		//gViewPort->UpdateSpectatorPanel();
 		break;
 
@@ -663,7 +664,7 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 							break;*/
 
 	case DRC_CMD_STUFFTEXT:
-		ClientCmd( READ_STRING() );
+		ClientCmd( reader.ReadString() );
 		break;
 
 	default			:	gEngfuncs.Con_DPrintf("CHudSpectator::DirectorMessage: unknown command %i.\n", cmd );

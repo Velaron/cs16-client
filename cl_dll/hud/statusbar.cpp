@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include "draw_util.h"
 
 DECLARE_MESSAGE( m_StatusBar, StatusText );
 DECLARE_MESSAGE( m_StatusBar, StatusValue );
@@ -258,14 +259,14 @@ int CHudStatusBar :: Draw( float fTime )
 // %iX, where X is an integer, will substitute a number here, getting the number from StatusValue[X]
 int CHudStatusBar :: MsgFunc_StatusText( const char *pszName, int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int line = READ_BYTE();
+	int line = reader.ReadByte();
 
 	if ( line < 0 || line >= MAX_STATUSBAR_LINES )
 		return 1;
 
-	strncpy( m_szStatusText[line], READ_STRING(), MAX_STATUSTEXT_LENGTH );
+	strncpy( m_szStatusText[line], reader.ReadString(), MAX_STATUSTEXT_LENGTH );
 	m_szStatusText[line][MAX_STATUSTEXT_LENGTH-1] = 0;  // ensure it's null terminated ( strncpy() won't null terminate if read string too long)
 
 	if ( m_szStatusText[0] == 0 )
@@ -284,13 +285,13 @@ int CHudStatusBar :: MsgFunc_StatusText( const char *pszName, int iSize, void *p
 //		short: value to store
 int CHudStatusBar :: MsgFunc_StatusValue( const char *pszName, int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int index = READ_BYTE();
+	int index = reader.ReadByte();
 	if ( index < 1 || index >= MAX_STATUSBAR_VALUES )
 		return 1; // index out of range
 
-	m_iStatusValues[index] = READ_SHORT();
+	m_iStatusValues[index] = reader.ReadShort();
 
 	m_bReparseString = TRUE;
 	

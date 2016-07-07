@@ -833,13 +833,13 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 
 	extra_player_info_t *pExtra = g_PlayerExtraInfo + pplayer->number;
 
-	if( cl_minmodels && cl_minmodels->value > 0.0f )
+	if( gHUD.cl_minmodels && gHUD.cl_minmodels->value > 0.0f )
 	{
 		int team = pExtra->teamnumber;
 		if( team == TEAM_TERRORIST )
 		{
 			// set leet if model isn't valid
-			int modelIdx = cl_min_t && BIsValidTModelIndex(cl_min_t->value) ? cl_min_t->value : 1;
+			int modelIdx = gHUD.cl_min_t && BIsValidTModelIndex(gHUD.cl_min_t->value) ? gHUD.cl_min_t->value : 1;
 
 			m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[ modelIdx ], NULL );
 		}
@@ -850,7 +850,7 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 			else
 			{
 				// set gign, if model isn't valud
-				int modelIdx = cl_min_ct && BIsValidCTModelIndex(cl_min_ct->value) ? cl_min_ct->value : 2;
+				int modelIdx = gHUD.cl_min_ct && BIsValidCTModelIndex(gHUD.cl_min_ct->value) ? gHUD.cl_min_ct->value : 2;
 
 				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[ modelIdx ], NULL );
 			}
@@ -1114,7 +1114,7 @@ HUD_GetStudioModelInterface
 Export this function for the engine to use the studio renderer class to render objects.
 ====================
 */
-extern "C" int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio )
+int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio )
 {
 	if ( version != STUDIO_INTERFACE_VERSION )
 		return 0;

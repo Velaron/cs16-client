@@ -82,7 +82,7 @@ void EV_FireM4A1( event_args_t *args )
 			sequence = Com_RandomLong( M4A1_SHOOT1_UNSIL, M4A1_SHOOT3_UNSIL );
 		}
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(sequence, 2);
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0, 0);
 		}

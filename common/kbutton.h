@@ -5,9 +5,9 @@
 // $NoKeywords: $
 //=============================================================================
 
+#pragma once
 #if !defined( KBUTTONH )
 #define KBUTTONH
-#pragma once
 
 typedef struct kbutton_s
 {

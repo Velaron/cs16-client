@@ -32,9 +32,9 @@ SRCS := \
 	./vgui_parser.cpp \
 	./unicode_strtools.cpp \
 	./draw_util.cpp \
-	../pm_shared/pm_debug.c \
-	../pm_shared/pm_math.c \
-	../pm_shared/pm_shared.c \
+	../pm_shared/pm_debug.cpp \
+	../pm_shared/pm_math.cpp \
+	../pm_shared/pm_shared.cpp \
 	./studio/GameStudioModelRenderer.cpp \
 	./studio/StudioModelRenderer.cpp \
 	./studio/studio_util.cpp \

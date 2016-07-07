@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "parsemsg.h"
+#include "draw_util.h"
 
 DECLARE_MESSAGE(m_Train, Train )
 
@@ -71,10 +72,10 @@ int CHudTrain::Draw(float fTime)
 
 int CHudTrain::MsgFunc_Train(const char *pszName,  int iSize, void *pbuf)
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
 	// update Train data
-	m_iPos = READ_BYTE();
+	m_iPos = reader.ReadByte();
 
 	if (m_iPos)
 		m_iFlags |= HUD_DRAW;

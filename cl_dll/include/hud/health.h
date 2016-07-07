@@ -119,18 +119,18 @@ public:
 	void GetPainColor( int &r, int &g, int &b );
 	float m_fFade;
 private:
-	HSPRITE m_hSprite;
-	HSPRITE m_hDamage;
-	Vector2D m_vAttackPos[4];
-
-	
-	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
-	float m_flTimeFlash;
-	int	m_bitsDamage;
 	void DrawPain( float fTime );
 	void DrawDamage( float fTime );
 	void DrawHealthBar( float flTime );
 	void CalcDamageDirection( Vector vecFrom );
 	void UpdateTiles( float fTime, long bits );
 	void DrawPlayerLocation( void );
+
+	HSPRITE m_hSprite;
+	HSPRITE m_hDamage;
+	Vector2D m_vAttackPos[4];
+	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
+	float m_flTimeFlash;
+	int	m_bitsDamage;
+	cvar_t *cl_radartype;
 };

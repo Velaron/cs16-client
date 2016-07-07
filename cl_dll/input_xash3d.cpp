@@ -3,38 +3,15 @@
 #include "cvardef.h"
 #include "kbutton.h"
 #include "keydefs.h"
-cvar_t		*sensitivity;
-cvar_t		*in_joystick;
+#include "input.h"
+
 #define	PITCH	0
 #define	YAW		1
 #define	ROLL	2 
 
-extern "C" void DLLEXPORT IN_ClientMoveEvent( float forwardmove, float sidemove );
-extern "C" void DLLEXPORT IN_ClientLookEvent( float relyaw, float relpitch );
-
-extern kbutton_t	in_strafe;
-extern kbutton_t	in_mlook;
-extern kbutton_t	in_speed;
-extern kbutton_t	in_jlook;
-extern kbutton_t	in_forward;
-extern kbutton_t	in_back;
-extern kbutton_t	in_moveleft;
-extern kbutton_t	in_moveright;
-
-extern cvar_t	*m_pitch;
-extern cvar_t	*m_yaw;
-extern cvar_t	*m_forward;
-extern cvar_t	*m_side;
-extern cvar_t	*lookstrafe;
-extern cvar_t	*lookspring;
-extern cvar_t	*cl_pitchdown;
-extern cvar_t	*cl_pitchup;
-extern cvar_t	*cl_yawspeed;
-extern cvar_t	*cl_sidespeed;
-extern cvar_t	*cl_forwardspeed;
-extern cvar_t	*cl_pitchspeed;
-extern cvar_t	*cl_movespeedkey;
 cvar_t	*cl_laddermode;
+cvar_t	*sensitivity;
+cvar_t	*in_joystick;
 
 
 float ac_forwardmove;
@@ -224,7 +201,7 @@ void IN_Move( float frametime, usercmd_t *cmd )
 	ac_movecount = 0;
 }
 
-extern "C" DLLEXPORT void IN_MouseEvent( int mstate )
+void DLLEXPORT IN_MouseEvent( int mstate )
 {
 	static int mouse_oldbuttonstate;
 	// perform button actions
@@ -247,22 +224,22 @@ extern "C" DLLEXPORT void IN_MouseEvent( int mstate )
 
 // Stubs
 
-extern "C" DLLEXPORT void IN_ClearStates ( void )
+void DLLEXPORT IN_ClearStates ( void )
 {
 	//gEngfuncs.Con_Printf("IN_ClearStates\n");
 }
 
-extern "C" DLLEXPORT void IN_ActivateMouse ( void )
+void  DLLEXPORT IN_ActivateMouse ( void )
 {
 	//gEngfuncs.Con_Printf("IN_ActivateMouse\n");
 }
 
-extern "C" DLLEXPORT void IN_DeactivateMouse ( void )
+void DLLEXPORT  IN_DeactivateMouse ( void )
 {
 	//gEngfuncs.Con_Printf("IN_DeactivateMouse\n");
 }
 
-extern "C" DLLEXPORT void IN_Accumulate ( void )
+void DLLEXPORT IN_Accumulate ( void )
 {
 	//gEngfuncs.Con_Printf("IN_Accumulate\n");
 }
@@ -285,6 +262,7 @@ void IN_Init( void )
 #ifdef __ANDROID__
 	gEngfuncs.Cvar_SetValue("m_yaw", -1);
 	gEngfuncs.Cvar_SetValue("m_pitch", -1);
+	gEngfuncs.pfnSetMouseEnable( false );
 #endif
 
 	ac_forwardmove = ac_sidemove = rel_yaw = rel_pitch = 0;

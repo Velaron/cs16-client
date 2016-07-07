@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 2.6.0)
 project (CLDLL)
 
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wl,--no-undefined -ggdb")
+set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wl,--no-undefined -ggdb")
 set (CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 set (CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  -O3")
 set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Os")
@@ -177,8 +177,8 @@ set (CLDLL_SOURCES
     ./tri.cpp
 	./util.cpp
 	./view.cpp
-	#./input_xash3d.cpp
-	./input_sdl.cpp
+	./input_xash3d.cpp
+	#./input_sdl.cpp
     ./vgui_parser.cpp
     ./unicode_strtools.cpp
 	./draw_util.cpp

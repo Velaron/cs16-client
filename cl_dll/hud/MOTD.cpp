@@ -25,6 +25,7 @@
 #include "triangleapi.h"
 #include <string.h>
 #include <stdio.h>
+#include "draw_util.h"
 
 DECLARE_MESSAGE( m_MOTD, MOTD );
 
@@ -135,10 +136,10 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 		Reset(); // clear the current MOTD in prep for this one
 	}
 
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int is_finished = READ_BYTE();
-	strcat( m_szMOTD, READ_STRING() );
+	int is_finished = reader.ReadByte();
+	strcat( m_szMOTD, reader.ReadString() );
 
 	if ( is_finished )
 	{

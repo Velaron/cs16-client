@@ -35,9 +35,6 @@ extern int g_iVisibleMouse;
 
 float HUD_GetFOV( void );
 
-extern cvar_t *sensitivity;
-extern cvar_t *cl_lw;
-
 // Think
 void CHud::Think(void)
 {

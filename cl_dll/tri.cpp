@@ -16,12 +16,6 @@
 #include "triangleapi.h"
 #include "rain.h"
 
-extern "C"
-{
-	void DLLEXPORT HUD_DrawNormalTriangles( void );
-	void DLLEXPORT HUD_DrawTransparentTriangles( void );
-};
-
 //#define TEST_IT
 #if defined( TEST_IT )
 
@@ -88,14 +82,8 @@ void Draw_Triangles( void )
 
 #endif
 
-#ifdef _MSC_VER
-extern "C" {
-#endif
 void AngleMatrix (const float angles[3], float (*matrix)[4]);
 void VectorTransform (const float in1[3], float in2[3][4], float out[3]);
-#ifdef _MSC_VER
-}
-#endif
 
 void SetPoint( float x, float y, float z, float (*matrix)[4])
 {

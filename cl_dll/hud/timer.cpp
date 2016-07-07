@@ -35,6 +35,7 @@ version.
 #include "parsemsg.h"
 #include "vgui_parser.h"
 #include <string.h>
+#include "draw_util.h"
 
 DECLARE_MESSAGE( m_Timer, RoundTime )
 DECLARE_MESSAGE( m_Timer, ShowTimer )
@@ -105,8 +106,8 @@ int CHudTimer::Draw( float fTime )
 
 int CHudTimer::MsgFunc_RoundTime(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ( pbuf, iSize );
-	m_iTime = READ_SHORT();
+	BufferReader reader( pbuf, iSize );
+	m_iTime = reader.ReadShort();
 	m_fStartTime = gHUD.m_flTime;
 	m_iFlags = HUD_DRAW;
 	return 1;
@@ -186,9 +187,9 @@ int CHudProgressBar::Draw( float flTime )
 
 int CHudProgressBar::MsgFunc_BarTime(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	m_iDuration = READ_SHORT();
+	m_iDuration = reader.ReadShort();
 	m_fPercent = 0.0f;
 
 	m_fStartTime = gHUD.m_flTime;
@@ -199,10 +200,10 @@ int CHudProgressBar::MsgFunc_BarTime(const char *pszName, int iSize, void *pbuf)
 
 int CHudProgressBar::MsgFunc_BarTime2(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	m_iDuration = READ_SHORT();
-	m_fPercent = (float)READ_SHORT() / 100.0f;
+	m_iDuration = reader.ReadShort();
+	m_fPercent = (float)reader.ReadShort() / 100.0f;
 
 	m_fStartTime = gHUD.m_flTime;
 
@@ -212,24 +213,24 @@ int CHudProgressBar::MsgFunc_BarTime2(const char *pszName, int iSize, void *pbuf
 
 int CHudProgressBar::MsgFunc_BotProgress(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 	m_iDuration = 0.0f; // don't update our progress bar
 	m_iFlags = HUD_DRAW;
 
 	float fNewPercent;
-	int flag = READ_BYTE();
+	int flag = reader.ReadByte();
 	switch( flag )
 	{
 	case UPDATE_BOTPROGRESS:
 	case CREATE_BOTPROGRESS:
-		fNewPercent = (float)READ_BYTE() / 100.0f;
+		fNewPercent = (float)reader.ReadByte() / 100.0f;
 		// cs behavior:
 		// just don't decrease percent values
 		if( m_fPercent < fNewPercent )
 		{
 			m_fPercent = fNewPercent;
 		}
-		strncpy(m_szHeader, READ_STRING(), sizeof(m_szHeader));
+		strncpy(m_szHeader, reader.ReadString(), sizeof(m_szHeader));
 		if( m_szHeader[0] == '#' )
 			m_szLocalizedHeader = Localize(m_szHeader + 1);
 		else

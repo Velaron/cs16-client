@@ -59,7 +59,7 @@ void EV_FireP90(event_args_s *args)
 		++g_iShotsFired;
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(Com_RandomLong(P90_SHOOT1, P90_SHOOT3), 2);
 		EV_MuzzleFlash();
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -16.0, -22.0, 0);
 		}

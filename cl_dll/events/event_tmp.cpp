@@ -64,7 +64,7 @@ void EV_FireTMP(event_args_s *args)
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(Com_RandomLong(TMP_SHOOT1, TMP_SHOOT3), 2);
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -6.0, -11.0, 0);
 		}

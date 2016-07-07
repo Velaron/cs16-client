@@ -21,6 +21,8 @@
 
 #include <string.h>
 #include <stdio.h>
+#include "draw_util.h"
+
 float color[3];
 
 DECLARE_MESSAGE( m_DeathNotice, DeathMsg );
@@ -160,15 +162,15 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 {
 	m_iFlags |= HUD_DRAW;
 
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int killer = READ_BYTE();
-	int victim = READ_BYTE();
-	int headshot = READ_BYTE();
+	int killer = reader.ReadByte();
+	int victim = reader.ReadByte();
+	int headshot = reader.ReadByte();
 
 	char killedwith[32];
 	strncpy( killedwith, "d_", sizeof(killedwith) );
-	strcat( killedwith, READ_STRING() );
+	strcat( killedwith, reader.ReadString() );
 
 	//if (gViewPort)
 	//	gViewPort->DeathMsg( killer, victim );

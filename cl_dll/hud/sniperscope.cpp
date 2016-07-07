@@ -33,6 +33,7 @@ version.
 #include "r_efx.h"
 #include "cl_util.h"
 
+#include "draw_util.h"
 
 int CHudSniperScope::Init()
 {

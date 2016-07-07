@@ -30,6 +30,7 @@ version.
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "draw_util.h"
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
@@ -84,12 +85,12 @@ void CHudRadar::UserCmd_ShowRadar()
 
 int CHudRadar::MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int index = READ_BYTE();
-	g_PlayerExtraInfo[index].origin.x = READ_COORD();
-	g_PlayerExtraInfo[index].origin.y = READ_COORD();
-	g_PlayerExtraInfo[index].origin.z = READ_COORD();
+	int index = reader.ReadByte();
+	g_PlayerExtraInfo[index].origin.x = reader.ReadCoord();
+	g_PlayerExtraInfo[index].origin.y = reader.ReadCoord();
+	g_PlayerExtraInfo[index].origin.z = reader.ReadCoord();
 	return 1;
 }
 
@@ -309,7 +310,9 @@ Vector CHudRadar::WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectO
 	flOffset = (vAngles.y - flOffset) * M_PI / 180.0f;
 
 	// transform origin difference to radar source
-	return { -iRadius * sin(flOffset),
-				   iRadius * cos(flOffset),
-				   vPlayerOrigin.z - vObjectOrigin.z };
+	Vector ret( (float)(-iRadius * sin(flOffset)),
+				(float)(iRadius * cos(flOffset)),
+				(float)(vPlayerOrigin.z - vObjectOrigin.z) );
+
+	return ret;
 }

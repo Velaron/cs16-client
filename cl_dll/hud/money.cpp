@@ -37,6 +37,7 @@ version.
 #include "parsemsg.h"
 #include <string.h>
 #include "vgui_parser.h"
+#include "draw_util.h"
 DECLARE_MESSAGE( m_Money, Money )
 DECLARE_MESSAGE( m_Money, BlinkAcct )
 
@@ -146,9 +147,9 @@ int CHudMoney::Draw(float flTime)
 
 int CHudMoney::MsgFunc_Money(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader buf( pbuf, iSize );
 	int iOldCount = m_iMoneyCount;
-	m_iMoneyCount = READ_LONG();
+	m_iMoneyCount = buf.ReadLong();
 	m_iDelta = m_iMoneyCount - iOldCount;
 	m_fFade = 5.0f; //fade for 5 seconds
 	m_iFlags |= HUD_DRAW;
@@ -157,9 +158,9 @@ int CHudMoney::MsgFunc_Money(const char *pszName, int iSize, void *pbuf)
 
 int CHudMoney::MsgFunc_BlinkAcct(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader buf( pbuf, iSize );
 
-	m_iBlinkAmt = READ_BYTE();
+	m_iBlinkAmt = buf.ReadByte();
 	m_fBlinkTime = 0;
 	return 1;
 }

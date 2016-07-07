@@ -60,7 +60,7 @@ void EV_FireSG550(event_args_s *args)
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation( Com_RandomLong(SG550_SHOOT, SG550_SHOOT2), 2 );
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0, 0);
 		}

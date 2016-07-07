@@ -61,7 +61,7 @@ void EV_FireUMP45(event_args_s *args)
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(Com_RandomLong(UMP45_SHOOT1, UMP45_SHOOT3), 2);
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 34.0, -10.0, -11.0, 0);
 		}

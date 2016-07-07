@@ -889,7 +889,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 	StudioSetUpTransform(0);
 
-	if(m_pCurrentEntity == gEngfuncs.GetViewModel() && (cl_righthand->value))
+	if(m_pCurrentEntity == gEngfuncs.GetViewModel() && (gHUD.cl_righthand->value))
 	{
 		(*m_protationmatrix)[0][1] *= -1;
 		(*m_protationmatrix)[1][1] *= -1;

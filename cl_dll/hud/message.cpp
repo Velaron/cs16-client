@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include "parsemsg.h"
 #include "vgui_parser.h"
+#include "draw_util.h"
 
 DECLARE_MESSAGE( m_Message, HudText )
 DECLARE_MESSAGE( m_Message, GameTitle )
@@ -512,9 +513,9 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 
 int CHudMessage::MsgFunc_HudText( const char *pszName,  int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	char *pString = READ_STRING();
+	char *pString = reader.ReadString();
 
 	MessageAdd( pString, gHUD.m_flTime );
 	// Remember the time -- to fix up level transitions
@@ -564,10 +565,10 @@ void CHudMessage::MessageAdd(client_textmessage_t * newMessage )
 int CHudMessage::MsgFunc_HudTextPro( const char *pszName, int iSize, void *pbuf )
 {
 	const char *sz;
-	int hint;
-	BEGIN_READ(pbuf, iSize);
-	sz = READ_STRING();
-	hint = READ_BYTE();
+	//int hint;
+	BufferReader reader(pbuf, iSize);
+	sz = reader.ReadString();
+	//hint = reader.ReadByte();
 
 	MessageAdd(sz, gHUD.m_flTime/*, hint, Newfont*/); // TODO
 
@@ -581,10 +582,10 @@ int CHudMessage::MsgFunc_HudTextPro( const char *pszName, int iSize, void *pbuf 
 
 int CHudMessage::MsgFunc_HudTextArgs( const char *pszName, int iSize, void *pbuf )
 {
-	/*BEGIN_READ( pbuf, iSize );
+	/*BufferReader reader( pbuf, iSize );
 
-	const char *sz = READ_STRING();
-	int hint = READ_BYTE();
+	const char *sz = reader.ReadString();
+	int hint = reader.ReadByte();
 
 	MessageAdd(sz, gHUD.m_flTime, hint, Newfont); // TODO
 

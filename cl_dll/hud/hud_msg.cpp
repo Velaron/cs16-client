@@ -100,16 +100,16 @@ int CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 
 int CHud :: MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
-	m_Teamplay = READ_BYTE();
+	BufferReader reader( pbuf, iSize );
+	m_Teamplay = reader.ReadByte();
 
 	return 1;
 }
 
 int CHud :: MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
-	m_iConcussionEffect = READ_BYTE();
+	BufferReader reader( pbuf, iSize );
+	m_iConcussionEffect = reader.ReadByte();
 	if (m_iConcussionEffect)
 		this->m_StatusIcons.EnableIcon("dmg_concuss",255,160,0);
 	else
@@ -119,9 +119,9 @@ int CHud :: MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )
 
 int CHud::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ(pbuf, iSize);
+	BufferReader reader(pbuf, iSize);
 
-	int iWeatherType = READ_BYTE();
+	int iWeatherType = reader.ReadByte();
 
 	if( iWeatherType == 0 )
 	{
@@ -141,11 +141,11 @@ int CHud::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
 
 int CHud::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ(pbuf, iSize);
+	BufferReader reader(pbuf, iSize);
 
-	g_PlayerExtraInfo[33].origin.x = READ_COORD();
-	g_PlayerExtraInfo[33].origin.y = READ_COORD();
-	g_PlayerExtraInfo[33].origin.z = READ_COORD();
+	g_PlayerExtraInfo[33].origin.x = reader.ReadCoord();
+	g_PlayerExtraInfo[33].origin.y = reader.ReadCoord();
+	g_PlayerExtraInfo[33].origin.z = reader.ReadCoord();
 
 	g_PlayerExtraInfo[33].radarflashon = 1;
 	g_PlayerExtraInfo[33].radarflashes = 99999;
@@ -154,7 +154,7 @@ int CHud::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 	g_PlayerExtraInfo[33].dead = 0;
 	g_PlayerExtraInfo[33].nextflash = true;
 
-	int Flag = READ_BYTE();
+	int Flag = reader.ReadByte();
 	g_PlayerExtraInfo[33].playerclass = Flag;
 
 	if( Flag ) // bomb planted
@@ -178,14 +178,14 @@ int CHud::MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf)
 int CHud::MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf)
 {
 
-	BEGIN_READ(pbuf, iSize);
-	int Flag = READ_BYTE();
-	int idx = READ_BYTE();
+	BufferReader reader(pbuf, iSize);
+	int Flag = reader.ReadByte();
+	int idx = reader.ReadByte();
 	if ( idx <= MAX_HOSTAGES )
 	{
-		g_HostageInfo[idx].origin.x = READ_COORD();
-		g_HostageInfo[idx].origin.y = READ_COORD();
-		g_HostageInfo[idx].origin.z = READ_COORD();
+		g_HostageInfo[idx].origin.x = reader.ReadCoord();
+		g_HostageInfo[idx].origin.y = reader.ReadCoord();
+		g_HostageInfo[idx].origin.z = reader.ReadCoord();
 		if ( Flag == 1 )
 		{
 			g_HostageInfo[idx].radarflash = gHUD.m_flTime;
@@ -201,8 +201,8 @@ int CHud::MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf)
 
 int CHud::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ(pbuf, iSize);
-	int idx = READ_BYTE();
+	BufferReader reader(pbuf, iSize);
+	int idx = reader.ReadByte();
 	if ( idx <= MAX_HOSTAGES )
 	{
 		g_HostageInfo[idx].dead = 1;
@@ -215,9 +215,9 @@ int CHud::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 
 int CHud::MsgFunc_ShadowIdx(const char *pszName, int iSize, void *pbuf)
 {
-	BEGIN_READ(pbuf, iSize);
+	BufferReader reader(pbuf, iSize);
 
-	int idx = READ_BYTE();
+	int idx = reader.ReadByte();
 	g_StudioRenderer.StudioSetShadowSprite(idx);
 	return 1;
 }

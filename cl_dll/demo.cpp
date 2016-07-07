@@ -26,11 +26,6 @@ float g_demozoom;
 
 // FIXME:  There should be buffer helper functions to avoid all of the *(int *)& crap.
 
-extern "C" 
-{
-	void DLLEXPORT Demo_ReadBuffer( int size, unsigned char *buffer );
-}
-
 /*
 =====================
 Demo_WriteBuffer

@@ -26,13 +26,13 @@
 #include "pm_shared.h"
 
 #include <string.h>
-#include "interface.h"
+//#include "interface.h" // not used here
 #include "render_api.h"
 #include "mobility_int.h"
 
-cl_enginefunc_t gEngfuncs = { 0 };
-render_api_t gRenderAPI = { 0 };
-mobile_engfuncs_t gMobileAPI = { 0 };
+cl_enginefunc_t gEngfuncs = { };
+render_api_t gRenderAPI = { };
+mobile_engfuncs_t gMobileAPI = { };
 CHud gHUD;
 int g_iXash = 0; // indicates a buildnum
 int g_iMobileAPIVersion = 0;
@@ -48,24 +48,20 @@ void IN_Commands( void );
 Called when the DLL is first loaded.
 ==========================
 */
-extern "C" 
+int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
-int		DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
-int		DLLEXPORT HUD_VidInit( void );
-void	DLLEXPORT HUD_Init( void );
-int		DLLEXPORT HUD_Redraw( float flTime, int intermission );
-int		DLLEXPORT HUD_UpdateClientData( client_data_t *cdata, float flTime );
-void	DLLEXPORT HUD_Reset ( void );
-void	DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server );
-void	DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove );
-char	DLLEXPORT HUD_PlayerMoveTexture( char *name );
-int		DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
-int		DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
-void	DLLEXPORT HUD_Frame( double time );
-void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
-void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
-int 	DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback );
-int     DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi );
+	gEngfuncs = *pEnginefuncs;
+
+	if (iVersion != CLDLL_INTERFACE_VERSION)
+		return 0;
+
+	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
+
+	g_iXash = (int)CVAR_GET_FLOAT("build");
+
+	EV_HookEvents();
+
+	return 1;
 }
 
 /*
@@ -136,22 +132,6 @@ char DLLEXPORT HUD_PlayerMoveTexture( char *name )
 void DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
 {
 	PM_Move( ppmove, server );
-}
-
-int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
-{
-	gEngfuncs = *pEnginefuncs;
-
-	if (iVersion != CLDLL_INTERFACE_VERSION)
-		return 0;
-
-	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
-
-	g_iXash = (int)CVAR_GET_FLOAT("build");
-
-	EV_HookEvents();
-
-	return 1;
 }
 
 #ifdef _CS16CLIENT_ENABLE_GSRC_SUPPORT

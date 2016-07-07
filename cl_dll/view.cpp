@@ -7,12 +7,14 @@
 
 // view/refresh setup functions
 
+#include <string.h>
+
 #include "hud.h"
+#include "pm_math.h"
 #include "cl_util.h"
 #include "cvardef.h"
 #include "usercmd.h"
 #include "const.h"
-#include <string.h>
 
 #include "entity_state.h"
 #include "cl_entity.h"
@@ -21,49 +23,24 @@
 #include "pm_movevars.h"
 #include "pm_shared.h"
 #include "pm_defs.h"
+#include "pm_debug.h"
 #include "event_api.h"
 #include "pmtrace.h"
 #include "screenfade.h"
 #include "shake.h"
 #include "hltv.h"
-
-// Spectator Mode
-extern "C"
-{
-float	vecNewViewAngles[3];
-int		iHasNewViewAngles;
-float	vecNewViewOrigin[3];
-int		iHasNewViewOrigin;
-int		iIsSpectator;
-}
+#include "r_studioint.h"
+#include "com_model.h"
+#include "kbutton.h"
+#include "input.h"
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
 
-void PM_ParticleLine( float *start, float *end, int pcolor, float life, float vert);
-int	 PM_GetVisEntInfo( int ent );
-int	 PM_GetPhysEntInfo( int ent );
-extern "C" int  CL_IsThirdPerson( void );
-void CL_CameraOffset( float *ofs );
-
-extern "C" void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
-
-void	InterpolateAngles(  float * start, float * end, float * output, float frac );
-void	NormalizeAngles( float * angles );
-float	Distance(const float * v1, const float * v2);
-float	AngleBetweenVectors(  const float * v1,  const float * v2 );
-
 extern float	vJumpOrigin[3];
 extern float	vJumpAngles[3];
 
-
-void V_GetChaseOrigin( float * angles, float * origin, float distance, float * returnvec );
-void V_DropPunchAngle ( float frametime, float *ev_punchangle );
-void VectorAngles( const float *forward, float *angles );
-
-#include "r_studioint.h"
-#include "com_model.h"
 
 extern engine_studio_api_t IEngineStudio;
 
@@ -104,12 +81,12 @@ cvar_t	*cl_chasedist;
 
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
-cvar_t	v_iyaw_cycle		= {"v_iyaw_cycle", "2", 0, 2};
-cvar_t	v_iroll_cycle		= {"v_iroll_cycle", "0.5", 0, 0.5};
-cvar_t	v_ipitch_cycle		= {"v_ipitch_cycle", "1", 0, 1};
-cvar_t	v_iyaw_level		= {"v_iyaw_level", "0.3", 0, 0.3};
-cvar_t	v_iroll_level		= {"v_iroll_level", "0.1", 0, 0.1};
-cvar_t	v_ipitch_level		= {"v_ipitch_level", "0.3", 0, 0.3};
+cvar_t	v_iyaw_cycle		= {"v_iyaw_cycle", "2", 0, 2, NULL};
+cvar_t	v_iroll_cycle		= {"v_iroll_cycle", "0.5", 0, 0.5, NULL};
+cvar_t	v_ipitch_cycle		= {"v_ipitch_cycle", "1", 0, 1, NULL};
+cvar_t	v_iyaw_level		= {"v_iyaw_level", "0.3", 0, 0.3, NULL};
+cvar_t	v_iroll_level		= {"v_iroll_level", "0.1", 0, 0.1, NULL};
+cvar_t	v_ipitch_level		= {"v_ipitch_level", "0.3", 0, 0.3, NULL};
 
 float	v_idlescale;  // used by TFC for concussion grenade effect
 
@@ -352,6 +329,23 @@ void V_DriftPitch ( struct ref_params_s *pparams )
 						VIEW RENDERING
 ==============================================================================
 */
+
+/*
+=============
+V_DropPunchAngle
+
+=============
+*/
+void V_DropPunchAngle ( float frametime, float *ev_punchangle )
+{
+	float	len;
+
+	len = VectorNormalize ( ev_punchangle );
+	len -= (10.0 + len * 0.5) * frametime;
+	len = max( len, 0.0 );
+	VectorScale ( ev_punchangle, len, ev_punchangle );
+}
+
 
 /*
 ==================
@@ -1671,22 +1665,6 @@ void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 	{
 		V_CalcNormalRefdef ( pparams );
 	}
-}
-
-/*
-=============
-V_DropPunchAngle
-
-=============
-*/
-void V_DropPunchAngle ( float frametime, float *ev_punchangle )
-{
-	float	len;
-
-	len = VectorNormalize ( ev_punchangle );
-	len -= (10.0 + len * 0.5) * frametime;
-	len = max( len, 0.0 );
-	VectorScale ( ev_punchangle, len, ev_punchangle );
 }
 
 /*

@@ -113,7 +113,7 @@ void EV_FireUSP( event_args_t *args )
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
 
 
-		if( !cl_righthand->value )
+		if( !gHUD.cl_righthand->value )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, -14.0, 0);
 		}

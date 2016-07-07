@@ -34,15 +34,18 @@
 #include "ammo.h"
 
 #include "csprite.h"
-#include "draw_util.h"
-
+#include "cvardef.h"
 
 #define MIN_ALPHA	 100	
-
-#define		HUDELEM_ACTIVE	1
-
+#define	HUDELEM_ACTIVE	1
 #define CHudMsgFunc(x) int MsgFunc_##x(const char *pszName, int iSize, void *buf)
 #define CHudUserCmd(x) void UserCmd_##x()
+
+class RGBA
+{
+public:
+	unsigned char r, g, b, a;
+};
 
 enum 
 { 
@@ -52,21 +55,10 @@ enum
 	MAX_HOSTAGES = 24,
 };
 
-typedef struct cvar_s cvar_t;
-extern cvar_t *cl_righthand;
-extern cvar_t *cl_weather;
-extern cvar_t *cl_minmodels;
-extern cvar_t *cl_min_t;
-extern cvar_t *cl_min_ct;
 extern const char *sPlayerModelFiles[];
 extern wrect_t nullrc;
 
 class CClientSprite;
-
-struct RGBA
-{
-	unsigned char r, g, b, a;
-};
 
 inline bool BIsValidTModelIndex( int i )
 {
@@ -334,6 +326,7 @@ private:
 	bool m_bDrawStroke;
 	bool m_bForceDraw; // if called by showscoreboard2
 	bool m_bShowscoresHeld;
+	cvar_t *cl_showpacketloss;
 };
 
 //
@@ -916,34 +909,46 @@ public:
 	cvar_t *cl_weapon_wallpuff;
 	cvar_t *cl_weapon_sparks;
 	cvar_t *zoom_sens_ratio;
+	cvar_t *cl_lw;
+	cvar_t *cl_righthand;
+	cvar_t *cl_weather;
+	cvar_t *cl_minmodels;
+	cvar_t *cl_min_t;
+	cvar_t *cl_min_ct;
+	cvar_t *default_fov;
+	cvar_t *hud_textmode;
+	cvar_t *sensitivity;
+#ifdef __ANDROID__
+	cvar_t *cl_android_force_defaults;
+#endif
 
 	HSPRITE m_hGasPuff;
 
 	int m_iFontHeight;
-	CHudAmmo		m_Ammo;
-	CHudHealth		m_Health;
-	CHudSpectator		m_Spectator;
-	CHudGeiger		m_Geiger;
-	CHudBattery		m_Battery;
-	CHudTrain		m_Train;
-	CHudFlashlight	m_Flash;
-	CHudMessage		m_Message;
+	CHudAmmo        m_Ammo;
+	CHudHealth      m_Health;
+	CHudSpectator   m_Spectator;
+	CHudGeiger      m_Geiger;
+	CHudBattery	    m_Battery;
+	CHudTrain       m_Train;
+	CHudFlashlight  m_Flash;
+	CHudMessage     m_Message;
 	CHudStatusBar   m_StatusBar;
 	CHudDeathNotice m_DeathNotice;
-	CHudSayText		m_SayText;
-	CHudMenu		m_Menu;
-	CHudAmmoSecondary	m_AmmoSecondary;
+	CHudSayText     m_SayText;
+	CHudMenu        m_Menu;
+	CHudAmmoSecondary m_AmmoSecondary;
 	CHudTextMessage m_TextMessage;
 	CHudStatusIcons m_StatusIcons;
-	CHudScoreboard	m_Scoreboard;
-	CHudMOTD	m_MOTD;
-	CHudMoney	m_Money;
-	CHudTimer	m_Timer;
-	CHudRadio	m_Radio;
+	CHudScoreboard  m_Scoreboard;
+	CHudMOTD        m_MOTD;
+	CHudMoney       m_Money;
+	CHudTimer       m_Timer;
+	CHudRadio       m_Radio;
 	CHudProgressBar m_ProgressBar;
 	CHudSniperScope m_SniperScope;
-	CHudNVG			m_NVG;
-	CHudRadar	m_Radar;
+	CHudNVG         m_NVG;
+	CHudRadar       m_Radar;
 	CHudSpectatorGui m_SpectatorGui;
 
 	// user messages
@@ -994,11 +999,6 @@ private:
 	HSPRITE *m_rghSprites;	/*[HUD_SPRITE_COUNT]*/			// the sprites loaded from hud.txt
 	wrect_t *m_rgrcRects;	/*[HUD_SPRITE_COUNT]*/
 	char *m_rgszSpriteNames; /*[HUD_SPRITE_COUNT][MAX_SPRITE_NAME_LENGTH]*/
-
-	struct cvar_s *default_fov;
-#ifdef __ANDROID__
-	cvar_t *cl_android_force_defaults;
-#endif
 };
 
 extern CHud gHUD;
@@ -1007,4 +1007,3 @@ extern int g_iTeamNumber;
 extern int g_iUser1;
 extern int g_iUser2;
 extern int g_iUser3;
-

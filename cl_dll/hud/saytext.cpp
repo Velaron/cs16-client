@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "vgui_parser.h"
+#include "draw_util.h"
 
 //#include "vgui_TeamFortressViewport.h"
 
@@ -189,13 +190,13 @@ CSimpleMap sayTextFmt[] =
 
 int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 {
-	BEGIN_READ( pbuf, iSize );
+	BufferReader reader( pbuf, iSize );
 
-	int client_index = READ_BYTE();		// the client who spoke the message
+	int client_index = reader.ReadByte();		// the client who spoke the message
 	char szBuf[3][64];
-	strncpy( szBuf[0], READ_STRING(), sizeof(szBuf[0]));
-	strncpy( szBuf[1], READ_STRING(), sizeof(szBuf[1]));
-	strncpy( szBuf[2], READ_STRING(), sizeof(szBuf[2]));
+	strncpy( szBuf[0], reader.ReadString(), sizeof(szBuf[0]));
+	strncpy( szBuf[1], reader.ReadString(), sizeof(szBuf[1]));
+	strncpy( szBuf[2], reader.ReadString(), sizeof(szBuf[2]));
 
 	const char *fmt =  "\x02%s: %s";
 	int i = 0;
