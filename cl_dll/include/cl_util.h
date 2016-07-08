@@ -125,11 +125,12 @@ inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( 
 #define VectorAdd(a,b,c) {(c)[0]=(a)[0]+(b)[0];(c)[1]=(a)[1]+(b)[1];(c)[2]=(a)[2]+(b)[2];}
 #define VectorCopy(a,b) {(b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2];}
 inline void VectorClear(float *a) { a[0]=0.0;a[1]=0.0;a[2]=0.0;}
-float Length(const float *v);
-void VectorMA (const float *veca, float scale, const float *vecb, float *vecc);
-void VectorScale (const float *in, float scale, float *out);
+#define DotProduct(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
+#define VectorLength(a) ( sqrt( DotProduct( a, a )))
+#define VectorMA(a, scale, b, c) ((c)[0] = (a)[0] + (scale) * (b)[0],(c)[1] = (a)[1] + (scale) * (b)[1],(c)[2] = (a)[2] + (scale) * (b)[2])
+#define VectorScale(in, scale, out) ((out)[0] = (in)[0] * (scale),(out)[1] = (in)[1] * (scale),(out)[2] = (in)[2] * (scale))
 float VectorNormalize (float *v);
-void VectorInverse ( float *v );
+#define VectorInverse(x) ((x)[0] = -(x)[0], (x)[1] = -(x)[1], (x)[2] = -(x)[2])
 
 extern vec3_t vec3_origin;
 
@@ -140,9 +141,55 @@ extern vec3_t vec3_origin;
 #pragma warning( disable: 4305 )
 #endif
 
-HSPRITE LoadSprite(const char *pszName);
 float *GetClientColor( int clientIndex );
-void GetTeamColor( int &r, int &g, int &b, int teamIndex );
+inline HSPRITE LoadSprite(const char *pszName)
+{
+	int i;
+	char sz[256];
+
+	if (ScreenWidth < 640)
+		i = 320;
+	else
+		i = 640;
+
+	sprintf(sz, pszName, i);
+
+	return SPR_Load(sz);
+}
+
+extern vec3_t g_ColorRed, g_ColorBlue, g_ColorYellow, g_ColorGrey;
+
+inline void GetTeamColor( int &r, int &g, int &b, int teamIndex )
+{
+	r = 255;
+	g = 255;
+	b = 255;
+	switch( teamIndex )
+	{
+	case TEAM_TERRORIST:
+		r *= g_ColorRed[0];
+		g *= g_ColorRed[1];
+		b *= g_ColorRed[2];
+		break;
+	case TEAM_CT:
+		r *= g_ColorBlue[0];
+		g *= g_ColorBlue[1];
+		b *= g_ColorBlue[2];
+		break;
+	case TEAM_SPECTATOR:
+	case TEAM_UNASSIGNED:
+		r *= g_ColorYellow[0];
+		g *= g_ColorYellow[1];
+		b *= g_ColorYellow[2];
+		break;
+	default:
+		r *= g_ColorGrey[0];
+		g *= g_ColorGrey[1];
+		b *= g_ColorGrey[2];
+		break;
+	}
+}
+
 #define bound( min, num, max ) ((num) >= (min) ? ((num) < (max) ? (num) : (max)) : (min))
 #define RAD2DEG( x )	((float)(x) * (float)(180.f / M_PI))
 #define DEG2RAD( x )	((float)(x) * (float)(M_PI / 180.f))
