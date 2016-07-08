@@ -11,6 +11,7 @@
 
 #include <memory.h>
 #include "hud.h"
+#include "pm_math.h"
 #include "cl_util.h"
 #include "const.h"
 #include "entity_types.h"
@@ -19,23 +20,130 @@
 #include "event_api.h"
 
 #include "rain.h"
+#include "r_efx.h"
+#include "con_nprint.h"
+#include "triangleapi.h"
+#include "parsemsg.h"
+#include <new>
 
-void WaterLandingEffect(cl_drip *drip);
 
-rain_properties     Rain;
+#define DRIPSPEED    900		// speed of raindrips (pixel per secs)
+#define SNOWSPEED    200		// speed of snowflakes
+#define SNOWFADEDIST 80
 
-cl_drip     FirstChainDrip;
-cl_rainfx   FirstChainFX;
+#define MAXDRIPS 2000	// max raindrops
+#define MAXFX    3000	// max effects
 
-double rain_curtime;    // current time
-double rain_oldtime;    // last time we have updated drips
-double rain_timedelta;  // difference between old time and current time
-double rain_nextspawntime;  // when the next drip should be spawned
+#define DRIP_SPRITE_HALFHEIGHT 64
+#define DRIP_SPRITE_HALFWIDTH  1
+#define SNOW_SPRITE_HALFSIZE   3
 
-int dripcounter = 0;
-int fxcounter = 0;
-int RainInfo = 0;
+// radius water rings
+#define MAXRINGHALFSIZE	25
 
+struct
+{
+	Vector2D wind;
+	Vector2D rand;
+
+	float    distFromPlayer;
+	float    globalHeight;
+
+	int      dripsPerSecond;
+	int	     weatherMode;	// 0 - snow, 1 - rain
+
+	float    curtime;    // current time
+	float    oldtime;    // last time we have updated drips
+	float    timedelta;  // difference between old time and current time
+	float    nextspawntime;  // when the next drip should be spawned
+
+	int dripcounter;
+	int fxcounter;
+
+	HSPRITE hsprRain;
+	HSPRITE hsprSnow;
+	HSPRITE hsprRipple;
+} Rain;
+
+enum
+{
+	NO_LANDING = 0,
+	DEFAULT_LANDING,
+	WATER_LANDING
+};
+
+struct cl_drip_t
+{
+	Vector		origin;
+	float		birthTime;
+	float		minHeight;	// minimal height to kill raindrop
+	float		alpha;
+
+	Vector2D    Delta; // side speed
+	int         land;
+
+	cl_drip_t*		p_Next;		// next drip in chain
+	cl_drip_t*		p_Prev;		// previous drip in chain
+} FirstChainDrip;
+
+struct cl_rainfx_t
+{
+	Vector		origin;
+	float		birthTime;
+	float		life;
+	float		alpha;
+
+	int type;
+
+	cl_rainfx_t*		p_Next;		// next fx in chain
+	cl_rainfx_t*		p_Prev;		// previous fx in chain
+} FirstChainFX;
+
+
+#ifdef _DEBUG
+cvar_t *debug_rain = NULL;
+#endif
+
+
+/*
+=================================
+WaterLandingEffect
+=================================
+*/
+void LandingEffect( cl_drip_t *drip )
+{
+	if( drip->land == NO_LANDING )
+		return;
+
+	if (Rain.fxcounter >= MAXFX)
+	{
+		gEngfuncs.Con_Printf( "Rain error: FX limit overflow!\n" );
+		return;
+	}
+
+	cl_rainfx_t *newFX = new(std::nothrow) cl_rainfx_t;
+	if( !newFX )
+	{
+		gEngfuncs.Con_Printf( "Rain error: failed to allocate FX object!\n");
+		return;
+	}
+
+	newFX->alpha = gEngfuncs.pfnRandomFloat(0.6, 0.9);
+	newFX->origin = drip->origin;
+	newFX->origin.z = drip->minHeight; // correct position
+	newFX->birthTime = Rain.curtime;
+	newFX->life = gEngfuncs.pfnRandomFloat(0.7, 1);
+	newFX->type = drip->land;
+
+	// add to first place in chain
+	newFX->p_Next = FirstChainFX.p_Next;
+	newFX->p_Prev = &FirstChainFX;
+	if (newFX->p_Next != NULL)
+		newFX->p_Next->p_Prev = newFX;
+	FirstChainFX.p_Next = newFX;
+
+	Rain.fxcounter++;
+}
 /*
 =================================
 ProcessRain
@@ -45,132 +153,110 @@ Must think every frame.
 */
 void ProcessRain( void )
 {
-	rain_oldtime = rain_curtime; // save old time
-	rain_curtime = gEngfuncs.GetClientTime();
-	rain_timedelta = rain_curtime - rain_oldtime;
+	int speed = Rain.weatherMode ? SNOWSPEED : DRIPSPEED;
+
+	Rain.oldtime = Rain.curtime; // save old time
+	Rain.curtime = gEngfuncs.GetClientTime();
+	Rain.timedelta = Rain.curtime - Rain.oldtime;
 
 	// first frame
-	if (rain_oldtime == 0)
+	if( Rain.oldtime == 0 || ( Rain.dripsPerSecond == 0 && FirstChainDrip.p_Next == NULL ) )
 	{
 		// fix first frame bug with nextspawntime
-		rain_nextspawntime = gEngfuncs.GetClientTime();
+		Rain.nextspawntime = Rain.curtime;
 		return;
 	}
 
-	if (Rain.dripsPerSecond == 0 && FirstChainDrip.p_Next == NULL)
-	{
-		// keep nextspawntime correct
-		rain_nextspawntime = rain_curtime;
-		return;
-	}
-
-	if (rain_timedelta == 0)
+	if( !Rain.timedelta )
 		return; // not in pause
 
 	double timeBetweenDrips = 1 / (double)Rain.dripsPerSecond;
 
-	cl_drip* curDrip = FirstChainDrip.p_Next;
-	cl_drip* nextDrip = NULL;
-
-
+#ifdef _DEBUG
 	// save debug info
 	float debug_lifetime = 0;
 	int debug_howmany = 0;
 	int debug_attempted = 0;
 	int debug_dropped = 0;
+#endif
 
-	while (curDrip != NULL) // go through list
+	for( cl_drip_t *curDrip = FirstChainDrip.p_Next, *nextDrip = NULL;
+		 curDrip;
+		 curDrip = nextDrip ) // go through list
 	{
 		nextDrip = curDrip->p_Next; // save pointer to next drip
 
-		if (Rain.weatherMode == 0)
-			curDrip->origin.z -= rain_timedelta * DRIPSPEED; // rain
-		else
-			curDrip->origin.z -= rain_timedelta * SNOWSPEED; // snow
+		curDrip->origin.x += Rain.timedelta * curDrip->Delta.x;
+		curDrip->origin.y += Rain.timedelta * curDrip->Delta.y;
+		curDrip->origin.z -= Rain.timedelta * speed;
 
-		curDrip->origin.x += rain_timedelta * curDrip->xDelta;
-		curDrip->origin.y += rain_timedelta * curDrip->yDelta;
-		
 		// remove drip if its origin lower than minHeight
-		if (curDrip->origin.z < curDrip->minHeight) 
+		if (curDrip->origin.z < curDrip->minHeight)
 		{
-			if (curDrip->landInWater/* && Rain.weatherMode == 0*/)
-				WaterLandingEffect(curDrip); // create water rings
-
-			if (RainInfo)
+			LandingEffect( curDrip );
+#ifdef _DEBUG
+			if( debug_rain->value )
 			{
-				debug_lifetime += (rain_curtime - curDrip->birthTime);
+				debug_lifetime += ( Rain.curtime - curDrip->birthTime );
 				debug_howmany++;
 			}
-			
+#endif
+
 			curDrip->p_Prev->p_Next = curDrip->p_Next; // link chain
-			if (nextDrip != NULL)
-				nextDrip->p_Prev = curDrip->p_Prev; 
+			if( nextDrip != NULL )
+				nextDrip->p_Prev = curDrip->p_Prev;
 			delete curDrip;
-					
-			dripcounter--;
+
+			Rain.dripcounter--;
 		}
-
-		curDrip = nextDrip; // restore pointer, so we can continue moving through chain
 	}
 
-	int maxDelta; // maximum height randomize distance
-	float falltime;
-	if (Rain.weatherMode == 0)
-	{
-		maxDelta = DRIPSPEED * rain_timedelta; // for rain
-		falltime = (Rain.globalHeight + 4096) / DRIPSPEED;
-	}
-	else
-	{
-		maxDelta = SNOWSPEED * rain_timedelta; // for snow
-		falltime = (Rain.globalHeight + 4096) / SNOWSPEED;
-	}
+	int maxDelta = speed * Rain.timedelta; // maximum height randomize distance
+	float falltime = (Rain.globalHeight + 4096) / speed;
 
-	while (rain_nextspawntime < rain_curtime)
+	for( ; Rain.nextspawntime < Rain.curtime; Rain.nextspawntime += timeBetweenDrips )
 	{
-		rain_nextspawntime += timeBetweenDrips;		
-		if (RainInfo)
+#ifdef _DEBUG
+		if( debug_rain->value )
 			debug_attempted++;
+#endif
 				
-		if (dripcounter < MAXDRIPS) // check for overflow
+		if( Rain.dripcounter < MAXDRIPS ) // check for overflow
 		{
 			float deathHeight;
-			vec3_t vecStart, vecEnd;
+			Vector vecStart, vecEnd;
+			Vector2D Delta( Rain.wind.x + gEngfuncs.pfnRandomFloat( Rain.rand.x * -1, Rain.rand.x ),
+							Rain.wind.y + gEngfuncs.pfnRandomFloat( Rain.rand.y * -1, Rain.rand.y ));
 
-			vecStart[0] = gEngfuncs.pfnRandomFloat(gHUD.m_vecOrigin.x - Rain.distFromPlayer, gHUD.m_vecOrigin.x + Rain.distFromPlayer);
-			vecStart[1] = gEngfuncs.pfnRandomFloat(gHUD.m_vecOrigin.y - Rain.distFromPlayer, gHUD.m_vecOrigin.y + Rain.distFromPlayer);
-			vecStart[2] = Rain.globalHeight;
-
-			float xDelta = Rain.windX + gEngfuncs.pfnRandomFloat(Rain.randX * -1, Rain.randX);
-			float yDelta = Rain.windY + gEngfuncs.pfnRandomFloat(Rain.randY * -1, Rain.randY);
+			vecStart.x = gEngfuncs.pfnRandomFloat( gHUD.m_vecOrigin.x - Rain.distFromPlayer, gHUD.m_vecOrigin.x + Rain.distFromPlayer );
+			vecStart.y = gEngfuncs.pfnRandomFloat( gHUD.m_vecOrigin.y - Rain.distFromPlayer, gHUD.m_vecOrigin.y + Rain.distFromPlayer );
+			vecStart.z = Rain.globalHeight;
 
 			// find a point at bottom of map
-			vecEnd[0] = falltime * xDelta;
-			vecEnd[1] = falltime * yDelta;
-			vecEnd[2] = -4096;
+			vecEnd.x = falltime * Delta.x;
+			vecEnd.y = falltime * Delta.y;
+			vecEnd.z = -4096;
 
-			pmtrace_t pmtrace;
-			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-			gEngfuncs.pEventAPI->EV_PlayerTrace( vecStart, vecEnd, PM_STUDIO_IGNORE, -1, &pmtrace );
+			pmtrace_t *pmtrace = gEngfuncs.PM_TraceLine( vecStart, vecEnd, PM_STUDIO_IGNORE, 2, -1 );
 
-			if (pmtrace.startsolid)
+			if( pmtrace->startsolid )
 			{
-				if (RainInfo)
+#ifdef _DEBUG
+				if( debug_rain->value )
 					debug_dropped++;
-
+#endif
 				continue; // drip cannot be placed
 			}
 			
 			// falling to water?
-			int contents = gEngfuncs.PM_PointContents( pmtrace.endpos, NULL );
-			if (contents == CONTENTS_WATER)
+			int contents = gEngfuncs.PM_PointContents( pmtrace->endpos, NULL );
+			if( contents == CONTENTS_WATER )
 			{
-				int waterEntity = gEngfuncs.PM_WaterEntity( pmtrace.endpos );
-				if ( waterEntity > 0 )
+				int waterEntity = gEngfuncs.PM_WaterEntity( pmtrace->endpos );
+				if( waterEntity > 0 )
 				{
 					cl_entity_t *pwater = gEngfuncs.GetEntityByIndex( waterEntity );
-					if ( pwater && ( pwater->model != NULL ) )
+					if( pwater && ( pwater->model != NULL ) )
 					{
 						deathHeight = pwater->curstate.maxs[2];
 					}
@@ -188,7 +274,7 @@ void ProcessRain( void )
 			}
 			else
 			{
-				deathHeight = pmtrace.endpos[2];
+				deathHeight = pmtrace->endpos[2];
 			}
 
 			// just in case..
@@ -198,30 +284,38 @@ void ProcessRain( void )
 				continue;
 			}
 
-
-			cl_drip *newClDrip = new cl_drip;
-			if (!newClDrip)
+			cl_drip_t *newClDrip = new(std::nothrow) cl_drip_t;
+			if( !newClDrip )
 			{
 				Rain.dripsPerSecond = 0; // disable rain
 				gEngfuncs.Con_Printf( "Rain error: failed to allocate object!\n");
 				return;
 			}
 			
-			vecStart[2] -= gEngfuncs.pfnRandomFloat(0, maxDelta); // randomize a bit
+			vecStart[2] -= gEngfuncs.pfnRandomFloat( 0, maxDelta ); // randomize a bit
 			
-			newClDrip->alpha = gEngfuncs.pfnRandomFloat(0.12, 0.2);
-			VectorCopy(vecStart, newClDrip->origin);
-			
-			newClDrip->xDelta = xDelta;
-			newClDrip->yDelta = yDelta;
-	
-			newClDrip->birthTime = rain_curtime; // store time when it was spawned
+			newClDrip->alpha     = gEngfuncs.pfnRandomFloat( 0.12, 0.2 );
+			newClDrip->origin    = vecStart;
+			newClDrip->Delta     = Delta;
+			newClDrip->birthTime = Rain.curtime; // store time when it was spawned
 			newClDrip->minHeight = deathHeight;
 
-			if (contents == CONTENTS_WATER)
-				newClDrip->landInWater = 1;
+			if( contents == CONTENTS_WATER )
+			{
+				newClDrip->land = WATER_LANDING;
+			}
 			else
-				newClDrip->landInWater = 0;
+			{
+				newClDrip->land = NO_LANDING;
+			}
+			/*else if( pmtrace->fraction < 1.0f && pmtrace->plane.normal.z > 0.71 && !pmtrace->inopen)
+			{
+				newClDrip->land = DEFAULT_LANDING;
+			}
+			else
+			{
+				newClDrip->land = NO_LANDING;
+			}*/
 
 			// add to first place in chain
 			newClDrip->p_Next = FirstChainDrip.p_Next;
@@ -230,7 +324,7 @@ void ProcessRain( void )
 				newClDrip->p_Next->p_Prev = newClDrip;
 			FirstChainDrip.p_Next = newClDrip;
 
-			dripcounter++;
+			Rain.dripcounter++;
 		}
 		else
 		{
@@ -239,57 +333,31 @@ void ProcessRain( void )
 		}
 	}
 
-	if (RainInfo) // print debug info
+#ifdef _DEBUG
+	if( debug_rain->value ) // print debug info
 	{
-		gEngfuncs.Con_Printf( "Rain info: Drips exist: %i\n", dripcounter );
-		gEngfuncs.Con_Printf( "Rain info: FX's exist: %i\n", fxcounter );
-		gEngfuncs.Con_Printf( "Rain info: Attempted/Dropped: %i, %i\n", debug_attempted, debug_dropped);
-		if (debug_howmany)
+		con_nprint_t info =
+		{
+			1,
+			0.5f,
+			{1.0f, 0.6f, 0.0f }
+		};
+		gEngfuncs.Con_NXPrintf( &info, "Rain info: Drips exist: %i\n", Rain.dripcounter );
+
+		info.index = 2;
+		gEngfuncs.Con_NXPrintf( &info, "Rain info: FX's exist: %i\n", Rain.fxcounter );
+
+		info.index = 3;
+		gEngfuncs.Con_NXPrintf( &info, "Rain info: Attempted/Dropped: %i, %i\n", debug_attempted, debug_dropped);
+		if( debug_howmany )
 		{
 			float ave = debug_lifetime / (float)debug_howmany;
-			gEngfuncs.Con_Printf( "Rain info: Average drip life time: %f\n", ave);
+
+			info.index = 4;
+			gEngfuncs.Con_NXPrintf( &info, "Rain info: Average drip life time: %f\n", ave);
 		}
-		else
-			gEngfuncs.Con_Printf( "Rain info: Average drip life time: --\n");
 	}
-	return;
-}
-
-/*
-=================================
-WaterLandingEffect
-=================================
-*/
-void WaterLandingEffect(cl_drip *drip)
-{
-	if (fxcounter >= MAXFX)
-	{
-		gEngfuncs.Con_Printf( "Rain error: FX limit overflow!\n" );
-		return;
-	}	
-	
-	cl_rainfx *newFX = new cl_rainfx;
-	if (!newFX)
-	{
-		gEngfuncs.Con_Printf( "Rain error: failed to allocate FX object!\n");
-		return;
-	}
-			
-	newFX->alpha = gEngfuncs.pfnRandomFloat(0.6, 0.9);
-	VectorCopy(drip->origin, newFX->origin);
-	newFX->origin[2] = drip->minHeight; // correct position
-			
-	newFX->birthTime = gEngfuncs.GetClientTime();
-	newFX->life = gEngfuncs.pfnRandomFloat(0.7, 1);
-
-	// add to first place in chain
-	newFX->p_Next = FirstChainFX.p_Next;
-	newFX->p_Prev = &FirstChainFX;
-	if (newFX->p_Next != NULL)
-		newFX->p_Next->p_Prev = newFX;
-	FirstChainFX.p_Next = newFX;
-			
-	fxcounter++;
+#endif
 }
 
 /*
@@ -302,57 +370,48 @@ Call every frame before ProcessRain
 */
 void ProcessFXObjects( void )
 {
-	float curtime = gEngfuncs.GetClientTime();
-	
-	cl_rainfx* curFX = FirstChainFX.p_Next;
-	cl_rainfx* nextFX = NULL;	
-
-	while (curFX != NULL) // go through FX objects list
+	for( cl_rainfx_t *curFX = FirstChainFX.p_Next, *nextFX = NULL;
+		 curFX;
+		 curFX = nextFX )
 	{
 		nextFX = curFX->p_Next; // save pointer to next
-		
+
 		// delete current?
-		if ((curFX->birthTime + curFX->life) < curtime)
+		if( curFX->birthTime + curFX->life < Rain.curtime )
 		{
 			curFX->p_Prev->p_Next = curFX->p_Next; // link chain
-			if (nextFX != NULL)
-				nextFX->p_Prev = curFX->p_Prev; 
-			delete curFX;					
-			fxcounter--;
+			if( nextFX )
+				nextFX->p_Prev = curFX->p_Prev;
+
+			delete curFX;
+			Rain.fxcounter--;
 		}
-		curFX = nextFX; // restore pointer
 	}
 }
 
 /*
 =================================
 ResetRain
+
 clear memory, delete all objects
 =================================
 */
 void ResetRain( void )
 {
-// delete all drips
-	cl_drip* delDrip = FirstChainDrip.p_Next;
-	FirstChainDrip.p_Next = NULL;
-	
-	while (delDrip != NULL)
+	// delete all drips
+	for( cl_drip_t *curDrip = FirstChainDrip.p_Next; curDrip;
+		 curDrip = FirstChainDrip.p_Next, Rain.dripcounter-- )
 	{
-		cl_drip* nextDrip = delDrip->p_Next; // save pointer to next drip in chain
-		delete delDrip;
-		delDrip = nextDrip; // restore pointer
-		dripcounter--;
+		FirstChainDrip.p_Next = curDrip->p_Next;
+		delete curDrip;
 	}
-// delete all FX objects
-	cl_rainfx* delFX = FirstChainFX.p_Next;
-	FirstChainFX.p_Next = NULL;
-	
-	while (delFX != NULL)
+
+	// delete all FX objects
+	for( cl_rainfx_t *curFX = FirstChainFX.p_Next; curFX;
+		 curFX = FirstChainFX.p_Next, Rain.fxcounter-- )
 	{
-		cl_rainfx* nextFX = delFX->p_Next;
-		delete delFX;
-		delFX = nextFX;
-		fxcounter--;
+		FirstChainFX.p_Next = curFX->p_Next;
+		delete curFX;
 	}
 
 	InitRain();
@@ -367,39 +426,191 @@ initialze system
 */
 void InitRain( void )
 {
-	Rain.dripsPerSecond = 0;
-	Rain.distFromPlayer = 0;
-	Rain.windX = 0;
-	Rain.windY = 0;
-	Rain.randX = 0;
-	Rain.randY = 0;
-	Rain.weatherMode = 0;
-	Rain.globalHeight = 0;
+	memset( &Rain, 0, sizeof(Rain) );
+	memset( &FirstChainDrip, 0, sizeof( cl_drip_t ));
+	memset( &FirstChainFX, 0, sizeof( cl_rainfx_t ));
 
-	FirstChainDrip.birthTime = 0;
-	FirstChainDrip.minHeight = 0;
-	FirstChainDrip.origin[0]=0;
-	FirstChainDrip.origin[1]=0;
-	FirstChainDrip.origin[2]=0;
-	FirstChainDrip.alpha = 0;
-	FirstChainDrip.xDelta = 0;
-	FirstChainDrip.yDelta = 0;
-	FirstChainDrip.landInWater = 0;
-	FirstChainDrip.p_Next = NULL;
-	FirstChainDrip.p_Prev = NULL;
+#ifdef _DEBUG
+	if( !debug_rain )
+		debug_rain = CVAR_CREATE( "Rain.debug", "0", 0 );
+#endif
 
-	FirstChainFX.alpha = 0;
-	FirstChainFX.birthTime = 0;
-	FirstChainFX.life = 0;
-	FirstChainFX.origin[0] = 0;
-	FirstChainFX.origin[1] = 0;
-	FirstChainFX.origin[2] = 0;
-	FirstChainFX.p_Next = NULL;
-	FirstChainFX.p_Prev = NULL;
-	
-	rain_oldtime = 0;
-	rain_curtime = 0;
-	rain_nextspawntime = 0;
+	Rain.hsprRain = SPR_Load("sprites/effects/rain.spr");
+	Rain.hsprSnow = SPR_Load("sprites/effects/snowflake.spr");
+	Rain.hsprRipple = SPR_Load("sprites/effects/ripple.spr");
+}
 
-	return;
+
+void SetPoint( float x, float y, float z, float (*matrix)[4])
+{
+	Vector point( x, y, z ), result;
+
+	VectorTransform( point, matrix, result );
+
+	gEngfuncs.pTriAPI->Vertex3fv( result );
+}
+
+int CHud::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
+{
+	BufferReader reader(pbuf, iSize);
+
+	int iWeatherType = reader.ReadByte();
+
+	if( iWeatherType == 0 )
+	{
+		ResetRain();
+		return 1;
+	}
+
+	Rain.distFromPlayer = 500;
+	Rain.dripsPerSecond = 500;
+	Rain.wind.x = Rain.wind.y = 30;
+	Rain.rand.x = Rain.rand.y = 0;
+	Rain.weatherMode = iWeatherType - 1;
+	Rain.globalHeight = 100;
+
+	return 1;
+}
+
+
+/*
+=================================
+DrawRain
+
+draw raindrips and snowflakes
+=================================
+*/
+void DrawRain( void )
+{
+	if (FirstChainDrip.p_Next == NULL)
+		return; // no drips to draw
+
+	cl_entity_t *player = gEngfuncs.GetLocalPlayer();
+
+	if( Rain.weatherMode == 0 ) // draw rain
+	{
+		const model_s *pTexture = gEngfuncs.GetSpritePointer( Rain.hsprRain );
+		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pTexture, 0 );
+		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+
+		for( cl_drip_t *Drip = FirstChainDrip.p_Next; Drip; Drip = Drip->p_Next )
+		{
+			Vector2D toPlayer, shift(Drip->Delta * DRIP_SPRITE_HALFHEIGHT / DRIPSPEED);
+			toPlayer.x = (player->origin.x - Drip->origin.x) * DRIP_SPRITE_HALFWIDTH;
+			toPlayer.y = (player->origin.y - Drip->origin.y) * DRIP_SPRITE_HALFWIDTH;
+			toPlayer = toPlayer.Normalize();
+
+			// --- draw triangle --------------------------
+			gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, Drip->alpha );
+			gEngfuncs.pTriAPI->Begin( TRI_TRIANGLES );
+
+				gEngfuncs.pTriAPI->TexCoord2f( 0, 0 );
+				gEngfuncs.pTriAPI->Vertex3f( Drip->origin.x-toPlayer.y - shift.x,
+						Drip->origin.y + toPlayer.x - shift.y,
+						Drip->origin.z + DRIP_SPRITE_HALFHEIGHT );
+
+				gEngfuncs.pTriAPI->TexCoord2f( 0.5, 1 );
+				gEngfuncs.pTriAPI->Vertex3f( Drip->origin.x + shift.x,
+						Drip->origin.y + shift.y,
+						Drip->origin.z - DRIP_SPRITE_HALFHEIGHT );
+
+				gEngfuncs.pTriAPI->TexCoord2f( 1, 0 );
+				gEngfuncs.pTriAPI->Vertex3f( Drip->origin.x+toPlayer.y - shift.x,
+						Drip->origin.y - toPlayer.x - shift.y,
+						Drip->origin.z + DRIP_SPRITE_HALFHEIGHT);
+
+			gEngfuncs.pTriAPI->End();
+			// --- draw triangle end ----------------------
+		}
+	}
+
+	else	// draw snow
+	{
+		const model_s *pTexture = gEngfuncs.GetSpritePointer( Rain.hsprSnow );
+		float visibleHeight = Rain.globalHeight - SNOWFADEDIST;
+		vec3_t normal;
+		float  matrix[3][4];
+
+		gEngfuncs.GetViewAngles( normal );
+		AngleMatrix (normal, matrix);	// calc view matrix
+
+		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pTexture, 0 );
+		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+
+
+		for( cl_drip_t *Drip = FirstChainDrip.p_Next; Drip; Drip = Drip->p_Next )
+		{
+			matrix[0][3] = Drip->origin.x; // write origin to matrix
+			matrix[1][3] = Drip->origin.y;
+			matrix[2][3] = Drip->origin.z;
+
+			// apply start fading effect
+			float alpha = (Drip->origin.z <= visibleHeight) ? Drip->alpha : ((Rain.globalHeight - Drip->origin.z) / (float)SNOWFADEDIST) * Drip->alpha;
+
+			// --- draw quad --------------------------
+			gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, alpha );
+			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+
+				gEngfuncs.pTriAPI->TexCoord2f( 0, 0 );
+				SetPoint(0, SNOW_SPRITE_HALFSIZE, SNOW_SPRITE_HALFSIZE, matrix);
+
+				gEngfuncs.pTriAPI->TexCoord2f( 0, 1 );
+				SetPoint(0, SNOW_SPRITE_HALFSIZE, -SNOW_SPRITE_HALFSIZE, matrix);
+
+				gEngfuncs.pTriAPI->TexCoord2f( 1, 1 );
+				SetPoint(0, -SNOW_SPRITE_HALFSIZE, -SNOW_SPRITE_HALFSIZE, matrix);
+
+				gEngfuncs.pTriAPI->TexCoord2f( 1, 0 );
+				SetPoint(0, -SNOW_SPRITE_HALFSIZE, SNOW_SPRITE_HALFSIZE, matrix);
+
+			gEngfuncs.pTriAPI->End();
+			// --- draw quad end ----------------------
+		}
+	}
+}
+
+/*
+=================================
+DrawFXObjects
+=================================
+*/
+void DrawFXObjects( void )
+{
+	const model_s *pTexture = gEngfuncs.GetSpritePointer( Rain.hsprRipple );
+	gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pTexture, 0 );
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+
+	// go through objects list
+	for( cl_rainfx_t *curFX = FirstChainFX.p_Next; curFX; curFX = curFX->p_Next )
+	{
+		if( curFX->type == WATER_LANDING )
+		{
+
+			// fadeout
+			float alpha = ((curFX->birthTime + curFX->life - Rain.curtime) / curFX->life) * curFX->alpha;
+			float size = (Rain.curtime - curFX->birthTime) * MAXRINGHALFSIZE;
+
+			// --- draw quad --------------------------
+			gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, alpha );
+			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+
+				gEngfuncs.pTriAPI->TexCoord2f( 0, 0 );
+				gEngfuncs.pTriAPI->Vertex3f(curFX->origin.x - size, curFX->origin.y - size, curFX->origin.z);
+
+				gEngfuncs.pTriAPI->TexCoord2f( 0, 1 );
+				gEngfuncs.pTriAPI->Vertex3f(curFX->origin.x - size, curFX->origin.y + size, curFX->origin.z);
+
+				gEngfuncs.pTriAPI->TexCoord2f( 1, 1 );
+				gEngfuncs.pTriAPI->Vertex3f(curFX->origin.x + size, curFX->origin.y + size, curFX->origin.z);
+
+				gEngfuncs.pTriAPI->TexCoord2f( 1, 0 );
+				gEngfuncs.pTriAPI->Vertex3f(curFX->origin.x + size, curFX->origin.y - size, curFX->origin.z);
+
+			gEngfuncs.pTriAPI->End();
+			// --- draw quad end ----------------------
+		}
+	}
 }

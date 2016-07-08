@@ -117,28 +117,6 @@ int CHud :: MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
-int CHud::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
-{
-	BufferReader reader(pbuf, iSize);
-
-	int iWeatherType = reader.ReadByte();
-
-	if( iWeatherType == 0 )
-	{
-		ResetRain();
-		return 1;
-	}
-
-	Rain.distFromPlayer = 500;
-	Rain.dripsPerSecond = 500;
-	Rain.windX = Rain.windY = 30;
-	Rain.randX = Rain.randY = 0;
-	Rain.weatherMode = iWeatherType - 1;
-	Rain.globalHeight = 100;
-
-	return 1;
-}
-
 int CHud::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 {
 	BufferReader reader(pbuf, iSize);
