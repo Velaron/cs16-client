@@ -10,17 +10,15 @@
 #include <memory.h>
 
 #include "hud.h"
+#include "pm_defs.h"
+#include "pmtrace.h"
+#include "pm_shared.h"
 #include "cl_util.h"
 #include "const.h"
 #include "entity_types.h"
 #include "studio_event.h" // def. of mstudioevent_t
 #include "r_efx.h"
 #include "event_api.h"
-#include "pm_defs.h"
-#include "pmtrace.h"	
-#include "pm_shared.h"
-
-void Game_AddObjects( void );
 
 extern vec3_t v_origin;
 
@@ -222,7 +220,6 @@ Gives us a chance to add additional entities to the render this frame
 void DLLEXPORT HUD_CreateEntities( void )
 {
 	// Add in any game specific objects
-	Game_AddObjects();
 
 	//GetClientVoiceMgr()->CreateEntities();
 }
@@ -511,7 +508,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 							//
 							VectorScale( pTemp->entity.baseline.origin, 0.6, pTemp->entity.baseline.origin );
 
-							if ( Length( pTemp->entity.baseline.origin ) < 10 )
+							if ( pTemp->entity.baseline.origin.Length() < 10 )
 							{
 								pTemp->entity.baseline.framerate = 0.0;								
 							}
