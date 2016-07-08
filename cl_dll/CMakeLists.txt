@@ -82,14 +82,11 @@ set (WEAPONEVENT_SRCS
 	./events/event_xm1014.cpp
 	./events/hl_events.cpp
 	./ev_common.cpp
-	./events.cpp
-
 )
 
 set (CLWEAPON_SRCS
 	./com_weapons.cpp
 	./cs_wpn/cs_baseentity.cpp
-	./cs_wpn/cs_objects.cpp
 	./cs_wpn/cs_weapons.cpp
 	../dlls/wpn_shared/wpn_ak47.cpp
 	../dlls/wpn_shared/wpn_aug.cpp
@@ -152,12 +149,25 @@ set (HUD_SRCS
 	./hud/death.cpp
 	./hud/saytext.cpp
 	./hud/spectator_gui.cpp
+
+	./include/hud/ammo.h
+	./include/hud/ammohistory.h
+	./include/hud/health.h
+	./include/hud/hud.h
+	./include/hud/hud_iface.h
+	./include/hud/hud_spectator.h
+	./include/hud/radar.h
 )
 
 set (STUDIORENDER_SRCS
 	./studio/GameStudioModelRenderer.cpp
 	./studio/StudioModelRenderer.cpp
 	./studio/studio_util.cpp
+
+	./include/studio/GameStudioModelRenderer.h
+	./include/studio/StudioModelRenderer.h
+	./include/studio/studio_util.h
+
 )
 
 set (PLAYERMOVE_SRCS
@@ -172,8 +182,7 @@ set (CLDLL_SOURCES
     ./entity.cpp
     ./in_camera.cpp
     ./input.cpp
-    ./parsemsg.cpp
-    ./rain.cpp
+	./rain.cpp
     ./tri.cpp
 	./util.cpp
 	./view.cpp
@@ -182,6 +191,27 @@ set (CLDLL_SOURCES
     ./vgui_parser.cpp
     ./unicode_strtools.cpp
 	./draw_util.cpp
+	./include/camera.h
+	./include/cl_dll.h
+	./include/cl_util.h
+	./include/com_weapons.h
+	./include/csprite.h
+	./include/demo.h
+	./include/draw_util.h
+	./include/eventscripts.h
+	./include/events.h
+	./include/ev_hldm.h
+	./include/overview.h
+	./include/parsemsg.h
+	./include/rain.h
+	./include/tf_defs.h
+	./include/unicode_strtools.h
+	./include/util_vector.h
+	./include/vgui_parser.h
+	./include/view.h
+	./include/wrect.h
+	./include/math/neon_mathfun.h
+	./include/math/sse_mathfun.h
 
 	${PLAYERMOVE_SRCS}
 	${HUD_SRCS}

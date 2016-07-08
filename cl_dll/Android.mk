@@ -23,7 +23,6 @@ SRCS := \
 	./entity.cpp \
 	./in_camera.cpp \
 	./input.cpp \
-	./parsemsg.cpp \
 	./rain.cpp \
 	./tri.cpp \
 	./util.cpp \
@@ -69,7 +68,6 @@ SRCS := \
 	./hud/spectator_gui.cpp \
 	./com_weapons.cpp \
 	./cs_wpn/cs_baseentity.cpp \
-	./cs_wpn/cs_objects.cpp \
 	./cs_wpn/cs_weapons.cpp \
 	../dlls/wpn_shared/wpn_ak47.cpp \
 	../dlls/wpn_shared/wpn_aug.cpp \
@@ -132,8 +130,7 @@ SRCS := \
 	./events/event_vehicle.cpp \
 	./events/event_xm1014.cpp \
 	./events/hl_events.cpp \
-	./ev_common.cpp \
-	./events.cpp 
+	./ev_common.cpp
 
 DEFINES = -Wno-write-strings -DLINUX -D_LINUX -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -Wl,--no-undefined
 
