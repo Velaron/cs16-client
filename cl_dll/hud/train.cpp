@@ -37,14 +37,14 @@ int CHudTrain::Init(void)
 	gHUD.AddHudElem(this);
 
 	return 1;
-};
+}
 
 int CHudTrain::VidInit(void)
 {
 	m_hSprite = 0;
 
 	return 1;
-};
+}
 
 int CHudTrain::Draw(float fTime)
 {

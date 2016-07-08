@@ -28,7 +28,7 @@
 #include "vgui_parser.h"
 #include "ctype.h"
 
-DECLARE_MESSAGE( m_TextMessage, TextMsg );
+DECLARE_MESSAGE( m_TextMessage, TextMsg )
 
 int CHudTextMessage::Init(void)
 {
@@ -38,7 +38,7 @@ int CHudTextMessage::Init(void)
 	m_iFlags = 0;
 
 	return 1;
-};
+}
 
 // Searches through the string for any msg names (indicated by a '#')
 // any found are looked up in titles.txt and the new message substituted

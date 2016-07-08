@@ -47,12 +47,12 @@ version.
 #define INT_XPOS(x) int(XPOS(x) * ScreenWidth)
 #define INT_YPOS(y) int(YPOS(y) * ScreenHeight)
 
-DECLARE_MESSAGE( m_SpectatorGui, SpecHealth );
-DECLARE_MESSAGE( m_SpectatorGui, SpecHealth2 );
+DECLARE_MESSAGE( m_SpectatorGui, SpecHealth )
+DECLARE_MESSAGE( m_SpectatorGui, SpecHealth2 )
 
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenu );
+DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenu )
 
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuOptions );
+DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuOptions )
 // close
 // help
 // settings
@@ -60,14 +60,14 @@ DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuOptions );
 // autodirector
 // showscores
 
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuOptionsSettings );
+DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuOptionsSettings )
 // settings
 // // chat msgs
 // // show status
 // // view cone
 // // player names
 
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuSpectateOptions );
+DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuSpectateOptions )
 // chase map overview
 // free map overview
 // first person

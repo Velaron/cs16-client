@@ -34,14 +34,14 @@ char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 
 int KB_ConvertString( char *in, char **ppout );
 
-DECLARE_MESSAGE( m_Menu, ShowMenu );
-DECLARE_MESSAGE( m_Menu, VGUIMenu );
-DECLARE_MESSAGE( m_Menu, BuyClose );
-DECLARE_MESSAGE( m_Menu, AllowSpec );
+DECLARE_MESSAGE( m_Menu, ShowMenu )
+DECLARE_MESSAGE( m_Menu, VGUIMenu )
+DECLARE_MESSAGE( m_Menu, BuyClose )
+DECLARE_MESSAGE( m_Menu, AllowSpec )
 
-DECLARE_COMMAND( m_Menu, OldStyleMenuOpen );
-DECLARE_COMMAND( m_Menu, OldStyleMenuClose );
-DECLARE_COMMAND( m_Menu, ShowVGUIMenu );
+DECLARE_COMMAND( m_Menu, OldStyleMenuOpen )
+DECLARE_COMMAND( m_Menu, OldStyleMenuClose )
+DECLARE_COMMAND( m_Menu, ShowVGUIMenu )
 
 int CHudMenu :: Init( void )
 {

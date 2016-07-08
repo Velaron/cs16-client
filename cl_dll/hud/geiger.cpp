@@ -40,12 +40,12 @@ int CHudGeiger::Init(void)
 	srand( (unsigned)time( NULL ) );
 
 	return 1;
-};
+}
 
 int CHudGeiger::VidInit(void)
 {
 	return 1;
-};
+}
 
 int CHudGeiger::MsgFunc_Geiger(const char *pszName,  int iSize, void *pbuf)
 {

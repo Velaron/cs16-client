@@ -25,7 +25,7 @@
 
 float color[3];
 
-DECLARE_MESSAGE( m_DeathNotice, DeathMsg );
+DECLARE_MESSAGE( m_DeathNotice, DeathMsg )
 
 struct DeathNoticeItem {
 	char szKiller[MAX_PLAYER_NAME_LENGTH*2];

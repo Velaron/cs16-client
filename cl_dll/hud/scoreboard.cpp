@@ -61,14 +61,14 @@ inline int PING_POS_END()		{ return xend - 10; }
 
 //#include "vgui_TeamFortressViewport.h"
 
-DECLARE_COMMAND( m_Scoreboard, ShowScores );
-DECLARE_COMMAND( m_Scoreboard, HideScores );
-DECLARE_COMMAND( m_Scoreboard, ShowScoreboard2 );
-DECLARE_COMMAND( m_Scoreboard, HideScoreboard2 );
+DECLARE_COMMAND( m_Scoreboard, ShowScores )
+DECLARE_COMMAND( m_Scoreboard, HideScores )
+DECLARE_COMMAND( m_Scoreboard, ShowScoreboard2 )
+DECLARE_COMMAND( m_Scoreboard, HideScoreboard2 )
 
-DECLARE_MESSAGE( m_Scoreboard, ScoreInfo );
-DECLARE_MESSAGE( m_Scoreboard, TeamInfo );
-DECLARE_MESSAGE( m_Scoreboard, TeamScore );
+DECLARE_MESSAGE( m_Scoreboard, ScoreInfo )
+DECLARE_MESSAGE( m_Scoreboard, TeamInfo )
+DECLARE_MESSAGE( m_Scoreboard, TeamScore )
 
 int CHudScoreboard :: Init( void )
 {

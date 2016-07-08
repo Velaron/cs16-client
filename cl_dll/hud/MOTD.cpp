@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include "draw_util.h"
 
-DECLARE_MESSAGE( m_MOTD, MOTD );
+DECLARE_MESSAGE( m_MOTD, MOTD )
 
 int CHudMOTD :: Init( void )
 {

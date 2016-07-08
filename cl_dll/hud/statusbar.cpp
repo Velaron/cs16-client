@@ -27,10 +27,8 @@
 #include <stdio.h>
 #include "draw_util.h"
 
-DECLARE_MESSAGE( m_StatusBar, StatusText );
-DECLARE_MESSAGE( m_StatusBar, StatusValue );
-
-extern float g_ColorYellow[3];
+DECLARE_MESSAGE( m_StatusBar, StatusText )
+DECLARE_MESSAGE( m_StatusBar, StatusValue )
 
 #define STATUSBAR_ID_LINE		0
 

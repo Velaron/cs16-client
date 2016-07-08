@@ -285,32 +285,32 @@ int giBucketHeight, giBucketWidth, giABHeight, giABWidth; // Ammo Bar width and 
 
 HSPRITE ghsprBuckets;					// Sprite for top row of weapons menu
 
-DECLARE_MESSAGE(m_Ammo, CurWeapon );	// Current weapon and clip
-DECLARE_MESSAGE(m_Ammo, WeaponList);	// new weapon type
-DECLARE_MESSAGE(m_Ammo, AmmoX);			// update known ammo type's count
-DECLARE_MESSAGE(m_Ammo, AmmoPickup);	// flashes an ammo pickup record
-DECLARE_MESSAGE(m_Ammo, WeapPickup);    // flashes a weapon pickup record
-DECLARE_MESSAGE(m_Ammo, HideWeapon);	// hides the weapon, ammo, and crosshair displays temporarily
-DECLARE_MESSAGE(m_Ammo, ItemPickup);
-DECLARE_MESSAGE(m_Ammo, Crosshair);
-DECLARE_MESSAGE(m_Ammo, Brass);
+DECLARE_MESSAGE(m_Ammo, CurWeapon ) // Current weapon and clip
+DECLARE_MESSAGE(m_Ammo, WeaponList) // new weapon type
+DECLARE_MESSAGE(m_Ammo, AmmoX)      // update known ammo type's count
+DECLARE_MESSAGE(m_Ammo, AmmoPickup) // flashes an ammo pickup record
+DECLARE_MESSAGE(m_Ammo, WeapPickup) // flashes a weapon pickup record
+DECLARE_MESSAGE(m_Ammo, HideWeapon) // hides the weapon, ammo, and crosshair displays temporarily
+DECLARE_MESSAGE(m_Ammo, ItemPickup)
+DECLARE_MESSAGE(m_Ammo, Crosshair)
+DECLARE_MESSAGE(m_Ammo, Brass)
 
-DECLARE_COMMAND(m_Ammo, Slot1);
-DECLARE_COMMAND(m_Ammo, Slot2);
-DECLARE_COMMAND(m_Ammo, Slot3);
-DECLARE_COMMAND(m_Ammo, Slot4);
-DECLARE_COMMAND(m_Ammo, Slot5);
-DECLARE_COMMAND(m_Ammo, Slot6);
-DECLARE_COMMAND(m_Ammo, Slot7);
-DECLARE_COMMAND(m_Ammo, Slot8);
-DECLARE_COMMAND(m_Ammo, Slot9);
-DECLARE_COMMAND(m_Ammo, Slot10);
-DECLARE_COMMAND(m_Ammo, Close);
-DECLARE_COMMAND(m_Ammo, NextWeapon);
-DECLARE_COMMAND(m_Ammo, PrevWeapon);
-DECLARE_COMMAND(m_Ammo, Adjust_Crosshair);
-DECLARE_COMMAND(m_Ammo, Rebuy);
-DECLARE_COMMAND(m_Ammo, Autobuy);
+DECLARE_COMMAND(m_Ammo, Slot1)
+DECLARE_COMMAND(m_Ammo, Slot2)
+DECLARE_COMMAND(m_Ammo, Slot3)
+DECLARE_COMMAND(m_Ammo, Slot4)
+DECLARE_COMMAND(m_Ammo, Slot5)
+DECLARE_COMMAND(m_Ammo, Slot6)
+DECLARE_COMMAND(m_Ammo, Slot7)
+DECLARE_COMMAND(m_Ammo, Slot8)
+DECLARE_COMMAND(m_Ammo, Slot9)
+DECLARE_COMMAND(m_Ammo, Slot10)
+DECLARE_COMMAND(m_Ammo, Close)
+DECLARE_COMMAND(m_Ammo, NextWeapon)
+DECLARE_COMMAND(m_Ammo, PrevWeapon)
+DECLARE_COMMAND(m_Ammo, Adjust_Crosshair)
+DECLARE_COMMAND(m_Ammo, Rebuy)
+DECLARE_COMMAND(m_Ammo, Autobuy)
 
 // width of ammo fonts
 #define AMMO_SMALL_WIDTH 10
@@ -375,7 +375,7 @@ int CHudAmmo::Init(void)
 	gHR.Init();
 
 	return 1;
-};
+}
 
 void CHudAmmo::Reset(void)
 {
