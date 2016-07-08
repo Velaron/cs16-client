@@ -38,7 +38,7 @@ int g_iXash = 0; // indicates a buildnum
 int g_iMobileAPIVersion = 0;
 
 void InitInput (void);
-void EV_HookEvents( void );
+void Game_HookEvents( void );
 void IN_Commands( void );
 
 /*
@@ -59,7 +59,7 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	g_iXash = (int)CVAR_GET_FLOAT("build");
 
-	EV_HookEvents();
+	Game_HookEvents();
 
 	return 1;
 }
