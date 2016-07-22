@@ -164,7 +164,7 @@ char* ConvertCRtoNL( char *str )
 #define MAX_TEXTMSG_STRING 256
 int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int msg_dest = reader.ReadByte();
 

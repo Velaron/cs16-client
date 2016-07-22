@@ -50,7 +50,7 @@ int CHudGeiger::VidInit(void)
 int CHudGeiger::MsgFunc_Geiger(const char *pszName,  int iSize, void *pbuf)
 {
 
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	// update geiger data
 	m_iGeigerRange = reader.ReadByte() << 2;

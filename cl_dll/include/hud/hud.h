@@ -49,8 +49,8 @@ public:
 
 enum 
 { 
-	MAX_PLAYERS = 64,
-	MAX_TEAMS = 8,
+	MAX_PLAYERS = 33, // including the bomb
+	MAX_TEAMS = 3,
 	MAX_TEAM_NAME = 16,
 	MAX_HOSTAGES = 24,
 };
@@ -917,7 +917,6 @@ public:
 	cvar_t *cl_min_ct;
 	cvar_t *default_fov;
 	cvar_t *hud_textmode;
-	cvar_t *sensitivity;
 #ifdef __ANDROID__
 	cvar_t *cl_android_force_defaults;
 #endif
@@ -1002,6 +1001,7 @@ private:
 };
 
 extern CHud gHUD;
+extern cvar_t *sensitivity;
 
 extern int g_iTeamNumber;
 extern int g_iUser1;

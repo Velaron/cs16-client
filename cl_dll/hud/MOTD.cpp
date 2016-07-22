@@ -136,7 +136,7 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 		Reset(); // clear the current MOTD in prep for this one
 	}
 
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int is_finished = reader.ReadByte();
 	strcat( m_szMOTD, reader.ReadString() );

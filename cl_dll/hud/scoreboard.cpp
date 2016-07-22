@@ -29,10 +29,10 @@
 #include <stdio.h>
 #include "draw_util.h"
 
-hud_player_info_t   g_PlayerInfoList[MAX_PLAYERS+1]  = { }; // player info from the engine
-extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS+1] = { }; // additional player info sent directly to the client dll
-team_info_t         g_TeamInfo[MAX_TEAMS+1]          = { };
-hostage_info_t      g_HostageInfo[MAX_HOSTAGES+1]    = { };
+hud_player_info_t   g_PlayerInfoList[MAX_PLAYERS+1]; // player info from the engine
+extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS+1]; // additional player info sent directly to the client dll
+team_info_t         g_TeamInfo[MAX_TEAMS+1];
+hostage_info_t      g_HostageInfo[MAX_HOSTAGES+1];
 int g_iUser1;
 int g_iUser2;
 int g_iUser3;
@@ -428,7 +428,7 @@ int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *p
 {
 	m_iFlags |= HUD_DRAW;
 
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	short cl = reader.ReadByte();
 	short frags = reader.ReadShort();
 	short deaths = reader.ReadShort();
@@ -454,7 +454,7 @@ int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *p
 //		string: client team name
 int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	short cl = reader.ReadByte();
 	int teamNumber = 0;
 
@@ -549,7 +549,7 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 // if this message is never received, then scores will simply be the combined totals of the players.
 int CHudScoreboard :: MsgFunc_TeamScore( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	char *TeamName = reader.ReadString();
 	int i;
 

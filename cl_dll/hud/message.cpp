@@ -513,7 +513,7 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 
 int CHudMessage::MsgFunc_HudText( const char *pszName,  int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	char *pString = reader.ReadString();
 
@@ -582,7 +582,7 @@ int CHudMessage::MsgFunc_HudTextPro( const char *pszName, int iSize, void *pbuf 
 
 int CHudMessage::MsgFunc_HudTextArgs( const char *pszName, int iSize, void *pbuf )
 {
-	/*BufferReader reader( pbuf, iSize );
+	/*BufferReader reader( pszName, pbuf, iSize );
 
 	const char *sz = reader.ReadString();
 	int hint = reader.ReadByte();

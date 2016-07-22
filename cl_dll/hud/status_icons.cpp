@@ -85,7 +85,7 @@ int CHudStatusIcons::Draw( float flTime )
 //		byte   : blue
 int CHudStatusIcons::MsgFunc_StatusIcon( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int ShouldEnable = reader.ReadByte();
 	char *pszIconName = reader.ReadString();

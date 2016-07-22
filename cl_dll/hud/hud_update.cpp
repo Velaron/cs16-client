@@ -26,7 +26,6 @@ int CL_ButtonBits( int );
 void CL_ResetButtonBits( int bits );
 
 extern float v_idlescale;
-float in_fov;
 extern void HUD_SetCmdBits( int bits );
 
 int CHud::UpdateClientData(client_data_t *cdata, float time)
@@ -36,8 +35,6 @@ int CHud::UpdateClientData(client_data_t *cdata, float time)
 	
 	m_iKeyBits = CL_ButtonBits( 0 );
 	m_iWeaponBits = cdata->iWeaponBits;
-
-	in_fov = cdata->fov;
 
 	Think();
 

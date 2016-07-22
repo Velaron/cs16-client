@@ -162,7 +162,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 {
 	m_iFlags |= HUD_DRAW;
 
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int killer = reader.ReadByte();
 	int victim = reader.ReadByte();

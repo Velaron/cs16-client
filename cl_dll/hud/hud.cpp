@@ -38,7 +38,7 @@
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 
 wrect_t nullrc = { 0, 0, 0, 0 };
-
+float g_lastFOV = 0.0;
 const char *sPlayerModelFiles[12] =
 {
 	"models/player.mdl",
@@ -345,15 +345,13 @@ void CHud :: VidInit( void )
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	// update Train data
 	m_iLogo = reader.ReadByte();
 
 	return 1;
 }
-
-float g_lastFOV = 0.0;
 
 /*
 ============
@@ -447,14 +445,16 @@ float HUD_GetFOV( void )
 
 int CHud::MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf)
 {
-	BufferReader reader( pbuf, iSize );
+	//Weapon prediction already takes care of changing the fog. ( g_lastFOV ).
+#if 0 // VALVEWHY: original client checks for "tfc" here.
+	if ( cl_lw && cl_lw->value )
+		return 1;
+#endif
+
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int newfov = reader.ReadByte();
 	int def_fov = default_fov->value;
-
-	//Weapon prediction already takes care of changing the fog. ( g_lastFOV ).
-	if ( cl_lw && cl_lw->value )
-		return 1;
 
 	g_lastFOV = newfov;
 	m_iFOV = newfov ? newfov : def_fov;

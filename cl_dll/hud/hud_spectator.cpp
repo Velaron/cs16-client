@@ -539,7 +539,7 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 	float	value;
 	char *	string;
 
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( "DRCMsg", pbuf, iSize );
 
 	int cmd = reader.ReadByte();
 

@@ -85,7 +85,7 @@ void CHudRadar::UserCmd_ShowRadar()
 
 int CHudRadar::MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int index = reader.ReadByte();
 	g_PlayerExtraInfo[index].origin.x = reader.ReadCoord();

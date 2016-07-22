@@ -72,7 +72,7 @@ int CHudTrain::Draw(float fTime)
 
 int CHudTrain::MsgFunc_Train(const char *pszName,  int iSize, void *pbuf)
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	// update Train data
 	m_iPos = reader.ReadByte();

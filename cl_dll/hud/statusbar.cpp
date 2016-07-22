@@ -257,7 +257,7 @@ int CHudStatusBar :: Draw( float fTime )
 // %iX, where X is an integer, will substitute a number here, getting the number from StatusValue[X]
 int CHudStatusBar :: MsgFunc_StatusText( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int line = reader.ReadByte();
 
@@ -283,7 +283,7 @@ int CHudStatusBar :: MsgFunc_StatusText( const char *pszName, int iSize, void *p
 //		short: value to store
 int CHudStatusBar :: MsgFunc_StatusValue( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int index = reader.ReadByte();
 	if ( index < 1 || index >= MAX_STATUSBAR_VALUES )

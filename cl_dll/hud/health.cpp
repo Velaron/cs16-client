@@ -142,7 +142,7 @@ int CHudHealth::VidInit(void)
 int CHudHealth:: MsgFunc_Health(const char *pszName,  int iSize, void *pbuf )
 {
 	// TODO: update local health data
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	int x = reader.ReadByte();
 
 	m_iFlags |= HUD_DRAW;
@@ -160,7 +160,7 @@ int CHudHealth:: MsgFunc_Health(const char *pszName,  int iSize, void *pbuf )
 
 int CHudHealth:: MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int armor = reader.ReadByte();	// armor
 	int damageTaken = reader.ReadByte();	// health
@@ -190,7 +190,7 @@ int CHudHealth:: MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf )
 
 int CHudHealth:: MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int index = reader.ReadByte();
 	unsigned char flags = reader.ReadByte();

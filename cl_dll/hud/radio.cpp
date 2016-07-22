@@ -49,7 +49,7 @@ int CHudRadio::Init( )
 
 int CHudRadio::MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	char sentence[64];
 	int SenderID = reader.ReadByte( );
@@ -69,7 +69,7 @@ int CHudRadio::MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf )
 
 int CHudRadio::MsgFunc_ReloadSound( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int vol = reader.ReadByte( );
 	if ( reader.ReadByte( ) )

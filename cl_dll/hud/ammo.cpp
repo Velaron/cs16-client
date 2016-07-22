@@ -570,7 +570,7 @@ void WeaponsResource :: SelectSlot( int iSlot, int fAdvance, int iDirection )
 // 
 int CHudAmmo::MsgFunc_AmmoX(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int iIndex = reader.ReadByte();
 	int iCount = reader.ReadByte();
@@ -582,7 +582,7 @@ int CHudAmmo::MsgFunc_AmmoX(const char *pszName, int iSize, void *pbuf)
 
 int CHudAmmo::MsgFunc_AmmoPickup( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	int iIndex = reader.ReadByte();
 	int iCount = reader.ReadByte();
 
@@ -594,7 +594,7 @@ int CHudAmmo::MsgFunc_AmmoPickup( const char *pszName, int iSize, void *pbuf )
 
 int CHudAmmo::MsgFunc_WeapPickup( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	int iIndex = reader.ReadByte();
 
 	// Add the weapon to the history
@@ -605,7 +605,7 @@ int CHudAmmo::MsgFunc_WeapPickup( const char *pszName, int iSize, void *pbuf )
 
 int CHudAmmo::MsgFunc_ItemPickup( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	const char *szName = reader.ReadString();
 
 	// Add the weapon to the history
@@ -617,7 +617,7 @@ int CHudAmmo::MsgFunc_ItemPickup( const char *pszName, int iSize, void *pbuf )
 
 int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	
 	gHUD.m_iHideHUDDisplay = reader.ReadByte();
 
@@ -645,7 +645,7 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 //
 int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int iState = reader.ReadByte();
 	int iId = reader.ReadChar();
@@ -709,7 +709,7 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 //
 int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	
 	WEAPON Weapon;
 
@@ -739,7 +739,7 @@ int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )
 
 int CHudAmmo::MsgFunc_Crosshair(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	if( reader.ReadByte() > 0)
 	{
@@ -754,7 +754,7 @@ int CHudAmmo::MsgFunc_Crosshair(const char *pszName, int iSize, void *pbuf)
 
 int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	reader.ReadByte();
 
 	Vector start, velocity;

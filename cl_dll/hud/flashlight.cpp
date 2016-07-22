@@ -66,7 +66,7 @@ int CHudFlashlight::VidInit(void)
 
 int CHudFlashlight:: MsgFunc_FlashBat(const char *pszName,  int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	int x = reader.ReadByte();
 	m_iBat = x;
 	m_flBat = ((float)x)/100.0;
@@ -76,7 +76,7 @@ int CHudFlashlight:: MsgFunc_FlashBat(const char *pszName,  int iSize, void *pbu
 
 int CHudFlashlight:: MsgFunc_Flashlight(const char *pszName,  int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	m_fOn = reader.ReadByte();
 	int x = reader.ReadByte();
 	m_iBat = x;

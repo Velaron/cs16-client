@@ -100,7 +100,7 @@ int CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 
 int CHud :: MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	m_Teamplay = reader.ReadByte();
 
 	return 1;
@@ -108,7 +108,7 @@ int CHud :: MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 
 int CHud :: MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	m_iConcussionEffect = reader.ReadByte();
 	if (m_iConcussionEffect)
 		this->m_StatusIcons.EnableIcon("dmg_concuss",255,160,0);

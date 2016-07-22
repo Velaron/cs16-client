@@ -157,7 +157,7 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 {
 	char *temp = NULL, *menustring;
 
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	m_bitsValidSlots = reader.ReadShort();
 	int DisplayTime = reader.ReadChar();
@@ -259,7 +259,7 @@ int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 
 int CHudMenu::MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	m_bAllowSpec = !!reader.ReadByte();
 

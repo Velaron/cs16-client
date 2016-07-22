@@ -24,7 +24,12 @@ class BufferReader
 {
 public:
 	BufferReader( void *buf, int size ) :
-		m_pBuf( (uint8_t*)buf ), m_iSize( size ), m_iRead( 0 ), m_bBad( false ) {}
+		m_szMsgName( "not set" ), m_pBuf( (uint8_t*)buf ), m_iSize( size ), m_iRead( 0 ), m_bBad( false ) {}
+	BufferReader( const char *name, void *buf, int size ) :
+		m_szMsgName( name ), m_pBuf( (uint8_t*)buf ), m_iSize( size ), m_iRead( 0 ), m_bBad( false ) {}
+#ifdef _DEBUG
+	inline ~BufferReader( void );
+#endif
 
 	template<typename T> T Read( void );
 
@@ -39,10 +44,11 @@ public:
 	float ReadAngle( void );
 	float ReadHiResAngle( void );
 private:
+	const char *m_szMsgName;
 	uint8_t *m_pBuf;
-	size_t m_iSize;
-	size_t m_iRead;
-	bool m_bBad;
+	size_t   m_iSize;
+	size_t   m_iRead;
+	bool     m_bBad;
 };
 
 template<typename T>
@@ -55,6 +61,9 @@ inline T BufferReader::Read( void )
 	if( m_iRead + sizeof( T ) > m_iSize )
 	{
 		m_bBad = true;
+
+		// may occur, but safe
+		//gEngfuncs.Con_DPrintf( "BufferReader(%s): buffer overrun. Expected %i\n", m_szMsgName, m_iSize );
 		return -1;
 	}
 
@@ -74,7 +83,7 @@ inline char* BufferReader::Read( void )
 	static char string[2048];
 
 	if( m_bBad )
-		return nullptr;
+		return (char*)""; // do not return NULL, may break strcpy's
 
 	size_t l;
 	for( l = 0; l < sizeof(string) - 1; l++)
@@ -170,6 +179,14 @@ inline float BufferReader::ReadHiResAngle( void )
 {
 	return ReadShort() * 360.0f / 65536.0f;
 }
+
+#ifdef _DEBUG
+BufferReader::~BufferReader()
+{
+	if( m_iRead < m_iSize )
+		gEngfuncs.Con_DPrintf( "BufferReader(%s): destroyed before reaching end. Expected %i, read %i\n", m_szMsgName, m_iSize, m_iRead );
+}
+#endif
 
 /*
 void BEGIN_READ( void *buf, int size );

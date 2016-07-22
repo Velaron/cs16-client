@@ -106,7 +106,7 @@ int CHudTimer::Draw( float fTime )
 
 int CHudTimer::MsgFunc_RoundTime(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	m_iTime = reader.ReadShort();
 	m_fStartTime = gHUD.m_flTime;
 	m_iFlags = HUD_DRAW;
@@ -187,7 +187,7 @@ int CHudProgressBar::Draw( float flTime )
 
 int CHudProgressBar::MsgFunc_BarTime(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	m_iDuration = reader.ReadShort();
 	m_fPercent = 0.0f;
@@ -200,7 +200,7 @@ int CHudProgressBar::MsgFunc_BarTime(const char *pszName, int iSize, void *pbuf)
 
 int CHudProgressBar::MsgFunc_BarTime2(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	m_iDuration = reader.ReadShort();
 	m_fPercent = (float)reader.ReadShort() / 100.0f;
@@ -213,7 +213,7 @@ int CHudProgressBar::MsgFunc_BarTime2(const char *pszName, int iSize, void *pbuf
 
 int CHudProgressBar::MsgFunc_BotProgress(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 	m_iDuration = 0.0f; // don't update our progress bar
 	m_iFlags = HUD_DRAW;
 

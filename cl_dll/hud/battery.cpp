@@ -60,7 +60,7 @@ void CHudBattery::InitHUDData( void )
 
 int CHudBattery:: MsgFunc_Battery(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	m_iFlags |= HUD_DRAW;
 	int x = reader.ReadShort();
@@ -138,7 +138,7 @@ int CHudBattery::Draw( float flTime )
 
 int CHudBattery::MsgFunc_ArmorType(const char *pszName,  int iSize, void *pbuf )
 {
-	BufferReader reader( pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	m_enArmorType = (armortype_t)reader.ReadByte();
 
