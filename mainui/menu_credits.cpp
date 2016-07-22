@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static const char *uiCreditsDefault[] = 
 {
-	"CS16Client v1.0",
+	"CS16Client v1.1-",
 	"Build Date:" __DATE__ " " __TIME__ ,
 	"",
 	"Developers: ",
@@ -60,12 +60,13 @@ static const char *uiCreditsDefault[] =
 	"",
 	"Big thanks to Valve Corporation for Counter-Strike",
 	"Uncle Mike for this powerful engine",
+	"ONeiLL for inspiration",
 	"Nagist and s1lentq for successful CS1.6 game researching",
 	"Spirit of Half-Life developers for rain code",
 	"hzqst for studio render code",
 	"",
-	"Copyright SDLash3D Team 2015-2016 (C)",
-	"SDLash3D is not affiliated with Valve or any of their partners.",
+	"Copyright Flying With Gauss 2015-2016 (C)",
+	"Flying With Gauss is not affiliated with Valve or any of their partners.",
 	"All copyrights reserved to their respective owners.",
 	"Thanks for playing!",
 	NULL
