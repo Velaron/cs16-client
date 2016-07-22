@@ -557,18 +557,21 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		FireRemaining(m_iFamasShotsFired, m_flFamasShoot, FALSE);
 	}
 
-	if (m_flNextPrimaryAttack <= 0.0f)
+	if (m_flNextPrimaryAttack <= UTIL_WeaponTimeBase() )
 	{
 		if (m_pPlayer->m_bResumeZoom)
 		{
 			m_pPlayer->pev->fov = m_pPlayer->m_iFOV = m_pPlayer->m_iLastZoom;
 
 			if (m_pPlayer->m_iFOV == m_pPlayer->m_iLastZoom)
+			{
 				m_pPlayer->m_bResumeZoom = false;
+				// viewmodel hide is implemented elsewhere
+			}
 		}
 	}
 
-	if (!g_bHoldingShield)
+	if ( m_pPlayer->HasShield() )
 	{
 		if (m_fInReload && m_pPlayer->pev->button & IN_ATTACK2)
 		{
@@ -1438,24 +1441,9 @@ be ignored
 void DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed )
 {
 	g_runfuncs = runfuncs;
-//#if defined( CLIENT_WEAPONS )
-	/*if ( cl_lw && cl_lw->value )
-	{
-		HUD_WeaponsPostThink( from, to, cmd, time, random_seed );
-	}
-	else
-#endif
-	{
-		to->client.fov = g_lastFOV;
-		g_iWeaponFlags = from->weapondata[ from->client.m_iId ].m_iWeaponState;
-		g_iPlayerFlags = from->client.flags;
-		g_iFreezeTimeOver	= !(from->client.iuser3 & PLAYER_FREEZE_TIME_OVER);
-		g_bInBombZone		= (from->client.iuser3 & PLAYER_IN_BOMB_ZONE) != 0;
-		g_bHoldingShield	= (from->client.iuser3 & PLAYER_HOLDING_SHIELD) != 0;
-		g_bGlockBurstMode   = false; // will be taken from g_iWeaponFlags
-	}*/
 
 	HUD_WeaponsPostThink( from, to, cmd, time, random_seed );
+	to->client.fov = g_lastFOV;
 
 	if ( g_runfuncs )
 	{
@@ -1464,7 +1452,4 @@ void DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct us
 		g_clang		= cmd->viewangles;
 		g_clorg		= to->playerstate.origin;
 	}
-
-	// All games can use FOV state
-	g_lastFOV = to->client.fov;
 }
