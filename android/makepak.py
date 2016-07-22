@@ -17,6 +17,7 @@ pakfile.write(struct.Struct("<4s2l").pack(b"PACK",0,0))
 
 #walk the directory recursively, add the files and record the file entries
 offset = 12
+i = 0
 fileentries = []
 for root, subFolders, files in os.walk(rootdir):
     for file in files:
@@ -24,13 +25,14 @@ for root, subFolders, files in os.walk(rootdir):
         impfilename = os.path.join(root,file)
         entry.filename = os.path.relpath(impfilename,rootdir).replace("\\","/")
         if(entry.filename.startswith(".git")):continue
-	print "pak: "+entry.filename
+	# print "pak: "+entry.filename
         with open(impfilename, "rb") as importfile:
             pakfile.write(importfile.read())
             entry.offset = offset
             entry.length = importfile.tell()
             offset = offset + entry.length
         fileentries.append(entry)
+        i += 1
 tablesize = 0
 
 #after all the file data, write the list of entries
@@ -39,6 +41,8 @@ for entry in fileentries:
     pakfile.write(struct.Struct("<l").pack(entry.offset))
     pakfile.write(struct.Struct("<l").pack(entry.length))
     tablesize = tablesize + 64
+
+print "Done. " + i + " files packed to " + pakfilename + "."
 
 #return to the header and write the values correctly
 pakfile.seek(0)
