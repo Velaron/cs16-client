@@ -59,6 +59,14 @@ int giDmgFlags[NUM_DMG_TYPES] =
 	DMG_HALLUC
 };
 
+enum
+{
+	ATK_FRONT = 0,
+	ATK_RIGHT,
+	ATK_REAR,
+	ATK_LEFT
+};
+
 int CHudHealth::Init(void)
 {
 	HOOK_MESSAGE(Health);
@@ -102,32 +110,17 @@ int CHudHealth::VidInit(void)
 {
 	m_hSprite = LoadSprite(PAIN_NAME);
 
+	m_vAttackPos[ATK_FRONT].x = ScreenWidth  / 2 - SPR_Width( m_hSprite, 0 ) / 2;
+	m_vAttackPos[ATK_FRONT].y = ScreenHeight / 2 - SPR_Width( m_hSprite, 0 ) * 3;
 
-	for( int i = 0; i < 4; i++ )
-	{
-		m_vAttackPos[i].x = ScreenWidth / 2;
-		m_vAttackPos[i].y = ScreenHeight / 2;
+	m_vAttackPos[ATK_RIGHT].x = ScreenWidth  / 2 + SPR_Width( m_hSprite, 1 ) * 2;
+	m_vAttackPos[ATK_RIGHT].y = ScreenHeight / 2 - SPR_Width( m_hSprite, 1 ) / 2;
 
-		if( i & 1 )
-		{
-			if( i & 2 )
-				m_vAttackPos[i].x -= SPR_Width( m_hSprite, i ) * 3;
-			else
-				m_vAttackPos[i].x += SPR_Width( m_hSprite, i ) * 2;
+	m_vAttackPos[ATK_REAR ].x = ScreenWidth  / 2 - SPR_Width( m_hSprite, 2 ) / 2;
+	m_vAttackPos[ATK_REAR ].y = ScreenHeight / 2 + SPR_Width( m_hSprite, 2 ) * 2;
 
-
-			m_vAttackPos[i].y -= SPR_Height( m_hSprite, i ) / 2;
-		}
-		else
-		{
-			if( i & 2 )
-				m_vAttackPos[i].y += SPR_Height( m_hSprite, i ) * 2;
-			else
-				m_vAttackPos[i].y -= SPR_Height( m_hSprite, i ) * 3;
-
-			m_vAttackPos[i].x -= SPR_Width( m_hSprite, i ) / 2;
-		}
-	}
+	m_vAttackPos[ATK_LEFT ].x = ScreenWidth  / 2 - SPR_Width( m_hSprite, 3 ) * 3;
+	m_vAttackPos[ATK_LEFT ].y = ScreenHeight / 2 - SPR_Width( m_hSprite, 3 ) / 2;
 
 
 	m_HUD_dmg_bio = gHUD.GetSpriteIndex( "dmg_bio" ) + 1;
@@ -201,19 +194,47 @@ int CHudHealth:: MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf
 }
 // Returns back a color from the
 // Green <-> Yellow <-> Red ramp
-void CHudHealth::GetPainColor( int &r, int &g, int &b )
+void CHudHealth::GetPainColor( int &r, int &g, int &b, int &a )
 {
+#if 0
 	int iHealth = m_iHealth;
 
 	if (iHealth > 25)
 		iHealth -= 25;
 	else if ( iHealth < 0 )
 		iHealth = 0;
-#if 0
 	g = iHealth * 255 / 100;
 	r = 255 - g;
 	b = 0;
 #else
+	if( m_iHealth <= 15 )
+	{
+		a = 255; // If health is getting low, make it bright red
+	}
+	else
+	{
+		// Has health changed? Flash the health #
+		if (m_fFade)
+		{
+			m_fFade -= (gHUD.m_flTimeDelta * 20);
+
+			if (m_fFade <= 0)
+			{
+				m_fFade = 0;
+				a = MIN_ALPHA;
+			}
+			else
+			{
+				// Fade the health number back to dim
+				a = MIN_ALPHA +  (m_fFade/FADE_TIME) * 128;
+			}
+		}
+		else
+		{
+			a = MIN_ALPHA;
+		}
+	}
+
 	if (m_iHealth > 25)
 	{
 		DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
@@ -246,27 +267,7 @@ void CHudHealth::DrawHealthBar( float flTime )
 	int a = 0, x, y;
 	int HealthWidth;
 
-	// Has health changed? Flash the health #
-	if (m_fFade)
-	{
-		m_fFade -= (gHUD.m_flTimeDelta * 20);
-		if (m_fFade <= 0)
-		{
-			a = MIN_ALPHA;
-			m_fFade = 0;
-		}
-
-		// Fade the health number back to dim
-		a = MIN_ALPHA +  (m_fFade/FADE_TIME) * 128;
-	}
-	else
-		a = MIN_ALPHA;
-
-	// If health is getting low, make it bright red
-	if (m_iHealth <= 15)
-		a = 255;
-
-	GetPainColor( r, g, b );
+	GetPainColor( r, g, b, a );
 	DrawUtils::ScaleColors(r, g, b, a );
 
 	// Only draw health if we have the suit.
@@ -317,11 +318,11 @@ void CHudHealth::CalcDamageDirection( Vector vecFrom )
 		if (side > EPSILON)
 			m_fAttack[0] = max(m_fAttack[0], side);
 		if (side < -EPSILON)
-			m_fAttack[1] = max(m_fAttack[1], side * -1 );
+			m_fAttack[1] = max(m_fAttack[1], -side );
 		if (front > EPSILON)
 			m_fAttack[2] = max(m_fAttack[2], front);
 		if (front < -EPSILON)
-			m_fAttack[3] = max(m_fAttack[3], front * -1 );
+			m_fAttack[3] = max(m_fAttack[3], -front );
 	}
 }
 

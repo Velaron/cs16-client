@@ -152,14 +152,14 @@ public:
 		return ret;
 	}
 
-	static inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)
+	static inline void UnpackRGB( int &r, int &g, int &b, const unsigned long ulRGB )
 	{
 		r = (ulRGB & 0xFF0000) >>16;
 		g = (ulRGB & 0xFF00) >> 8;
 		b = ulRGB & 0xFF;
 	}
 
-	static inline void ScaleColors( int &r, int &g, int &b, int a )
+	static inline void ScaleColors( int &r, int &g, int &b, const int a )
 	{
 		r *= a / 255.0f;
 		g *= a / 255.0f;

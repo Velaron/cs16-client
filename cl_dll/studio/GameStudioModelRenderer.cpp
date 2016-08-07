@@ -477,12 +477,7 @@ void CGameStudioModelRenderer::CalculatePitchBlend(entity_state_t *pplayer)
 
 void CGameStudioModelRenderer::CalculateYawBlend(entity_state_t *pplayer)
 {
-	float dt;
 	float flYaw;
-
-	dt = (m_clTime - m_clOldTime);
-	dt = max(0.0, dt);
-	dt = min(1.0, dt);
 
 	StudioEstimateGait(pplayer);
 
@@ -511,10 +506,7 @@ void CGameStudioModelRenderer::CalculateYawBlend(entity_state_t *pplayer)
 
 	float blend_yaw = (flYaw / 90.0) * 128.0 + 127.0;
 
-	blend_yaw = min(255.0, blend_yaw);
-	blend_yaw = max(0.0, blend_yaw);
-
-	blend_yaw = 255.0 - blend_yaw;
+	blend_yaw = 255.0 - bound( 0.0, blend_yaw, 255.0 );
 
 	m_pCurrentEntity->curstate.blending[0] = (int)(blend_yaw);
 	m_pCurrentEntity->latched.prevblending[0] = m_pCurrentEntity->curstate.blending[0];
@@ -531,21 +523,20 @@ void CGameStudioModelRenderer::CalculateYawBlend(entity_state_t *pplayer)
 void CGameStudioModelRenderer::StudioProcessGait(entity_state_t *pplayer)
 {
 	mstudioseqdesc_t *pseqdesc;
-	float dt;
 
 	CalculateYawBlend(pplayer);
 	CalculatePitchBlend(pplayer);
 
-	dt = (m_clTime - m_clOldTime);
-	dt = max(0.0, dt);
-	dt = min(1.0, dt);
 
 	pseqdesc = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + pplayer->gaitsequence;
 
 	if (pseqdesc->linearmovement[0] > 0)
 		m_pPlayerInfo->gaitframe += (m_flGaitMovement / pseqdesc->linearmovement[0]) * pseqdesc->numframes;
 	else
+	{
+		float dt = bound( 0.0, (m_clTime - m_clOldTime), 1.0 );
 		m_pPlayerInfo->gaitframe += pseqdesc->fps * dt * m_pCurrentEntity->curstate.framerate;
+	}
 
 	m_pPlayerInfo->gaitframe = m_pPlayerInfo->gaitframe - (int)(m_pPlayerInfo->gaitframe / pseqdesc->numframes) * pseqdesc->numframes;
 
@@ -563,10 +554,10 @@ void CGameStudioModelRenderer::SavePlayerState(entity_state_t *pplayer)
 
 	st = &g_state;
 
-	VectorCopy(ent->curstate.angles, st->angles);
-	VectorCopy(ent->curstate.origin, st->origin);
+	st->angles = ent->curstate.angles;
+	st->origin = ent->curstate.origin;
 
-	VectorCopy(ent->angles, st->realangles);
+	st->realangles = ent->angles;
 
 	st->sequence = ent->curstate.sequence;
 	st->gaitsequence = pplayer->gaitsequence;
@@ -672,8 +663,7 @@ void CGameStudioModelRenderer::SetupClientAnimation(entity_state_t *pplayer)
 		return;
 
 	curtime = gEngfuncs.GetClientTime();
-	dt = curtime - oldtime;
-	dt = min(1.0, max(0.0, dt));
+	dt = bound( 0.0, (curtime - oldtime), 1.0 );
 
 	oldtime = curtime;
 	st = &g_clientstate;
@@ -701,9 +691,10 @@ void CGameStudioModelRenderer::SetupClientAnimation(entity_state_t *pplayer)
 	st->m_fSequenceLoops = ((GetSequenceFlags(pmodel, st) & STUDIO_LOOPING) != 0);
 	StudioFrameAdvance(st, fr, dt);
 
-	VectorCopy(st->realangles, ent->angles);
-	VectorCopy(st->angles, ent->curstate.angles);
-	VectorCopy(st->origin, ent->curstate.origin);
+	ent->angles = st->realangles;
+
+	ent->curstate.angles = st->angles;
+	ent->curstate.origin = st->origin;
 
 	ent->curstate.sequence = st->sequence;
 	pplayer->gaitsequence = st->gaitsequence;
@@ -727,9 +718,10 @@ void CGameStudioModelRenderer::RestorePlayerState(entity_state_t *pplayer)
 
 	st = &g_clientstate;
 
-	VectorCopy(ent->curstate.angles, st->angles);
-	VectorCopy(ent->curstate.origin, st->origin);
-	VectorCopy(ent->angles, st->realangles);
+	st->angles = ent->curstate.angles;
+	st->origin = ent->curstate.origin;
+
+	st->realangles = ent->angles;
 
 	st->sequence = ent->curstate.sequence;
 	st->gaitsequence = pplayer->gaitsequence;
@@ -744,9 +736,10 @@ void CGameStudioModelRenderer::RestorePlayerState(entity_state_t *pplayer)
 
 	st = &g_state;
 
-	VectorCopy(st->angles, ent->curstate.angles);
-	VectorCopy(st->origin, ent->curstate.origin);
-	VectorCopy(st->realangles, ent->angles);
+	ent->angles = st->realangles;
+
+	ent->curstate.angles = st->angles;
+	ent->curstate.origin = st->origin;
 
 	ent->curstate.sequence = st->sequence;
 	pplayer->gaitsequence = st->gaitsequence;
@@ -785,7 +778,7 @@ int CGameStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t *pplaye
 
 		for( int i = 0; i < m_nCachedBones; i++ )
 		{
-			if( !stricmp(m_nCachedBoneNames[i], "Bip01 Spine3") )
+			if( !strcmp(m_nCachedBoneNames[i], "Bip01 Spine3") )
 			{
 				chestpos.x = m_rgCachedBoneTransform[i][0][3];
 				chestpos.y = m_rgCachedBoneTransform[i][1][3];
@@ -833,7 +826,7 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 
 	extra_player_info_t *pExtra = g_PlayerExtraInfo + pplayer->number;
 
-	if( gHUD.cl_minmodels && gHUD.cl_minmodels->value > 0.0f )
+	if( gHUD.cl_minmodels && gHUD.cl_minmodels->value )
 	{
 		int team = pExtra->teamnumber;
 		if( team == TEAM_TERRORIST )
@@ -859,20 +852,6 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 	else
 	{
 		m_pRenderModel = IEngineStudio.SetupPlayerModel( m_nPlayerIndex );
-
-		if( !m_pRenderModel ) // player have a unloadable shit in userinfo, so load appropriate to his team model
-		{
-			if( pExtra->teamnumber == TEAM_CT && pExtra->vip )
-				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[3], NULL ); // vip
-			else if( pExtra->teamnumber == TEAM_CT )
-				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[2], NULL ); // gign
-			else if( pExtra->teamnumber == TEAM_TERRORIST )
-				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[1], NULL ); // leet
-			else
-				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[0], NULL ); // player.mdl
-
-			// if we cannot load gign or leet model, player have a shit inside his gamedata, so we can't deal with it
-		}
 	}
 
 	if( !m_pRenderModel )
@@ -898,10 +877,8 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 
 	if (pplayer->gaitsequence)
 	{
-		vec3_t orig_angles;
+		vec3_t orig_angles(m_pCurrentEntity->angles);
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
-
-		VectorCopy(m_pCurrentEntity->angles, orig_angles);
 
 		StudioProcessGait(pplayer);
 
@@ -909,7 +886,7 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 		m_pPlayerInfo = NULL;
 
 		StudioSetUpTransform(0);
-		VectorCopy(orig_angles, m_pCurrentEntity->angles);
+		m_pCurrentEntity->angles = orig_angles;
 	}
 	else
 	{
@@ -1040,15 +1017,12 @@ void CGameStudioModelRenderer::StudioFxTransform(cl_entity_t *ent, float transfo
 
 			if (axis == 1)
 				axis = 2;
-			VectorScale( transform[axis], gEngfuncs.pfnRandomFloat(1,1.484), transform[axis] );
+
+			VectorScale( transform[axis], gEngfuncs.pfnRandomFloat( 1, 1.484 ), transform[axis] );
 		}
 		else if (Com_RandomLong(0, 49) == 0)
 		{
 			float offset;
-			int axis = Com_RandomLong(0, 1);
-
-			if (axis == 1)
-				axis = 2;
 
 			offset = gEngfuncs.pfnRandomFloat(-10, 10);
 			transform[Com_RandomLong(0, 2)][3] += offset;
@@ -1123,7 +1097,7 @@ int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interfac
 	*ppinterface = &studio;
 
 	// Copy in engine helper functions
-	memcpy( &IEngineStudio, pstudio, sizeof( IEngineStudio ) );
+	IEngineStudio = *pstudio;
 
 	// Initialize local variables, etc.
 	R_StudioInit();

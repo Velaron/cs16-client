@@ -95,10 +95,19 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 extern float color[3]; // hud.cpp
 
 // Gets the height & width of a sprite,  at the specified frame
-inline int SPR_Height( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Height(x, f); }
-inline int SPR_Width( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Width(x, f); }
+inline int SPR_Height( HSPRITE x, int f )
+{
+	return gEngfuncs.pfnSPR_Height(x, f);
+}
+inline int SPR_Width( HSPRITE x, int f )
+{
+	return gEngfuncs.pfnSPR_Width(x, f);
+}
 
-inline 	client_textmessage_t	*TextMessageGet( const char *pName ) { return gEngfuncs.pfnTextMessageGet( pName ); }
+inline client_textmessage_t *TextMessageGet( const char *pName )
+{
+	return gEngfuncs.pfnTextMessageGet( pName );
+}
 
 inline void ConsolePrint( const char *string )
 {

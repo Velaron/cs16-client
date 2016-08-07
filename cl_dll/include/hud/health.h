@@ -116,7 +116,7 @@ public:
 	int m_HUD_cross;
 	//float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
 	float m_fAttack[4];
-	void GetPainColor( int &r, int &g, int &b );
+	void GetPainColor(int &r, int &g, int &b , int &a);
 	float m_fFade;
 private:
 	void DrawPain( float fTime );

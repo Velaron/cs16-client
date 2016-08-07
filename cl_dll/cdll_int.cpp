@@ -50,12 +50,10 @@ Called when the DLL is first loaded.
 */
 int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
-	gEngfuncs = *pEnginefuncs;
-
 	if (iVersion != CLDLL_INTERFACE_VERSION)
 		return 0;
 
-	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
+	gEngfuncs = *pEnginefuncs;
 
 	g_iXash = (int)CVAR_GET_FLOAT("build");
 

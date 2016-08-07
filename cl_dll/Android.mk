@@ -16,7 +16,7 @@ LOCAL_MODULE_FILENAME = libclient_hardfp
 endif
 
 LOCAL_CFLAGS += -fsigned-char -DCLIENT_DLL=1 -DCLIENT_WEAPONS=1
-LOCAL_CPPFLAGS += -std=c++11
+LOCAL_CPPFLAGS += -std=c++0x
 SRCS := \
 	./cdll_int.cpp \
 	./demo.cpp \
