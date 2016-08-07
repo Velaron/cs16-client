@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "basemenu.h"
 #include "utils.h"
 #include "menu_btnsbmp_table.h"
+#include "keydefs.h"
 
 #define ART_BANNER			"gfx/shell/head_multi"
 
@@ -34,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ID_CUSTOMIZE		5
 #define ID_CONTROLS			6
 #define ID_DONE			7
-#define ID_DEMOS        8
+
 typedef struct
 {
 	menuFramework_s	menu;
@@ -48,10 +49,21 @@ typedef struct
 	menuPicButton_s	Customize;	// playersetup
 	menuPicButton_s	Controls;
 	menuPicButton_s	done;
-	menuPicButton_s demos;
 } uiMultiPlayer_t;
 
 static uiMultiPlayer_t	uiMultiPlayer;
+
+/*
+=================
+UI_MsgBox_Ownerdraw
+=================
+*/
+static void UI_MsgBox_Ownerdraw( void *self )
+{
+	menuCommon_s	*item = (menuCommon_s *)self;
+
+	UI_FillRect( item->x, item->y, item->width, item->height, uiPromptBgColor );
+}
 
 /*
 =================
@@ -84,9 +96,6 @@ static void UI_MultiPlayer_Callback( void *self, int event )
 		break;
 	case ID_DONE:
 		UI_PopMenu();
-		break;
-	case ID_DEMOS:
-		UI_PlayRec_Menu();
 		break;
 	}
 }
@@ -175,20 +184,11 @@ static void UI_MultiPlayer_Init( void )
 	
 	UI_UtilSetupPicButton( &uiMultiPlayer.Controls, PC_CONTROLS );
 
-	uiMultiPlayer.demos.generic.id = ID_DEMOS;
-	uiMultiPlayer.demos.generic.type = QMTYPE_BM_BUTTON;
-	uiMultiPlayer.demos.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
-	uiMultiPlayer.demos.generic.x = 72;
-	uiMultiPlayer.demos.generic.y = 480;
-	uiMultiPlayer.demos.generic.name = "Demos";
-	uiMultiPlayer.demos.generic.statusText = "Play or record the demos";
-	uiMultiPlayer.demos.generic.callback = UI_MultiPlayer_Callback;
-
 	uiMultiPlayer.done.generic.id = ID_DONE;
 	uiMultiPlayer.done.generic.type = QMTYPE_BM_BUTTON;
 	uiMultiPlayer.done.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
 	uiMultiPlayer.done.generic.x = 72;
-	uiMultiPlayer.done.generic.y = 530;
+	uiMultiPlayer.done.generic.y = 480;
 	uiMultiPlayer.done.generic.name = "Done";
 	uiMultiPlayer.done.generic.statusText = "Go back to the Main Menu";
 	uiMultiPlayer.done.generic.callback = UI_MultiPlayer_Callback;
@@ -203,7 +203,6 @@ static void UI_MultiPlayer_Init( void )
 	UI_AddItem( &uiMultiPlayer.menu, (void *)&uiMultiPlayer.Customize );
 	UI_AddItem( &uiMultiPlayer.menu, (void *)&uiMultiPlayer.Controls );
 	UI_AddItem( &uiMultiPlayer.menu, (void *)&uiMultiPlayer.done );
-	UI_AddItem( &uiMultiPlayer.menu, (void *)&uiMultiPlayer.demos );
 }
 
 /*

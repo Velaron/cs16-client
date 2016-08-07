@@ -231,19 +231,19 @@ static void UI_VidModes_Init( void )
 	uiVidModes.vidList.generic.id = ID_VIDMODELIST;
 	uiVidModes.vidList.generic.type = QMTYPE_SCROLLLIST;
 	uiVidModes.vidList.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_SMALLFONT;
-#if defined(__ANDROID__) // it's impossible to change resolution on Android, so grey it out
-	uiVidModes.vidList.generic.flags = QMF_INACTIVE;
-	uiVidModes.vidList.generic.color = uiColorDkGrey;
-#endif
 	uiVidModes.vidList.generic.x = 400;
 	uiVidModes.vidList.generic.y = 300;
 	uiVidModes.vidList.generic.width = 560;
 	uiVidModes.vidList.generic.height = 300;
 	uiVidModes.vidList.generic.callback = UI_VidModes_Callback;
+#if defined(__ANDROID__) // it's impossible to change resolution on Android, so grey it out
+	uiVidModes.vidList.generic.flags = QMF_INACTIVE;
+	uiVidModes.vidList.generic.color = uiColorDkGrey;
+#endif
 
 	uiVidModes.windowed.generic.id = ID_FULLSCREEN;
 	uiVidModes.windowed.generic.type = QMTYPE_CHECKBOX;
-	uiVidModes.windowed.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_MOUSEONLY|QMF_DROPSHADOW;
+	uiVidModes.windowed.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_DROPSHADOW;
 	uiVidModes.windowed.generic.name = "Run in a window";
 	uiVidModes.windowed.generic.x = 400;
 	uiVidModes.windowed.generic.y = 620;
@@ -252,7 +252,7 @@ static void UI_VidModes_Init( void )
 
 	uiVidModes.vsync.generic.id = ID_VERTICALSYNC;
 	uiVidModes.vsync.generic.type = QMTYPE_CHECKBOX;
-	uiVidModes.vsync.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_MOUSEONLY|QMF_DROPSHADOW;
+	uiVidModes.vsync.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_DROPSHADOW;
 	uiVidModes.vsync.generic.name = "Vertical sync";
 	uiVidModes.vsync.generic.x = 400;
 	uiVidModes.vsync.generic.y = 670;

@@ -264,7 +264,7 @@ static void UI_TouchOptions_Callback( void *self, int event )
 			COM_FileBase( CVAR_GET_STRING( "touch_config_file" ), curprofile );
 			isCurrent = !strcmp( curprofile, uiTouchOptions.profileDesc[ uiTouchOptions.profiles.curItem ]);
 
-			// Scrolllist changed, update available options
+			// Scrolllist changed, update availiable options
 			uiTouchOptions.remove.generic.flags |= QMF_GRAYED;
 			if( ( uiTouchOptions.profiles.curItem > uiTouchOptions.firstProfile ) && !isCurrent )
 				uiTouchOptions.remove.generic.flags &= ~QMF_GRAYED;
@@ -426,7 +426,7 @@ static void UI_TouchOptions_Init( void )
 
 	//uiTouchOptions.hTestImage = PIC_Load( ART_GAMMA, PIC_KEEP_RGBDATA );
 
-	uiTouchOptions.menu.vidInitFunc = UI_TouchOptions_Init;
+	//uiTouchOptions.menu.vidInitFunc = UI_TouchOptions_Init;
 
 	uiTouchOptions.background.generic.id = ID_BACKGROUND;
 	uiTouchOptions.background.generic.type = QMTYPE_BITMAP;

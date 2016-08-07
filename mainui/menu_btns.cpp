@@ -155,13 +155,13 @@ void UI_LoadBmpButtons( void )
 
 	if ( bhdr.biBitCount <= 8 )
 	{
-		byte* palette=&bmp_buffer[sizeof( bmp_t ) + sizeof( short )];
-		byte* firstpixel_col=&palette[img_data[0]*4];
+		byte* pallete=&bmp_buffer[sizeof( bmp_t ) + sizeof( short )];
+		byte* firstpixel_col=&pallete[img_data[0]*4];
 		firstpixel_col[0]=firstpixel_col[1]=firstpixel_col[2]=0;
 	}
 
 	// determine buttons count by image height...
-	// int pic_count = ( pInfoHdr->biHeight == 5538 ) ? PC_BUTTONCOUNT : PC_BUTTONCOUNT - 2;
+	// int pic_count = ( pInfoHdr->biHeight == 5538 ) ? PC_BUTTONCOUNT
 	int pic_count = ( bhdr.biHeight / 78 );
 
 	bhdr.biHeight = 78;     //uiStatic.buttons_height;
@@ -189,7 +189,7 @@ void UI_LoadBmpButtons( void )
 
 		memcpy( &raw_img_buff[offset], img_data, cutted_img_sz );
 
-		// upload image into video memory
+		// upload image into viedo memory
 		uiStatic.buttonsPics[i] = PIC_Load( fname, raw_img_buff, CuttedBmpSize );
 
 		img_data -= cutted_img_sz;

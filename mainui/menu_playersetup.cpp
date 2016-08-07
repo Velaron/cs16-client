@@ -467,7 +467,7 @@ static void UI_PlayerSetup_Init( void )
 
 	uiPlayerSetup.crosshairTranslucent.generic.id = ID_CROSSHAIRCOLOR;
 	uiPlayerSetup.crosshairTranslucent.generic.type = QMTYPE_CHECKBOX;
-	uiPlayerSetup.crosshairTranslucent.generic.flags = QMF_HIGHLIGHTIFFOCUS | QMF_ACT_ONRELEASE | QMF_MOUSEONLY | QMF_DROPSHADOW;
+	uiPlayerSetup.crosshairTranslucent.generic.flags = QMF_HIGHLIGHTIFFOCUS | QMF_ACT_ONRELEASE | QMF_DROPSHADOW;
 	uiPlayerSetup.crosshairTranslucent.generic.x = 320;
 	uiPlayerSetup.crosshairTranslucent.generic.y = 420;
 	uiPlayerSetup.crosshairTranslucent.generic.callback = UI_PlayerSetup_Callback;

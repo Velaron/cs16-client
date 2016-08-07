@@ -52,7 +52,6 @@ typedef struct
 } uiPlayRec_t;
 
 static uiPlayRec_t	uiPlayRec;
-static const char *uiEmptyString = "";
 bool ignore = false;
 
 /*

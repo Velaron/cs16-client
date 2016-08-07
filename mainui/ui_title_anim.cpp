@@ -53,8 +53,8 @@ float UI_GetTitleTransFraction( void )
 
 void LerpQuad( ui_quad_t a, ui_quad_t b, float frac, ui_quad_t *c )
 {
-	c->x  = a.x  + (b.x  - a.x ) * frac;
-	c->y  = a.y  + (b.y  - a.y ) * frac;
+	c->x = a.x + (b.x - a.x) * frac;
+	c->y = a.y + (b.y - a.y) * frac;
 	c->lx = a.lx + (b.lx - a.lx) * frac;
 	c->ly = a.ly + (b.ly - a.ly) * frac;
 }
@@ -76,6 +76,7 @@ void UI_DrawTitleAnim()
 	wrect_t r = { 0, uiStatic.buttons_width, 26, 51 };
 
 	float frac = UI_GetTitleTransFraction();/*(sin(gpGlobals->time*4)+1)/2*/;
+
 #ifdef TA_ALT_MODE
 	if( frac == 1 && transition_state == AS_TO_BUTTON )
 		return;
@@ -97,7 +98,7 @@ void UI_DrawTitleAnim()
 void UI_SetTitleAnim( int anim_state, menuPicButton_s *button )
 {
 	// skip buttons which don't call new menu
-	if( !button || (PreClickDepth == uiStatic.menuDepth && anim_state == AS_TO_TITLE) )
+	if( !button || ( PreClickDepth == uiStatic.menuDepth && anim_state == AS_TO_TITLE ) )
 		return;
 
 	// replace cancel\done button with button which called this menu 

@@ -90,8 +90,6 @@ static void UI_ResetToDefaultsDialog( void )
 	uiControls.done.generic.flags ^= QMF_INACTIVE;
 	uiControls.cancel.generic.flags ^= QMF_INACTIVE;
 
-	uiControls.keysList.generic.flags ^= QMF_INACTIVE;
-
 	uiControls.msgBox2.generic.flags ^= QMF_HIDDEN;
 	uiControls.promptMessage.generic.flags ^= QMF_HIDDEN;
 	uiControls.yes.generic.flags ^= QMF_HIDDEN;
@@ -172,11 +170,11 @@ static void UI_Controls_ParseKeysList( void )
 
 		if( !stricmp( token, "blank" ))
 		{
-			// separator
+			// seperator
 			pfile = COM_ParseFile( pfile, token );
 			if( !pfile ) break;	// technically an error
 
-			sprintf( str, "^6%s^7", token );	// enable uiPromptTextColor
+			snprintf( str, sizeof(str), "^6%s^7", token );	// enable uiPromptTextColor
 			StringConcat( uiControls.keysDescription[i], str, strlen( str ) + 1 );
 			AddSpaces( uiControls.keysDescription[i], 256 );	// empty
 			uiControls.keysDescriptionPtr[i] = uiControls.keysDescription[i];
@@ -196,7 +194,7 @@ static void UI_Controls_ParseKeysList( void )
 			pfile = COM_ParseFile( pfile, token );
 			if( !pfile ) break; // technically an error
 
-			sprintf( str, "^6%s^7", token );	// enable uiPromptTextColor
+			snprintf( str, sizeof( str ), "^6%s^7", token );	// enable uiPromptTextColor
 
 			if( keys[0] == -1 ) strcpy( uiControls.firstKey[i], "" );
 			else strncpy( uiControls.firstKey[i], KEY_KeynumToString( keys[0] ), sizeof( uiControls.firstKey[i] ));
@@ -209,15 +207,15 @@ static void UI_Controls_ParseKeysList( void )
 
 			// HACKHACK this color should be get from kb_keys.lst
 			if( !strnicmp( uiControls.firstKey[i], "MOUSE", 5 ))
-				sprintf( str, "^5%s^7", uiControls.firstKey[i] );	// cyan
-			else sprintf( str, "^3%s^7", uiControls.firstKey[i] );	// yellow
+				snprintf( str, sizeof( str ), "^5%s^7", uiControls.firstKey[i] );	// cyan
+			else snprintf( str, sizeof( str ), "^3%s^7", uiControls.firstKey[i] );	// yellow
 			StringConcat( uiControls.keysDescription[i], str, KEY1_LENGTH );
 			AddSpaces( uiControls.keysDescription[i], KEY1_LENGTH );
 
 			// HACKHACK this color should be get from kb_keys.lst
 			if( !strnicmp( uiControls.secondKey[i], "MOUSE", 5 ))
-				sprintf( str, "^5%s^7", uiControls.secondKey[i] );// cyan
-			else sprintf( str, "^3%s^7", uiControls.secondKey[i] );	// yellow
+				snprintf( str, sizeof( str ), "^5%s^7", uiControls.secondKey[i] );// cyan
+			else snprintf( str, sizeof( str ), "^3%s^7", uiControls.secondKey[i] );	// yellow
 
 			StringConcat( uiControls.keysDescription[i], str, KEY2_LENGTH );
 			AddSpaces( uiControls.keysDescription[i],KEY2_LENGTH );
@@ -251,6 +249,8 @@ static void UI_Controls_RestartMenu( void )
 {
 	int lastSelectedKey = uiControls.keysList.curItem;
 	int lastTopItem = uiControls.keysList.topItem;
+	int cursor = uiControls.menu.cursor;
+	int cursorPrev = uiControls.menu.cursorPrev;
 
 	// HACK to prevent mismatch anim stack
 	hold_button_stack = true;
@@ -262,6 +262,8 @@ static void UI_Controls_RestartMenu( void )
 	hold_button_stack = false;
 
 	// restore last key and top item
+	uiControls.menu.cursor = cursor;
+	uiControls.menu.cursorPrev = cursorPrev;
 	uiControls.keysList.curItem = lastSelectedKey;
 	uiControls.keysList.topItem = lastTopItem;
 }
@@ -297,7 +299,7 @@ static void UI_Controls_ResetKeysList( void )
 
 		UI_UnbindCommand( token );
 
-		sprintf( cmd, "bind \"%s\" \"%s\"\n", key, token );
+		snprintf( cmd, sizeof( cmd ), "bind \"%s\" \"%s\"\n", key, token );
 		CLIENT_COMMAND( TRUE, cmd );
 	}
 
@@ -345,7 +347,10 @@ static const char *UI_Controls_KeyFunc( int key, int down )
 			return uiSoundLaunch;
 		}
 
-		if( down && ( key == K_ENTER || key == K_AUX31 || key == K_AUX32 ) && uiControls.dlgMessage.generic.flags & QMF_HIDDEN ) // ENTER, A or SELECT
+		if( down
+			&& ( key == K_ENTER || key == K_AUX1 || key == K_AUX31 || key == K_AUX32 )
+			&& uiControls.dlgMessage.generic.flags & QMF_HIDDEN
+			&& UI_IsCurrentSelected( &uiControls.keysList ) ) // ENTER, A or SELECT
 		{
 			if( !strlen( uiControls.keysBind[uiControls.keysList.curItem] ))
 			{
@@ -365,7 +370,9 @@ static const char *UI_Controls_KeyFunc( int key, int down )
 			return uiSoundKey;
 		}
 
-		if(( key == K_BACKSPACE || key == K_DEL || key == K_AUX30 ) && uiControls.dlgMessage.generic.flags & QMF_HIDDEN )
+		if(( key == K_BACKSPACE || key == K_DEL || key == K_AUX30 )
+		   && uiControls.dlgMessage.generic.flags & QMF_HIDDEN
+		   && UI_IsCurrentSelected( &uiControls.keysList ) )
 		{
 			// delete bindings
 

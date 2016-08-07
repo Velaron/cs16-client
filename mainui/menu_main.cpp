@@ -41,12 +41,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ID_SAVERESTORE	6	
 #define ID_MULTIPLAYER	7
 #define ID_CUSTOMGAME	8
-#define ID_PREVIEWS		9
+#define ID_credits		9
 #define ID_QUIT		10
 #define ID_QUIT_BUTTON	11
 #define ID_MINIMIZE		12
 #define ID_MSGBOX	 	13
 #define ID_MSGTEXT	 	14
+#define ID_DISCONNECT	15
 #define ID_YES	 	130
 #define ID_NO	 	131
 
@@ -57,9 +58,10 @@ typedef struct
 	menuBitmap_s	background;
 	menuPicButton_s	console;
 	menuPicButton_s	resumeGame;
+	menuPicButton_s	disconnect;
 	menuPicButton_s	configuration;
-	menuPicButton_s credits;
 	menuPicButton_s	multiPlayer;
+	menuPicButton_s	credits;
 	menuPicButton_s	quit;
 
 	menuBitmap_s	minimizeBtn;
@@ -94,8 +96,6 @@ UI_Background_Ownerdraw
 */
 static void UI_Background_Ownerdraw( void *self )
 {
-	menuCommon_s	*item = (menuCommon_s *)self;
-
 	// map has background
 	if( CVAR_GET_FLOAT( "cl_background" ))
 		return;
@@ -119,7 +119,6 @@ static void UI_Background_Ownerdraw( void *self )
 	logoPosY = 70 * scaleY;	// 70 it's empirically determined value (magic number)
 
 	DRAW_LOGO( "logo.avi", 0, logoPosY, logoWidth, logoHeight );
-	//UI_DrawPic( 0, logoPosY, logoWidth, logoHeight)
 }
 
 static void UI_QuitDialog( void )
@@ -128,8 +127,10 @@ static void UI_QuitDialog( void )
 	// show\hide quit dialog
 	uiMain.console.generic.flags ^= QMF_INACTIVE; 
 	uiMain.resumeGame.generic.flags ^= QMF_INACTIVE;
+	uiMain.disconnect.generic.flags ^= QMF_INACTIVE;
 	uiMain.configuration.generic.flags ^= QMF_INACTIVE;
 	uiMain.multiPlayer.generic.flags ^= QMF_INACTIVE;
+	uiMain.credits.generic.flags ^= QMF_INACTIVE;
 	uiMain.quit.generic.flags ^= QMF_INACTIVE;
 	uiMain.minimizeBtn.generic.flags ^= QMF_INACTIVE;
 	uiMain.quitButton.generic.flags ^= QMF_INACTIVE;
@@ -147,8 +148,10 @@ static void UI_PromptDialog( void )
 	// show\hide quit dialog
 	uiMain.console.generic.flags ^= QMF_INACTIVE; 
 	uiMain.resumeGame.generic.flags ^= QMF_INACTIVE;
+	uiMain.disconnect.generic.flags ^= QMF_INACTIVE;
 	uiMain.configuration.generic.flags ^= QMF_INACTIVE;
 	uiMain.multiPlayer.generic.flags ^= QMF_INACTIVE;
+	uiMain.credits.generic.flags ^= QMF_INACTIVE;
 	uiMain.quit.generic.flags ^= QMF_INACTIVE;
 	uiMain.minimizeBtn.generic.flags ^= QMF_INACTIVE;
 	uiMain.quitButton.generic.flags ^= QMF_INACTIVE;
@@ -191,11 +194,14 @@ UI_Main_ActivateFunc
 static void UI_Main_ActivateFunc( void )
 {
 	if ( !CL_IsActive( ))
+	{
 		uiMain.resumeGame.generic.flags |= QMF_HIDDEN;
+		uiMain.disconnect.generic.flags |= QMF_HIDDEN;
+	}
 
 	if( gpGlobals->developer )
 	{
-		uiMain.console.generic.y = CL_IsActive() ? 380 : 430;
+		uiMain.console.generic.y = CL_IsActive() ? 330 : 430;
 		UI_ScaleCoords( NULL, &uiMain.console.generic.y, NULL, NULL );
 	}
 }
@@ -256,14 +262,21 @@ static void UI_Main_Callback( void *self, int event )
 	case ID_RESUME:
 		UI_CloseMenu();
 		break;
+	case ID_DISCONNECT:
+		if( CVAR_GET_FLOAT( "host_serverstate" ) )
+			CLIENT_COMMAND( TRUE, "endgame;wait;wait;wait;menu_options;menu_main\n");
+		else
+			CLIENT_COMMAND( TRUE, "cmd disconnect;wait;wait;wait;menu_options;menu_main\n");
+		UI_Main_Menu();
+		break;
 	case ID_MULTIPLAYER:
 		UI_MultiPlayer_Menu();
 		break;
 	case ID_CONFIGURATION:
 		UI_Options_Menu();
 		break;
-	case ID_PREVIEWS:
-		UI_Credits_Menu( );
+	case ID_credits:
+		UI_Credits_Menu();
 		break;
 	case ID_QUIT:
 	case ID_QUIT_BUTTON:
@@ -316,7 +329,7 @@ static void UI_Main_Init( void )
 	uiMain.console.generic.name = "Console";
 	uiMain.console.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
 	uiMain.console.generic.x = 72;
-	uiMain.console.generic.y = CL_IsActive() ? 330 : 380;
+	uiMain.console.generic.y = CL_IsActive() ? 330 : 430;
 	uiMain.console.generic.callback = UI_Main_Callback;
 
 	UI_UtilSetupPicButton( &uiMain.console, PC_CONSOLE );
@@ -327,26 +340,21 @@ static void UI_Main_Init( void )
 	uiMain.resumeGame.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
 	uiMain.resumeGame.generic.statusText = MenuStrings[HINT_RESUME_GAME];
 	uiMain.resumeGame.generic.x = 72;
-	uiMain.resumeGame.generic.y = 430;
+	uiMain.resumeGame.generic.y = 380;
 	uiMain.resumeGame.generic.callback = UI_Main_Callback;
 
 	UI_UtilSetupPicButton( &uiMain.resumeGame, PC_RESUME_GAME );
 
-	if( !CL_IsActive( ))
-	{
-		uiMain.resumeGame.generic.flags |= QMF_HIDDEN;
-	}
+	uiMain.disconnect.generic.id = ID_DISCONNECT;
+	uiMain.disconnect.generic.type = QMTYPE_BM_BUTTON;
+	uiMain.disconnect.generic.name = "Disconnect";
+	uiMain.disconnect.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
+	uiMain.disconnect.generic.statusText = "Disconnect from server";
+	uiMain.disconnect.generic.x = 72;
+	uiMain.disconnect.generic.y = 430;
+	uiMain.disconnect.generic.callback = UI_Main_Callback;
 
-	uiMain.multiPlayer.generic.id = ID_MULTIPLAYER;
-	uiMain.multiPlayer.generic.type = QMTYPE_BM_BUTTON;
-	uiMain.multiPlayer.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
-	uiMain.multiPlayer.generic.name = "Multiplayer";
-	uiMain.multiPlayer.generic.statusText = MenuStrings[HINT_MULTIPLAYER];
-	uiMain.multiPlayer.generic.x = 72;
-	uiMain.multiPlayer.generic.y = 480 ;
-	uiMain.multiPlayer.generic.callback = UI_Main_Callback;
-
-	UI_UtilSetupPicButton( &uiMain.multiPlayer, PC_MULTIPLAYER );
+	UI_UtilSetupPicButton( &uiMain.disconnect, PC_DISCONNECT );
 
 	uiMain.configuration.generic.id = ID_CONFIGURATION;
 	uiMain.configuration.generic.type = QMTYPE_BM_BUTTON;
@@ -354,24 +362,32 @@ static void UI_Main_Init( void )
 	uiMain.configuration.generic.name = "Configuration";
 	uiMain.configuration.generic.statusText = MenuStrings[HINT_CONFIGURATION];
 	uiMain.configuration.generic.x = 72;
-	uiMain.configuration.generic.y = 530;
+	uiMain.configuration.generic.y = 480;
 	uiMain.configuration.generic.callback = UI_Main_Callback;
 
 	UI_UtilSetupPicButton( &uiMain.configuration, PC_CONFIG );
-        
-        uiMain.credits.generic.id = ID_PREVIEWS;
+
+	uiMain.multiPlayer.generic.id = ID_MULTIPLAYER;
+	uiMain.multiPlayer.generic.type = QMTYPE_BM_BUTTON;
+	uiMain.multiPlayer.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
+	uiMain.multiPlayer.generic.name = "Multiplayer";
+	uiMain.multiPlayer.generic.statusText = MenuStrings[HINT_MULTIPLAYER];
+	uiMain.multiPlayer.generic.x = 72;
+	uiMain.multiPlayer.generic.y = 530;
+	uiMain.multiPlayer.generic.callback = UI_Main_Callback;
+
+	UI_UtilSetupPicButton( &uiMain.multiPlayer, PC_MULTIPLAYER );
+
+	uiMain.credits.generic.id = ID_credits;
 	uiMain.credits.generic.type = QMTYPE_BM_BUTTON;
 	uiMain.credits.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
 	uiMain.credits.generic.name = "Credits";
-	uiMain.credits.generic.statusText = "Developer credits";
+	uiMain.credits.generic.statusText = "Show developer credits";
 	uiMain.credits.generic.x = 72;
 	uiMain.credits.generic.y = 580;
 	uiMain.credits.generic.callback = UI_Main_Callback;
 
-	UI_UtilSetupPicButton( &uiMain.credits, PC_VIEW_README );	
-
-	if ( gMenu.m_gameinfo.gamemode == GAME_SINGLEPLAYER_ONLY )
-		uiMain.multiPlayer.generic.flags |= QMF_GRAYED;
+	UI_UtilSetupPicButton( &uiMain.credits, PC_VIEW_README );
 
 	uiMain.quit.generic.id = ID_QUIT;
 	uiMain.quit.generic.type = QMTYPE_BM_BUTTON;
@@ -458,12 +474,11 @@ static void UI_Main_Init( void )
 	if ( gpGlobals->developer )
 		UI_AddItem( &uiMain.menu, (void *)&uiMain.console );
 
+	UI_AddItem( &uiMain.menu, (void *)&uiMain.disconnect );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.resumeGame );
-
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.configuration );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.multiPlayer );
-        UI_AddItem( &uiMain.menu, (void *)&uiMain.credits );
-
+	UI_AddItem( &uiMain.menu, (void *)&uiMain.credits );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.quit );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.minimizeBtn );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.quitButton );

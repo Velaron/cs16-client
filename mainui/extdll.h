@@ -16,14 +16,6 @@ GNU General Public License for more details.
 #ifndef EXTDLL_H
 #define EXTDLL_H
 
-// shut-up compiler warnings
-#if defined(MSC_VER)
-#pragma warning(disable : 4305)	// int or float data truncation
-#pragma warning(disable : 4201)	// nameless struct/union
-#pragma warning(disable : 4514)	// unreferenced inline function removed
-#pragma warning(disable : 4100)	// unreferenced formal parameter
-#pragma warning(disable : 4244)	// conversion from 'float' to 'int', possible loss of data
-#endif
 // Misc C-runtime library headers
 #include <assert.h>
 #include <string.h>
