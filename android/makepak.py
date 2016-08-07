@@ -42,7 +42,7 @@ for entry in fileentries:
     pakfile.write(struct.Struct("<l").pack(entry.length))
     tablesize = tablesize + 64
 
-print "Done. " + i + " files packed to " + pakfilename + "."
+print "Done. " + str(i) + " files packed to " + pakfilename + "."
 
 #return to the header and write the values correctly
 pakfile.seek(0)
