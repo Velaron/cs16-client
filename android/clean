@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo " ------- CLEANING ------- "
+rm -rf obj/ libs/armeabi-v7a libs/armeabi libs/x86 bin/ gen/ assets/ pak/
