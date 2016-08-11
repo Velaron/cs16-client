@@ -37,6 +37,7 @@ LOCAL_SRC_FILES := basemenu.cpp \
            menu_credits.cpp \
 	   menu_filedialog.cpp \
            menu_gameoptions.cpp \
+           menu_gamepad.cpp \
            menu_internetgames.cpp \
            menu_langame.cpp \
            menu_main.cpp \
