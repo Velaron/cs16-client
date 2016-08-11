@@ -31,9 +31,6 @@ echo "*****************************************"
 
 set -x
 
-# Clean
-rm -rf obj/ libs/armeabi-v7a libs/armeabi libs/x86 bin/ gen/ assets/ pak/
-
 # Regenerate PAK file
 mkdir -p pak/
 mkdir -p assets/
