@@ -26,10 +26,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ART_BANNER			"gfx/shell/head_audio"
 
 #define ID_BACKGROUND 0
+#define ID_BANNER 1
+
 enum
 {
-	ID_BANNER = 1,
-	ID_DONE,
+	ID_DONE = 2,
 	ID_RT_COMMAND,
 	ID_RT_THRESHOLD,
 	ID_LT_COMMAND,
@@ -105,6 +106,7 @@ static void UI_GamePad_GetConfig( void )
 {
 	float side, forward, pitch, yaw;
 	char binding[7] = { 0 };
+	static char lt_threshold_text[8], rt_threshold_text[8];
 
 	strcpy( uiGamePad.rt_command.buffer, CVAR_GET_STRING( "joy_rt_command") );
 	strcpy( uiGamePad.lt_command.buffer, CVAR_GET_STRING( "joy_lt_command") );
@@ -126,7 +128,7 @@ static void UI_GamePad_GetConfig( void )
 	uiGamePad.invYaw.enabled = yaw < 0.0f ? true: false;
 
 	// I made a monster...
-	for( size_t i = 0; i < sizeof( binding ) - 1; i++ )
+	for( int i = 0; i < sizeof( binding ) - 1; i++ )
 	{
 		switch( binding[i] )
 		{

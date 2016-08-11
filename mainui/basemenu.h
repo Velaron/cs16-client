@@ -91,6 +91,9 @@ GNU General Public License for more details.
 #define UI_BUTTON_CHARWIDTH		14	// empirically determined value
 
 #define ID_BACKGROUND		0	// catch warning on change this
+#define ID_BANNER			1	// catch warning on change this
+#define ID_YES				130	// catch warning on change this
+#define ID_NO				131	// catch warning on change this
 
 // Generic types
 typedef enum
@@ -266,7 +269,7 @@ typedef struct
 typedef struct
 {
 	menuCommon_s	generic;
-	bool		enabled;
+	int		enabled;
 	const char	*emptyPic;
 	const char	*focusPic;	// can be replaced with pressPic manually
 	const char	*checkPic;
@@ -452,6 +455,10 @@ void UI_PopMenu( void );
 
 // Precache
 void UI_Main_Precache( void );
+void UI_NewGame_Precache( void );
+void UI_LoadGame_Precache( void );
+void UI_SaveGame_Precache( void );
+void UI_SaveLoad_Precache( void );
 void UI_MultiPlayer_Precache( void );
 void UI_Options_Precache( void );
 void UI_InternetGames_Precache( void );
@@ -465,19 +472,25 @@ void UI_Audio_Precache( void );
 void UI_Video_Precache( void );
 void UI_VidOptions_Precache( void );
 void UI_VidModes_Precache( void );
+void UI_CustomGame_Precache( void );
 void UI_Credits_Precache( void );
+void UI_GoToSite_Precache( void );
 void UI_Touch_Precache( void );
 void UI_TouchOptions_Precache( void );
 void UI_TouchButtons_Precache( void );
 void UI_TouchEdit_Precache( void );
 void UI_FileDialog_Precache( void );
 void UI_GamePad_Precache( void );
+void UI_RecDemo_Precache( void );
 void UI_PlayDemo_Precache( void );
 void UI_PlayRec_Precache( void );
-void UI_RecDemo_Precache( void );
 
 // Menus
 void UI_Main_Menu( void );
+void UI_NewGame_Menu( void );
+void UI_LoadGame_Menu( void );
+void UI_SaveGame_Menu( void );
+void UI_SaveLoad_Menu( void );
 void UI_MultiPlayer_Menu( void );
 void UI_Options_Menu( void );
 void UI_InternetGames_Menu( void );
@@ -491,6 +504,7 @@ void UI_Audio_Menu( void );
 void UI_Video_Menu( void );
 void UI_VidOptions_Menu( void );
 void UI_VidModes_Menu( void );
+void UI_CustomGame_Menu( void );
 void UI_Credits_Menu( void );
 void UI_Touch_Menu( void );
 void UI_TouchOptions_Menu( void );
@@ -500,9 +514,10 @@ void UI_FileDialog_Menu( void );
 void UI_TouchButtons_AddButtonToList( const char *name, const char *texture, const char *command, unsigned char *color, int flags );
 void UI_TouchButtons_GetButtonList();
 void UI_GamePad_Menu( void );
+void UI_RecDemo_Menu( void );
 void UI_PlayDemo_Menu( void );
 void UI_PlayRec_Menu( void );
-void UI_RecDemo_Menu( void );
+
 //
 //-----------------------------------------------------
 //

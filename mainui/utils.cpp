@@ -102,6 +102,7 @@ void StringConcat( char *dst, const char *src, size_t size )
 	dlen = ColorStrlen( dst );
 	d += strlen( dst );
 #endif
+
 	n = size - dlen;
 
 	if ( n == 0 ) return;
@@ -214,7 +215,7 @@ char *Info_ValueForKey( const char *s, const char *key )
 		o = pkey;
 		while( *s != '\\' && *s != '\n' )
 		{
-			if( !*s ) return (char*)"";
+			if( !*s ) return "";
 			*o++ = *s++;
 		}
 
@@ -225,14 +226,14 @@ char *Info_ValueForKey( const char *s, const char *key )
 
 		while( *s != '\\' && *s != '\n' && *s )
 		{
-			if( !*s ) return (char*)"";
+			if( !*s ) return "";
 			*o++ = *s++;
 		}
 		*o = 0;
 
 		if( !strcmp( key, pkey ))
 			return value[valueindex];
-		if( !*s ) return (char*)"";
+		if( !*s ) return "";
 		s++;
 	}
 }
@@ -1183,6 +1184,8 @@ UI_Slider_Key
 */
 const char *UI_Slider_Key( menuSlider_s *sl, int key, int down )
 {
+	int	sliderX;
+
 	if( !down )
 	{
 		if( sl->keepSlider )
@@ -1203,6 +1206,7 @@ const char *UI_Slider_Key( menuSlider_s *sl, int key, int down )
 			return uiSoundNull;
 
 		// find the current slider position
+		sliderX = sl->generic.x2 + (sl->drawStep * (sl->curValue / sl->range));
 		sl->keepSlider = true;
 		int	dist, numSteps;
 		
@@ -1458,7 +1462,7 @@ void UI_CheckBox_Draw( menuCheckBox_s *cb )
 		return; // grayed
 	}
 
-	if( ( ( cb->generic.flags & QMF_MOUSEONLY ) && !( cb->generic.flags & QMF_HASMOUSEFOCUS ) )
+	if(( cb->generic.flags & QMF_MOUSEONLY ) && !( cb->generic.flags & QMF_HASMOUSEFOCUS )
 	   || ( (menuCommon_s *)cb != (menuCommon_s *)UI_ItemAtCursor( cb->generic.parent ) ) )
 	{
 		if( !cb->enabled )
@@ -2159,7 +2163,7 @@ void UI_Bitmap_Draw( menuBitmap_s *b )
 	}
 
 	//CR
-	if( b->generic.id == 1 )
+	if( b->generic.id == ID_BANNER )
 	{
 		// don't draw banners until transition is done
 #ifdef TA_ALT_MODE
@@ -2276,28 +2280,27 @@ const char *UI_PicButton_Key( menuPicButton_s *b, int key, int down )
 	if( sound && ( b->generic.flags & QMF_SILENT ))
 		sound = uiSoundNull;
 
-	if( b->generic.flags & QMF_ACT_ONRELEASE )
+	if( sound && b->generic.callback )
 	{
-		if( sound && b->generic.callback )
+		if( b->generic.flags & QMF_ACT_ONRELEASE )
 		{
-			int	event;
-			
-			if( down ) 
+			int event;
+			if( down )
 			{
 				event = QM_PRESSED;
 				b->generic.bPressed = true;
 			}
-			else event = QM_ACTIVATED;
-			//CR
+			else
+				event = QM_ACTIVATED;
+
 			UI_TACheckMenuDepth();
 			b->generic.callback( b, event );
 			UI_SetTitleAnim( AS_TO_TITLE, b );
 		}
-	}
-	else if( down )
-	{
-		if( sound && b->generic.callback )
+		else if( down )
+		{
 			b->generic.callback( b, QM_ACTIVATED );
+		}
 	}
 
 	return sound;

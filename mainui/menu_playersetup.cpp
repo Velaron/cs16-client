@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ART_BANNER		"gfx/shell/head_customize"
 
 #undef ID_BACKGROUND
+#undef ID_BANNER
 enum
 {
 	ID_BACKGROUND = 0,
