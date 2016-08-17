@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">CS16Client</string>
+    <string name="title_activity_launcher">CS16Client Başlatıcısı</string>
+    <string name="launch_button">CS16-client\'i Başlat!</string>
+    <string name="cmd_args_text">Komut satırı argümanları:</string>
+    <string name="cmd_args_text2">Buna niye ihtiyacınız olduğunu bilmeden dokunmayın!</string>
+    <string name="not_found_msg">Hiçbir şey bulunamadı. APK\'yi kontrol edin veya başka sunucu seçin.</string>
+    <string name="not_found_title">Bir şeyler yolunda gitmedi...</string>
+    <string name="not_implemented_msg">Bu özellik henüz tamamlanmadı.</string>
+    <string name="not_implemented_title">Tamamlanmadı!</string>
+	<string name="enablezbot">ZBot botlarını aktif et</string>
+	<string name="enableyapb">YaPB botlarını aktif et</string>
+	<string name="defCmdArgs">-console -game cstrike -bots</string>
+	<string name="basedir_text">Yolu oyun dizinine ayarlayın:</string>
+	<string name="basedir_text2">Xash3D Android tercihlerini kullanmak için boş bırakın.</string>
+	<!--<string name="ad_unit_id">Не дам! :P</string>-->
+    <!--
+	<string name="text_shortcut">SoHL shortcut</string>
+	<string name="shortcut_button_save">Save shortcut</string>
+	<string name="gamedir">Mod directory</string>
+	<string name="shortcut_name">Shortcut name</string>-->
+</resources>
