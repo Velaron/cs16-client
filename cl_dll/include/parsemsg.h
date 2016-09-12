@@ -23,10 +23,10 @@
 class BufferReader
 {
 public:
-	BufferReader( void *buf, int size ) :
-		m_szMsgName( "not set" ), m_pBuf( (uint8_t*)buf ), m_iSize( size ), m_iRead( 0 ), m_bBad( false ) {}
 	BufferReader( const char *name, void *buf, int size ) :
 		m_szMsgName( name ), m_pBuf( (uint8_t*)buf ), m_iSize( size ), m_iRead( 0 ), m_bBad( false ) {}
+	BufferReader( void *buf, int size ) : BufferReader( "not set", buf, size ) {}
+
 #ifdef _DEBUG
 	inline ~BufferReader( void );
 #endif
