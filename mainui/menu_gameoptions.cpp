@@ -114,9 +114,13 @@ static void UI_GameOptions_UpdateConfig( void )
 {
 	static char	corpseStayText[8];
 	static char	maxpacketText[8];
+	static char decalsText[8];
 
 	sprintf( corpseStayText, "%.f", uiGameOptions.cl_corpsestay.curValue );
 	uiGameOptions.cl_corpsestay.generic.name = corpseStayText;
+
+	sprintf( decalsText, "%.f", uiGameOptions.mp_decals.curValue );
+	uiGameOptions.mp_decals.generic.name = decalsText;
 	if( uiGameOptions.maxPacket.curValue >= 1500 )
 	{
 		sprintf( maxpacketText, "default" );
@@ -198,6 +202,7 @@ static void UI_GameOptions_GetConfig( void )
 {
 	uiGameOptions.cl_corpsestay.curValue = uiGameInitial.cl_corpsestay = CVAR_GET_FLOAT( "cl_corpsestay" );
 	uiGameOptions.mp_decals.curValue = uiGameInitial.mp_decals = CVAR_GET_FLOAT( "mp_decals" );
+	uiGameOptions.maxPacket.curValue = uiGameInitial.maxPacket = CVAR_GET_FLOAT( "cl_maxpacket" );
 
 	uiGameInitial.hand = uiGameOptions.hand.enabled = !CVAR_GET_FLOAT( "hand" );
 	uiGameInitial.oldstylemenu = uiGameOptions.oldstylemenu.enabled = !CVAR_GET_FLOAT( "_vgui_menus" );
@@ -341,7 +346,8 @@ static void UI_GameOptions_Init( void )
 	UI_GenItemInit( uiGameOptions.mp_decals_message.generic, 10000, QMTYPE_ACTION, QMF_SMALLFONT|QMF_INACTIVE|QMF_DROPSHADOW,
 		420, y += gap, "Multiplayer decal limit:", NULL);
 	uiGameOptions.mp_decals_message.generic.color = uiColorHelp;
-	UI_GenItemInit( uiGameOptions.mp_decals.generic, ID_CORSPESTAY, QMTYPE_SPINCONTROL, QMF_CENTER_JUSTIFY|QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW,
+
+	UI_GenItemInit( uiGameOptions.mp_decals.generic, ID_DECALS, QMTYPE_SPINCONTROL, QMF_CENTER_JUSTIFY|QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW,
 		450, y += gap, "300", NULL );
 	uiGameOptions.mp_decals.generic.height = 26;
 	uiGameOptions.mp_decals.generic.width = 168;

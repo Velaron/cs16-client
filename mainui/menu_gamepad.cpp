@@ -98,7 +98,6 @@ static void UI_GamePad_GetConfig( void )
 {
 	float side, forward, pitch, yaw;
 	char binding[7] = { 0 };
-	static char lt_threshold_text[8], rt_threshold_text[8];
 
 	strncpy( binding, CVAR_GET_STRING( "joy_axis_binding"), sizeof( binding ));
 
@@ -118,7 +117,7 @@ static void UI_GamePad_GetConfig( void )
 	uiGamePad.invYaw.enabled = yaw < 0.0f ? true: false;
 
 	// I made a monster...
-	for( int i = 0; i < sizeof( binding ) - 1; i++ )
+	for( size_t i = 0; i < sizeof( binding ) - 1; i++ )
 	{
 		switch( binding[i] )
 		{
