@@ -55,7 +55,7 @@ int CHudMenu :: Init( void )
 	HOOK_COMMAND( "client_buy_close", OldStyleMenuClose );
 	HOOK_COMMAND( "showvguimenu", ShowVGUIMenu );
 
-	_extended_menus = CVAR_CREATE("_extended_menus", "1", FCVAR_ARCHIVE);
+	_extended_menus = CVAR_CREATE("_extended_menus", "0", FCVAR_ARCHIVE);
 
 	InitHUDData();
 
