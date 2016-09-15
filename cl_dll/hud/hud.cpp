@@ -100,7 +100,7 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( HostageK );
 	HOOK_MESSAGE( ShadowIdx );
 
-	CVAR_CREATE( "_vgui_menus", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	CVAR_CREATE( "_vgui_menus", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_ah", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
