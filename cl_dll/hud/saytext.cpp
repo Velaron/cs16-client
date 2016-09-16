@@ -197,7 +197,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	strncpy( szBuf[1], reader.ReadString(), sizeof(szBuf[1]));
 	strncpy( szBuf[2], reader.ReadString(), sizeof(szBuf[2]));
 
-	const char *fmt =  "\x02%s: %s";
+	const char *fmt =  "\x02%s";
 	int i = 0;
 	for( i = CHAT_CT; i < CHAT_NAME_CHANGE; i++ )
 	{
@@ -228,6 +228,10 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	if( i == CHAT_NAME_CHANGE )
 	{
 		snprintf( dst, sizeof( dst ), fmt, szBuf[1], szBuf[2]);
+	}
+	else if( szBuf[1][0] == '\0' && szBuf[2][0] == '\0' )
+	{
+		snprintf( dst, sizeof( dst ), fmt, szBuf[0] );
 	}
 	else
 	{
