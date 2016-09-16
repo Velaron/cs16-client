@@ -185,9 +185,9 @@ private:
 	bool m_bDrawCrosshair;
 	int m_iAmmoLastCheck;
 
-	cvar_t *m_pClCrosshairColor;
-	cvar_t *m_pClCrosshairTranslucent;
-	cvar_t *m_pClCrosshairSize;
+	convar_t *m_pClCrosshairColor;
+	convar_t *m_pClCrosshairTranslucent;
+	convar_t *m_pClCrosshairSize;
 	cvar_t *m_pClDynamicCrosshair;
 	cvar_t *m_pHud_FastSwitch;
 	cvar_t *m_pHud_DrawHistory_Time;

@@ -19,6 +19,7 @@
 //
 
 #include "hud.h"
+#include "cvardef.h"
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "pm_shared.h"
@@ -354,9 +355,9 @@ int CHudAmmo::Init(void)
 	m_pHud_DrawHistory_Time = CVAR_CREATE( "hud_drawhistory_time", HISTORY_DRAW_TIME, 0 );
 	m_pHud_FastSwitch = CVAR_CREATE( "hud_fastswitch", "0", FCVAR_ARCHIVE );		// controls whether or not weapons can be selected in one keypress
 	CVAR_CREATE( "cl_observercrosshair", "1", 0 );
-	m_pClCrosshairColor = CVAR_CREATE( "cl_crosshair_color", "50 250 50", FCVAR_ARCHIVE );
-	m_pClCrosshairTranslucent = CVAR_CREATE( "cl_crosshair_translucent", "1", FCVAR_ARCHIVE );
-	m_pClCrosshairSize = CVAR_CREATE( "cl_crosshair_size", "auto", FCVAR_ARCHIVE );
+	m_pClCrosshairColor = (convar_t*)CVAR_CREATE( "cl_crosshair_color", "50 250 50", FCVAR_ARCHIVE );
+	m_pClCrosshairTranslucent = (convar_t*)CVAR_CREATE( "cl_crosshair_translucent", "1", FCVAR_ARCHIVE );
+	m_pClCrosshairSize = (convar_t*)CVAR_CREATE( "cl_crosshair_size", "auto", FCVAR_ARCHIVE );
 	m_pClDynamicCrosshair = CVAR_CREATE("cl_dynamiccrosshair", "1", FCVAR_ARCHIVE);
 
 	m_iFlags = HUD_DRAW | HUD_THINK; //!!!
@@ -367,8 +368,8 @@ int CHudAmmo::Init(void)
 
 	m_cvarB = m_cvarR = m_cvarG = -1;
 	m_iCurrentCrosshair = 0;
-	m_bAdditive = 1;
-	m_iCrosshairScaleBase = 1024;
+	m_bAdditive = true;
+	m_iCrosshairScaleBase = -1;
 	m_bDrawCrosshair = true;
 
 	gWR.Init();
@@ -1386,6 +1387,9 @@ void CHudAmmo::DrawCrosshair( float flTime )
 
 void CHudAmmo::CalcCrosshairSize()
 {
+	if( !m_pClCrosshairSize->modified )
+		return;
+
 	const char *size = m_pClCrosshairSize->string;
 
 	if( !stricmp(size, "auto") )
@@ -1415,6 +1419,8 @@ void CHudAmmo::CalcCrosshairSize()
 	{
 		m_iCrosshairScaleBase = 640;
 	}
+
+	m_pClCrosshairSize->modified = false;
 	return;
 }
 
@@ -1437,17 +1443,18 @@ void CHudAmmo::CalcCrosshairDrawMode()
 
 void CHudAmmo::CalcCrosshairColor()
 {
+	if( !m_pClCrosshairColor->modified )
+		return;
+
 	const char *colors = m_pClCrosshairColor->string;
 
-	int tempR;
-	int tempG;
-	int tempB;
+	sscanf( colors, "%d %d %d", &m_cvarR, &m_cvarG, &m_cvarB);
 
-	sscanf( colors, "%d %d %d", &tempR, &tempG, &tempB);
+	m_R = m_cvarR = bound( 0, m_cvarR, 255 );
+	m_G = m_cvarG = bound( 0, m_cvarG, 255 );
+	m_B = m_cvarB = bound( 0, m_cvarB, 255 );
 
-	m_R = m_cvarR = bound( 0, tempR, 255 );
-	m_G = m_cvarG = bound( 0, tempG, 255 );
-	m_B = m_cvarB = bound( 0, tempB, 255 );
+	m_pClCrosshairSize->modified = false;
 }
 
 //

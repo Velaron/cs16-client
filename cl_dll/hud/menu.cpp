@@ -182,32 +182,25 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 	// so execute it and exit
 	if( _extended_menus->value != 0.0f )
 	{
-		if( !strcmp(menustring, "#RadioA") )
+		if( !strncmp(menustring, "#Radio", 6 ) )
 		{
-			ShowVGUIMenu(MENU_RADIOA);
-			return 1;
+			if( menustring[6] == 'A' )
+			{
+				ShowVGUIMenu(MENU_RADIOA); return 1;
+			}
+			else if( menustring[6] == 'B' )
+			{
+				ShowVGUIMenu(MENU_RADIOB); return 1;
+			}
+			else if( menustring[6] == 'B' )
+			{
+				ShowVGUIMenu(MENU_RADIOC); return 1;
+			}
+			else ShowVGUIMenu( MENU_NUMERICAL_MENU ); // we just show touch screen numbers
 		}
-		else if( !strcmp(menustring, "#RadioB"))
-		{
-			ShowVGUIMenu(MENU_RADIOB);
-			return 1;
-		}
-		else if( !strcmp(menustring, "#RadioC"))
-		{
-			ShowVGUIMenu(MENU_RADIOC);
-			return 1;
-		}
-		else
-		{
-			// we just show touch screen numbers
-			ShowVGUIMenu(MENU_NUMERICAL_MENU);
-		}
+		else ShowVGUIMenu(MENU_NUMERICAL_MENU);
 	}
-	else
-	{
-		// we just show touch screen numbers
-		ShowVGUIMenu(MENU_NUMERICAL_MENU);
-	}
+	else ShowVGUIMenu(MENU_NUMERICAL_MENU);
 
 	if ( !m_fWaitingForMore ) // this is the start of a new menu
 	{
@@ -261,7 +254,7 @@ int CHudMenu::MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 {
 	BufferReader reader( pszName, pbuf, iSize );
 
-	m_bAllowSpec = !!reader.ReadByte();
+	m_bAllowSpec = (bool)reader.ReadByte();
 
 	return 1;
 }
