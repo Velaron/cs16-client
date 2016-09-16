@@ -452,7 +452,7 @@ void SetPoint( float x, float y, float z, float (*matrix)[4])
 
 int CHud::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader(pbuf, iSize);
+	BufferReader reader( pszName, pbuf, iSize);
 
 	int iWeatherType = reader.ReadByte();
 

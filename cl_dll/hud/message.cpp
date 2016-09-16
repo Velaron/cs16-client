@@ -565,10 +565,10 @@ void CHudMessage::MessageAdd(client_textmessage_t * newMessage )
 int CHudMessage::MsgFunc_HudTextPro( const char *pszName, int iSize, void *pbuf )
 {
 	const char *sz;
-	//int hint;
-	BufferReader reader(pbuf, iSize);
+	int hint;
+	BufferReader reader( pszName, pbuf, iSize );
 	sz = reader.ReadString();
-	//hint = reader.ReadByte();
+	hint = reader.ReadByte();
 
 	MessageAdd(sz, gHUD.m_flTime/*, hint, Newfont*/); // TODO
 

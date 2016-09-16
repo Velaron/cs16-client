@@ -99,6 +99,7 @@ public:
 	virtual void Think(void) {return;}
 	virtual void Reset(void) {return;}
 	virtual void InitHUDData( void ) {}		// called every time a server is connected to
+	virtual void Shutdown( void ) {}
 
 };
 
@@ -758,6 +759,7 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw( float flTime );
+	void Shutdown( void );
 
 private:
 	float left, right, centerx, centery;
@@ -796,6 +798,8 @@ public:
 	int Draw( float flTime );
 	void InitHUDData();
 	void Reset();
+	void Shutdown();
+
 	CHudMsgFunc( SpecHealth );
 	CHudMsgFunc( SpecHealth2 );
 
@@ -846,7 +850,8 @@ public:
 
 	void Init( void );
 	void VidInit( void );
-	void Think(void);
+	void Think( void );
+	void Shutdown( void );
 	int Redraw( float flTime, int intermission );
 	int UpdateClientData( client_data_t *cdata, float time );
 	void AddHudElem(CHudBase *p);
@@ -889,6 +894,11 @@ public:
 	inline int GetCharHeight( )
 	{
 		return m_scrinfo.iCharHeight;
+	}
+
+	inline bool IsCZero( )
+	{
+		return m_bIsCZero;
 	}
 
 
@@ -992,6 +1002,7 @@ private:
 	int	m_iForceCamera;
 	int m_iForceChaseCam;
 	int m_iFadeToBlack;
+	bool m_bIsCZero;
 
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
 	// freed in ~CHud()

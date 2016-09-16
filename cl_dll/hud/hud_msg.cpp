@@ -119,7 +119,7 @@ int CHud :: MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )
 
 int CHud::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader(pbuf, iSize);
+	BufferReader reader( pszName, pbuf, iSize );
 
 	g_PlayerExtraInfo[33].origin.x = reader.ReadCoord();
 	g_PlayerExtraInfo[33].origin.y = reader.ReadCoord();
@@ -156,7 +156,7 @@ int CHud::MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf)
 int CHud::MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf)
 {
 
-	BufferReader reader(pbuf, iSize);
+	BufferReader reader( pszName, pbuf, iSize );
 	int Flag = reader.ReadByte();
 	int idx = reader.ReadByte();
 	if ( idx <= MAX_HOSTAGES )
@@ -179,7 +179,7 @@ int CHud::MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf)
 
 int CHud::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader(pbuf, iSize);
+	BufferReader reader( pszName, pbuf, iSize );
 	int idx = reader.ReadByte();
 	if ( idx <= MAX_HOSTAGES )
 	{
@@ -193,7 +193,7 @@ int CHud::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 
 int CHud::MsgFunc_ShadowIdx(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader(pbuf, iSize);
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int idx = reader.ReadByte();
 	g_StudioRenderer.StudioSetShadowSprite(idx);

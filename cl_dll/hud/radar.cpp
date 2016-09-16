@@ -31,7 +31,7 @@ version.
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "draw_util.h"
-
+#include "triangleapi.h"
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
@@ -40,6 +40,46 @@ DECLARE_COMMAND( m_Radar, ShowRadar )
 DECLARE_COMMAND( m_Radar, HideRadar )
 
 DECLARE_MESSAGE( m_Radar, Radar )
+
+static byte	r_RadarCross[8][8] =
+{
+{1,1,0,0,0,0,1,1},
+{1,1,1,0,0,1,1,1},
+{0,1,1,1,1,1,1,0},
+{0,0,1,1,1,1,0,0},
+{0,0,1,1,1,1,0,0},
+{0,1,1,1,1,1,1,0},
+{1,1,1,0,0,1,1,1},
+{1,1,0,0,0,0,1,1}
+};
+
+static byte	r_RadarT[8][8] =
+{
+{1,1,1,1,1,1,1,1},
+{1,1,1,1,1,1,1,1},
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0}
+};
+
+static byte	r_RadarFlippedT[8][8] =
+{
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0},
+{1,1,1,1,1,1,1,1},
+{1,1,1,1,1,1,1,1}
+};
+
+#define BLOCK_SIZE_MAX 1024
+
+static byte	data2D[BLOCK_SIZE_MAX*BLOCK_SIZE_MAX*4];	// intermediate texbuffer
 
 int CHudRadar::Init()
 {
@@ -50,6 +90,8 @@ int CHudRadar::Init()
 	m_iFlags = HUD_DRAW;
 
 	cl_radartype = CVAR_CREATE( "cl_radartype", "0", FCVAR_ARCHIVE );
+
+	bTexturesInitialized = bUseRenderAPI = false;
 
 	gHUD.AddHudElem( this );
 	return 1;
@@ -66,8 +108,82 @@ void CHudRadar::Reset()
 	}
 }
 
+static void Radar_InitBitmap( int w, int h, byte *buf )
+{
+	for( int x = 0; x < w; x++ )
+	{
+		for( int y = 0; y < h; y++ )
+		{
+			data2D[(y * 8 + x) * 4 + 0] = 255;
+			data2D[(y * 8 + x) * 4 + 1] = 255;
+			data2D[(y * 8 + x) * 4 + 2] = 255;
+			data2D[(y * 8 + x) * 4 + 3] = buf[y*h + x]  * 255;
+		}
+	}
+}
+
+int CHudRadar::InitBuiltinTextures( void )
+{
+	texFlags_t defFlags = (texFlags_t)(TF_NOMIPMAP | TF_NOPICMIP | TF_NEAREST | TF_CLAMP | TF_HAS_ALPHA);
+
+	if( bTexturesInitialized )
+		return 1;
+
+	const struct
+	{
+		const char	*name;
+		byte	*buf;
+		int		*texnum;
+		int		w, h;
+		void	(*init)( int w, int h, byte *buf );
+		int	texType;
+	}
+	textures[] =
+	{
+	{ "radarT",		   (byte*)r_RadarT,      &hT,		 8, 8, Radar_InitBitmap, TEX_CUSTOM },
+	{ "radarcross",    (byte*)r_RadarCross,    &hCross,    8, 8, Radar_InitBitmap, TEX_CUSTOM },
+	{ "radarflippedT", (byte*)r_RadarFlippedT, &hFlippedT, 8, 8, Radar_InitBitmap, TEX_CUSTOM }
+	};
+	size_t	i, num_builtin_textures = sizeof( textures ) / sizeof( textures[0] );
+
+	for( i = 0; i < num_builtin_textures; i++ )
+	{
+		textures[i].init( textures[i].w, textures[i].h, textures[i].buf );
+		*textures[i].texnum = gRenderAPI.GL_CreateTexture( textures[i].name, textures[i].w, textures[i].h, data2D, defFlags );
+		if( *textures[i].texnum == 0 )
+		{
+			for( size_t j = 0; j < i; i++ )
+			{
+				gRenderAPI.GL_FreeTexture( *textures[i].texnum );
+			}
+			return 0;
+		}
+
+		gRenderAPI.GL_SetTextureType( *textures[i].texnum, textures[i].texType );
+	}
+
+	hDot = gRenderAPI.GL_LoadTexture( "*white", NULL, 0, 0 );
+
+	bTexturesInitialized = true;
+
+	return 1;
+}
+
+void CHudRadar::Shutdown( void )
+{
+	// GL_FreeTexture( hDot ); engine inner texture
+	if( bTexturesInitialized )
+	{
+		gRenderAPI.GL_FreeTexture( hT );
+		gRenderAPI.GL_FreeTexture( hFlippedT );
+		gRenderAPI.GL_FreeTexture( hCross );
+	}
+}
+
 int CHudRadar::VidInit(void)
 {
+	bUseRenderAPI = g_iXash && InitBuiltinTextures();
+
 	m_hRadar.SetSpriteByName( "radar" );
 	m_hRadarOpaque.SetSpriteByName( "radaropaque" );
 	return 1;
@@ -114,6 +230,14 @@ int CHudRadar::Draw(float flTime)
 	{
 		SPR_Set( m_hRadar.spr, 25, 75, 25 );
 		SPR_DrawAdditive( 0, 0, 0, &m_hRadarOpaque.rect );
+	}
+
+	if( bUseRenderAPI )
+	{
+		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+		gEngfuncs.pTriAPI->Brightness( 1 );
+		gRenderAPI.GL_SelectTexture( 0 );
 	}
 
 	for(int i = 0; i < 33; i++)
@@ -255,29 +379,68 @@ void CHudRadar::DrawPlayerLocation()
 
 void CHudRadar::DrawRadarDot(int x, int y, int size, int r, int g, int b, int a)
 {
-	FillRGBA(62.5f + x - size/2.0f, 62.5f + y - size/2.0f, size, size, r, g, b, a);
+	if( bUseRenderAPI )
+	{
+		gRenderAPI.GL_Bind( 0, hDot );
+		gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
+		DrawUtils::Draw2DQuad( 62.5f + x - size/2, 62.5f + y - size/2,
+							   62.5f + x + size/2, 62.5f + y + size/2);
+	}
+	else
+	{
+		FillRGBA(62.5f + x - size/2.0f, 62.5f + y - size/2.0f, size, size, r, g, b, a);
+	}
 }
 
 void CHudRadar::DrawCross(int x, int y, int size, int r, int g, int b, int a)
 {
-	FillRGBA(62.5f + x, 62.5f + y, size, size, r, g, b, a);
-	FillRGBA(62.5f + x - size, 62.5f + y - size, size, size, r, g, b, a);
-	FillRGBA(62.5f + x - size, 62.5f + y + size, size, size, r, g, b, a);
-	FillRGBA(62.5f + x + size, 62.5f + y - size, size, size, r, g, b, a);
-	FillRGBA(62.5f + x + size, 62.5f + y + size, size, size, r, g, b, a);
-
+	if( bUseRenderAPI )
+	{
+		gRenderAPI.GL_Bind( 0, hCross );
+		gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
+		DrawUtils::Draw2DQuad( 62.5f + x - size*2, 62.5f + y - size*2,
+							   62.5f + x + size*2, 62.5f + y + size*2);
+	}
+	else
+	{
+		FillRGBA(62.5f + x, 62.5f + y, size, size, r, g, b, a);
+		FillRGBA(62.5f + x - size, 62.5f + y - size, size, size, r, g, b, a);
+		FillRGBA(62.5f + x - size, 62.5f + y + size, size, size, r, g, b, a);
+		FillRGBA(62.5f + x + size, 62.5f + y - size, size, size, r, g, b, a);
+		FillRGBA(62.5f + x + size, 62.5f + y + size, size, size, r, g, b, a);
+	}
 }
 
 void CHudRadar::DrawT(int x, int y, int size, int r, int g, int b, int a)
 {
-	FillRGBA( 62.5f + x - size, 62.5 + y - size, 3*size, size, r, g, b, a);
-	FillRGBA( 62.5f + x, 62.5 + y, size, 2*size, r, g, b, a);
+	if( bUseRenderAPI )
+	{
+		gRenderAPI.GL_Bind( 0, hT );
+		gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
+		DrawUtils::Draw2DQuad( 62.5f + x - size*2, 62.5f + y - size*2,
+							   62.5f + x + size*2, 62.5f + y + size*2);
+	}
+	else
+	{
+		FillRGBA( 62.5f + x - size, 62.5 + y - size, 3*size, size, r, g, b, a);
+		FillRGBA( 62.5f + x, 62.5 + y, size, 2*size, r, g, b, a);
+	}
 }
 
 void CHudRadar::DrawFlippedT(int x, int y, int size, int r, int g, int b, int a)
 {
-	FillRGBA( 62.5f + x, 62.5 + y - size, size, 2*size, r, g, b, a);
-	FillRGBA( 62.5f + x - size, 62.5 + y + size, 3*size, size, r, g, b, a);
+	if( bUseRenderAPI )
+	{
+		gRenderAPI.GL_Bind( 0, hFlippedT );
+		gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
+		DrawUtils::Draw2DQuad( 62.5f + x - size*2, 62.5f + y - size*2,
+							   62.5f + x + size*2, 62.5f + y + size*2);
+	}
+	else
+	{
+		FillRGBA( 62.5f + x, 62.5 + y - size, size, 2*size, r, g, b, a);
+		FillRGBA( 62.5f + x - size, 62.5 + y + size, 3*size, size, r, g, b, a);
+	}
 }
 
 Vector CHudRadar::WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles  )

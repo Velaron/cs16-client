@@ -73,7 +73,7 @@ int CHudNVG::Draw(float flTime)
 
 int CHudNVG::MsgFunc_NVGToggle(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader reader(pbuf, iSize);
+	BufferReader reader( pszName, pbuf, iSize );
 
 	m_iEnable = reader.ReadByte();
 	return 1;

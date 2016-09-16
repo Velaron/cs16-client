@@ -123,6 +123,11 @@ int CHudSpectatorGui::VidInit()
 	return 1;
 }
 
+void CHudSpectatorGui::Shutdown()
+{
+	gRenderAPI.GL_FreeTexture( m_hTimerTexture );
+}
+
 inline void DrawButtonWithText( int x1, int y1, int wide, int tall, const char *sz, int r, int g, int b )
 {
 	DrawUtils::DrawRectangle(x1, y1, wide, tall);
@@ -327,7 +332,7 @@ void CHudSpectatorGui::Reset()
 
 int CHudSpectatorGui::MsgFunc_SpecHealth(const char *pszName, int iSize, void *buf)
 {
-	BufferReader reader( buf, iSize );
+	BufferReader reader( pszName, buf, iSize );
 
 	int health = reader.ReadByte();
 
@@ -339,7 +344,7 @@ int CHudSpectatorGui::MsgFunc_SpecHealth(const char *pszName, int iSize, void *b
 
 int CHudSpectatorGui::MsgFunc_SpecHealth2(const char *pszName, int iSize, void *buf)
 {
-	BufferReader reader( buf, iSize );
+	BufferReader reader( pszName, buf, iSize );
 
 	int health = reader.ReadByte();
 	int client = reader.ReadByte();

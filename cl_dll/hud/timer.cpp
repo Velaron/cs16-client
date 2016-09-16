@@ -203,7 +203,7 @@ int CHudProgressBar::MsgFunc_BarTime2(const char *pszName, int iSize, void *pbuf
 	BufferReader reader( pszName, pbuf, iSize );
 
 	m_iDuration = reader.ReadShort();
-	m_fPercent = (float)reader.ReadShort() / 100.0f;
+	m_fPercent = m_iDuration * (float)reader.ReadShort() / 100.0f;
 
 	m_fStartTime = gHUD.m_flTime;
 

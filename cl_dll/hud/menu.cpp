@@ -241,7 +241,7 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 
 int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader(pbuf, iSize);
+	BufferReader reader( pszName, pbuf, iSize );
 
 	int menuType = reader.ReadByte();
 	m_bitsValidSlots = reader.ReadShort(); // is ignored

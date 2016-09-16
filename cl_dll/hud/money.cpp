@@ -147,7 +147,7 @@ int CHudMoney::Draw(float flTime)
 
 int CHudMoney::MsgFunc_Money(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader buf( pbuf, iSize );
+	BufferReader buf( pszName, pbuf, iSize );
 	int iOldCount = m_iMoneyCount;
 	m_iMoneyCount = buf.ReadLong();
 	m_iDelta = m_iMoneyCount - iOldCount;
@@ -158,7 +158,7 @@ int CHudMoney::MsgFunc_Money(const char *pszName, int iSize, void *pbuf)
 
 int CHudMoney::MsgFunc_BlinkAcct(const char *pszName, int iSize, void *pbuf)
 {
-	BufferReader buf( pbuf, iSize );
+	BufferReader buf( pszName, pbuf, iSize );
 
 	m_iBlinkAmt = buf.ReadByte();
 	m_fBlinkTime = 0;

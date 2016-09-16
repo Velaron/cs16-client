@@ -15,6 +15,7 @@ public:
 	virtual int VidInit();
 	virtual int Draw( float flTime );
 	virtual void Reset();
+	virtual void Shutdown();
 
 	int MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf);
 
@@ -27,6 +28,7 @@ private:
 
 	cvar_t *cl_radartype;
 
+	int InitBuiltinTextures();
 	void DrawPlayerLocation();
 	void DrawRadarDot(int x, int y, int size, int r, int g, int b, int a);
 	void DrawCross(int x, int y, int size, int r, int g, int b, int a );
@@ -34,6 +36,8 @@ private:
 	void DrawFlippedT( int x, int y, int size, int r, int g, int b, int a );
 	Vector WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles );
 
+	bool bUseRenderAPI, bTexturesInitialized;
+	int hDot, hCross, hT, hFlippedT;
 };
 
 #endif // RADAR_H

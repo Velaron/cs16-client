@@ -55,8 +55,6 @@ const char *sPlayerModelFiles[12] =
 	"models/player/militia/militia.mdl" // t
 };
 
-void ShutdownInput (void);
-
 #define GHUD_DECLARE_MESSAGE(x) int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf ) { return gHUD.MsgFunc_##x(pszName, iSize, pbuf); }
 
 GHUD_DECLARE_MESSAGE(Logo)
@@ -215,10 +213,6 @@ CHud :: ~CHud()
 		delete pList;
 	}
 	m_pHudList = NULL;
-
-	//Localize_Free();
-
-	//ServersShutdown();
 }
 
 void CHud :: VidInit( void )
@@ -341,6 +335,14 @@ void CHud :: VidInit( void )
 	m_SniperScope.VidInit();
 	m_Radar.VidInit();
 	m_SpectatorGui.VidInit();
+}
+
+void CHud::Shutdown( void )
+{
+	for( HUDLIST *pList = m_pHudList; pList; pList = m_pHudList->pNext )
+	{
+		pList->p->Shutdown();
+	}
 }
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)

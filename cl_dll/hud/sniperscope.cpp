@@ -101,3 +101,9 @@ int CHudSniperScope::Draw(float flTime)
 
 	return 0;
 }
+
+void CHudSniperScope::Shutdown()
+{
+	for( int i = 0; i < 4; i++ )
+		gRenderAPI.GL_FreeTexture( m_iScopeArc[i] );
+}

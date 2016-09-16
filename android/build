@@ -38,7 +38,7 @@ cp -r ../3rdparty/extras/* pak/
 python2 makepak.py pak/ assets/extras.pak
 
 # Build
-ndk-build -j8 NDK_TOOLCHAIN_VERSION=4.8 _CS16CLIENT_ENABLE_OPENMP=$OMP NDK_DEBUG=$RELEASE 
+ndk-build -j8 NDK_TOOLCHAIN_VERSION=4.8 _CS16CLIENT_ENABLE_OPENMP=$OMP NDK_DEBUG=$RELEASE V=1
 ant $1
 jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ../../myks.keystore bin/cs16-client-$1-unaligned.apk xashdroid -tsa https://timestamp.geotrust.com/tsa
 $HOME/.android/android-sdk-linux/build-tools/23.0.3/zipalign 4 bin/cs16-client-$1-unaligned.apk bin/cs16-client.apk

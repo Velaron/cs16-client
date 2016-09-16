@@ -392,7 +392,10 @@ bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim)
 	return true;
 }
 
-void CBasePlayerWeapon::KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change){}
+void CBasePlayerWeapon::KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change)
+{
+
+}
 
 void CBasePlayerWeapon::SetPlayerShieldAnim(void)
 {
@@ -498,8 +501,7 @@ Animate weapon model
 void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal )
 {
 	m_pPlayer->pev->weaponanim = iAnim;
-
-	HUD_SendWeaponAnim( iAnim, m_iId, m_pPlayer->pev->body, 0 );
+	HUD_SendWeaponAnim( iAnim, m_iId, 0, 0 );
 }
 
 Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, entvars_t *pevAttacker, bool bPistol, int shared_rand )

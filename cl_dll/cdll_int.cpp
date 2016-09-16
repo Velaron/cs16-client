@@ -29,6 +29,7 @@
 //#include "interface.h" // not used here
 #include "render_api.h"
 #include "mobility_int.h"
+#include "vgui_parser.h"
 
 cl_enginefunc_t gEngfuncs = { };
 render_api_t gRenderAPI = { };
@@ -40,6 +41,7 @@ int g_iMobileAPIVersion = 0;
 void InitInput (void);
 void Game_HookEvents( void );
 void IN_Commands( void );
+void Input_Shutdown (void);
 
 /*
 ========================== 
@@ -61,6 +63,21 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	return 1;
 }
+
+
+/*
+=============
+HUD_Shutdown
+
+=============
+*/
+void DLLEXPORT HUD_Shutdown( void )
+{
+	gHUD.Shutdown();
+	Input_Shutdown();
+	Localize_Free();
+}
+
 
 /*
 ================================

@@ -984,17 +984,11 @@ void InitInput (void)
 
 /*
 ============
-ShutdownInput
+Input_Shutdown
 ============
 */
-void ShutdownInput (void)
+void Input_Shutdown (void)
 {
 	IN_Shutdown();
 	KB_Shutdown();
-}
-
-void DLLEXPORT HUD_Shutdown( void )
-{
-	ShutdownInput();
-	Localize_Free();
 }

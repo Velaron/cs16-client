@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo " ------- UPDATING SUBMODULES ------- "
+git submodule foreach git pull origin master

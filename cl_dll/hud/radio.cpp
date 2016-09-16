@@ -100,7 +100,7 @@ void VoiceIconCallback(struct tempent_s *ent, float frametime, float currenttime
 
 int CHudRadio::MsgFunc_BotVoice( const char *pszName, int iSize, void *buf )
 {
-	BufferReader reader( buf, iSize );
+	BufferReader reader( pszName, buf, iSize );
 
 	int enable   = reader.ReadByte();
 	int entIndex = reader.ReadByte();
