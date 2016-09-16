@@ -10,22 +10,40 @@
 	android:background="#252525"
 	android:weightSum="1"
 	tools:context="in.celest.xash3d.LauncherActivity" >
-	<TextView
-		android:id="@+id/textView_tittle"
+	<LinearLayout
 		android:layout_width="fill_parent"
-		android:layout_height="50dp"
-		android:layout_marginBottom="1dp"
-		android:layout_marginLeft="5dp"
-		android:background="#555555"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
 		android:layout_marginRight="5dp"
 		android:layout_marginTop="20dp"
-		android:text="@string/app_name"
-		android:textAppearance="?android:attr/textAppearanceMedium"
-		android:textSize="25sp"
-		android:drawableLeft="@drawable/ic_launcher"
-		android:drawablePadding="10dp"
-		android:singleLine="true"
-		android:gravity="center_vertical" />
+		android:layout_marginBottom="1dp"
+		android:layout_marginLeft="5dp"
+		android:background="#555555" >
+		<TextView
+			android:id="@+id/textView_tittle"
+			android:layout_width="wrap_content"
+			android:layout_height="50dp"
+			android:background="#555555"
+			android:drawableLeft="@drawable/ic_launcher"
+			android:drawablePadding="5dp"
+			android:singleLine="true"
+			android:gravity="center_vertical"
+			android:clickable="true"
+			android:onClick="onTitleClick" />
+		<TextView
+			android:id="@+id/textView_title"
+			android:layout_width="fill_parent"
+			android:layout_height="50dp"
+			android:layout_marginRight="1dp"
+			android:layout_marginTop="1dp"
+			android:layout_marginBottom="1dp"
+			android:layout_marginLeft="1dp"
+			android:text="@string/app_name"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:textSize="25sp"
+			android:singleLine="true"
+			android:gravity="center_vertical" />
+	</LinearLayout>
 	<TabHost
 		android:id="@+id/tabhost"
 		android:layout_width="match_parent"
@@ -110,6 +128,17 @@
 								android:text="nothing"
 								android:textOff="@string/yapb_off"
 								android:textOn="@string/yapb_on" />
+							<ToggleButton
+								android:id="@+id/enableczero"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_margin="10dp"
+								android:layout_marginLeft="10dp"
+								android:layout_marginRight="10dp"
+								android:layout_marginTop="10dp"
+								android:text="nothing"
+								android:textOff="@string/czero_off"
+								android:textOn="@string/czero_on" />
 						</LinearLayout>
 					</LinearLayout>
 					<LinearLayout
@@ -164,7 +193,7 @@
 								android:layout_marginRight="10dp"
 								android:layout_marginTop="20dp"
 								android:text="@string/cmd_args_text2"
-								android:textAppearance="?android:attr/textAppearanceMedium" />
+								android:textAppearance="?android:attr/textAppearanceSmall" />
 							<EditText
 								android:id="@+id/cmdArgs"
 								android:layout_width="match_parent"
@@ -179,7 +208,7 @@
 				</FrameLayout>
 			</ScrollView>
 		</LinearLayout>
-	</TabHost>
+	</TabHost>		
 	<com.google.android.gms.ads.AdView
 		android:id="@+id/adView"
 		android:layout_width="fill_parent"
@@ -187,14 +216,23 @@
 		android:layout_gravity="center"
 		ads:adSize="BANNER"
 		ads:adUnitId="@string/ad_unit_id" />
-	<Button
-		android:id="@+id/button_launch"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginLeft="0dp"
-		android:onClick="startXash"
-		android:text="@string/launch_button" >
-	<requestFocus />
-	</Button>
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="50dp"
+		android:background="#444444"
+		android:layout_marginBottom="-20dp"
+		android:paddingTop="5dp"
+		android:layout_gravity="bottom"
+		android:orientation="horizontal">
+		<Button
+			android:id="@+id/button_launch"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="0dp"
+			android:onClick="startXash"
+			android:text="@string/launch_button" >
+			<requestFocus />
+		</Button>
+	</LinearLayout>
 </LinearLayout>
 

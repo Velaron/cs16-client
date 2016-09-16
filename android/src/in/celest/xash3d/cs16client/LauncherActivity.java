@@ -39,11 +39,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.CheckBox;
 import android.widget.ToggleButton;
+import android.widget.TextView;
+import android.widget.TabHost;
 import android.os.Environment;
-
+import android.os.Build;
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -54,7 +57,8 @@ import com.google.android.gms.ads.*;
 import in.celest.xash3d.cs16client.R;
 
 public class LauncherActivity extends Activity {
-	private static final int PAK_VERSION = 2;
+	private static final int PAK_VERSION = 3;
+	public final static int sdk = Integer.valueOf(Build.VERSION.SDK);
 	public final static String TAG = "LauncherActivity";
 	
 	static SharedPreferences mPref;
@@ -65,8 +69,10 @@ public class LauncherActivity extends Activity {
 	static ToggleButton mEnableYaPB;
 	static ToggleButton mEnableCZero;
 	static AdView   mAdView;
-	
+	static TextView mTitle;
 	static Boolean isExtracting = false;
+	static int mClicks;
+	static Boolean mDev;
 
 	String getDefaultPath()
 	{
@@ -79,7 +85,27 @@ public class LauncherActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		if ( sdk >= 21 )
+			super.setTheme( 0x01030224 );
+		else super.setTheme( 0x01030005 );
+
 		setContentView(R.layout.activity_launcher);
+		
+		TabHost tabHost = (TabHost) findViewById(R.id.tabhost);
+		tabHost.setup();
+		
+		TabHost.TabSpec tabSpec;
+		tabSpec = tabHost.newTabSpec("tabtag1");
+		tabSpec.setIndicator(getString(R.string.text_tab1));
+		tabSpec.setContent(R.id.tab1);
+		tabHost.addTab(tabSpec);
+
+		tabSpec = tabHost.newTabSpec("tabtag2");
+		tabSpec.setIndicator(getString(R.string.text_tab2));
+		tabSpec.setContent(R.id.tab2);
+		tabHost.addTab(tabSpec);
+
 		
 		// get preferences
 		mPref          = getSharedPreferences("mod", 0);
@@ -89,11 +115,17 @@ public class LauncherActivity extends Activity {
 		mEnableYaPB    = (ToggleButton)findViewById(R.id.use_yapb);
 		mEnableCZero   = (ToggleButton)findViewById(R.id.enableczero); // TODO
 		mAdView        = (AdView)  findViewById(R.id.adView);
-
+		mTitle         = (TextView) findViewById(R.id.textView_tittle);
+		mClicks = 0;
+		mDev = mPref.getBoolean("dev", false);
+		
 		mCmdArgs.   setText   (mPref.getString ("argv"   , "-console"));
 		mEnableZBot.setChecked(mPref.getBoolean("zbots"  , true ));
 		mEnableYaPB.setChecked(mPref.getBoolean("yapbs"  , false));
 		mEnableCZero.setChecked(mPref.getBoolean("czero" , false)); // TODO
+		
+		if( !mDev )
+			mEnableCZero.setVisibility(View.GONE);
 		
 		AdRequest adRequest = new AdRequest.Builder()
 			.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
@@ -159,6 +191,26 @@ public class LauncherActivity extends Activity {
 		intent.putExtra("gamelibdir", getFilesDir().getAbsolutePath().replace("/files","/lib"));
 		intent.putExtra("pakfile",    getFilesDir().getAbsolutePath() + "/extras.pak" );
 		startActivity(intent);
+	}
+	
+	public void onTitleClick(View view)
+	{
+		if( mDev )
+			return;
+		
+		if( mClicks++ > 10 )
+		{
+			SharedPreferences.Editor editor = mPref.edit();
+			editor.putBoolean("dev", true);
+			editor.commit();
+			editor.apply();
+			
+			mDev = true;
+			
+			mEnableCZero.setVisibility(View.VISIBLE);
+
+		}
+			
 	}
 
 	@Override
