@@ -1,92 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools" 
-	xmlns:ads="http://schemas.android.com/apk/res-auto" 
+	xmlns:ads="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/layout_shortcut"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:paddingLeft="@dimen/activity_horizontal_margin"
-	android:paddingRight="@dimen/activity_horizontal_margin"
 	android:orientation="vertical"
-	tools:context="in.celest.xash3d.LauncherActivity"
-	android:id="@+id/layout_shortcut">
-	<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:background="#252525"
+	android:weightSum="1"
+	tools:context="in.celest.xash3d.LauncherActivity" >
+	<TextView
+		android:id="@+id/textView_tittle"
 		android:layout_width="fill_parent"
+		android:layout_height="50dp"
+		android:layout_marginBottom="1dp"
+		android:layout_marginLeft="5dp"
+		android:background="#555555"
+		android:layout_marginRight="5dp"
+		android:layout_marginTop="20dp"
+		android:text="@string/app_name"
+		android:textAppearance="?android:attr/textAppearanceMedium"
+		android:textSize="25sp"
+		android:drawableLeft="@drawable/ic_launcher"
+		android:drawablePadding="10dp"
+		android:singleLine="true"
+		android:gravity="center_vertical" />
+	<TabHost
+		android:id="@+id/tabhost"
+		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:layout_weight="1.0">
+		android:layout_weight="1.20"
+		android:paddingBottom="10dp"
+		android:paddingLeft="3dp"
+		android:paddingRight="3dp"
+		android:paddingTop="8dp">
 		<LinearLayout
-			xmlns:android="http://schemas.android.com/apk/res/android"
-			xmlns:tools="http://schemas.android.com/tools"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:background="#555555"
 			android:orientation="vertical">
-
-			<TextView
+			<TabWidget
+				android:id="@android:id/tabs"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:textAppearance="?android:attr/textAppearanceMedium"
-				android:text="@string/cmd_args_text" />
-			
-			<TextView
+				android:showDividers="middle" />
+			<ScrollView
 				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:textAppearance="?android:attr/textAppearanceSmall"
-				android:text="@string/cmd_args_text2" />
-
-			<EditText android:id="@+id/cmdArgs"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:hint="@string/defCmdArgs"/>
-			
-			<TextView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:textAppearance="?android:attr/textAppearanceMedium"
-				android:text="@string/basedir_text" />
-			
-			<TextView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:textAppearance="?android:attr/textAppearanceSmall"
-				android:text="@string/basedir_text2" />
-
-			
-			<EditText android:id="@+id/basedir"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content" />
-			
-			<CheckBox android:id="@+id/enablezbot"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:text="@string/enablezbot"/>
-
-			<CheckBox android:id="@+id/enableyapb"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:text="@string/enableyapb"/>			
+				android:layout_height="match_parent"
+				android:id="@+id/scrollView2">
+				<FrameLayout
+					android:id="@android:id/tabcontent"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent">
+					<LinearLayout
+						android:id="@+id/tab1"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginLeft="10dp"
+						android:layout_marginRight="10dp"
+						android:layout_marginTop="15dp"
+						android:layout_marginBottom="25dp"
+						android:background="#333333"
+						android:orientation="vertical"
+						android:text="@string/text_tab1"
+						android:weightSum="0.6">
+						<TextView
+							android:id="@+id/textView_path1"
+							android:layout_width="fill_parent"
+							android:layout_height="40dp"
+							android:layout_marginBottom="2dp"
+							android:layout_marginLeft="10dp"
+							android:background="#444444"
+							android:layout_marginRight="10dp"
+							android:layout_marginTop="10dp"
+							android:text="@string/text_res_tittle2"
+							android:textAppearance="?android:attr/textAppearanceMedium"
+							android:textSize="20sp"
+							android:gravity="center_vertical|center_horizontal" />
+						<LinearLayout 
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							android:layout_marginBottom="10dp"
+							android:layout_marginLeft="10dp"
+							android:layout_marginRight="10dp"
+							android:layout_marginTop="10dp"
+							android:background="#444444"
+							android:orientation="vertical"
+							android:weightSum="1">
+							<ToggleButton
+								android:id="@+id/use_zbot"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_margin="10dp"
+								android:layout_marginLeft="10dp"
+								android:layout_marginRight="10dp"
+								android:layout_marginTop="10dp"
+								android:text="nothing"
+								android:textOff="@string/zbot_off"
+								android:textOn="@string/zbot_on" />
+							<ToggleButton
+								android:id="@+id/use_yapb"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_margin="10dp"
+								android:layout_marginLeft="10dp"
+								android:layout_marginRight="10dp"
+								android:layout_marginTop="10dp"
+								android:text="nothing"
+								android:textOff="@string/yapb_off"
+								android:textOn="@string/yapb_on" />
+						</LinearLayout>
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/tab2"
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:layout_marginLeft="10dp"
+						android:layout_marginRight="10dp"
+						android:layout_marginTop="15dp"
+						android:background="#333333"
+						android:orientation="vertical"
+						android:text="@string/text_tab2">
+						<TextView
+							android:id="@+id/textView_path2"
+							android:layout_width="fill_parent"
+							android:layout_height="40dp"
+							android:layout_marginBottom="2dp"
+							android:layout_marginLeft="10dp"
+							android:background="#444444"
+							android:layout_marginRight="10dp"
+							android:layout_marginTop="13dp"
+							android:text="@string/text_res_tittle3"
+							android:textAppearance="?android:attr/textAppearanceMedium"
+							android:textSize="20sp"
+							android:gravity="center_vertical|center_horizontal" />
+						<LinearLayout 
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							android:layout_marginBottom="10dp"
+							android:layout_marginLeft="10dp"
+							android:layout_marginRight="10dp"
+							android:layout_marginTop="10dp"
+							android:background="#444444"
+							android:orientation="vertical"
+							android:weightSum="1">
+							<TextView
+								android:id="@+id/textView_args"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginBottom="10dp"
+								android:layout_marginLeft="10dp"
+								android:layout_marginRight="10dp"
+								android:layout_marginTop="20dp"
+								android:text="@string/cmd_args_text"
+								android:textAppearance="?android:attr/textAppearanceMedium" />
+							<TextView
+								android:id="@+id/textView_args"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginBottom="10dp"
+								android:layout_marginLeft="10dp"
+								android:layout_marginRight="10dp"
+								android:layout_marginTop="20dp"
+								android:text="@string/cmd_args_text2"
+								android:textAppearance="?android:attr/textAppearanceMedium" />
+							<EditText
+								android:id="@+id/cmdArgs"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginBottom="10dp"
+								android:layout_marginLeft="10dp"
+								android:layout_marginRight="10dp"
+								android:layout_marginTop="3dp"
+								android:hint="@string/defCmdArgs"/>
+						</LinearLayout>
+					</LinearLayout>
+				</FrameLayout>
+			</ScrollView>
 		</LinearLayout>
-	</ScrollView>
-
-	<Button
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="@string/launch_button"
-		android:id="@+id/button_launch"
-		android:onClick="startXash"
-		android:layout_column="6"
-		android:layout_gravity="right"
-		android:layout_weight="0.0" >
-	<requestFocus />
-	</Button>
-	
+	</TabHost>
 	<com.google.android.gms.ads.AdView
 		android:id="@+id/adView"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center"
 		ads:adSize="BANNER"
-		ads:adUnitId="@string/ad_unit_id"/>
-
-
+		ads:adUnitId="@string/ad_unit_id" />
+	<Button
+		android:id="@+id/button_launch"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="0dp"
+		android:onClick="startXash"
+		android:text="@string/launch_button" >
+	<requestFocus />
+	</Button>
 </LinearLayout>
 

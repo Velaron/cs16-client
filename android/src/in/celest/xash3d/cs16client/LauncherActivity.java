@@ -41,6 +41,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.CheckBox;
+import android.widget.ToggleButton;
 import android.os.Environment;
 
 import java.io.FileOutputStream;
@@ -60,8 +61,9 @@ public class LauncherActivity extends Activity {
 	
 	static EditText mCmdArgs;
 	static EditText mBaseDir;
-	static CheckBox mEnableZBot;
-	static CheckBox mEnableYaPB;
+	static ToggleButton mEnableZBot;
+	static ToggleButton mEnableYaPB;
+	static ToggleButton mEnableCZero;
 	static AdView   mAdView;
 	
 	static Boolean isExtracting = false;
@@ -83,17 +85,15 @@ public class LauncherActivity extends Activity {
 		mPref          = getSharedPreferences("mod", 0);
 		
 		mCmdArgs       = (EditText)findViewById(R.id.cmdArgs);
-		mBaseDir       = (EditText)findViewById(R.id.basedir);
-		mEnableZBot    = (CheckBox)findViewById(R.id.enablezbot);
-		mEnableYaPB    = (CheckBox)findViewById(R.id.enableyapb);
-		//mEnableCZero   = (CheckBox)findViewById(R.id.enableczero); // TODO
+		mEnableZBot    = (ToggleButton)findViewById(R.id.use_zbot);
+		mEnableYaPB    = (ToggleButton)findViewById(R.id.use_yapb);
+		mEnableCZero   = (ToggleButton)findViewById(R.id.enableczero); // TODO
 		mAdView        = (AdView)  findViewById(R.id.adView);
 
 		mCmdArgs.   setText   (mPref.getString ("argv"   , "-console"));
-		mBaseDir.   setText   (mPref.getString ("basedir", getDefaultPath()));
 		mEnableZBot.setChecked(mPref.getBoolean("zbots"  , true ));
 		mEnableYaPB.setChecked(mPref.getBoolean("yapbs"  , false));
-		//mEnableCZero.setChecked(mPref.getBoolean("czero" , false)); // TODO
+		mEnableCZero.setChecked(mPref.getBoolean("czero" , false)); // TODO
 		
 		AdRequest adRequest = new AdRequest.Builder()
 			.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
@@ -105,10 +105,9 @@ public class LauncherActivity extends Activity {
 	{
 		SharedPreferences.Editor editor = mPref.edit();
 		String argv    = mCmdArgs.getText().toString();
-		String basedir = mBaseDir.getText().toString();
+		String gamedir = "cstrike";
 
 		editor.putString("argv", argv);
-		editor.putString("basedir", basedir );
 		editor.putBoolean("zbots", mEnableZBot.isChecked());
 		editor.putBoolean("yapbs", mEnableYaPB.isChecked());
 		editor.commit();
@@ -141,25 +140,22 @@ public class LauncherActivity extends Activity {
 			argv = argv + " -bots";
 		}
 		
-		/*if( mEnableCZero.isChecked() ) // TODO
+		if( mEnableCZero.isChecked() ) // TODO
 		{
 			AlertDialog.Builder notImplementedDialogBuilder = new AlertDialog.Builder(this);
 			notImplementedDialogBuilder.setMessage(R.string.not_implemented_msg)
-				.setTitle(R.string.not_implemented_title);
+				.setTitle(R.string.not_implemented_fully);
 			notImplementedDialogBuilder.create().show();
-			return;
 			
 			gamedir = "czero"; // use when czero will be done
-		}*/
+		}
 		
 		Intent intent = new Intent();
 		intent.setAction("in.celest.xash3d.START");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		intent.putExtra("argv",       argv);
-		intent.putExtra("gamedir",    "cstrike" );
-		if( basedir != null && !basedir.isEmpty() )
-			intent.putExtra("basedir",    mBaseDir.getText().toString() );
+		intent.putExtra("gamedir",    gamedir );
 		intent.putExtra("gamelibdir", getFilesDir().getAbsolutePath().replace("/files","/lib"));
 		intent.putExtra("pakfile",    getFilesDir().getAbsolutePath() + "/extras.pak" );
 		startActivity(intent);
@@ -195,7 +191,7 @@ public class LauncherActivity extends Activity {
 			ret = Runtime.getRuntime().exec("chmod " + Integer.toOctalString(mode) + " " + path).waitFor();
 			Log.d(TAG, "chmod " + Integer.toOctalString(mode) + " " + path + ": " + ret );
 		}
-		catch(Exception e) 
+		catch(Exception e)
 		{
 			ret = -1;
 			Log.d(TAG, "chmod: Runtime not worked: " + e.toString() );
@@ -208,15 +204,16 @@ public class LauncherActivity extends Activity {
 			ret = (Integer) setPermissions.invoke(null, path,
 				mode, -1, -1);
 		}
-		catch(Exception e) 
+		catch(Exception e)
 		{
 			ret = -1;
 			Log.d(TAG, "chmod: FileUtils not worked: " + e.toString() );
 		}
 		return ret;
-	}
+	 }
 
-	private static void extractFile(Context context, String path) {
+	 private static void extractFile(Context context, String path) 
+	 {
 		try
 		{
 			InputStream is = null;
@@ -228,7 +225,8 @@ public class LauncherActivity extends Activity {
 			os = new FileOutputStream(out);
 			byte[] buffer = new byte[1024];
 			int length;
-			while ((length = is.read(buffer)) > 0) {
+			while ((length = is.read(buffer)) > 0) 
+			{
 				os.write(buffer, 0, length);
 			}
 			os.close();
@@ -240,31 +238,30 @@ public class LauncherActivity extends Activity {
 			Log.e( TAG, "Failed to extract file:" + e.toString() );
 			e.printStackTrace();
 		}
-			
-	}
-	public static void extractPAK(Context context, Boolean force) {
-		if(isExtracting)
-			return;
-		isExtracting = true;
-		try {
+	 }
+
+	public static synchronized void extractPAK(Context context, Boolean force) 
+	{
+		InputStream is = null;
+		FileOutputStream os = null;
+		try 
+		{
 			if( mPref == null )
 				mPref = context.getSharedPreferences("mod", 0);
-		
-			if( mPref.getInt( "pakversion", 0 ) == PAK_VERSION && !force )
-				return;
-				
-			extractFile(context, "extras.pak");
-
-			SharedPreferences.Editor editor = mPref.edit();
-			editor.putInt( "pakversion", PAK_VERSION );
-			editor.commit();
-			editor.apply();
+			synchronized( mPref )
+			{
+				if( mPref.getInt( "pakversion", 0 ) == PAK_VERSION && !force )
+					return;
+				extractFile(context, "extras.pak");
+				SharedPreferences.Editor editor = mPref.edit();
+				editor.putInt( "pakversion", PAK_VERSION );
+				editor.commit();
+			}
 		} 
 		catch( Exception e )
 		{
 			Log.e( TAG, "Failed to extract PAK:" + e.toString() );
 		}
-		isExtracting = false;
 	}
 }
 

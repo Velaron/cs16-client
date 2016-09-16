@@ -10,15 +10,17 @@
     <string name="not_found_title">Something got wrong...</string>
     <string name="not_implemented_msg">This feature is not implemented yet</string>
     <string name="not_implemented_title">Not implemented!</string>
-	<string name="enablezbot">Enable ZBot bots</string>
-	<string name="enableyapb">Enable YaPB bots</string>
+	<string name="not_implemented_fully">This is not ready! Bugreports are not accepted when this feature is on.</string>
+	<string name="zbot_on">ZBot Enabled</string>
+	<string name="zbot_off">ZBot Disabled</string>
+	<string name="yapb_on">YaPB Enabled</string>
+	<string name="yapb_off">YaPB Disabled</string>
+	<string name="czero_on">Condition Zero Enabled</string>
+	<string name="czero_off">Condition Zero Disabled</string>
 	<string name="defCmdArgs">-console -game cstrike -bots, etc</string>
-	<string name="basedir_text">Set path to gamedir:</string>
-	<string name="basedir_text2">Leave empty to use Xash3D Android preferences.</string>
+    <string name="text_tab1">Normal</string>
+    <string name="text_tab2">Advanced</string>
+    <string name="text_res_tittle2">Normal settings</string>
+    <string name="text_res_tittle3">Advanced settings</string>
 	<!--<string name="ad_unit_id">Не дам! :P</string>-->
-    <!--
-	<string name="text_shortcut">SoHL shortcut</string>
-	<string name="shortcut_button_save">Save shortcut</string>
-	<string name="gamedir">Mod directory</string>
-	<string name="shortcut_name">Shortcut name</string>-->
 </resources>
