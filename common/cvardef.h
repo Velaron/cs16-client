@@ -35,6 +35,8 @@ typedef struct cvar_s
 } cvar_t;
 
 
+typedef int qboolean;
+
 // WARNING: Private structure from Xash3D Engine. Use with caution
 typedef struct convar_s
 {
