@@ -57,7 +57,7 @@ import com.google.android.gms.ads.*;
 import in.celest.xash3d.cs16client.R;
 
 public class LauncherActivity extends Activity {
-	private static final int PAK_VERSION = 3;
+	public static final int PAK_VERSION = 3;
 	public final static int sdk = Integer.valueOf(Build.VERSION.SDK);
 	public final static String TAG = "LauncherActivity";
 	
@@ -292,7 +292,7 @@ public class LauncherActivity extends Activity {
 		}
 	 }
 
-	public static synchronized void extractPAK(Context context, Boolean force) 
+	public static void extractPAK(Context context, Boolean force) 
 	{
 		InputStream is = null;
 		FileOutputStream os = null;
@@ -300,15 +300,13 @@ public class LauncherActivity extends Activity {
 		{
 			if( mPref == null )
 				mPref = context.getSharedPreferences("mod", 0);
-			synchronized( mPref )
-			{
-				if( mPref.getInt( "pakversion", 0 ) == PAK_VERSION && !force )
+			
+			if( mPref.getInt( "pakversion", 0 ) == PAK_VERSION && !force )
 					return;
-				extractFile(context, "extras.pak");
-				SharedPreferences.Editor editor = mPref.edit();
-				editor.putInt( "pakversion", PAK_VERSION );
-				editor.commit();
-			}
+			extractFile(context, "extras.pak");
+			SharedPreferences.Editor editor = mPref.edit();
+			editor.putInt( "pakversion", PAK_VERSION );
+			editor.commit();
 		} 
 		catch( Exception e )
 		{
