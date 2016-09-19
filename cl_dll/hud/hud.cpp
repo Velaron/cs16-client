@@ -339,7 +339,7 @@ void CHud :: VidInit( void )
 
 void CHud::Shutdown( void )
 {
-	for( HUDLIST *pList = m_pHudList; pList; pList = m_pHudList->pNext )
+	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 	{
 		pList->p->Shutdown();
 	}
