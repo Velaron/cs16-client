@@ -1267,31 +1267,35 @@ void CHudAmmo::DrawCrosshair( float flTime )
 
 	weaponid = m_pWeapon->iId;
 
-	if( weaponid == WEAPON_AWP || weaponid == WEAPON_SCOUT || weaponid == WEAPON_SG550 || weaponid == WEAPON_G3SG1 )
+	if(    weaponid == WEAPON_AWP 
+		|| weaponid == WEAPON_SCOUT 
+		|| weaponid == WEAPON_SG550 
+		|| weaponid == WEAPON_G3SG1 )
 		return;
 
 	if ( g_iWeaponFlags & WPNSTATE_SHIELD_DRAWN )
 		return;
 
-	if ( weaponid > 30 )
+	if( weaponid <= 30 )
+	{
+		iDistance = Distances[weaponid - 1][0];
+		iDeltaDistance = Distances[weaponid - 1][1];
+	}
+	else
 	{
 		iDistance = 4;
 		iDeltaDistance = 3;
 	}
-	else
-	{
-		iDistance = Distances[weaponid-1][0];
-		iDeltaDistance = Distances[weaponid-1][1];
-	}
-
-	iLength = 0;
-	flags = GetWeaponAccuracyFlags(weaponid);
+	
+	flags = GetWeaponAccuracyFlags( weaponid );
 	if ( flags && m_pClDynamicCrosshair->value && !(gHUD.m_iHideHUDDisplay & 1) )
 	{
-		if ( g_iPlayerFlags & FL_ONGROUND || !(flags & ACCURACY_AIR) )
+		if ( g_iPlayerFlags & FL_ONGROUND || !( flags & ACCURACY_AIR ) )
 		{
-			if ( (g_iPlayerFlags & FL_DUCKING) && (flags & ACCURACY_DUCK) )
+			if ( ( g_iPlayerFlags & FL_DUCKING ) && ( flags & ACCURACY_DUCK ) )
+			{
 				iDistance *= 0.5;
+			}
 			else
 			{
 				int iWeaponSpeed = 0;
@@ -1312,11 +1316,14 @@ void CHudAmmo::DrawCrosshair( float flTime )
 					break;
 				}
 
-				if ( (g_flPlayerSpeed >= iWeaponSpeed) && (flags & ACCURACY_SPEED) )
+				if ( (flags & ACCURACY_SPEED) && (g_flPlayerSpeed >= iWeaponSpeed) )
 					iDistance *= 1.5;
 			}
 		}
-		else iDistance *= 2;
+		else 
+		{
+			iDistance *= 2;
+		}
 		if ( flags & ACCURACY_MULTIPLY_BY_14 )
 			iDistance *= 1.4;
 		if ( flags & ACCURACY_MULTIPLY_BY_14_2 )
@@ -1330,13 +1337,8 @@ void CHudAmmo::DrawCrosshair( float flTime )
 	}
 	else
 	{
-		m_flCrosshairDistance += iDeltaDistance;
-		m_iAlpha -= 40;
-
-		if ( m_flCrosshairDistance > 15.0 )
-			m_flCrosshairDistance = 15.0;
-		if ( m_iAlpha < 120 )
-			m_iAlpha = 120;
+		m_flCrosshairDistance = min( m_flCrosshairDistance + iDeltaDistance, 15.0f );
+		m_iAlpha = max( m_iAlpha - 40, 120 );
 	}
 
 	if ( g_iShotsFired > 600 )
@@ -1347,16 +1349,20 @@ void CHudAmmo::DrawCrosshair( float flTime )
 	CalcCrosshairSize();
 
 	m_iAmmoLastCheck = g_iShotsFired;
-	if ( iDistance > m_flCrosshairDistance )
-		m_flCrosshairDistance = iDistance;
+	m_flCrosshairDistance = max( m_flCrosshairDistance, iDistance );
+	iLength = (m_flCrosshairDistance - iDistance) * 0.5 + 5;
+	
 	if ( m_iAlpha > 255 )
 		m_iAlpha = 255;
-	iLength = (m_flCrosshairDistance - iDistance) * 0.5 + 5;
-	flCrosshairDistance = m_flCrosshairDistance;
+	
 	if ( ScreenWidth != m_iCrosshairScaleBase )
 	{
-		flCrosshairDistance = ScreenWidth * flCrosshairDistance / m_iCrosshairScaleBase;
+		flCrosshairDistance = ScreenWidth * m_flCrosshairDistance / m_iCrosshairScaleBase;
 		iLength = ScreenWidth * iLength / m_iCrosshairScaleBase;
+	}
+	else
+	{
+		flCrosshairDistance = m_flCrosshairDistance;
 	}
 
 
@@ -1368,30 +1374,33 @@ void CHudAmmo::DrawCrosshair( float flTime )
 		FillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, 250, 50, 50, m_iAlpha);
 		FillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, 250, 50, 50, m_iAlpha);
 	}
-	else if ( !m_bAdditive )
-	{
-		FillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
-		FillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
-		FillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
-		FillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
-	}
-	else
+	else if ( m_bAdditive )
 	{
 		FillRGBA(WEST_XPOS, EAST_WEST_YPOS,		iLength, 1, m_R, m_G, m_B, m_iAlpha);
 		FillRGBA(EAST_XPOS, EAST_WEST_YPOS,		iLength, 1, m_R, m_G, m_B, m_iAlpha);
 		FillRGBA(NORTH_SOUTH_XPOS,	NORTH_YPOS,	1, iLength, m_R, m_G, m_B, m_iAlpha);
 		FillRGBA(NORTH_SOUTH_XPOS, SOUTH_YPOS,	1, iLength, m_R, m_G, m_B, m_iAlpha);
 	}
+	else
+	{
+		FillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
+		FillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
+		FillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
+		FillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
+	}
 	return;
 }
 
 void CHudAmmo::CalcCrosshairSize()
 {
-	if( !m_pClCrosshairSize->modified )
-		return;
-
+	static char prevSize[64] = { 0 };
 	const char *size = m_pClCrosshairSize->string;
 
+	if( !strncmp( prevSize, size, sizeof(prevSize) ) )
+		return;
+	
+	strncpy( prevSize, size, sizeof(prevSize) );
+	
 	if( !stricmp(size, "auto") )
 	{
 		if( ScreenWidth <= 640 )
@@ -1419,14 +1428,17 @@ void CHudAmmo::CalcCrosshairSize()
 	{
 		m_iCrosshairScaleBase = 640;
 	}
-
-	m_pClCrosshairSize->modified = false;
 	return;
 }
 
 void CHudAmmo::CalcCrosshairDrawMode()
 {
+	static float prevDrawMode = -1;
 	float drawMode = m_pClCrosshairTranslucent->value;
+	
+	if( drawMode == prevDrawMode )
+		return;
+	
 	if ( drawMode == 0.0f )
 	{
 		m_bAdditive = 0;
@@ -1438,23 +1450,27 @@ void CHudAmmo::CalcCrosshairDrawMode()
 	else
 	{
 		gEngfuncs.Con_Printf("usage: cl_crosshair_translucent <1|0>\n");
+		gEngfuncs.Cvar_Set("cl_crosshair_translucent", (char*)"1");
 	}
+	
+	prevDrawMode = drawMode;
 }
 
 void CHudAmmo::CalcCrosshairColor()
 {
-	if( !m_pClCrosshairColor->modified )
-		return;
-
+	static char prevColors[64] = { 0 };
 	const char *colors = m_pClCrosshairColor->string;
 
-	sscanf( colors, "%d %d %d", &m_cvarR, &m_cvarG, &m_cvarB);
+	if( strncmp( prevColors, colors, 64 ) )
+	{
+		strncpy( prevColors, colors, 64 );
+	
+		sscanf( colors, "%d %d %d", &m_cvarR, &m_cvarG, &m_cvarB);
 
-	m_R = m_cvarR = bound( 0, m_cvarR, 255 );
-	m_G = m_cvarG = bound( 0, m_cvarG, 255 );
-	m_B = m_cvarB = bound( 0, m_cvarB, 255 );
-
-	m_pClCrosshairSize->modified = false;
+		m_R = m_cvarR = bound( 0, m_cvarR, 255 );
+		m_G = m_cvarG = bound( 0, m_cvarG, 255 );
+		m_B = m_cvarB = bound( 0, m_cvarB, 255 );
+	}
 }
 
 //
@@ -1464,11 +1480,8 @@ int DrawBar(int x, int y, int width, int height, float f)
 {
 	int r, g, b;
 
-	if (f < 0)
-		f = 0;
-	if (f > 1)
-		f = 1;
-
+	f = bound( 0, f, 1 );
+	
 	if (f)
 	{
 		int w = f * width;
