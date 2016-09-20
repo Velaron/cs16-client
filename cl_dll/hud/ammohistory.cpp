@@ -147,7 +147,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				WEAPON *weap = gWR.GetWeapon( rgAmmoHistory[i].iId );
 
 				if ( !weap )
-					return 1;  // we don't know about the weapon yet, so don't draw anything
+					continue;  // we don't know about the weapon yet, so don't draw anything
 
 				int r, g, b;
 				DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
