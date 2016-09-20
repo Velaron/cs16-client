@@ -39,6 +39,7 @@ int CHudSniperScope::Init()
 {
 	gHUD.AddHudElem(this);
 	m_iFlags = HUD_DRAW;
+	m_iScopeArc[0] = m_iScopeArc[1] =m_iScopeArc[2] = m_iScopeArc[3]  = 0;
 	return 1;
 }
 

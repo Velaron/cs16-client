@@ -103,7 +103,7 @@ int CHudSpectatorGui::Init()
 	m_iFlags = HUD_DRAW;
 	m_menuFlags = 0;
 	m_fTextScale = 1.0f;
-
+	m_hTimerTexture = 0;
 	return 1;
 }
 
