@@ -52,6 +52,7 @@ int CHudNVG::Init()
    return 0;
 }
 
+
 int CHudNVG::Draw(float flTime)
 {
 	if ( !m_iEnable || gEngfuncs.IsSpectateOnly() )
@@ -62,7 +63,7 @@ int CHudNVG::Draw(float flTime)
 
 	// draw a dynamic light on player's origin
 	dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight ( 0 );
-	VectorCopy ( gHUD.m_vecOrigin, dl->origin );
+	dl->origin = gHUD.m_vecOrigin;
 	dl->radius = gEngfuncs.pfnRandomFloat( 750, 800 );
 	dl->die = flTime + 0.1f;
 	dl->color.r = 50;

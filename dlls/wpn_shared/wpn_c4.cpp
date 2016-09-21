@@ -188,10 +188,11 @@ void CC4::PrimaryAttack(void)
 			{
 				m_bStartedArming = false;
 				m_fArmedTime = 0;
-				Broadcast("BOMBPL");
 				m_pPlayer->m_bHasC4 = false;
 
 #ifndef CLIENT_WEAPONS
+				Broadcast("BOMBPL");
+
 				if (pev->speed != 0 && g_pGameRules)
 					g_pGameRules->m_iC4Timer = (int)pev->speed;
 

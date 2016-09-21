@@ -287,6 +287,7 @@ Called when a player starts or stops talking.
 
 void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
 {
+	gHUD.m_Radio.Voice( entindex, bTalking );
 }
 
 /*
@@ -342,20 +343,20 @@ int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 {
 	if( mobileapi->version != MOBILITY_API_VERSION )
 	{
+		gEngfuncs.Con_Printf("Client Error: Mobile API version mismatch. Got: %i, want: %i\n",
+			mobileapi->version, MOBILITY_API_VERSION);
+
 #ifdef __ANDROID__
 		if( gRenderAPI.Host_Error )
 		{
 			gRenderAPI.Host_Error("Xash3D Android version check failed!\nPlease update your Xash3D Android!\n");
 		}
 #endif
-		gEngfuncs.Con_Printf("Client Error: Mobile API version mismatch. Got: %i, want: %i\n", mobileapi->version, MOBILITY_API_VERSION);
 		return 1;
 	}
 
 	g_iMobileAPIVersion = MOBILITY_API_VERSION;
 	gMobileAPI = *mobileapi;
-
-
 
 	return 0;
 }

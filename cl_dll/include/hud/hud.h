@@ -690,6 +690,7 @@ class CHudRadio: public CHudBase
 {
 public:
 	int Init( void );
+	void Voice(int entindex, bool bTalking );
 	// play a sentence from a radio
 	// [byte] unknown (always 1)
 	// [string] sentence name
