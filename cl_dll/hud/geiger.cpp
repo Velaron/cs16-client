@@ -65,9 +65,9 @@ int CHudGeiger::MsgFunc_Geiger(const char *pszName,  int iSize, void *pbuf)
 
 int CHudGeiger::Draw (float flTime)
 {
-	int pct;
+	int pct = 0;
 	float flvol = 0.0f;
-	int i;
+	int i = 0;
 	
 	if (m_iGeigerRange < 1000 && m_iGeigerRange > 0)
 	{
@@ -139,18 +139,19 @@ int CHudGeiger::Draw (float flTime)
 		}
 
 		flvol = (flvol * ((rand() & 127)) / 255) + 0.25; // UTIL_RandomFloat(0.25, 0.5);
+		flvol = Com_RandomFloat(0.25, 25);
 
-		if ((rand() & 127) < pct || (rand() & 127) < pct)
+		if( pct && rand() & 127 < pct )
 		{
 			//S_StartDynamicSound (-1, 0, rgsfx[rand() % i], r_origin, flvol, 1.0, 0, 100);	
 			char sz[256];
 			
 			int j = rand() & 1;
-			if (i > 2)
+			if( i > 2 )
 				j += rand() & 1;
 
-			sprintf(sz, "player/geiger%d.wav", j + 1);
-			PlaySound(sz, flvol);
+			sprintf( sz, "player/geiger%d.wav", j + 1 );
+			PlaySound( sz, flvol );
 			
 		}
 	}
