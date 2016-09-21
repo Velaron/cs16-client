@@ -418,39 +418,8 @@ void ResetRain( void )
 	return;
 }
 
-/*
-=================================
-InitRain
-initialze system
-=================================
-*/
-void InitRain( void )
-{
-	memset( &Rain, 0, sizeof(Rain) );
-	memset( &FirstChainDrip, 0, sizeof( cl_drip_t ));
-	memset( &FirstChainFX, 0, sizeof( cl_rainfx_t ));
 
-#ifdef _DEBUG
-	if( !debug_rain )
-		debug_rain = CVAR_CREATE( "Rain.debug", "0", 0 );
-#endif
-
-	Rain.hsprRain = SPR_Load("sprites/effects/rain.spr");
-	Rain.hsprSnow = SPR_Load("sprites/effects/snowflake.spr");
-	Rain.hsprRipple = SPR_Load("sprites/effects/ripple.spr");
-}
-
-
-void SetPoint( float x, float y, float z, float (*matrix)[4])
-{
-	Vector point( x, y, z ), result;
-
-	VectorTransform( point, matrix, result );
-
-	gEngfuncs.pTriAPI->Vertex3fv( result );
-}
-
-int CHud::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
+int __MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
 {
 	BufferReader reader( pszName, pbuf, iSize);
 
@@ -471,6 +440,41 @@ int CHud::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
 
 	return 1;
 }
+
+/*
+=================================
+InitRain
+initialze system
+=================================
+*/
+void InitRain( void )
+{
+	memset( &Rain, 0, sizeof(Rain) );
+	memset( &FirstChainDrip, 0, sizeof( cl_drip_t ));
+	memset( &FirstChainFX, 0, sizeof( cl_rainfx_t ));
+
+#ifdef _DEBUG
+	if( !debug_rain )
+		debug_rain = CVAR_CREATE( "Rain.debug", "0", 0 );
+#endif
+
+	Rain.hsprRain = SPR_Load("sprites/effects/rain.spr");
+	Rain.hsprSnow = SPR_Load("sprites/effects/snowflake.spr");
+	Rain.hsprRipple = SPR_Load("sprites/effects/ripple.spr");
+
+	HOOK_MESSAGE( ReceiveW );
+}
+
+
+void SetPoint( float x, float y, float z, float (*matrix)[4])
+{
+	Vector point( x, y, z ), result;
+
+	VectorTransform( point, matrix, result );
+
+	gEngfuncs.pTriAPI->Vertex3fv( result );
+}
+
 
 
 /*

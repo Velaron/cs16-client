@@ -155,15 +155,8 @@ extern vec3_t vec3_origin;
 float *GetClientColor( int clientIndex );
 inline HSPRITE LoadSprite(const char *pszName)
 {
-	int i;
 	char sz[256];
-
-	if (ScreenWidth < 640)
-		i = 320;
-	else
-		i = 640;
-
-	sprintf(sz, pszName, i);
+	snprintf(sz, 256, pszName, 640);
 
 	return SPR_Load(sz);
 }

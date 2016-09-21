@@ -40,6 +40,11 @@ DECLARE_COMMAND( m_Radar, ShowRadar )
 DECLARE_COMMAND( m_Radar, HideRadar )
 
 DECLARE_MESSAGE( m_Radar, Radar )
+DECLARE_MESSAGE( m_Radar, HostageK )
+DECLARE_MESSAGE( m_Radar, HostagePos )
+DECLARE_MESSAGE( m_Radar, BombDrop )
+DECLARE_MESSAGE( m_Radar, BombPickup )
+
 
 static byte	r_RadarCross[8][8] =
 {
@@ -86,6 +91,10 @@ int CHudRadar::Init()
 	HOOK_MESSAGE( Radar );
 	HOOK_COMMAND( "drawradar", ShowRadar );
 	HOOK_COMMAND( "hideradar", HideRadar );
+	HOOK_MESSAGE( HostageK );
+	HOOK_MESSAGE( HostagePos );
+	HOOK_MESSAGE( BombDrop );
+	HOOK_MESSAGE( BombPickup );
 
 	m_iFlags = HUD_DRAW;
 
@@ -478,4 +487,78 @@ Vector CHudRadar::WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectO
 				(float)(vPlayerOrigin.z - vObjectOrigin.z) );
 
 	return ret;
+}
+
+int CHudRadar::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
+{
+	BufferReader reader( pszName, pbuf, iSize );
+
+	g_PlayerExtraInfo[33].origin.x = reader.ReadCoord();
+	g_PlayerExtraInfo[33].origin.y = reader.ReadCoord();
+	g_PlayerExtraInfo[33].origin.z = reader.ReadCoord();
+
+	g_PlayerExtraInfo[33].radarflashon = 1;
+	g_PlayerExtraInfo[33].radarflashes = 99999;
+	g_PlayerExtraInfo[33].radarflash = gHUD.m_flTime;
+	strncpy(g_PlayerExtraInfo[33].teamname, "TERRORIST", MAX_TEAM_NAME);
+	g_PlayerExtraInfo[33].dead = 0;
+	g_PlayerExtraInfo[33].nextflash = true;
+
+	int Flag = reader.ReadByte();
+	g_PlayerExtraInfo[33].playerclass = Flag;
+
+	if( Flag ) // bomb planted
+	{
+		gHUD.m_SpectatorGui.m_bBombPlanted = 0;
+		gHUD.m_Timer.m_iFlags = 0;
+	}
+	return 1;
+}
+
+int CHudRadar::MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf)
+{
+	g_PlayerExtraInfo[33].radarflashon = 0;
+	g_PlayerExtraInfo[33].radarflash = 0.0f;
+	g_PlayerExtraInfo[33].radarflashes = 0;
+	g_PlayerExtraInfo[33].dead = 1;
+
+	return 1;
+}
+
+int CHudRadar::MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf)
+{
+
+	BufferReader reader( pszName, pbuf, iSize );
+	int Flag = reader.ReadByte();
+	int idx = reader.ReadByte();
+	if ( idx <= MAX_HOSTAGES )
+	{
+		g_HostageInfo[idx].origin.x = reader.ReadCoord();
+		g_HostageInfo[idx].origin.y = reader.ReadCoord();
+		g_HostageInfo[idx].origin.z = reader.ReadCoord();
+		if ( Flag == 1 )
+		{
+			g_HostageInfo[idx].radarflash = gHUD.m_flTime;
+			g_HostageInfo[idx].radarflashon = 1;
+			g_HostageInfo[idx].radarflashes = 99999;
+		}
+		strncpy(g_HostageInfo[idx].teamname, "CT", MAX_TEAM_NAME);
+		g_HostageInfo[idx].dead = 0;
+	}
+
+	return 1;
+}
+
+int CHudRadar::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
+{
+	BufferReader reader( pszName, pbuf, iSize );
+	int idx = reader.ReadByte();
+	if ( idx <= MAX_HOSTAGES )
+	{
+		g_HostageInfo[idx].dead = 1;
+		g_HostageInfo[idx].radarflash = gHUD.m_flTime;
+		g_HostageInfo[idx].radarflashes = 15;
+	}
+
+	return 1;
 }

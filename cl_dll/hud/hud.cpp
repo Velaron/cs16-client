@@ -64,11 +64,6 @@ GHUD_DECLARE_MESSAGE(Concuss)
 GHUD_DECLARE_MESSAGE(ResetHUD)
 GHUD_DECLARE_MESSAGE(ViewMode)
 GHUD_DECLARE_MESSAGE(GameMode)
-GHUD_DECLARE_MESSAGE(ReceiveW)
-GHUD_DECLARE_MESSAGE(BombDrop)
-GHUD_DECLARE_MESSAGE(HostageK)
-GHUD_DECLARE_MESSAGE(BombPickup)
-GHUD_DECLARE_MESSAGE(HostagePos)
 GHUD_DECLARE_MESSAGE(ShadowIdx)
 
 void __CmdFunc_InputCommandSpecial()
@@ -90,18 +85,12 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( ViewMode );
 	HOOK_MESSAGE( SetFOV );
 	HOOK_MESSAGE( Concuss );
-	HOOK_MESSAGE( ReceiveW );
 
-	HOOK_MESSAGE( BombDrop );
-	HOOK_MESSAGE( BombPickup );
-	HOOK_MESSAGE( HostagePos );
-	HOOK_MESSAGE( HostageK );
 	HOOK_MESSAGE( ShadowIdx );
 
 	CVAR_CREATE( "_vgui_menus", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_ah", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
-	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
 
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
 	cl_righthand = CVAR_CREATE( "hand", "1", FCVAR_ARCHIVE );
@@ -190,8 +179,7 @@ void CHud :: Init( void )
 		static byte color[] = {255, 255, 255, 255};
 		gMobileAPI.pfnTouchResetDefaultButtons();
 		gMobileAPI.pfnTouchAddDefaultButton("_settings", "touch_defaults/settings.tga", "menu_touchoptions",
-			0.4, 0.4, 0.6, 0.6, color, 0, 1.0f, TOUCH_FL_NOEDIT | TOUCH_FL_DEF_SHOW );
-		gEngfuncs.pfnClientCmd("alias touch_loaddefaults menu_touchoptions");
+			0.0, 0.0, 1.0, 1.0, color, 0, 1.0f, TOUCH_FL_NOEDIT | TOUCH_FL_DEF_SHOW );
 	}
 
 

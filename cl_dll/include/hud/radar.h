@@ -24,6 +24,10 @@ public:
 	CClientSprite m_hRadar;
 	CClientSprite m_hRadarOpaque;
 
+	int MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf);
 private:
 
 	cvar_t *cl_radartype;

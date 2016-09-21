@@ -970,11 +970,6 @@ public:
 	CHudMsgFunc(ViewMode);
 	CHudMsgFunc(SetFOV);
 	CHudMsgFunc(Concuss);
-	CHudMsgFunc(ReceiveW);
-	CHudMsgFunc(BombDrop);
-	CHudMsgFunc(BombPickup);
-	CHudMsgFunc(HostagePos);
-	CHudMsgFunc(HostageK);
 	CHudMsgFunc(ShadowIdx);
 
 	// Screen information
