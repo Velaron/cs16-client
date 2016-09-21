@@ -138,10 +138,9 @@ int CHudGeiger::Draw (float flTime)
 			i = 2;
 		}
 
-		flvol = (flvol * ((rand() & 127)) / 255) + 0.25; // UTIL_RandomFloat(0.25, 0.5);
 		flvol = Com_RandomFloat(0.25, 25);
 
-		if( pct && rand() & 127 < pct )
+		if( pct && (rand() & 127) < pct )
 		{
 			//S_StartDynamicSound (-1, 0, rgsfx[rand() % i], r_origin, flvol, 1.0, 0, 100);	
 			char sz[256];
