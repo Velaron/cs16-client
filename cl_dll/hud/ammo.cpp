@@ -751,15 +751,15 @@ int CHudAmmo::MsgFunc_Crosshair(const char *pszName, int iSize, void *pbuf)
 int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
 {
 	BufferReader reader( pszName, pbuf, iSize );
-	reader.ReadByte();
+	reader.ReadByte(); // unused!
 
-	Vector start, velocity;
-	start.x = reader.ReadCoord();
-	start.y = reader.ReadCoord();
-	start.z = reader.ReadCoord();
-	reader.ReadCoord();
-	reader.ReadCoord(); // unused data
-	reader.ReadCoord();
+	Vector origin, velocity;
+	origin.x = reader.ReadCoord();
+	origin.y = reader.ReadCoord();
+	origin.z = reader.ReadCoord();
+	reader.ReadCoord(); // unused!
+	reader.ReadCoord(); // unused!
+	reader.ReadCoord(); // unused!
 	velocity.x = reader.ReadCoord();
 	velocity.y = reader.ReadCoord();
 	velocity.z = reader.ReadCoord();
@@ -768,24 +768,27 @@ int CHudAmmo::MsgFunc_Brass( const char *pszName, int iSize, void *pbuf )
 	int ModelIndex = reader.ReadShort();
 	int BounceSoundType = reader.ReadByte();
 	int Life = reader.ReadByte();
-	reader.ReadByte();
+	int Client = reader.ReadByte();
 
 	float sin, cos, x, y;
-	sincosf( Rotation, &sin, &cos );
-	x = -9.0 * sin;
-	y = 9.0 * cos;
+	sincosf( fabs(Rotation), &sin, &cos );
 
-	if( gHUD.cl_righthand->value != 0.0f )
+	if( gHUD.cl_righthand->value != 0.0f && EV_IsLocal( Client ) )
 	{
 		velocity.x += sin * -120.0;
 		velocity.y += cos * 120.0;
 		x = 9.0 * sin;
 		y = -9.0 * cos;
 	}
+	else
+	{
+		x = -9.0 * sin;
+		y = 9.0 * cos;
+	}
 
-	start.x += x;
-	start.y += y;
-	EV_EjectBrass( start, velocity, Rotation, ModelIndex, BounceSoundType, Life );
+	origin.x += x;
+	origin.y += y;
+	EV_EjectBrass( origin, velocity, Rotation, ModelIndex, BounceSoundType, Life );
 	return 1;
 }
 
