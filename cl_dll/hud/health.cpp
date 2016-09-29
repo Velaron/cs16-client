@@ -110,17 +110,17 @@ int CHudHealth::VidInit(void)
 {
 	m_hSprite = LoadSprite(PAIN_NAME);
 
-	m_vAttackPos[ATK_FRONT].x = ScreenWidth  / 2 - SPR_Width( m_hSprite, 0 ) / 2;
-	m_vAttackPos[ATK_FRONT].y = ScreenHeight / 2 - SPR_Width( m_hSprite, 0 ) * 3;
+	m_vAttackPos[ATK_FRONT].x = ScreenWidth  / 2 - SPR_Width ( m_hSprite, 0 ) / 2;
+	m_vAttackPos[ATK_FRONT].y = ScreenHeight / 2 - SPR_Height( m_hSprite, 0 ) * 3;
 
-	m_vAttackPos[ATK_RIGHT].x = ScreenWidth  / 2 + SPR_Width( m_hSprite, 1 ) * 2;
-	m_vAttackPos[ATK_RIGHT].y = ScreenHeight / 2 - SPR_Width( m_hSprite, 1 ) / 2;
+	m_vAttackPos[ATK_RIGHT].x = ScreenWidth  / 2 + SPR_Width ( m_hSprite, 1 ) * 2;
+	m_vAttackPos[ATK_RIGHT].y = ScreenHeight / 2 - SPR_Height( m_hSprite, 1 ) / 2;
 
-	m_vAttackPos[ATK_REAR ].x = ScreenWidth  / 2 - SPR_Width( m_hSprite, 2 ) / 2;
-	m_vAttackPos[ATK_REAR ].y = ScreenHeight / 2 + SPR_Width( m_hSprite, 2 ) * 2;
+	m_vAttackPos[ATK_REAR ].x = ScreenWidth  / 2 - SPR_Width ( m_hSprite, 2 ) / 2;
+	m_vAttackPos[ATK_REAR ].y = ScreenHeight / 2 + SPR_Height( m_hSprite, 2 ) * 2;
 
-	m_vAttackPos[ATK_LEFT ].x = ScreenWidth  / 2 - SPR_Width( m_hSprite, 3 ) * 3;
-	m_vAttackPos[ATK_LEFT ].y = ScreenHeight / 2 - SPR_Width( m_hSprite, 3 ) / 2;
+	m_vAttackPos[ATK_LEFT ].x = ScreenWidth  / 2 - SPR_Width ( m_hSprite, 3 ) * 3;
+	m_vAttackPos[ATK_LEFT ].y = ScreenHeight / 2 - SPR_Height( m_hSprite, 3 ) / 2;
 
 
 	m_HUD_dmg_bio = gHUD.GetSpriteIndex( "dmg_bio" ) + 1;
@@ -318,11 +318,11 @@ void CHudHealth::CalcDamageDirection( Vector vecFrom )
 		if (side > EPSILON)
 			m_fAttack[0] = max(m_fAttack[0], side);
 		if (side < -EPSILON)
-			m_fAttack[1] = max(m_fAttack[1], -side );
+			m_fAttack[1] = max(m_fAttack[1], 0 - side );
 		if (front > EPSILON)
 			m_fAttack[2] = max(m_fAttack[2], front);
 		if (front < -EPSILON)
-			m_fAttack[3] = max(m_fAttack[3], -front );
+			m_fAttack[3] = max(m_fAttack[3], 0 - front );
 	}
 }
 

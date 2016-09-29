@@ -114,7 +114,6 @@ void CHud :: Init( void )
 	m_iLogo = 0;
 	m_iFOV = 0;
 
-
 	m_pSpriteList = NULL;
 
 	// Clear any old HUD list

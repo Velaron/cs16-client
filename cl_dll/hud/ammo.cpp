@@ -1037,8 +1037,8 @@ void CHudAmmo::UserCmd_Autobuy()
 		strcat(szCmd, token);
 	}
 
-	ConsolePrint(szCmd);
-	gEngfuncs.pfnServerCmd(szCmd);
+	ConsolePrint( szCmd );
+	gEngfuncs.pfnServerCmd( szCmd );
 
 	gEngfuncs.COM_FreeFile( afile );
 }
