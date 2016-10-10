@@ -73,6 +73,50 @@ void __CmdFunc_InputCommandSpecial()
 #endif
 }
 
+#define XASH_GENERATE_BUILDNUM
+
+#if defined(XASH_GENERATE_BUILDNUM)
+static const char *date = __DATE__;
+static const char *mon[12] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+static char mond[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+#endif
+
+char *Q_buildnum( void )
+{
+// do not touch this! Only author of Xash3D can increase buildnumbers!
+// Xash3D SDL: HAHAHA! I TOUCHED THIS!
+	int m = 0, d = 0, y = 0;
+	static int b = 0;
+	static char buildnum[16];
+
+	if( b != 0 )
+		return buildnum;
+
+	for( m = 0; m < 11; m++ )
+	{
+		if( !strncasecmp( &date[0], mon[m], 3 ))
+			break;
+		d += mond[m];
+	}
+
+	d += atoi( &date[4] ) - 1;
+	y = atoi( &date[7] ) - 1900;
+	b = d + (int)((y - 1) * 365.25f );
+
+	if((( y % 4 ) == 0 ) && m > 1 )
+	{
+		b += 1;
+	}
+	//b -= 38752; // Feb 13 2007
+	b -= 41940; // Oct 29 2015.
+	// Happy birthday, cs16client! :)
+
+	snprintf( buildnum, sizeof(buildnum), "%i", b );
+
+	return buildnum;
+}
+
+
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
@@ -110,6 +154,7 @@ void CHud :: Init( void )
 	cl_weapon_sparks = CVAR_CREATE( "cl_weapon_sparks", "1", FCVAR_ARCHIVE );
 	cl_weapon_wallpuff = CVAR_CREATE( "cl_weapon_wallpuff", "1", FCVAR_ARCHIVE );
 	zoom_sens_ratio = CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
+	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
 
 	m_iLogo = 0;
 	m_iFOV = 0;
