@@ -803,6 +803,9 @@ bool WeaponHasAttachments(entity_state_t *pplayer)
 	pweaponmodel = IEngineStudio.GetModelByIndex(pplayer->weaponmodel);
 	modelheader = (studiohdr_t *)IEngineStudio.Mod_Extradata(pweaponmodel);
 
+	if( !modelheader )
+		return false;
+
 	return (modelheader->numattachments != 0);
 }
 
