@@ -192,7 +192,7 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 			{
 				ShowVGUIMenu(MENU_RADIOB); return 1;
 			}
-			else if( menustring[6] == 'B' )
+			else if( menustring[6] == 'C' )
 			{
 				ShowVGUIMenu(MENU_RADIOC); return 1;
 			}
