@@ -159,17 +159,6 @@ void HUD_PlaybackEvent( int flags, const edict_t *pInvoker, unsigned short event
 
 /*
 =====================
-HUD_SetMaxSpeed
-
-=====================
-*/
-void HUD_SetMaxSpeed( const edict_t *ed, float speed )
-{
-}
-
-
-/*
-=====================
 UTIL_WeaponTimeBase
 
 Always 0.0 on client, even if not predicting weapons ( won't get called
@@ -281,17 +270,3 @@ float UTIL_SharedRandomFloat( unsigned int seed, float low, float high )
 		return (low + offset * range );
 	}
 }
-
-
-/*
-======================
-stub_*
-
-stub functions for such things as precaching.  So we don't have to modify weapons code that
- is compiled into both game and client .dlls.
-======================
-*/
-int				stub_PrecacheModel		( const char* s ) { return 0; }
-int				stub_PrecacheSound		( const char* s ) { return 0; }
-const char		*stub_NameForFunction	( unsigned int function ) { return "func"; }
-void			stub_SetModel			( edict_t *e, const char *m ) {}

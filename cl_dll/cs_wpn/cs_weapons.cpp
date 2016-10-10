@@ -877,11 +877,7 @@ void HUD_InitClientWeapons( void )
 	gpGlobals->time = gEngfuncs.GetClientTime();
 
 	// Fake functions
-	g_engfuncs.pfnPrecacheModel		= stub_PrecacheModel;
-	g_engfuncs.pfnPrecacheSound		= stub_PrecacheSound;
-	g_engfuncs.pfnNameForFunction	= stub_NameForFunction;
-	g_engfuncs.pfnSetModel			= stub_SetModel;
-	g_engfuncs.pfnSetClientMaxspeed = HUD_SetMaxSpeed;
+	//g_engfuncs.pfnSetClientMaxspeed = HUD_SetMaxSpeed;
 
 	// Handled locally
 	g_engfuncs.pfnPlaybackEvent		= HUD_PlaybackEvent;

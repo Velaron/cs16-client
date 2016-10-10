@@ -147,13 +147,13 @@ void CC4::PrimaryAttack(void)
 			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1;
 			return;
 		}
-		g_engfuncs.pfnSetClientMaxspeed(ENT(m_pPlayer->pev), 1);
 #endif
 		m_bStartedArming = true;
 		m_bBombPlacedAnimation = false;
 		m_fArmedTime = gpGlobals->time + 3;
 		SendWeaponAnim(C4_ARM, UseDecrement() != FALSE);
 #ifndef CLIENT_DLL
+		g_engfuncs.pfnSetClientMaxspeed(ENT(m_pPlayer->pev), 1);
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 		m_pPlayer->SetProgressBarTime(3);
 #endif
