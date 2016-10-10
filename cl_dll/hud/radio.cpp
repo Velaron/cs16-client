@@ -48,12 +48,12 @@ int CHudRadio::Init( )
 }
 
 
-static void Broadcast( const char *msg, int pitch )
+void Broadcast( const char *msg, int pitch )
 {
 	if ( msg[0] == '%' && msg[1] == '!' )
 		gEngfuncs.pfnPlaySoundVoiceByName( &msg[1], 1.0f, pitch );
 	else
-		gEngfuncs.pfnPlaySoundVoiceByName( &msg[1], 1.0f, pitch );
+		gEngfuncs.pfnPlaySoundVoiceByName( msg, 1.0f, pitch );
 }
 
 int CHudRadio::MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf )
@@ -66,9 +66,12 @@ int CHudRadio::MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf )
 
 	Broadcast( sentence, pitch );
 
-	g_PlayerExtraInfo[SenderID].radarflashes = 22;
-	g_PlayerExtraInfo[SenderID].radarflash   = gHUD.m_flTime;
-	g_PlayerExtraInfo[SenderID].radarflashon = 1;
+	if( SenderID <= MAX_PLAYERS )
+	{
+		g_PlayerExtraInfo[SenderID].radarflashes = 22;
+		g_PlayerExtraInfo[SenderID].radarflash   = gHUD.m_flTime;
+		g_PlayerExtraInfo[SenderID].radarflashon = 1;
+	}
 	return 1;
 }
 
