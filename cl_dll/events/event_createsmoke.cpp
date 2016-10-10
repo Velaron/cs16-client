@@ -54,8 +54,8 @@ void EV_CreateSmoke(event_args_s *args)
 		{
 			// randomize smoke cloud position
 			Vector org = args->origin;
-			org.x += gEngfuncs.pfnRandomFloat(-100.0f, 100.0f);
-			org.y += gEngfuncs.pfnRandomFloat(-100.0f, 100.0f);
+			org.x += Com_RandomFloat(-100.0f, 100.0f);
+			org.y += Com_RandomFloat(-100.0f, 100.0f);
 			org.z += 30; 
 
 			pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( org, (model_s*)pGasModel );
