@@ -21,7 +21,7 @@
 #define KNIFE_BODYHIT_VOLUME 128
 #define KNIFE_WALLHIT_VOLUME 512
 
-LINK_ENTITY_TO_CLASS(weapon_knife, CKnife);
+LINK_ENTITY_TO_CLASS(weapon_knife, CKnife)
 
 enum knife_e
 {
@@ -217,9 +217,10 @@ bool CKnife::ShieldSecondaryFire(int up_anim, int down_anim)
 		m_pPlayer->m_bShieldDrawn = true;
 	}
 
-   m_pPlayer->UpdateShieldCrosshair((m_iWeaponState & WPNSTATE_SHIELD_DRAWN) == 0);
+#ifndef CLIENT_DLL
+	m_pPlayer->UpdateShieldCrosshair((m_iWeaponState & WPNSTATE_SHIELD_DRAWN) == 0);
 	m_pPlayer->ResetMaxSpeed();
-
+#endif
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.4;
 	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.4;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.6;
@@ -315,7 +316,9 @@ int CKnife::Swing(int fFirst)
 			else
 				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/knife_slash2.wav", VOL_NORM, ATTN_NORM, 0, 94);
 
+#ifndef CLIENT_DLL
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 		}
 	}
 	else
@@ -345,7 +348,10 @@ int CKnife::Swing(int fFirst)
 
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 		SetPlayerShieldAnim();
+
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 		ClearMultiDamage();
 		if (pEntity)
 		{
@@ -357,8 +363,9 @@ int CKnife::Swing(int fFirst)
 		ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
 		float flVol = 1;
+#ifndef CLIENT_DLL
 		int fHitWorld = TRUE;
-
+#endif
 		if (pEntity)
 		{
 			if (pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
@@ -377,15 +384,19 @@ int CKnife::Swing(int fFirst)
 					return TRUE;
 
 				flVol = 0.1;
+#ifndef CLIENT_DLL
 				fHitWorld = FALSE;
+#endif
 			}
 		}
 
+#ifndef CLIENT_DLL
 		if (fHitWorld)
 		{
 			TEXTURETYPE_PlaySound(&tr, vecSrc, vecSrc + (vecEnd - vecSrc) * 2, BULLET_PLAYER_CROWBAR);
 			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hitwall1.wav", VOL_NORM, ATTN_NORM, 0, 98 + RANDOM_LONG(0, 3));
 		}
+#endif
 
 		m_trHit = tr;
 		m_pPlayer->m_iWeaponVolume = flVol * KNIFE_WALLHIT_VOLUME;
@@ -436,21 +447,26 @@ int CKnife::Stab(int fFirst)
 				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/knife_slash1.wav", VOL_NORM, ATTN_NORM, 0, 94);
 			else
 				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/knife_slash2.wav", VOL_NORM, ATTN_NORM, 0, 94);
-
+#ifndef CLIENT_DLL
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 		}
 	}
 	else
 	{
 		fDidHit = TRUE;
-		SendWeaponAnim(KNIFE_STABHIT, UseDecrement() != FALSE);
 
+#ifndef CLIENT_DLL
+		SendWeaponAnim(KNIFE_STABHIT, UseDecrement() != FALSE);
+#endif
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.1;
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1.1;
 
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
-		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
+#ifndef CLIENT_DLL
+		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 		float flDamage = 65.0;
 
 		if (pEntity && pEntity->IsPlayer())
@@ -474,8 +490,9 @@ int CKnife::Stab(int fFirst)
 		ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
 		float flVol = 1;
+#ifndef CLIENT_DLL
 		int fHitWorld = TRUE;
-
+#endif
 		if (pEntity)
 		{
 			if (pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
@@ -487,15 +504,19 @@ int CKnife::Stab(int fFirst)
 					return TRUE;
 
 				flVol = 0.1;
+#ifndef CLIENT_DLL
 				fHitWorld = FALSE;
+#endif
 			}
 		}
 
+#ifndef CLIENT_DLL
 		if (fHitWorld)
 		{
 			TEXTURETYPE_PlaySound(&tr, vecSrc, vecSrc + (vecEnd - vecSrc) * 2, BULLET_PLAYER_CROWBAR);
 			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hitwall1.wav", VOL_NORM, ATTN_NORM, 0, 98 + RANDOM_LONG(0, 3));
 		}
+#endif
 
 		m_trHit = tr;
 		m_pPlayer->m_iWeaponVolume = flVol * KNIFE_WALLHIT_VOLUME;

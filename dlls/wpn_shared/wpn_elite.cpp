@@ -38,7 +38,7 @@ enum elite_e
 	ELITE_DRAW
 };
 
-LINK_ENTITY_TO_CLASS(weapon_elite, CELITE);
+LINK_ENTITY_TO_CLASS(weapon_elite, CELITE)
 
 void CELITE::Spawn(void)
 {
@@ -160,7 +160,9 @@ void CELITE::ELITEFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	if (m_iWeaponState & WPNSTATE_ELITE_LEFT)
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 		m_iWeaponState &= ~WPNSTATE_ELITE_LEFT;
 
 		vecDir = FireBullets3(m_pPlayer->GetGunPosition() - gpGlobals->v_right * 5, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_9MM, 1, 36, 0.75, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
@@ -168,16 +170,19 @@ void CELITE::ELITEFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	}
 	else
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_ATTACK2);
+#endif
 		m_iWeaponState |= WPNSTATE_ELITE_LEFT;
 
 		vecDir = FireBullets3(m_pPlayer->GetGunPosition() - gpGlobals->v_right * 5, gpGlobals->v_forward, flSpread, 8192, BULLET_PLAYER_9MM, 1, 36, 0.75, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
 		PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireELITE_RIGHT, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.y * 100), m_iClip, FALSE, FALSE);
 	}
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
 	m_pPlayer->pev->punchangle.x -= 2;
 }
@@ -189,7 +194,9 @@ void CELITE::Reload(void)
 
 	if (DefaultReload(ELITE_MAX_CLIP, ELITE_RELOAD, 4.5))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0.88;
 	}
 }

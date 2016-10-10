@@ -27,7 +27,7 @@ enum g3sg1_e
 	G3SG1_DRAW
 };
 
-LINK_ENTITY_TO_CLASS(weapon_g3sg1, CG3SG1);
+LINK_ENTITY_TO_CLASS(weapon_g3sg1, CG3SG1)
 
 void CG3SG1::Spawn(void)
 {
@@ -136,7 +136,9 @@ void CG3SG1::G3SG1Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
@@ -155,9 +157,10 @@ void CG3SG1::G3SG1Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireG3SG1, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), TRUE, FALSE);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.8;
 
 	m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomFloat(m_pPlayer->random_seed + 4, 2.75, 3.25) + m_pPlayer->pev->punchangle.x * 0.25;
@@ -172,7 +175,9 @@ void CG3SG1::Reload(void)
 	if (DefaultReload(G3SG1_MAX_CLIP, G3SG1_RELOAD, 3.5))
 	{
 		m_flAccuracy = 0.2;
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 
 		if (m_pPlayer->pev->fov != 90)
 		{

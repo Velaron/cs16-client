@@ -28,7 +28,7 @@ enum aug_e
 	AUG_SHOOT3
 };
 
-LINK_ENTITY_TO_CLASS(weapon_aug, CAUG);
+LINK_ENTITY_TO_CLASS(weapon_aug, CAUG)
 
 void CAUG::Spawn(void)
 {
@@ -131,8 +131,9 @@ void CAUG::AUGFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
+#endif
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
@@ -150,9 +151,10 @@ void CAUG::AUGFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireAug, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.9;
 
 	if (m_pPlayer->pev->velocity.Length2D() > 0)
@@ -172,8 +174,9 @@ void CAUG::Reload(void)
 
 	if (DefaultReload(AUG_MAX_CLIP, AUG_RELOAD, 3.3))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
-
+#endif
 		if (m_pPlayer->m_iFOV != 90)
 			SecondaryAttack();
 

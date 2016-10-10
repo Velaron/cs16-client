@@ -28,7 +28,7 @@ enum ak47_e
 	AK47_SHOOT3
 };
 
-LINK_ENTITY_TO_CLASS(weapon_ak47, CAK47);
+LINK_ENTITY_TO_CLASS(weapon_ak47, CAK47)
 
 void CAK47::Spawn(void)
 {
@@ -118,8 +118,9 @@ void CAK47::AK47Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
+#endif
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, gpGlobals->v_forward, flSpread, 8192, 2, BULLET_PLAYER_762MM, 36, 0.98, m_pPlayer->pev, FALSE, m_pPlayer->random_seed);
@@ -137,9 +138,10 @@ void CAK47::AK47Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.9;
 
 	if (m_pPlayer->pev->velocity.Length2D() > 0)
@@ -159,7 +161,9 @@ void CAK47::Reload(void)
 
 	if (DefaultReload(AK47_MAX_CLIP, AK47_RELOAD, 2.45))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0.2;
 		m_iShotsFired = 0;
 		m_bDelayFire = false;

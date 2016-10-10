@@ -28,7 +28,7 @@ enum fiveseven_e
 	FIVESEVEN_DRAW
 };
 
-LINK_ENTITY_TO_CLASS(weapon_fiveseven, CFiveSeven);
+LINK_ENTITY_TO_CLASS(weapon_fiveseven, CFiveSeven)
 
 void CFiveSeven::Spawn(void)
 {
@@ -142,8 +142,9 @@ void CFiveSeven::FiveSevenFire(float flSpread, float flCycleTime, BOOL fUseAutoA
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	SetPlayerShieldAnim();
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
+#endif
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
@@ -161,9 +162,10 @@ void CFiveSeven::FiveSevenFire(float flSpread, float flCycleTime, BOOL fUseAutoA
 	PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireFiveSeven, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), m_iClip != 0, FALSE);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
 	m_pPlayer->pev->punchangle.x -= 2;
 	ResetPlayerShieldAnim();
@@ -176,7 +178,9 @@ void CFiveSeven::Reload(void)
 
 	if (DefaultReload(FIVESEVEN_MAX_CLIP, FIVESEVEN_RELOAD, 2.7))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0.92;
 	}
 }

@@ -27,7 +27,7 @@ enum scout_e
 	SCOUT_DRAW
 };
 
-LINK_ENTITY_TO_CLASS(weapon_scout, CSCOUT);
+LINK_ENTITY_TO_CLASS(weapon_scout, CSCOUT)
 
 void CSCOUT::Spawn(void)
 {
@@ -135,7 +135,9 @@ void CSCOUT::SCOUTFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
@@ -154,10 +156,10 @@ void CSCOUT::SCOUTFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireScout, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x * 1000, vecDir.y * 1000, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.x * 100), FALSE, FALSE);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
-
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.8;
 	m_pPlayer->pev->punchangle.x -= 2;
 }
@@ -169,7 +171,9 @@ void CSCOUT::Reload(void)
 
 	if (DefaultReload(SCOUT_MAX_CLIP, SCOUT_RELOAD, 2))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 
 		if (m_pPlayer->pev->fov != 90)
 		{

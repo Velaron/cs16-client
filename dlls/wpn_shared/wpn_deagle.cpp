@@ -28,7 +28,7 @@ enum deagle_e
 	DEAGLE_DRAW
 };
 
-LINK_ENTITY_TO_CLASS(weapon_deagle, CDEAGLE);
+LINK_ENTITY_TO_CLASS(weapon_deagle, CDEAGLE)
 
 void CDEAGLE::Spawn(void)
 {
@@ -143,8 +143,9 @@ void CDEAGLE::DEAGLEFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	SetPlayerShieldAnim();
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
+#endif
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
@@ -164,9 +165,10 @@ void CDEAGLE::DEAGLEFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.8;
 	m_pPlayer->pev->punchangle.x -= 2;
 	ResetPlayerShieldAnim();
@@ -179,7 +181,9 @@ void CDEAGLE::Reload(void)
 
 	if (DefaultReload(DEAGLE_MAX_CLIP, DEAGLE_RELOAD, 2.2))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0.9;
 	}
 }

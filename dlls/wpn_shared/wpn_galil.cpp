@@ -28,7 +28,7 @@ enum galil_e
 	GALIL_SHOOT3
 };
 
-LINK_ENTITY_TO_CLASS(weapon_galil, CGalil);
+LINK_ENTITY_TO_CLASS(weapon_galil, CGalil)
 
 void CGalil::Spawn(void)
 {
@@ -123,7 +123,9 @@ void CGalil::GalilFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
@@ -142,9 +144,10 @@ void CGalil::GalilFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.9;
 
 	if (m_pPlayer->pev->velocity.Length2D() > 0)
@@ -164,7 +167,9 @@ void CGalil::Reload(void)
 
 	if (DefaultReload(GALIL_MAX_CLIP, GALIL_RELOAD, 2.45))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0.2;
 		m_iShotsFired = 0;
 		m_bDelayFire = false;

@@ -122,7 +122,7 @@ public:
 };
 
 extern char *GetTeam(int teamNo);
-extern void Broadcast(const char *sentence);
+extern void Broadcast(const char *sentence, int pitch = 100 );
 extern CGameRules *InstallGameRules(void);
 
 class CHalfLifeRules : public CGameRules

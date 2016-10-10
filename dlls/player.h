@@ -247,45 +247,45 @@ class CBasePlayer : public CBaseMonster
 {
 public:
 	virtual void Spawn(void);
-	virtual void Precache(void);
-	virtual void Restart(void);
-	virtual int Save(CSave &save);
-	virtual int Restore(CRestore &restore);
+	virtual void Precache(void) { }
+	virtual void Restart(void) { }
+	virtual int Save(CSave &save) { return 1; }
+	virtual int Restore(CRestore &restore) { return 1; }
 	virtual int ObjectCaps(void) { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-	virtual int Classify(void);
-	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, const Vector &vecDir, TraceResult *ptr, int bitsDamageType);
-	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
-	virtual int TakeHealth(float flHealth, int bitsDamageType);
+	virtual int Classify(void) { return 0; }
+	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, const Vector &vecDir, TraceResult *ptr, int bitsDamageType) { }
+	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType) { return 0; }
+	virtual int TakeHealth(float flHealth, int bitsDamageType) { return 0; }
 	virtual void Killed(entvars_t *pevAttacker, int iGib);
-	virtual void AddPoints(int score, BOOL bAllowNegativeScore);
-	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore);
-	virtual BOOL AddPlayerItem(CBasePlayerItem *pItem);
-	virtual BOOL RemovePlayerItem(CBasePlayerItem *pItem);
-	virtual int GiveAmmo(int iAmount, char *szName, int iMax);
+	virtual void AddPoints(int score, BOOL bAllowNegativeScore) {}
+	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore) {}
+	virtual BOOL AddPlayerItem(CBasePlayerItem *pItem) { return false; }
+	virtual BOOL RemovePlayerItem(CBasePlayerItem *pItem) { return false; }
+	virtual int GiveAmmo(int iAmount, char *szName, int iMax){ return 0; }
 	virtual void StartSneaking(void) { m_tSneaking = gpGlobals->time - 1; }
 	virtual void StopSneaking(void) { m_tSneaking = gpGlobals->time + 30; }
 	virtual BOOL IsSneaking(void) { return m_tSneaking <= gpGlobals->time; }
 	virtual BOOL IsAlive(void) { return pev->deadflag == DEAD_NO && pev->health > 0; }
 	virtual BOOL IsPlayer(void) { return TRUE; }
 	virtual BOOL IsNetClient(void) { return TRUE; }
-	virtual const char *TeamID(void);
-	virtual BOOL FBecomeProne(void);
+	virtual const char *TeamID(void) { return NULL; }
+	virtual BOOL FBecomeProne(void) { return TRUE; }
 	virtual Vector BodyTarget(const Vector &posSrc) { return Center() + pev->view_ofs * RANDOM_FLOAT(0.5, 1.1); }
-	virtual int Illumination(void);
+	virtual int Illumination(void) { return 0; }
 	virtual BOOL ShouldFadeOnDeath(void) { return FALSE; }
-	virtual void ResetMaxSpeed(void);
-	virtual void Jump(void);
-	virtual void Duck(void);
-	virtual void PreThink(void);
-	virtual void PostThink(void);
+	virtual void ResetMaxSpeed(void) {  }
+	virtual void Jump(void) { }
+	virtual void Duck(void) { }
+	virtual void PreThink(void) { }
+	virtual void PostThink(void) { }
 	virtual Vector GetGunPosition(void);
 	virtual BOOL IsBot(void) { return FALSE; }
-	virtual void UpdateClientData(void);
-	virtual void ImpulseCommands(void);
-	virtual void RoundRespawn(void);
-	virtual Vector GetAutoaimVector(float flDelta);
-	virtual void Blind(float flUntilTime, float flHoldTime, float flFadeTime, int iAlpha);
-	virtual void OnTouchingWeapon(CBasePlayerWeapon *pWeapon) {};
+	virtual void UpdateClientData(void) { }
+	virtual void ImpulseCommands(void) { }
+	virtual void RoundRespawn(void) { }
+	virtual Vector GetAutoaimVector(float flDelta) { return g_vecZero; }
+	virtual void Blind(float flUntilTime, float flHoldTime, float flFadeTime, int iAlpha) { }
+	virtual void OnTouchingWeapon(CBasePlayerWeapon *pWeapon) {}
 
 public:
 	void Pain(int hitgroup, bool hitkevlar);

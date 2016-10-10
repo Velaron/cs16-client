@@ -26,7 +26,7 @@ enum flashbang_e
 	FLASHBANG_DRAW
 };
 
-LINK_ENTITY_TO_CLASS(weapon_flashbang, CFlashbang);
+LINK_ENTITY_TO_CLASS(weapon_flashbang, CFlashbang)
 
 void CFlashbang::Spawn(void)
 {
@@ -158,9 +158,10 @@ bool CFlashbang::ShieldSecondaryFire(int up_anim, int down_anim)
 		m_pPlayer->m_bShieldDrawn = true;
 	}
 
-   m_pPlayer->UpdateShieldCrosshair((m_iWeaponState & WPNSTATE_SHIELD_DRAWN) == 0);
+#ifndef CLIENT_DLL
+	m_pPlayer->UpdateShieldCrosshair((m_iWeaponState & WPNSTATE_SHIELD_DRAWN) == 0);
 	m_pPlayer->ResetMaxSpeed();
-
+#endif
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.4;
 	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.4;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.6;
@@ -182,7 +183,9 @@ void CFlashbang::WeaponIdle(void)
 
 	if (m_flStartThrow)
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
+#endif
 		Vector angThrow = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 
 		if (angThrow.x < 0)
@@ -204,7 +207,9 @@ void CFlashbang::WeaponIdle(void)
 		SendWeaponAnim(FLASHBANG_THROW, UseDecrement() != FALSE);
 		SetPlayerShieldAnim();
 
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 		m_flStartThrow = 0;
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.75;

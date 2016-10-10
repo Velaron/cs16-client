@@ -52,7 +52,7 @@ enum glock18_shield_e
 	GLOCK18_SHIELD_DOWN
 };
 
-LINK_ENTITY_TO_CLASS(weapon_glock18, CGLOCK18);
+LINK_ENTITY_TO_CLASS(weapon_glock18, CGLOCK18)
 
 void CGLOCK18::Spawn(void)
 {
@@ -218,8 +218,10 @@ void CGLOCK18::GLOCK18Fire(float flSpread, float flCycleTime, BOOL fUseBurstMode
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	SetPlayerShieldAnim();
-	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
+#ifndef CLIENT_DLL
+	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
@@ -238,9 +240,10 @@ void CGLOCK18::GLOCK18Fire(float flSpread, float flCycleTime, BOOL fUseBurstMode
 	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireGlock18, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), m_iClip != 0, FALSE);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5;
 
 	if (fUseBurstMode != FALSE)
@@ -268,7 +271,9 @@ void CGLOCK18::Reload(void)
 
 	if (DefaultReload(GLOCK18_MAX_CLIP, iAnim, 2.2))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0.9;
 	}
 }

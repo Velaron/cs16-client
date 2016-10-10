@@ -37,11 +37,19 @@ public:
 	typedef enum { SATCHEL_DETONATE = 0, SATCHEL_RELEASE } SATCHELCODE;
 
 public:
+#ifndef CLIENT_DLL
 	static CGrenade *ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time);
 	static CGrenade *ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, int iTeam, unsigned short usEvent);
 	static CGrenade *ShootContact(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
 	static CGrenade *ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
 	static CGrenade *ShootSatchelCharge(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
+#else
+	static CGrenade *ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time) { return NULL; }
+	static CGrenade *ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, int iTeam, unsigned short usEvent) { return NULL; }
+	static CGrenade *ShootContact(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity) { return NULL; }
+	static CGrenade *ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent) { return NULL; }
+	static CGrenade *ShootSatchelCharge(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity) { return NULL; }
+#endif
 	static void UseSatchelCharges(entvars_t *pevOwner, SATCHELCODE code);
 
 public:
@@ -526,10 +534,10 @@ AmmoInfo;
 class CBasePlayerItem : public CBaseAnimating
 {
 public:
-	virtual int Save(CSave &save);
-	virtual int Restore(CRestore &restore);
-	virtual void SetObjectCollisionBox(void);
-	virtual int AddToPlayer(CBasePlayer *pPlayer);
+	virtual int Save(CSave &save) { return 1; }
+	virtual int Restore(CRestore &restore) { return 1; }
+	virtual void SetObjectCollisionBox(void) { }
+	virtual int AddToPlayer(CBasePlayer *pPlayer) { return false; }
 	virtual int AddDuplicate(CBasePlayerItem *pItem) { return FALSE; }
 	virtual int GetItemInfo(ItemInfo *p) { return 0; }
 	virtual BOOL CanDeploy(void) { return TRUE; }
@@ -537,13 +545,13 @@ public:
 	virtual BOOL Deploy(void) { return TRUE; }
 	virtual BOOL IsWeapon(void) { return FALSE; }
 	virtual BOOL CanHolster(void) { return TRUE; }
-	virtual void Holster(int skiplocal = 0);
+	virtual void Holster(int skiplocal = 0) {}
 	virtual void UpdateItemInfo(void) {}
 	virtual void ItemPreFrame(void) {}
 	virtual void ItemPostFrame(void) {}
-	virtual void Drop(void);
-	virtual void Kill(void);
-	virtual void AttachToPlayer(CBasePlayer *pPlayer);
+	virtual void Drop(void) {}
+	virtual void Kill(void) {}
+	virtual void AttachToPlayer(CBasePlayer *pPlayer) {}
 	virtual int PrimaryAmmoIndex(void) { return -1; }
 	virtual int SecondaryAmmoIndex(void) { return -1; }
 	virtual int UpdateClientData(CBasePlayer *pPlayer) { return 0; }
@@ -552,14 +560,14 @@ public:
 	virtual int iItemSlot(void) { return 0; }
 
 public:
-	void EXPORT DestroyItem(void);
-	void EXPORT DefaultTouch(CBaseEntity *pOther);
-	void EXPORT FallThink(void);
-	void EXPORT Materialize(void);
-	void EXPORT AttemptToMaterialize(void);
-	CBaseEntity *Respawn(void);
-	void FallInit(void);
-	void CheckRespawn(void);
+	void EXPORT DestroyItem(void) {}
+	void EXPORT DefaultTouch(CBaseEntity *pOther) {}
+	void EXPORT FallThink(void) {}
+	void EXPORT Materialize(void) {}
+	void EXPORT AttemptToMaterialize(void) {}
+	CBaseEntity *Respawn(void) { return this; }
+	void FallInit(void) { }
+	void CheckRespawn(void) {}
 
 public:
 	static TYPEDESCRIPTION m_SaveData[];
@@ -586,26 +594,26 @@ public:
 class CBasePlayerWeapon : public CBasePlayerItem
 {
 public:
-	virtual int Save(CSave &save);
-	virtual int Restore(CRestore &restore);
-	virtual int AddToPlayer(CBasePlayer *pPlayer);
-	virtual int AddDuplicate(CBasePlayerItem *pItem);
-	virtual int ExtractAmmo(CBasePlayerWeapon *pWeapon);
-	virtual int ExtractClipAmmo(CBasePlayerWeapon *pWeapon);
+	virtual int Save(CSave &save) { return 1; }
+	virtual int Restore(CRestore &restore) { return 1; }
+	virtual int AddToPlayer(CBasePlayer *pPlayer) { return 0; }
+	virtual int AddDuplicate(CBasePlayerItem *pItem) { return 0; }
+	virtual int ExtractAmmo(CBasePlayerWeapon *pWeapon) { return 0; }
+	virtual int ExtractClipAmmo(CBasePlayerWeapon *pWeapon) { return 0; }
 	virtual int AddWeapon(void) { ExtractAmmo(this); return TRUE; }
-	virtual void UpdateItemInfo(void) {};
+	virtual void UpdateItemInfo(void) {}
 	virtual BOOL PlayEmptySound(void);
 	virtual void ResetEmptySound(void);
 	virtual void SendWeaponAnim(int iAnim, int skiplocal = 0);
 	virtual BOOL CanDeploy(void);
 	virtual BOOL IsWeapon(void) { return TRUE; }
-	virtual BOOL IsUseable(void);
+	virtual BOOL IsUseable(void) { return true; }
 	virtual void ItemPostFrame(void);
 	virtual void PrimaryAttack(void) {}
 	virtual void SecondaryAttack(void) {}
 	virtual void Reload(void) {}
 	virtual void WeaponIdle(void) {}
-	virtual int UpdateClientData(CBasePlayer *pPlayer);
+	virtual int UpdateClientData(CBasePlayer *pPlayer) { return 0; }
 	virtual void RetireWeapon(void);
 	virtual BOOL ShouldWeaponIdle(void) { return FALSE; }
 	virtual void Holster(int skiplocal = 0);
@@ -616,10 +624,10 @@ public:
 	BOOL DefaultDeploy(const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int skiplocal = 0);
 	int DefaultReload(int iClipSize, int iAnim, float fDelay, int body = 0);
 	void ReloadSound(void);
-	BOOL AddPrimaryAmmo(int iCount, char *szName, int iMaxClip, int iMaxCarry);
-	BOOL AddSecondaryAmmo(int iCount, char *szName, int iMaxCarry);
-	int PrimaryAmmoIndex(void);
-	int SecondaryAmmoIndex(void);
+	BOOL AddPrimaryAmmo(int iCount, char *szName, int iMaxClip, int iMaxCarry) { return true; }
+	BOOL AddSecondaryAmmo(int iCount, char *szName, int iMaxCarry) { return true; }
+	int PrimaryAmmoIndex(void) { return -1; }
+	int SecondaryAmmoIndex(void) { return -1; }
 	void EjectBrassLate(void);
 	void KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);
 	void FireRemaining(int &shotsFired, float &shootTime, BOOL isGlock18);
@@ -670,13 +678,13 @@ public:
 class CBasePlayerAmmo : public CBaseEntity
 {
 public:
-	virtual void Spawn(void);
+	virtual void Spawn(void){}
 	virtual BOOL AddAmmo(CBaseEntity *pOther) { return TRUE; }
 
 public:
-	void EXPORT Materialize(void);
-	void EXPORT DefaultTouch(CBaseEntity *pOther);
-	CBaseEntity *Respawn(void);
+	void EXPORT Materialize(void) { }
+	void EXPORT DefaultTouch(CBaseEntity *pOther) { }
+	CBaseEntity *Respawn(void) { return this; }
 };
 
 extern DLL_GLOBAL short g_sModelIndexLaser;
@@ -697,6 +705,7 @@ extern DLL_GLOBAL short g_sModelIndexCTGhost;
 extern DLL_GLOBAL short g_sModelIndexTGhost;
 extern DLL_GLOBAL short g_sModelIndexC4Glow;
 
+#ifndef CLIENT_WEAPONS
 extern void ClearMultiDamage(void);
 extern void ApplyMultiDamage(entvars_t *pevInflictor, entvars_t *pevAttacker);
 extern void AddMultiDamage(entvars_t *pevInflictor, CBaseEntity *pEntity, float flDamage, int bitsDamageType);
@@ -705,7 +714,11 @@ extern void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage);
 extern int DamageDecal(CBaseEntity *pEntity, int bitsDamageType);
 extern void RadiusFlash(Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage);
 extern void RadiusDamage(Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType);
-
+#else
+inline void ClearMultiDamage(void) { }
+inline void ApplyMultiDamage(entvars_t *pevInflictor, entvars_t *pevAttacker) { }
+inline void DecalGunshot(TraceResult *pTrace, int iBulletType, bool ClientOnly, entvars_t *pShooter, bool bHitMetal) { }
+#endif
 typedef struct
 {
 	CBaseEntity *pEntity;

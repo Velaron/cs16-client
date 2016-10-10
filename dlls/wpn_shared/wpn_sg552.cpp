@@ -28,7 +28,7 @@ enum sg552_e
 	SG552_SHOOT3
 };
 
-LINK_ENTITY_TO_CLASS(weapon_sg552, CSG552);
+LINK_ENTITY_TO_CLASS(weapon_sg552, CSG552)
 
 void CSG552::Spawn(void)
 {
@@ -130,7 +130,9 @@ void CSG552::SG552Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
@@ -148,10 +150,10 @@ void CSG552::SG552Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireSG552, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), 5, FALSE);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
-
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
 
 	if (m_pPlayer->pev->velocity.Length2D() > 0)
@@ -171,7 +173,9 @@ void CSG552::Reload(void)
 
 	if (DefaultReload(SG552_MAX_CLIP, SG552_RELOAD, 3))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 
 		if (m_pPlayer->m_iFOV != 90)
 			SecondaryAttack();

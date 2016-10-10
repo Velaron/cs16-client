@@ -30,7 +30,7 @@ enum m3_e
 	M3_HOLSTER
 };
 
-LINK_ENTITY_TO_CLASS(weapon_m3, CM3);
+LINK_ENTITY_TO_CLASS(weapon_m3, CM3)
 
 void CM3::Spawn(void)
 {
@@ -107,10 +107,14 @@ void CM3::PrimaryAttack(void)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+#ifndef CLIENT_DLL
 	m_pPlayer->FireBullets(9, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, Vector(0.0675, 0.0675, 0), 3000, BULLET_PLAYER_BUCKSHOT, 0);
+#endif
 
 	int flags;
 #ifdef CLIENT_WEAPONS
@@ -124,9 +128,10 @@ void CM3::PrimaryAttack(void)
 	if (m_iClip)
 		m_flPumpTime = UTIL_WeaponTimeBase() + 0.5;
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	if (m_iClip)
 		m_flPumpTime = UTIL_WeaponTimeBase() + 0.5;
 
@@ -158,7 +163,9 @@ void CM3::Reload(void)
 
 	if (!m_fInSpecialReload)
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		SendWeaponAnim(M3_START_RELOAD, UseDecrement() != FALSE);
 
 		m_fInSpecialReload = 1;

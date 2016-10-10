@@ -18,27 +18,27 @@
 class CBaseMonster : public CBaseToggle
 {
 public:
-	virtual void KeyValue(KeyValueData *pkvd);
-	virtual float ChangeYaw(int speed);
-	virtual BOOL HasHumanGibs(void);
-	virtual BOOL HasAlienGibs(void);
-	virtual void FadeMonster(void);
-	virtual void GibMonster(void);
-	virtual Activity GetDeathActivity(void);
-	virtual void BecomeDead(void);
-	virtual BOOL ShouldFadeOnDeath(void);
-	virtual int IRelationship(CBaseEntity *pTarget);
-	virtual int TakeHealth(float flHealth, int bitsDamageType);
-	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
-	virtual void Killed(entvars_t *pevAttacker, int iGib);
+	virtual void KeyValue(KeyValueData *pkvd) { }
+	virtual float ChangeYaw(int speed) { return 0; }
+	virtual BOOL HasHumanGibs(void) { return FALSE; }
+	virtual BOOL HasAlienGibs(void) { return FALSE; }
+	virtual void FadeMonster(void) { }
+	virtual void GibMonster(void) { }
+	virtual Activity GetDeathActivity(void) { return ACT_DIE_HEADSHOT; }
+	virtual void BecomeDead(void) { }
+	virtual BOOL ShouldFadeOnDeath(void) { return FALSE; }
+	virtual int IRelationship(CBaseEntity *pTarget) { return 0; }
+	virtual int TakeHealth(float flHealth, int bitsDamageType) { return 0; }
+	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType) { return 0; }
+	virtual void Killed(entvars_t *pevAttacker, int iGib) { }
 	virtual void PainSound(void) { return; }
-	virtual void ResetMaxSpeed(void) {};
-	virtual void ReportAIState(void);
-	virtual void MonsterInitDead(void);
-	virtual void Look(int iDistance);
-	virtual CBaseEntity *BestVisibleEnemy(void);
-	virtual BOOL FInViewCone(CBaseEntity *pEntity);
-	virtual BOOL FInViewCone(Vector *pOrigin);
+	virtual void ResetMaxSpeed(void) {}
+	virtual void ReportAIState(void) { }
+	virtual void MonsterInitDead(void) { }
+	virtual void Look(int iDistance) { }
+	virtual CBaseEntity *BestVisibleEnemy(void) { return NULL; }
+	virtual BOOL FInViewCone(CBaseEntity *pEntity) { return FALSE; }
+	virtual BOOL FInViewCone(Vector *pOrigin) { return FALSE; }
 	virtual int BloodColor(void) { return m_bloodColor; }
 	virtual BOOL IsAlive(void) { return (pev->deadflag != DEAD_DEAD); }
 
@@ -54,7 +54,7 @@ public:
 	void RadiusDamage(Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType);
 	void EXPORT CorpseFallThink(void);
 	CBaseEntity *CheckTraceHullAttack(float flDist, int iDamage, int iDmgType);
-	void TraceAttack(entvars_t *pevAttacker, float flDamage, const Vector &vecDir, TraceResult *ptr, int bitsDamageType);
+	void TraceAttack(entvars_t *pevAttacker, float flDamage, const Vector &vecDir, TraceResult *ptr, int bitsDamageType) {}
 	void MakeDamageBloodDecal(int cCount, float flNoise, TraceResult *ptr, const Vector &vecDir);
 	void BloodSplat(const Vector &vecPos, const Vector &vecDir, int hitgroup, int iDamage);
 

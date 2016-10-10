@@ -28,7 +28,7 @@ enum famas_e
 	FAMAS_SHOOT3
 };
 
-LINK_ENTITY_TO_CLASS(weapon_famas, CFamas);
+LINK_ENTITY_TO_CLASS(weapon_famas, CFamas)
 
 void CFamas::Spawn(void)
 {
@@ -156,8 +156,9 @@ void CFamas::FamasFire(float flSpread, float flCycleTime, BOOL fUseAutoAim, BOOL
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
+#endif
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
@@ -176,9 +177,10 @@ void CFamas::FamasFire(float flSpread, float flCycleTime, BOOL fUseAutoAim, BOOL
 	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireFamas, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000000), (int)(m_pPlayer->pev->punchangle.y * 10000000), m_iClip != 0, FALSE);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.1;
 
 	if (m_pPlayer->pev->velocity.Length2D() > 0)
@@ -205,8 +207,9 @@ void CFamas::Reload(void)
 
 	if (DefaultReload(FAMAS_MAX_CLIP, FAMAS_RELOAD, 3.3))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
-
+#endif
 		if (m_pPlayer->m_iFOV != 90)
 			SecondaryAttack();
 

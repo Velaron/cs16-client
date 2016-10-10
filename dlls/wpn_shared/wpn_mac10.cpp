@@ -28,7 +28,7 @@ enum mac10_e
 	MAC10_SHOOT3
 };
 
-LINK_ENTITY_TO_CLASS(weapon_mac10, CMAC10);
+LINK_ENTITY_TO_CLASS(weapon_mac10, CMAC10)
 
 void CMAC10::Spawn(void)
 {
@@ -115,7 +115,9 @@ void CMAC10::MAC10Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
@@ -134,10 +136,10 @@ void CMAC10::MAC10Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireMAC10, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
-
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
 
 	if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
@@ -157,7 +159,9 @@ void CMAC10::Reload(void)
 
 	if (DefaultReload(MAC10_MAX_CLIP, MAC10_RELOAD, 3.15))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0;
 		m_iShotsFired = 0;
 	}

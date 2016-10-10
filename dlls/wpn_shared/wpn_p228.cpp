@@ -42,7 +42,7 @@ enum p228_shield_e
 	P228_SHIELD_DOWN
 };
 
-LINK_ENTITY_TO_CLASS(weapon_p228, CP228);
+LINK_ENTITY_TO_CLASS(weapon_p228, CP228)
 
 void CP228::Spawn(void)
 {
@@ -156,8 +156,9 @@ void CP228::P228Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	SetPlayerShieldAnim();
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
+#endif
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
@@ -175,10 +176,10 @@ void CP228::P228Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireP228, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), m_iClip != 0, FALSE);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
-
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
 	ResetPlayerShieldAnim();
 	m_pPlayer->pev->punchangle.x -= 2;
@@ -198,7 +199,9 @@ void CP228::Reload(void)
 
 	if (DefaultReload(P228_MAX_CLIP, iAnim, 2.7))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0.9;
 	}
 }

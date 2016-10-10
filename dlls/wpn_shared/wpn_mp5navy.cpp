@@ -28,7 +28,7 @@ enum mp5n_e
 	MP5N_SHOOT3
 };
 
-LINK_ENTITY_TO_CLASS(weapon_mp5navy, CMP5N);
+LINK_ENTITY_TO_CLASS(weapon_mp5navy, CMP5N)
 
 void CMP5N::Spawn(void)
 {
@@ -116,7 +116,9 @@ void CMP5N::MP5NFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
@@ -134,10 +136,10 @@ void CMP5N::MP5NFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
-
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
 
 	if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
@@ -157,7 +159,9 @@ void CMP5N::Reload(void)
 
 	if (DefaultReload(MP5N_MAX_CLIP, MP5N_RELOAD, 2.63))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0;
 		m_iShotsFired = 0;
 	}

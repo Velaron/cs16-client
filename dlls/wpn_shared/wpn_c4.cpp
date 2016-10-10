@@ -33,7 +33,7 @@ enum c4_e
 	C4_ARM
 };
 
-LINK_ENTITY_TO_CLASS(weapon_c4, CC4);
+LINK_ENTITY_TO_CLASS(weapon_c4, CC4)
 
 void CC4::Spawn(void)
 {
@@ -152,9 +152,11 @@ void CC4::PrimaryAttack(void)
 		m_bStartedArming = true;
 		m_bBombPlacedAnimation = false;
 		m_fArmedTime = gpGlobals->time + 3;
-		SendWeaponAnim(C4_ARM, UseDecrement() != FALSE);	
+		SendWeaponAnim(C4_ARM, UseDecrement() != FALSE);
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 		m_pPlayer->SetProgressBarTime(3);
+#endif
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.3;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + RANDOM_FLOAT(10, 15);
 	}
@@ -170,10 +172,11 @@ void CC4::PrimaryAttack(void)
 
 			m_bStartedArming = false;
 			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.5;
+#ifndef CLIENT_DLL
 			m_pPlayer->ResetMaxSpeed();
 			m_pPlayer->SetProgressBarTime(0);
 			m_pPlayer->SetAnimation(PLAYER_HOLDBOMB);
-
+#endif
 			if (m_bBombPlacedAnimation == true)
 				SendWeaponAnim(C4_DRAW, UseDecrement() != FALSE);
 			else
@@ -190,8 +193,8 @@ void CC4::PrimaryAttack(void)
 				m_fArmedTime = 0;
 				m_pPlayer->m_bHasC4 = false;
 
-#ifndef CLIENT_WEAPONS
 				Broadcast("BOMBPL");
+#ifndef CLIENT_WEAPONS
 
 				if (pev->speed != 0 && g_pGameRules)
 					g_pGameRules->m_iC4Timer = (int)pev->speed;
@@ -220,8 +223,10 @@ void CC4::PrimaryAttack(void)
 				EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/c4_plant.wav", VOL_NORM, ATTN_NORM);
 
 				m_pPlayer->pev->body = 0;
-				m_pPlayer->ResetMaxSpeed();
+#ifndef CLIENT_DLL
+				m_pPlayer->ResetMaxSpeed();				
 				m_pPlayer->SetBombIcon(FALSE);
+#endif
 				m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
 				if (!m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
@@ -239,7 +244,9 @@ void CC4::PrimaryAttack(void)
 				{
 					m_bBombPlacedAnimation = true;
 					SendWeaponAnim(C4_DROP, UseDecrement() != FALSE);
+#ifndef CLIENT_DLL
 					m_pPlayer->SetAnimation(PLAYER_HOLDBOMB);
+#endif
 				}
 			}
 		}
@@ -254,9 +261,11 @@ void CC4::WeaponIdle(void)
 	if (m_bStartedArming == true)
 	{
 		m_bStartedArming = false;
-		m_pPlayer->ResetMaxSpeed();
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1;
+#ifndef CLIENT_DLL
+		m_pPlayer->ResetMaxSpeed();
 		m_pPlayer->SetProgressBarTime(0);
+#endif
 
 		if (m_bBombPlacedAnimation == true)
 			SendWeaponAnim(C4_DRAW, UseDecrement() != FALSE);

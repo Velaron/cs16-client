@@ -70,7 +70,9 @@ typedef int BOOL;
 #define DECLARE_GLOBAL_METHOD(MethodName) extern void DLLEXPORT MethodName(void)
 #define GLOBAL_METHOD(funcname) void DLLEXPORT funcname(void)
 
-#ifdef _WIN32
+#ifdef CLIENT_DLL
+#define LINK_ENTITY_TO_CLASS( x, y )
+#elif defined(_WIN32)
 #define LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName) \
 	extern "C" EXPORT void mapClassName(entvars_t *pev); \
 	void mapClassName(entvars_t *pev) { GetClassPtr((DLLClassName *)pev); }
@@ -78,7 +80,7 @@ typedef int BOOL;
 #define LINK_ENTITY_TO_CLASS(mapClassName,DLLClassName) extern "C" void mapClassName(entvars_t *pev); void mapClassName(entvars_t *pev) { GetClassPtr((DLLClassName *)pev); }
 #endif
 
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(CLIENT_DLL)
 	extern edict_t *DBG_EntOfVars(const entvars_t *pev);
 	inline edict_t *ENT(const entvars_t *pev) { return DBG_EntOfVars(pev); }
 #else
@@ -178,7 +180,11 @@ extern float UTIL_AngleDiff(float destAngle, float srcAngle);
 extern CBaseEntity *UTIL_FindEntityInSphere(CBaseEntity *pStartEntity, const Vector &vecCenter, float flRadius);
 extern CBaseEntity *UTIL_FindEntityByString_Old(CBaseEntity *pStartEntity, const char *szKeyword, const char *szValue);
 extern CBaseEntity *UTIL_FindEntityByString(CBaseEntity *pStartEntity, const char *szKeyword, const char *szValue);
+#ifndef CLIENT_DLL
 extern CBaseEntity *UTIL_FindEntityByClassname(CBaseEntity *pStartEntity, const char *szName);
+#else
+inline CBaseEntity *UTIL_FindEntityByClassname(CBaseEntity *, const char* ) { return NULL; }
+#endif
 extern CBaseEntity *UTIL_FindEntityByTargetname(CBaseEntity *pStartEntity, const char *szName);
 extern CBaseEntity *UTIL_FindEntityGeneric(const char *szName, Vector &vecSrc, float flRadius);
 extern CBaseEntity *UTIL_PlayerByIndex(int playerIndex);
@@ -208,7 +214,11 @@ typedef enum { ignore_glass = 1, dont_ignore_glass = 0 } IGNORE_GLASS;
 extern void UTIL_TraceLine(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr);
 extern void UTIL_TraceLine(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t *pentIgnore, TraceResult *ptr);
 typedef enum { point_hull = 0, human_hull = 1, large_hull = 2, head_hull = 3 } HULL_TYPE;
+#ifndef CLIENT_DLL
 extern void UTIL_TraceHull(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr);
+#else
+inline void UTIL_TraceHull(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr) {}
+#endif
 extern TraceResult UTIL_GetGlobalTrace(void);
 extern void UTIL_TraceModel(const Vector &vecStart, const Vector &vecEnd, int hullNumber, edict_t *pentModel, TraceResult *ptr);
 extern Vector UTIL_GetAimVector(edict_t *pent, float flSpeed);
@@ -251,7 +261,11 @@ class CBasePlayerItem;
 class CBasePlayer;
 
 extern BOOL UTIL_GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon);
+#ifndef CLIENT_DLL
 extern void ClientPrint(entvars_t *client, int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL);
+#else
+inline void ClientPrint(entvars_t *client, int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL) { }
+#endif
 extern void UTIL_SayText(const char *pText, CBaseEntity *pEntity);
 extern void UTIL_SayTextAll(const char *pText, CBaseEntity *pEntity);
 
@@ -406,7 +420,11 @@ void TEXTURETYPE_Init(void);
 char TEXTURETYPE_Find(char *name);
 float TEXTURETYPE_PlaySound(TraceResult *ptr, Vector vecSrc, Vector vecEnd, int iBulletType);
 
+#ifndef CLIENT_WEAPONS
 void EMIT_SOUND_DYN(edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch);
+#else
+inline void EMIT_SOUND_DYN(edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch) { }
+#endif
 
 inline void EMIT_SOUND(edict_t *entity, int channel, const char *sample, float volume, float attenuation)
 {
@@ -455,5 +473,9 @@ void UTIL_UnsetGroupTrace(void);
 int UTIL_SharedRandomLong(unsigned int seed, int low, int high);
 float UTIL_SharedRandomFloat(unsigned int seed, float low, float high);
 
+#ifndef CLIENT_WEAPONS
 float UTIL_WeaponTimeBase(void);
+#else
+inline float UTIL_WeaponTimeBase( void ) { return 0; }
+#endif
 #endif // util_h__

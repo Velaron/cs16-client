@@ -352,7 +352,9 @@ void CBasePlayerWeapon::FireRemaining(int &shotsFired, float &shootTime, BOOL is
 	}
 
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 	shotsFired++;
 
 	if (shotsFired == 3)
@@ -383,9 +385,10 @@ bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim)
 		m_pPlayer->m_bShieldDrawn = true;
 	}
 
+#ifndef CLIENT_DLL
 	m_pPlayer->UpdateShieldCrosshair((m_iWeaponState & WPNSTATE_SHIELD_DRAWN) ? true : false);
 	m_pPlayer->ResetMaxSpeed();
-
+#endif
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.4;
 	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.4;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.6;
@@ -502,6 +505,12 @@ void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal )
 {
 	m_pPlayer->pev->weaponanim = iAnim;
 	HUD_SendWeaponAnim( iAnim, m_iId, 0, 0 );
+}
+
+void CBasePlayerWeapon::RetireWeapon()
+{
+	// TODO: Implement
+	//UTIL_GetNextBestWeapon( m_pPlayer, this );
 }
 
 Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, entvars_t *pevAttacker, bool bPistol, int shared_rand )

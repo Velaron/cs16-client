@@ -51,7 +51,7 @@ enum usp_shield_e
 	USP_SHIELD_DOWN
 };
 
-LINK_ENTITY_TO_CLASS(weapon_usp, CUSP);
+LINK_ENTITY_TO_CLASS(weapon_usp, CUSP)
 
 void CUSP::Spawn(void)
 {
@@ -203,7 +203,9 @@ void CUSP::USPFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	}
 
 	m_iClip--;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 
 	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
@@ -225,10 +227,10 @@ void CUSP::USPFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireUSP, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip != 0, m_iWeaponState & WPNSTATE_USP_SILENCED);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
-
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
 	m_pPlayer->pev->punchangle.x -= 2;
 	ResetPlayerShieldAnim();
@@ -250,7 +252,10 @@ void CUSP::Reload(void)
 
 	if (DefaultReload(USP_MAX_CLIP, iAnim, 2.7))
 	{
+
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0.92;
 	}
 }

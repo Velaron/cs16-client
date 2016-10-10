@@ -71,6 +71,10 @@ void AddEntityHashValue(struct entvars_s *pev, const char *value, hash_types_e f
 void RemoveEntityHashValue(struct entvars_s *pev, const char *value, hash_types_e fieldType);
 void printEntities(void);
 void loopPerformance(void);
+#ifdef CLIENT_DLL
+void Broadcast( const char*, int );
+#endif
+
 
 extern int DispatchSpawn(edict_t *pent);
 extern void DispatchKeyValue(edict_t *pentKeyvalue, KeyValueData *pkvd);
@@ -150,19 +154,19 @@ public:
 	virtual void Precache(void) {}
 	virtual void Restart(void) {}
 	virtual void KeyValue(KeyValueData *pkvd) { pkvd->fHandled = FALSE; }
-	virtual int Save(CSave &save);
-	virtual int Restore(CRestore &restore);
+	virtual int Save(CSave &save) { return 1; }
+	virtual int Restore(CRestore &restore) { return 1; }
 	virtual int ObjectCaps(void) { return FCAP_ACROSS_TRANSITION; }
 	virtual void Activate(void) {}
-	virtual void SetObjectCollisionBox(void);
+	virtual void SetObjectCollisionBox(void) {}
 	virtual int Classify(void) { return CLASS_NONE; }
 	virtual void DeathNotice(entvars_t *pevChild) {}
-	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, const Vector &vecDir, TraceResult *ptr, int bitsDamageType);
-	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
-	virtual int TakeHealth(float flHealth, int bitsDamageType);
+	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, const Vector &vecDir, TraceResult *ptr, int bitsDamageType) { }
+	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType) { return 1; }
+	virtual int TakeHealth(float flHealth, int bitsDamageType) { return 1; }
 	virtual void Killed(entvars_t *pevAttacker, int iGib);
 	virtual int BloodColor(void) { return DONT_BLEED; }
-	virtual void TraceBleed(float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+	virtual void TraceBleed(float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) { }
 	virtual BOOL IsTriggered(CBaseEntity *pActivator) { return TRUE; }
 	virtual CBaseMonster *MyMonsterPointer(void) { return NULL; }
 	virtual CSquadMonster *MySquadMonsterPointer(void) { return NULL; }
@@ -175,7 +179,7 @@ public:
 	virtual float GetDelay(void) { return 0; }
 	virtual int IsMoving(void) { return pev->velocity != g_vecZero; }
 	virtual void OverrideReset(void) {}
-	virtual int DamageDecal(int bitsDamageType);
+	virtual int DamageDecal(int bitsDamageType) { return -1; }
 	virtual void SetToggleState(int state) {}
 	virtual void StartSneaking(void) {}
 	virtual void StopSneaking(void) {}
@@ -185,11 +189,11 @@ public:
 	virtual BOOL IsBSPModel(void) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
 	virtual BOOL ReflectGauss(void) { return IsBSPModel() && !pev->takedamage; }
 	virtual BOOL HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->targetname)); }
-	virtual BOOL IsInWorld(void);
+	virtual BOOL IsInWorld(void) { return TRUE; }
 	virtual BOOL IsPlayer(void) { return FALSE; }
 	virtual BOOL IsNetClient(void) { return FALSE; }
 	virtual const char *TeamID(void) { return ""; }
-	virtual CBaseEntity *GetNextTarget(void);
+	virtual CBaseEntity *GetNextTarget(void) { return 0; }
 	virtual void Think(void) { if (m_pfnThink) (this->*m_pfnThink)(); }
 	virtual void Touch(CBaseEntity *pOther) { if (m_pfnTouch) (this->*m_pfnTouch)(pOther); }
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) { if (m_pfnUse) (this->*m_pfnUse)(pActivator, pCaller, useType, value); }
@@ -202,11 +206,11 @@ public:
 	virtual Vector EarPosition(void) { return pev->origin + pev->view_ofs; }
 	virtual Vector BodyTarget(const Vector &posSrc) { return Center(); }
 	virtual int Illumination(void) { return GETENTITYILLUM(ENT(pev)); }
-	virtual BOOL FVisible(CBaseEntity *pEntity);
-	virtual BOOL FVisible(const Vector &vecOrigin);
+	virtual BOOL FVisible(CBaseEntity *pEntity) { return FALSE; }
+	virtual BOOL FVisible(const Vector &vecOrigin) { return FALSE; }
 
 public:
-	void EXPORT SUB_Remove(void);
+	void EXPORT SUB_Remove(void) { }
 	void EXPORT SUB_DoNothing(void);
 	void EXPORT SUB_StartFadeOut(void);
 	void EXPORT SUB_FadeOut(void);
@@ -215,12 +219,12 @@ public:
 
 public:
 	void UpdateOnRemove(void);
-	int ShouldToggle(USE_TYPE useType, BOOL currentState);
+	int ShouldToggle(USE_TYPE useType, BOOL currentState) { return 0; }
 	void FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL);
 	Vector FireBullets3(Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, entvars_t *pevAttacker, bool bPistol, int shared_rand = 0);
-	int Intersects(CBaseEntity *pOther);
-	void MakeDormant(void);
-	int IsDormant(void);
+	int Intersects(CBaseEntity *pOther) { return 0; }
+	void MakeDormant(void) { }
+	int IsDormant(void) { return 0; }
 	BOOL IsLockedByMaster(void) { return FALSE; }
 
 public:
@@ -248,7 +252,7 @@ public:
 		return NULL;
 	}
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(CLIENT_DLL)
 	void FunctionCheck(void *pFunction, const char *name)
 	{
 		if (pFunction && !NAME_FOR_FUNCTION((unsigned long)(pFunction)))
@@ -292,7 +296,7 @@ public:
 	}
 #endif
 
-	static CBaseEntity *Create(char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL);
+	static CBaseEntity *Create(char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL) { return NULL; }
 
 	edict_t *edict(void) { return ENT(pev); }
 	EOFFSET eoffset(void) { return OFFSET(pev); }
@@ -344,7 +348,7 @@ public:
 	bool has_disconnected;
 };
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(CLIENT_DLL)
 #define SetThink(a) ThinkSet(static_cast <void (CBaseEntity::*)(void)>(a), (char*)#a)
 #define SetTouch(a) TouchSet(static_cast <void (CBaseEntity::*)(CBaseEntity *)>(a), #a)
 #define SetUse(a) UseSet(static_cast <void (CBaseEntity::*)(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)>(a), #a)
@@ -410,9 +414,9 @@ public:
 class CBaseDelay : public CBaseEntity
 {
 public:
-	void KeyValue(KeyValueData *pkvd);
-	int Save(CSave &save);
-	int Restore(CRestore &restore);
+	void KeyValue(KeyValueData *pkvd) { }
+	int Save(CSave &save) { return 1; }
+	int Restore(CRestore &restore) { return 1; }
 
 public:
 	void SUB_UseTargets(CBaseEntity *pActivator, USE_TYPE useType, float value);
@@ -431,29 +435,29 @@ public:
 class CBaseAnimating : public CBaseDelay
 {
 public:
-	virtual int Save(CSave &save);
-	virtual int Restore(CRestore &restore);
+	virtual int Save(CSave &save) { return 1; }
+	virtual int Restore(CRestore &restore) { return 1; }
 	virtual void HandleAnimEvent(MonsterEvent_t *pEvent) {}
 
 public:
 	float StudioFrameAdvance(float flInterval = 0);
 	int GetSequenceFlags(void);
-	int LookupActivity(int activity);
-	int LookupActivityHeaviest(int activity);
-	int LookupSequence(const char *label);
-	void ResetSequenceInfo(void);
-	void DispatchAnimEvents(float flFutureInterval = 0.1);
-	float SetBoneController(int iController, float flValue);
-	void InitBoneControllers(void);
-	float SetBlending(int iBlender, float flValue);
-	void GetBonePosition(int iBone, Vector &origin, Vector &angles);
-	void GetAutomovement(Vector &origin, Vector &angles, float flInterval = 0.1);
-	int FindTransition(int iEndingSequence, int iGoalSequence, int *piDir);
-	void GetAttachment(int iAttachment, Vector &origin, Vector &angles);
-	void SetBodygroup(int iGroup, int iValue);
-	int GetBodygroup(int iGroup);
-	int ExtractBbox(int sequence, float *mins, float *maxs);
-	void SetSequenceBox(void);
+	int LookupActivity(int activity) { return 0; }
+	int LookupActivityHeaviest(int activity) { return 0; }
+	int LookupSequence(const char *label) { return 0; }
+	void ResetSequenceInfo(void) { }
+	void DispatchAnimEvents(float flFutureInterval = 0.1) { }
+	float SetBoneController(int iController, float flValue) { return 0; }
+	void InitBoneControllers(void) { }
+	float SetBlending(int iBlender, float flValue) { return 0; }
+	void GetBonePosition(int iBone, Vector &origin, Vector &angles) { }
+	void GetAutomovement(Vector &origin, Vector &angles, float flInterval = 0.1) { }
+	int FindTransition(int iEndingSequence, int iGoalSequence, int *piDir) { return -1; }
+	void GetAttachment(int iAttachment, Vector &origin, Vector &angles) { }
+	void SetBodygroup(int iGroup, int iValue) {}
+	int GetBodygroup(int iGroup) { return 0; }
+	int ExtractBbox(int sequence, float *mins, float *maxs) { return 0; }
+	void SetSequenceBox(void) { }
 
 public:
 	static TYPEDESCRIPTION m_SaveData[];
@@ -471,9 +475,9 @@ public:
 class CBaseToggle : public CBaseAnimating
 {
 public:
-	void KeyValue(KeyValueData *pkvd);
-	int Save(CSave &save);
-	int Restore(CRestore &restore);
+	void KeyValue(KeyValueData *pkvd) { }
+	int Save(CSave &save) { return 1; }
+	int Restore(CRestore &restore) { return 1; }
 	int GetToggleState(void) { return m_toggle_state; }
 	float GetDelay(void) { return m_flWait; }
 

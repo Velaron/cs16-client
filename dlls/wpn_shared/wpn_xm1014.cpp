@@ -29,7 +29,7 @@ enum xm1014_e
 	XM1014_DRAW
 };
 
-LINK_ENTITY_TO_CLASS(weapon_xm1014, CXM1014);
+LINK_ENTITY_TO_CLASS(weapon_xm1014, CXM1014)
 
 void CXM1014::Spawn(void)
 {
@@ -103,11 +103,14 @@ void CXM1014::PrimaryAttack(void)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+#ifndef CLIENT_DLL
 	m_pPlayer->FireBullets(6, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, Vector(0.0725, 0.0725, 0.0), 3048, BULLET_PLAYER_BUCKSHOT, 0);
-
+#endif
 	int flags;
 #ifdef CLIENT_WEAPONS
 	flags = FEV_NOTHOST;
@@ -120,9 +123,10 @@ void CXM1014::PrimaryAttack(void)
 	if (m_iClip)
 		m_flPumpTime = UTIL_WeaponTimeBase() + 0.125;
 
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	if (m_iClip)
 		m_flPumpTime = UTIL_WeaponTimeBase() + 0.125;
 
@@ -152,7 +156,9 @@ void CXM1014::Reload(void)
 
 	if (!m_fInSpecialReload)
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		SendWeaponAnim(XM1014_START_RELOAD, UseDecrement() != FALSE);
 
 		m_fInSpecialReload = 1;

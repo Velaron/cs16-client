@@ -28,7 +28,7 @@ enum p90_e
 	P90_SHOOT3
 };
 
-LINK_ENTITY_TO_CLASS(weapon_p90, CP90);
+LINK_ENTITY_TO_CLASS(weapon_p90, CP90)
 
 void CP90::Spawn(void)
 {
@@ -119,7 +119,9 @@ void CP90::P90Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+#ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#endif
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
@@ -138,10 +140,10 @@ void CP90::P90Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireP90, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), 5, FALSE);
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
-
+#ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-
+#endif
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
 
 	if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
@@ -161,7 +163,9 @@ void CP90::Reload(void)
 
 	if (DefaultReload(P90_MAX_CLIP, P90_RELOAD, 3.4))
 	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+#endif
 		m_flAccuracy = 0.2;
 		m_iShotsFired = 0;
 	}
