@@ -11,9 +11,11 @@ if [[ "$#" -ne "2" ]]; then
 fi
 
 if [[ "$1" = "release" ]]; then
+	VERBOSE="0"
 	RELEASE="0"
 else
 	RELEASE="1 APP_CFLAGS=\"-gdwarf-3\""
+	VERBOSE="1"
 fi
 
 if [[ "$2" = "omp" ]]; then
@@ -38,9 +40,12 @@ cp -r ../3rdparty/extras/* pak/
 python2 makepak.py pak/ assets/extras.pak
 
 # Build
-ndk-build -j8 NDK_TOOLCHAIN_VERSION=4.8 _CS16CLIENT_ENABLE_OPENMP=$OMP NDK_DEBUG=$RELEASE V=1
+ndk-build -j8 NDK_TOOLCHAIN_VERSION=4.8 _CS16CLIENT_ENABLE_OPENMP=$OMP NDK_DEBUG=$RELEASE V=$VERBOSE
 ant $1
-jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ../../myks.keystore bin/cs16-client-$1-unaligned.apk xashdroid -tsa https://timestamp.geotrust.com/tsa
-$HOME/.android/android-sdk-linux/build-tools/23.0.3/zipalign 4 bin/cs16-client-$1-unaligned.apk bin/cs16-client.apk
+
+if [[ "$1" = "release" ]]; then
+	jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ../../myks.keystore bin/cs16-client-$1-unsigned.apk xashdroid -tsa https://timestamp.geotrust.com/tsa
+	$HOME/.android/android-sdk-linux/build-tools/23.0.3/zipalign 4 bin/cs16-client-$1-unsigned.apk bin/cs16-client.apk
+fi
 mv bin/cs16-client.apk cs16-client-$1-$NAME_POSTFIX.apk
 
