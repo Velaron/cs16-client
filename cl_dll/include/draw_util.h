@@ -61,14 +61,7 @@ public:
 		return DrawHudStringReverse( xpos, ypos, iMinX, szString, r, g, b, scale );
 	}
 
-	static inline int HudStringLen( const char *szIt, float scale = 1.0f )
-	{
-		int l;
-		// count length until we hit the null character or a newline character
-		for ( l = 0; *szIt != 0 && *szIt != '\n';
-			szIt++, l += gHUD.m_scrinfo.charWidths[(unsigned char)*szIt] * scale );
-		return l;
-	}
+	static int HudStringLen( const char *szIt, float scale = 1 );
 
 	// legacy shit came with Valve
 	static inline int GetNumWidth(int iNumber, int iFlags)

@@ -929,6 +929,7 @@ public:
 	cvar_t *cl_min_ct;
 	cvar_t *default_fov;
 	cvar_t *hud_textmode;
+	cvar_t *hud_colored;
 #ifdef __ANDROID__
 	cvar_t *cl_android_force_defaults;
 #endif

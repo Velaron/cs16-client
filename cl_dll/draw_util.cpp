@@ -35,6 +35,23 @@ version.
 
 float DrawUtils::color[3];
 
+#define IsColorString( p )	( p && *( p ) == '^' && *(( p ) + 1) && *(( p ) + 1) >= '0' && *(( p ) + 1 ) <= '9' )
+#define ColorIndex( c )	((( c ) - '0' ) & 7 )
+
+// console color typeing
+byte g_color_table[][4] =
+{
+{100, 100, 100, 255},	// should be black, but hud font is additive, so printing black characters is impossible
+{255,   0,   0, 255},	// red
+{  0, 255,   0, 255},	// green
+{255, 255,   0, 255},	// yellow
+{  0,   0, 255, 255},	// blue
+{  0, 255, 255, 255},	// cyan
+{255,   0, 255, 255},	// magenta
+{240, 180,  24, 255},	// default color (can be changed by user)
+};
+
+
 int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, int r, int g, int b, float scale, bool drawing )
 {
 	char *szIt = (char *)str;
@@ -66,6 +83,17 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 				++szIt;
 			}
 		}
+		else if( IsColorString( szIt ) )
+		{
+			szIt++;
+			if( gHUD.hud_colored->value )
+			{
+				r = g_color_table[ColorIndex( *szIt )][0];
+				g = g_color_table[ColorIndex( *szIt )][1];
+				b = g_color_table[ColorIndex( *szIt )][2];
+			}
+			continue;
+		}
 
 		xpos += TextMessageDrawChar( xpos, ypos, *szIt, r, g, b, scale );
 	}
@@ -84,26 +112,40 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 			return xpos;
 		xpos = next;
 
-		if ( i > 1 && szString[i - 1] == '\\' )
+		if ( i > 1 )
 		{
-			// an escape character
-
-			switch ( szString[i] )
+			if( szString[i - 1] == '\\' )
 			{
-			case 'y':
-				UnpackRGB( r, g, b, RGB_YELLOWISH );
-				break;
-			case 'w':
-				r = g = b = 255;
-				break;
-			case 'R':
-			//if( drawing ) return xpos;
-			//else return DrawHudString( iMinX, ypos, first_xpos, &szString[i - 1], r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
-			//xpos = iMinX + gHUD.m_scrinfo.charWidths['M'] * i ;
-			case 'd':
-				break;
+				// an escape character
+
+				switch ( szString[i] )
+				{
+				case 'y':
+					UnpackRGB( r, g, b, RGB_YELLOWISH );
+					break;
+				case 'w':
+					r = g = b = 255;
+					break;
+				case 'R':
+				//if( drawing ) return xpos;
+				//else return DrawHudString( iMinX, ypos, first_xpos, &szString[i - 1], r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
+				//xpos = iMinX + gHUD.m_scrinfo.charWidths['M'] * i ;
+				case 'd':
+					break;
+				}
+				continue;
 			}
-			continue;
+			else if( IsColorString( szString - 1 ) )
+			{
+				if( gHUD.hud_colored->value )
+				{
+					r = g_color_table[ColorIndex( *szString )][0];
+					g = g_color_table[ColorIndex( *szString )][1];
+					b = g_color_table[ColorIndex( *szString )][2];
+				}
+				i--;
+				continue;
+			}
 		}
 
 		TextMessageDrawChar( xpos, ypos, szString[i], r, g, b, scale );
@@ -242,4 +284,28 @@ void DrawUtils::Draw2DQuad( float x1, float y1, float x2, float y2 )
 	gEngfuncs.pTriAPI->Vertex3f( x2, y1, 0 );
 
 	gEngfuncs.pTriAPI->End( );
+}
+
+int DrawUtils::HudStringLen( const char *szIt, float scale )
+{
+	int l;
+	// count length until we hit the null character or a newline character
+	for ( l = 0; *szIt != 0 && *szIt != '\n'; szIt++ )
+	{
+		if( szIt[0] == '\\' && szIt[1] != '\n' &&
+			(szIt[1] == 'y' || szIt[1] == 'w' || szIt[1] == 'd' || szIt[1] == 'R') ) // not sure is reversing handled correctly
+		{
+			szIt++;
+			continue;
+		}
+
+		if( IsColorString( szIt ) ) // suck down, unreadable nicknames. Check even if hud_colored is off
+		{
+			szIt++;
+			continue;
+		}
+
+		l += gHUD.m_scrinfo.charWidths[(unsigned char)*szIt] * scale;
+	}
+	return l;
 }
