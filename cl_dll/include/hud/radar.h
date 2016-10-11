@@ -34,14 +34,16 @@ private:
 
 	int InitBuiltinTextures();
 	void DrawPlayerLocation();
-	void DrawRadarDot(int x, int y, int size, int r, int g, int b, int a);
-	void DrawCross(int x, int y, int size, int r, int g, int b, int a );
-	void DrawT( int x, int y, int size, int r, int g, int b, int a );
-	void DrawFlippedT( int x, int y, int size, int r, int g, int b, int a );
+	void DrawRadarDot(int x, int y, int r, int g, int b, int a);
+	void DrawCross(int x, int y, int r, int g, int b, int a );
+	void DrawT( int x, int y, int r, int g, int b, int a );
+	void DrawFlippedT( int x, int y, int r, int g, int b, int a );
 	Vector WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles );
+	inline void DrawColoredTexture( int x, int y, int size, byte r, byte g, byte b, byte a, int texHandle );
 
 	bool bUseRenderAPI, bTexturesInitialized;
 	int hDot, hCross, hT, hFlippedT;
+	int iMaxRadius;
 };
 
 #endif // RADAR_H

@@ -84,7 +84,7 @@ static byte	r_RadarFlippedT[8][8] =
 
 #define BLOCK_SIZE_MAX 1024
 
-static byte	data2D[BLOCK_SIZE_MAX*BLOCK_SIZE_MAX*4];	// intermediate texbuffer
+static byte	data2D[BLOCK_SIZE_MAX*4];	// intermediate texbuffer
 
 int CHudRadar::Init()
 {
@@ -195,6 +195,7 @@ int CHudRadar::VidInit(void)
 
 	m_hRadar.SetSpriteByName( "radar" );
 	m_hRadarOpaque.SetSpriteByName( "radaropaque" );
+	iMaxRadius = (m_hRadar.rect.right - m_hRadar.rect.left) / 2.0f;
 	return 1;
 }
 
@@ -218,6 +219,49 @@ int CHudRadar::MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf )
 	g_PlayerExtraInfo[index].origin.z = reader.ReadCoord();
 	return 1;
 }
+
+bool Radar_FlashTime( float flTime, extra_player_info_t *pplayer )
+{
+	if( !pplayer->radarflashon )
+		return true;
+
+	// radar flashing
+	if( pplayer->radarflashes )
+	{
+		float timer = (flTime - pplayer->radarflash);
+		if( timer > 0.5f )
+		{
+			pplayer->nextflash = !pplayer->nextflash;
+			pplayer->radarflash = flTime;
+			pplayer->radarflashes--;
+		}
+	}
+	else pplayer->radarflashon = 0;
+
+	return pplayer->nextflash;
+}
+
+bool Radar_FlashTime( float flTime, hostage_info_t *pplayer )
+{
+	if( !pplayer->radarflashon )
+		return true;
+
+	// radar flashing
+	if( pplayer->radarflashes )
+	{
+		float timer = (flTime - pplayer->radarflash);
+		if( timer > 0.5f )
+		{
+			pplayer->nextflash = !pplayer->nextflash;
+			pplayer->radarflash = flTime;
+			pplayer->radarflashes--;
+		}
+	}
+	else pplayer->radarflashon = 0;
+
+	return pplayer->nextflash;
+}
+
 
 int CHudRadar::Draw(float flTime)
 {
@@ -252,11 +296,16 @@ int CHudRadar::Draw(float flTime)
 	for(int i = 0; i < 33; i++)
 	{
 		// skip local player and dead players
-		if( i == gHUD.m_Scoreboard.m_iPlayerNum || g_PlayerExtraInfo[i].dead)
+		if( i == gHUD.m_Scoreboard.m_iPlayerNum || g_PlayerExtraInfo[i].dead )
 			continue;
 
 		// skip non-teammates
 		if( g_PlayerExtraInfo[i].teamnumber != iTeamNumber )
+			continue;
+
+		// decide should player draw at this time. For flashing.
+		// Always true for non-flashing players
+		if( !Radar_FlashTime( flTime, &g_PlayerExtraInfo[i]) )
 			continue;
 
 		// player with C4 must be red
@@ -273,108 +322,50 @@ int CHudRadar::Draw(float flTime)
 		// calc radar position
 		Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
 
-
-		if( !g_PlayerExtraInfo[i].radarflashon )
+		if( pos.z < 20 && pos.z > -20 )
 		{
-			if( pos.z < 20 && pos.z > -20 )
-			{
-				DrawRadarDot( pos.x, pos.y, 4, r, g, b, 255 );
-			}
-			else if( gHUD.m_vecOrigin.z > g_PlayerExtraInfo[i].origin.z )
-			{
-				DrawFlippedT( pos.x, pos.y, 2, r, g, b, 255);
-			}
-			else
-			{
-				DrawT( pos.x, pos.y, 2, r, g, b, 255 );
-			}
+			DrawRadarDot( pos.x, pos.y, r, g, b, 255 );
+		}
+		else if( gHUD.m_vecOrigin.z > g_PlayerExtraInfo[i].origin.z )
+		{
+			DrawFlippedT( pos.x, pos.y, r, g, b, 255 );
 		}
 		else
 		{
-			// radar flashing
-			if( g_PlayerExtraInfo[i].radarflashes )
-			{
-				float timer = (flTime - g_PlayerExtraInfo[i].radarflash);
-				if( timer > 0.5f )
-				{
-					g_PlayerExtraInfo[i].nextflash = !g_PlayerExtraInfo[i].nextflash;
-					g_PlayerExtraInfo[i].radarflash = flTime;
-					g_PlayerExtraInfo[i].radarflashes--;
-				}
-			}
-			else g_PlayerExtraInfo[i].radarflashon = 0;
-
-			if( g_PlayerExtraInfo[i].nextflash )
-			{
-				if( pos.z < 20 && pos.z > -20 )
-				{
-					DrawRadarDot( pos.x, pos.y, 4, r, g, b, 255 );
-				}
-				else if( gHUD.m_vecOrigin.z > g_PlayerExtraInfo[i].origin.z )
-				{
-					DrawFlippedT( pos.x, pos.y, 2, r, g, b, 255);
-				}
-				else
-				{
-					DrawT( pos.x, pos.y, 2, r, g, b, 255 );
-				}
-			}
+			DrawT( pos.x, pos.y, r, g, b, 255 );
 		}
 	}
 
 	// Terrorist specific code( C4 Bomb )
-	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST && g_PlayerExtraInfo[33].radarflashon)
+	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
 	{
-		Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[33].origin, gHUD.m_vecAngles);
-		if( g_PlayerExtraInfo[33].radarflashes )
+		if( Radar_FlashTime( flTime, &g_PlayerExtraInfo[33] ) )
 		{
-			float timer = (flTime - g_PlayerExtraInfo[33].radarflash);
-			if( timer > 0.5f )
+			Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[33].origin, gHUD.m_vecAngles);
+			if( g_PlayerExtraInfo[33].playerclass ) // bomb planted
 			{
-				g_PlayerExtraInfo[33].nextflash = !g_PlayerExtraInfo[33].nextflash;
-				g_PlayerExtraInfo[33].radarflash = flTime;
-				g_PlayerExtraInfo[33].radarflashes--;
-			}
-		}
-		else g_PlayerExtraInfo[33].radarflashon = 0;
-		if( g_PlayerExtraInfo[33].nextflash )
-		{
-			if( g_PlayerExtraInfo[33].playerclass )
-			{
-				DrawCross( pos.x, pos.y, 2, 255, 0, 0, 255);
+				DrawCross( pos.x, pos.y, 255, 0, 0, 255);
 			}
 			else
 			{
-				DrawRadarDot( pos.x, pos.y, 4, 255, 0, 0, 255 );
+				DrawRadarDot( pos.x, pos.y, 255, 0, 0, 255 );
 			}
 		}
 	}
-
 	// Counter-Terrorist specific code( hostages )
-	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_CT )
+	else if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_CT )
 	{
 		// draw hostages for CT
 		for( int i = 0; i < MAX_HOSTAGES; i++ )
 		{
-			if( !g_HostageInfo[i].radarflashon || g_HostageInfo[i].dead )
+			if( g_HostageInfo[i].dead )
+				continue;
+
+			if( !Radar_FlashTime( flTime, &g_HostageInfo[i] ) )
 				continue;
 
 			Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_HostageInfo[i].origin, gHUD.m_vecAngles);
-			if( g_HostageInfo[i].radarflashes )
-			{
-				float timer = (flTime - g_HostageInfo[i].radarflash);
-				if( timer > 0.5f )
-				{
-					g_HostageInfo[i].nextflash = !g_HostageInfo[i].nextflash;
-					g_HostageInfo[i].radarflash = flTime;
-					g_HostageInfo[i].radarflashes--;
-				}
-			}
-			else g_HostageInfo[i].radarflashon = 0;
-			if( g_HostageInfo[i].nextflash )
-			{
-				DrawRadarDot( pos.x, pos.y, 4, 255, 0, 0, 255 );
-			}
+			DrawRadarDot( pos.x, pos.y, 255, 0, 0, 255 );
 		}
 	}
 
@@ -386,104 +377,97 @@ void CHudRadar::DrawPlayerLocation()
 	DrawUtils::DrawConsoleString( 30, 30, g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].location );
 }
 
-void CHudRadar::DrawRadarDot(int x, int y, int size, int r, int g, int b, int a)
+inline void CHudRadar::DrawColoredTexture( int x, int y, int size, byte r, byte g, byte b, byte a, int texHandle )
 {
+	gRenderAPI.GL_Bind( 0, texHandle );
+	gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
+	DrawUtils::Draw2DQuad( (iMaxRadius + x - size * 2) * gHUD.m_flScale,
+						   (iMaxRadius + y - size * 2) * gHUD.m_flScale,
+						   (iMaxRadius + x + size * 2) * gHUD.m_flScale,
+						   (iMaxRadius + y + size * 2) * gHUD.m_flScale);
+}
+
+
+void CHudRadar::DrawRadarDot( int x, int y, int r, int g, int b, int a )
+{
+	const int size = 1;
 	if( bUseRenderAPI )
 	{
-		gRenderAPI.GL_Bind( 0, hDot );
-		gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
-		DrawUtils::Draw2DQuad( 62.5f + x - size/2, 62.5f + y - size/2,
-							   62.5f + x + size/2, 62.5f + y + size/2);
+		DrawColoredTexture( x, y, size, r, g, b, a, hDot );
 	}
 	else
 	{
-		FillRGBA(62.5f + x - size/2.0f, 62.5f + y - size/2.0f, size, size, r, g, b, a);
+		FillRGBA(iMaxRadius + x - size*2, iMaxRadius + y - size*2, size*4, size*4, r, g, b, a);
 	}
 }
 
-void CHudRadar::DrawCross(int x, int y, int size, int r, int g, int b, int a)
+
+void CHudRadar::DrawCross( int x, int y, int r, int g, int b, int a )
 {
+	const int size = 2;
 	if( bUseRenderAPI )
 	{
-		gRenderAPI.GL_Bind( 0, hCross );
-		gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
-		DrawUtils::Draw2DQuad( 62.5f + x - size*2, 62.5f + y - size*2,
-							   62.5f + x + size*2, 62.5f + y + size*2);
+		DrawColoredTexture( x, y, size, r, g, b, a, hCross );
 	}
 	else
 	{
-		FillRGBA(62.5f + x, 62.5f + y, size, size, r, g, b, a);
-		FillRGBA(62.5f + x - size, 62.5f + y - size, size, size, r, g, b, a);
-		FillRGBA(62.5f + x - size, 62.5f + y + size, size, size, r, g, b, a);
-		FillRGBA(62.5f + x + size, 62.5f + y - size, size, size, r, g, b, a);
-		FillRGBA(62.5f + x + size, 62.5f + y + size, size, size, r, g, b, a);
+		FillRGBA(iMaxRadius + x, iMaxRadius + y, size, size, r, g, b, a);
+		FillRGBA(iMaxRadius + x - size, iMaxRadius + y - size, size, size, r, g, b, a);
+		FillRGBA(iMaxRadius + x - size, iMaxRadius + y + size, size, size, r, g, b, a);
+		FillRGBA(iMaxRadius + x + size, iMaxRadius + y - size, size, size, r, g, b, a);
+		FillRGBA(iMaxRadius + x + size, iMaxRadius + y + size, size, size, r, g, b, a);
 	}
 }
 
-void CHudRadar::DrawT(int x, int y, int size, int r, int g, int b, int a)
+void CHudRadar::DrawT( int x, int y, int r, int g, int b, int a )
 {
+	const int size = 2;
+
 	if( bUseRenderAPI )
 	{
-		gRenderAPI.GL_Bind( 0, hT );
-		gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
-		DrawUtils::Draw2DQuad( 62.5f + x - size*2, 62.5f + y - size*2,
-							   62.5f + x + size*2, 62.5f + y + size*2);
+		DrawColoredTexture( x, y, size, r, g, b, a, hT );
 	}
 	else
 	{
-		FillRGBA( 62.5f + x - size, 62.5 + y - size, 3*size, size, r, g, b, a);
-		FillRGBA( 62.5f + x, 62.5 + y, size, 2*size, r, g, b, a);
+		FillRGBA( iMaxRadius + x - size, iMaxRadius + y - size, size * 3, size, r, g, b, a);
+		FillRGBA( iMaxRadius + x, iMaxRadius + y, size, size * 2, r, g, b, a);
 	}
 }
 
-void CHudRadar::DrawFlippedT(int x, int y, int size, int r, int g, int b, int a)
+void CHudRadar::DrawFlippedT( int x, int y, int r, int g, int b, int a )
 {
+	const int size = 2;
 	if( bUseRenderAPI )
 	{
-		gRenderAPI.GL_Bind( 0, hFlippedT );
-		gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
-		DrawUtils::Draw2DQuad( 62.5f + x - size*2, 62.5f + y - size*2,
-							   62.5f + x + size*2, 62.5f + y + size*2);
+		DrawColoredTexture( x, y, size, r, g, b, a, hFlippedT );
 	}
 	else
 	{
-		FillRGBA( 62.5f + x, 62.5 + y - size, size, 2*size, r, g, b, a);
-		FillRGBA( 62.5f + x - size, 62.5 + y + size, 3*size, size, r, g, b, a);
+		FillRGBA( iMaxRadius + x, iMaxRadius + y - size, size, size*2, r, g, b, a);
+		FillRGBA( iMaxRadius + x - size, iMaxRadius + y + size, size*3, size, r, g, b, a);
 	}
 }
+
 
 Vector CHudRadar::WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles  )
 {
-	float xdiff = vObjectOrigin.x - vPlayerOrigin.x;
-	float ydiff = vObjectOrigin.y - vPlayerOrigin.y;
+	Vector2D diff = vObjectOrigin.Make2D() - vPlayerOrigin.Make2D();
+	const float RADAR_SCALE = 32.0f;
 
 	// Supply epsilon values to avoid divide-by-zero
-	if(xdiff == 0)
-		xdiff = 0.00001f;
-	if(ydiff == 0)
-		ydiff = 0.00001f;
+	if( diff.x == 0 )
+		diff.x = 0.00001f;
+	if( diff.y == 0 )
+		diff.y = 0.00001f;
 
-	int iMaxRadius = (m_hRadar.rect.right - m_hRadar.rect.left) / 2.0f;
-
-	float flOffset = atan(ydiff / xdiff) * 180.0f / M_PI;
-
-	if ((xdiff < 0) && (ydiff >= 0))
-		flOffset += 180;
-	else if ((xdiff < 0) && (ydiff < 0))
-		flOffset += 180;
-	else if ((xdiff >= 0) && (ydiff < 0))
-		flOffset += 360;
+	float flOffset = DEG2RAD( vAngles.y - RAD2DEG( atan2( diff.y, diff.x ) ) );
 
 	// this magic 32.0f just scales position on radar
-	float iRadius = -( sqrt( xdiff*xdiff + ydiff*ydiff ) ) / 32.0f;
-	if( -iRadius > iMaxRadius)
-		iRadius = -iMaxRadius;
-
-	flOffset = (vAngles.y - flOffset) * M_PI / 180.0f;
+	float iRadius = min( diff.Length() / RADAR_SCALE, iMaxRadius );
 
 	// transform origin difference to radar source
-	Vector ret( (float)(-iRadius * sin(flOffset)),
-				(float)(iRadius * cos(flOffset)),
+	Vector ret( (float)(iRadius * sin(flOffset)),
+				(float)(iRadius * -cos(flOffset)),
 				(float)(vPlayerOrigin.z - vObjectOrigin.z) );
 
 	return ret;

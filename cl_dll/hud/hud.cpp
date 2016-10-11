@@ -261,15 +261,21 @@ void CHud :: VidInit( void )
 	//	m_hsprFont = LoadSprite("sprites/%d_font.spr");
 	
 	m_hsprLogo = 0;
+	m_flScale = CVAR_GET_FLOAT( "hud_scale" );
 
-	if( ScreenWidth < 640 && CVAR_GET_FLOAT("hud_scale") <= 1.0f )
+	if( ScreenWidth < 640 && m_flScale <= 1.0f )
 	{
 		gEngfuncs.Cvar_SetValue("hud_scale", ScreenWidth / 640.0f );
 	}
-	else if( CVAR_GET_FLOAT("hud_scale") < 1.0f )
+	else if( m_flScale < 1.0f )
 	{
 		gEngfuncs.Cvar_SetValue("hud_scale", 1.0f );
 	}
+
+	// give a real values to other code. It's not anymore an actual CVar value
+	if( m_flScale == 0.0f )
+		m_flScale = 1.0f;
+
 	GetScreenInfo(&m_scrinfo);
 
 	m_iRes = 640;
