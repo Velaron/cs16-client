@@ -21,6 +21,8 @@ float rel_yaw;
 float rel_pitch;
 bool bMouseInUse = false;
 
+extern Vector dead_viewangles;
+
 #define F 1U<<0	// Forward
 #define B 1U<<1	// Back
 #define L 1U<<2	// Left
@@ -134,13 +136,19 @@ void IN_Move( float frametime, usercmd_t *cmd )
 	if( bMouseInUse )
 		return;
 #endif
-
 	Vector viewangles;
-	gEngfuncs.GetViewAngles( viewangles );
+	bool bLadder = false;
 
-	bool fLadder = false;
+	if( gHUD.m_iIntermission )
+		return; // we can't move during intermission
+
+
 	if( cl_laddermode->value != 2 )
-		fLadder = gEngfuncs.GetLocalPlayer()->curstate.movetype == MOVETYPE_FLY;
+	{
+		cl_entity_t *pplayer = gEngfuncs.GetLocalPlayer();
+		if( pplayer )
+			bLadder = pplayer->curstate.movetype == MOVETYPE_FLY;
+	}
 	//if(ac_forwardmove || ac_sidemove)
 	//gEngfuncs.Con_Printf("Move: %f %f %f %f\n", ac_forwardmove, ac_sidemove, rel_pitch, rel_yaw);
 #if 0
@@ -149,8 +157,15 @@ void IN_Move( float frametime, usercmd_t *cmd )
 		V_StopPitchDrift();
 	}
 #endif
-	if( gHUD.m_iIntermission || CL_IsDead() )
-		return;
+
+	if( CL_IsDead( ) )
+	{
+		viewangles = dead_viewangles; // HACKHACK: see below
+	}
+	else
+	{
+		gEngfuncs.GetViewAngles( viewangles );
+	}
 
 	if( gHUD.GetSensitivity() != 0 )
 	{
@@ -170,7 +185,7 @@ void IN_Move( float frametime, usercmd_t *cmd )
 	{
 		viewangles[PITCH] += rel_pitch;
 		viewangles[YAW] += rel_yaw;
-		if( fLadder )
+		if( bLadder )
 		{
 			if( ( cl_laddermode->value == 1 ) )
 				viewangles[YAW] -= ac_sidemove * 5;
@@ -181,9 +196,14 @@ void IN_Move( float frametime, usercmd_t *cmd )
 		viewangles[PITCH] = cl_pitchdown->value;
 	if (viewangles[PITCH] < -cl_pitchup->value)
 		viewangles[PITCH] = -cl_pitchup->value;
-	float rgfl[3];
-	viewangles.CopyToArray( rgfl );
-	gEngfuncs.SetViewAngles( rgfl );
+
+
+	if( !CL_IsDead( ) )
+	{
+		gEngfuncs.SetViewAngles( viewangles );
+	}
+
+	dead_viewangles = viewangles;
 	
 	if( ac_movecount )
 	{

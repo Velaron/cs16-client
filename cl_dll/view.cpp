@@ -60,6 +60,7 @@ extern cvar_t	*cl_vsmoothing;
 #define CAM_MODE_FOCUS		2
 
 vec3_t v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles, ev_punchangle;
+Vector dead_viewangles( 0, 0, 0 ); // fake viewangles, for fixing
 float  v_frametime, v_lastDistance;
 float  v_cameraRelaxAngle	= 5.0f;
 float  v_cameraFocusAngle	= 35.0f;
@@ -428,7 +429,7 @@ void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 	cl_entity_t	*view;
 	float		old;
 
-	// view is the weapon model (only visible from inside body )
+	// view is the weapon model (only visible from inside body)
 	view = gEngfuncs.GetViewModel();
 
 	VectorCopy ( pparams->simorg, pparams->vieworg );
@@ -503,7 +504,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 		ent = gEngfuncs.GetLocalPlayer();
 	}
 
-	// view is the weapon model (only visible from inside body )
+	// view is the weapon model (only visible from inside body)
 	view = gEngfuncs.GetViewModel();
 
 	// transform the view offset by the model's matrix to get the offset from
@@ -515,7 +516,14 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	pparams->vieworg[2] += ( bob );
 	VectorAdd( pparams->vieworg, pparams->viewheight, pparams->vieworg );
 
-	VectorCopy ( pparams->cl_viewangles, pparams->viewangles );
+	if( pparams->health <= 0 )
+	{
+		VectorCopy( dead_viewangles, pparams->viewangles );
+	}
+	else
+	{
+		VectorCopy ( pparams->cl_viewangles, pparams->viewangles );
+	}
 
 	gEngfuncs.V_CalcShake();
 	gEngfuncs.V_ApplyShake( pparams->vieworg, pparams->viewangles, 1.0 );
@@ -594,7 +602,14 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	V_AddIdle ( pparams );
 
 	// offsets
-	VectorCopy( pparams->cl_viewangles, angles );
+	if( pparams->health <= 0 )
+	{
+		VectorCopy( dead_viewangles, angles );
+	}
+	else
+	{
+		VectorCopy( pparams->cl_viewangles, angles );
+	}
 
 	AngleVectors ( angles, pparams->forward, pparams->right, pparams->up );
 
@@ -628,7 +643,14 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	}*/
 
 	// Give gun our viewangles
-	VectorCopy ( pparams->cl_viewangles, view->angles );
+	if( pparams->health <= 0 )
+	{
+		VectorCopy( dead_viewangles, view->angles );
+	}
+	else
+	{
+		VectorCopy ( pparams->cl_viewangles, view->angles );
+	}
 
 	// set up gun position
 	V_CalcGunAngle ( pparams );

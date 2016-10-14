@@ -338,6 +338,7 @@ int CHudRadar::Draw(float flTime)
 
 	// Terrorist specific code( C4 Bomb )
 	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
+	{
 		if ( !g_PlayerExtraInfo[33].dead &&
 			 g_PlayerExtraInfo[33].radarflashon &&
 			 Radar_FlashTime( flTime, &g_PlayerExtraInfo[33] ))
@@ -352,6 +353,7 @@ int CHudRadar::Draw(float flTime)
 				DrawRadarDot( pos.x, pos.y, 255, 0, 0, 255 );
 			}
 		}
+	}
 	// Counter-Terrorist specific code( hostages )
 	else if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_CT )
 	{
