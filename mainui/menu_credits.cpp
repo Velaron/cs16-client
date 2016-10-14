@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static const char *uiCreditsDefault[] = 
 {
-	"CS16Client v1.1",
+	"CS16Client v1.02",
 	"Build Date:" __DATE__ " " __TIME__ ,
 	"",
 	"Developers: ",
@@ -57,6 +57,12 @@ static const char *uiCreditsDefault[] =
 	"THE-Swank",
 	"Namatrasnik",
 	"picos",
+	"BloodyLuxor",
+	"AndroUser",
+	"Bbltashit",
+	"Athiend",
+	"vlad[54rus]",
+	"KinG",
 	"",
 	"Big thanks to Valve Corporation for Counter-Strike",
 	"Uncle Mike for this powerful engine",
