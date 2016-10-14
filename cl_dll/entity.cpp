@@ -644,19 +644,6 @@ Indices must start at 1, not zero.
 */
 cl_entity_t DLLEXPORT *HUD_GetUserEntity( int index )
 {
-#if defined( BEAM_TEST )
-	// None by default, you would return a valic pointer if you create a client side
-	//  beam and attach it to a client side entity.
-	if ( index > 0 && index <= 1 )
-	{
-		return &beams[ index ];
-	}
-	else
-	{
-		return NULL;
-	}
-#else
 	return NULL;
-#endif
 }
 

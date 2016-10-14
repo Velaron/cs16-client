@@ -41,7 +41,4 @@ void DLLEXPORT HUD_DrawTransparentTriangles( void )
 	ProcessRain();
 	DrawRain();
 	DrawFXObjects();
-#if defined( TEST_IT )
-//	Draw_Triangles();
-#endif
 }

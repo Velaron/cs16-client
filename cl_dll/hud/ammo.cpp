@@ -1365,7 +1365,7 @@ void CHudAmmo::DrawCrosshair( float flTime )
 
 
 	// drawing
-	if ( gHUD.m_NVG.m_iEnable )
+	if ( gHUD.m_NVG.m_iFlags )
 	{
 		FillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	iLength, 1, 250, 50, 50, m_iAlpha);
 		FillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	iLength, 1, 250, 50, 50, m_iAlpha);

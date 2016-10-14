@@ -381,7 +381,6 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 			FillRGBABlend( xstart, ypos, xend - xstart, ROW_GAP, 255, 255, 255, 15 );
 		}
 
-
 		DrawUtils::DrawHudString( NAME_POS_START() + nameoffset, ypos, NAME_POS_END(), pl_info->name, r, g, b );
 
 		// draw bomb( if player have the bomb )
@@ -464,11 +463,11 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 		char teamName[MAX_TEAM_NAME];
 		strncpy( teamName, reader.ReadString(), MAX_TEAM_NAME );
 
-		if( !stricmp( teamName, "TERRORIST") )
+		if( !strcmp( teamName, "TERRORIST") )
 			teamNumber = TEAM_TERRORIST;
-		else if( !stricmp( teamName, "CT") )
+		else if( !strcmp( teamName, "CT") )
 			teamNumber = TEAM_CT;
-		else if( !stricmp( teamName, "SPECTATOR" ) || !stricmp( teamName, "UNASSIGNED" ) )
+		else if( !strcmp( teamName, "SPECTATOR" ) || !strcmp( teamName, "UNASSIGNED" ) )
 		{
 			teamNumber = TEAM_SPECTATOR;
 			strncpy( teamName, "SPECTATOR", MAX_TEAM_NAME );

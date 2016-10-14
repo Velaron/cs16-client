@@ -780,11 +780,10 @@ public:
 
 	CHudUserCmd(NVGAdjustUp);
 	CHudUserCmd(NVGAdjustDown);
-
-	int m_iEnable;
 private:
 	int m_iAlpha;
-
+	cvar_t *cl_fancy_nvg;
+	dlight_t *m_pLight;
 };
 
 //

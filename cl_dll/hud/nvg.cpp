@@ -44,9 +44,10 @@ int CHudNVG::Init()
 	HOOK_COMMAND("+nvgadjust", NVGAdjustUp);
 	HOOK_COMMAND("-nvgadjust", NVGAdjustDown);
 
+	cl_fancy_nvg = CVAR_CREATE( "cl_fancy_nvg", "0", FCVAR_ARCHIVE );
+
 	gHUD.AddHudElem(this);
-	m_iFlags = HUD_DRAW;
-	m_iEnable = 0;
+	m_iFlags = 0;
 	m_iAlpha = 110; // 220 is max, 30 is min
 
    return 0;
@@ -55,20 +56,47 @@ int CHudNVG::Init()
 
 int CHudNVG::Draw(float flTime)
 {
-	if ( !m_iEnable || gEngfuncs.IsSpectateOnly() )
+	if( gEngfuncs.IsSpectateOnly() )
 	{
 		return 1;
 	}
+
 	gEngfuncs.pfnFillRGBABlend(0, 0, ScreenWidth, ScreenHeight, 50, 225, 50, m_iAlpha);
 
 	// draw a dynamic light on player's origin
-	dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight ( 0 );
-	dl->origin = gHUD.m_vecOrigin;
-	dl->radius = gEngfuncs.pfnRandomFloat( 750, 800 );
-	dl->die = flTime + 0.1f;
-	dl->color.r = 50;
-	dl->color.g = 255;
-	dl->color.b = 50;
+	if( cl_fancy_nvg->value )
+	{
+		// recreate new dlight every frame
+
+		dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight ( 0 );
+		dl->origin = gHUD.m_vecOrigin;
+		dl->radius = Com_RandomLong( 750, 800 );
+		dl->die = flTime + 0.1f;
+		dl->color.r = 50;
+		dl->color.g = 255;
+		dl->color.b = 50;
+	}
+	else
+	{
+		// recreate if died
+		if( !m_pLight || m_pLight->die < flTime )
+		{
+			m_pLight = gEngfuncs.pEfxAPI->CL_AllocDlight( 0 );
+
+			// I hope no one is crazy so much to keep NVG for 9999 seconds
+			m_pLight->die = flTime + 9999.0f;
+			m_pLight->color.r = 50;
+			m_pLight->color.g = 255;
+			m_pLight->color.b = 50;
+		}
+
+		// just update origin
+		if( m_pLight )
+		{
+			m_pLight->origin = gHUD.m_vecOrigin;
+			m_pLight->radius = Com_RandomLong( 750, 800 );
+		}
+	}
 	return 1;
 }
 
@@ -76,18 +104,23 @@ int CHudNVG::MsgFunc_NVGToggle(const char *pszName, int iSize, void *pbuf)
 {
 	BufferReader reader( pszName, pbuf, iSize );
 
-	m_iEnable = reader.ReadByte();
+	m_iFlags = reader.ReadByte() ? HUD_DRAW : 0;
+
+	if( m_pLight )
+	{
+		m_pLight->die = 0; // engine will remove this immediately
+
+		m_pLight = NULL; // it's safe to set it 0 now
+	}
 	return 1;
 }
 
 void CHudNVG::UserCmd_NVGAdjustDown()
 {
-	m_iAlpha += 20;
-	if( m_iAlpha > 220 ) m_iAlpha = 220;
+	m_iAlpha = max( 220, m_iAlpha + 20 );
 }
 
 void CHudNVG::UserCmd_NVGAdjustUp()
 {
-	m_iAlpha -= 20;
-	if( m_iAlpha < 30 ) m_iAlpha = 30;
+	m_iAlpha = min( 30, m_iAlpha - 20 );
 }
