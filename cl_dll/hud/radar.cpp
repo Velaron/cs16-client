@@ -338,20 +338,20 @@ int CHudRadar::Draw(float flTime)
 
 	// Terrorist specific code( C4 Bomb )
 	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
-	{
-		if( Radar_FlashTime( flTime, &g_PlayerExtraInfo[33] ) )
+		if ( !g_PlayerExtraInfo[33].dead &&
+			 g_PlayerExtraInfo[33].radarflashon &&
+			 Radar_FlashTime( flTime, &g_PlayerExtraInfo[33] ))
 		{
 			Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[33].origin, gHUD.m_vecAngles);
 			if( g_PlayerExtraInfo[33].playerclass ) // bomb planted
 			{
-				DrawCross( pos.x, pos.y, 255, 0, 0, 255);
+				DrawCross( pos.x, pos.y, 255, 0, 0, 255 );
 			}
 			else
 			{
 				DrawRadarDot( pos.x, pos.y, 255, 0, 0, 255 );
 			}
 		}
-	}
 	// Counter-Terrorist specific code( hostages )
 	else if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_CT )
 	{
