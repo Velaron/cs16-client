@@ -22,5 +22,9 @@
     <string name="text_tab2">Advanced</string>
     <string name="text_res_tittle2">Normal settings</string>
     <string name="text_res_tittle3">Advanced settings</string>
+	<string name="xash_not_installed_title">No engine found</string>
+	<string name="xash_not_installed_msg">To continue, you must install Xash3D engine on your device</string>
+	<string name="install_xash">Install</string>
+	<string name="cancel">Cancel</string>
 	<!--<string name="ad_unit_id">Не дам! :P</string>-->
 </resources>

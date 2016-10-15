@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -47,12 +48,15 @@ import android.widget.TextView;
 import android.widget.TabHost;
 import android.os.Environment;
 import android.os.Build;
+import android.net.Uri;
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 
 import com.google.android.gms.ads.*;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.ConnectionResult;
 
 import in.celest.xash3d.cs16client.R;
 
@@ -61,8 +65,8 @@ public class LauncherActivity extends Activity {
 	public final static int sdk = Integer.valueOf(Build.VERSION.SDK);
 	public final static String TAG = "LauncherActivity";
 	
+	public static Context mContext;
 	static SharedPreferences mPref;
-	
 	static EditText mCmdArgs;
 	static EditText mBaseDir;
 	static ToggleButton mEnableZBot;
@@ -91,6 +95,8 @@ public class LauncherActivity extends Activity {
 		else super.setTheme( 0x01030005 );
 
 		setContentView(R.layout.activity_launcher);
+		
+		mContext = getApplicationContext();
 		
 		// get preferences
 		mPref          = getSharedPreferences("mod", 0);
@@ -167,6 +173,11 @@ public class LauncherActivity extends Activity {
 			gamedir = "czero"; // use when czero will be done
 		}
 		
+		// TODO:
+		// Check is installed engine is Google Play version
+		// Check myself for GP version
+		argv = argv + " -noch"; 
+		
 		Intent intent = new Intent();
 		intent.setAction("in.celest.xash3d.START");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -175,7 +186,72 @@ public class LauncherActivity extends Activity {
 		intent.putExtra("gamedir",    gamedir );
 		intent.putExtra("gamelibdir", getFilesDir().getAbsolutePath().replace("/files","/lib"));
 		intent.putExtra("pakfile",    getFilesDir().getAbsolutePath() + "/extras.pak" );
-		startActivity(intent);
+		
+		PackageManager pm = getPackageManager();
+		if( intent.resolveActivity( pm ) != null )
+		{
+			startActivity( intent );
+		}
+		else
+		{
+			showXashInstallDialog( );
+		}
+	}
+	
+	public void showXashInstallDialog( )
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder( this );
+		
+		builder.setTitle( R.string.xash_not_installed_title )
+			.setMessage( R.string.xash_not_installed_msg )
+			.setPositiveButton( R.string.install_xash, 
+			new DialogInterface.OnClickListener()
+			{
+				@Override
+				public void onClick( DialogInterface dialog, int which )
+				{
+					GoogleApiAvailability api = GoogleApiAvailability.getInstance();
+					int avail = api.isGooglePlayServicesAvailable( LauncherActivity.mContext );
+					
+					if( avail == ConnectionResult.SUCCESS )
+					{
+						// open GP
+						try 
+						{
+							startActivity( 
+								new Intent( Intent.ACTION_VIEW, 
+									Uri.parse("market://details?id=in.celest.xash3d.hl") ) );
+						} 
+						catch( android.content.ActivityNotFoundException e ) 
+						{
+							startActivity(
+								new Intent( Intent.ACTION_VIEW, 
+									Uri.parse("https://play.google.com/store/apps/details?id=in.celest.xash3d.hl" ) ) );
+						}
+					}
+					else
+					{
+						try
+						{
+							startActivity( 
+								new Intent( Intent.ACTION_VIEW, 
+									Uri.parse("https://github.com/FWGS/xash3d/releases/latest") ) );
+						}
+						catch( Exception e )
+						{ }
+					}
+				}
+			} )
+			.setNegativeButton( R.string.cancel, 
+			new DialogInterface.OnClickListener()
+			{
+				@Override
+				public void onClick( DialogInterface dialog, int which )
+				{
+					dialog.cancel();
+				}
+			} )
+			.show();
 	}
 	
 	public void onTitleClick(View view)
@@ -193,9 +269,7 @@ public class LauncherActivity extends Activity {
 			mDev = true;
 			
 			mEnableCZero.setVisibility(View.VISIBLE);
-
 		}
-			
 	}
 
 	@Override
