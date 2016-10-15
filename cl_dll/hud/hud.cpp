@@ -18,6 +18,8 @@
 // implementation of CHud class
 //
 
+#include <new>
+
 #include "hud.h"
 #include "cl_util.h"
 #include <string.h>
@@ -32,8 +34,6 @@
 
 #include "camera.h"
 
-#include <new>
-#include <unordered_map>
 
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 
@@ -264,9 +264,9 @@ void CHud :: VidInit( void )
 	m_hsprLogo = 0;
 	m_flScale = CVAR_GET_FLOAT( "hud_scale" );
 
-	if( ScreenWidth < 640 && m_flScale <= 1.0f )
+	if( TrueWidth < 640 && m_flScale <= 1.0f )
 	{
-		gEngfuncs.Cvar_SetValue("hud_scale", ScreenWidth / 640.0f );
+		gEngfuncs.Cvar_SetValue("hud_scale", TrueWidth / 640.0f );
 	}
 	else if( m_flScale < 1.0f )
 	{
