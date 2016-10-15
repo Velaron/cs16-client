@@ -92,21 +92,6 @@ public class LauncherActivity extends Activity {
 
 		setContentView(R.layout.activity_launcher);
 		
-		TabHost tabHost = (TabHost) findViewById(R.id.tabhost);
-		tabHost.setup();
-		
-		TabHost.TabSpec tabSpec;
-		tabSpec = tabHost.newTabSpec("tabtag1");
-		tabSpec.setIndicator(getString(R.string.text_tab1));
-		tabSpec.setContent(R.id.tab1);
-		tabHost.addTab(tabSpec);
-
-		tabSpec = tabHost.newTabSpec("tabtag2");
-		tabSpec.setIndicator(getString(R.string.text_tab2));
-		tabSpec.setContent(R.id.tab2);
-		tabHost.addTab(tabSpec);
-
-		
 		// get preferences
 		mPref          = getSharedPreferences("mod", 0);
 		

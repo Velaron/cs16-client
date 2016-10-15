@@ -16,7 +16,6 @@
 		android:orientation="horizontal"
 		android:layout_marginRight="5dp"
 		android:layout_marginTop="20dp"
-		android:layout_marginBottom="1dp"
 		android:layout_marginLeft="5dp"
 		android:background="#555555" >
 		<TextView
@@ -44,171 +43,95 @@
 			android:singleLine="true"
 			android:gravity="center_vertical" />
 	</LinearLayout>
-	<TabHost
-		android:id="@+id/tabhost"
+	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
+		android:background="#555555"
+		android:orientation="vertical"
 		android:layout_weight="1.20"
-		android:paddingBottom="10dp"
-		android:paddingLeft="3dp"
-		android:paddingRight="3dp"
-		android:paddingTop="8dp">
-		<LinearLayout
+		android:layout_marginBottom="5dp"
+		android:layout_marginLeft="5dp"
+		android:layout_marginRight="5dp"
+		android:layout_marginTop="10dp">
+		<ScrollView
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:background="#555555"
-			android:orientation="vertical">
-			<TabWidget
-				android:id="@android:id/tabs"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:showDividers="middle" />
-			<ScrollView
+			android:id="@+id/scrollView2">
+			<LinearLayout 
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
-				android:id="@+id/scrollView2">
-				<FrameLayout
-					android:id="@android:id/tabcontent"
+				android:layout_marginBottom="10dp"
+				android:layout_marginLeft="10dp"
+				android:layout_marginRight="10dp"
+				android:layout_marginTop="10dp"
+				android:background="#444444"
+				android:orientation="vertical"
+				android:weightSum="1">
+				<TextView
+					android:id="@+id/textView_args"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginBottom="1dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:layout_marginTop="10dp"
+					android:text="@string/cmd_args_text"
+					android:textAppearance="?android:attr/textAppearanceMedium" />
+				<TextView
+					android:id="@+id/textView_args"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginBottom="1dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:layout_marginTop="1dp"
+					android:text="@string/cmd_args_text2"
+					android:textAppearance="?android:attr/textAppearanceSmall" />
+				<EditText
+					android:id="@+id/cmdArgs"
 					android:layout_width="match_parent"
-					android:layout_height="match_parent">
-					<LinearLayout
-						android:id="@+id/tab1"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_marginLeft="10dp"
-						android:layout_marginRight="10dp"
-						android:layout_marginTop="15dp"
-						android:layout_marginBottom="25dp"
-						android:background="#333333"
-						android:orientation="vertical"
-						android:text="@string/text_tab1"
-						android:weightSum="0.6">
-						<TextView
-							android:id="@+id/textView_path1"
-							android:layout_width="fill_parent"
-							android:layout_height="40dp"
-							android:layout_marginBottom="2dp"
-							android:layout_marginLeft="10dp"
-							android:background="#444444"
-							android:layout_marginRight="10dp"
-							android:layout_marginTop="10dp"
-							android:text="@string/text_res_tittle2"
-							android:textAppearance="?android:attr/textAppearanceMedium"
-							android:textSize="20sp"
-							android:gravity="center_vertical|center_horizontal" />
-						<LinearLayout 
-							android:layout_width="match_parent"
-							android:layout_height="match_parent"
-							android:layout_marginBottom="10dp"
-							android:layout_marginLeft="10dp"
-							android:layout_marginRight="10dp"
-							android:layout_marginTop="10dp"
-							android:background="#444444"
-							android:orientation="vertical"
-							android:weightSum="1">
-							<ToggleButton
-								android:id="@+id/use_zbot"
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-								android:layout_margin="10dp"
-								android:layout_marginLeft="10dp"
-								android:layout_marginRight="10dp"
-								android:layout_marginTop="10dp"
-								android:text="nothing"
-								android:textOff="@string/zbot_off"
-								android:textOn="@string/zbot_on" />
-							<ToggleButton
-								android:id="@+id/use_yapb"
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-								android:layout_margin="10dp"
-								android:layout_marginLeft="10dp"
-								android:layout_marginRight="10dp"
-								android:layout_marginTop="10dp"
-								android:text="nothing"
-								android:textOff="@string/yapb_off"
-								android:textOn="@string/yapb_on" />
-							<ToggleButton
-								android:id="@+id/enableczero"
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-								android:layout_margin="10dp"
-								android:layout_marginLeft="10dp"
-								android:layout_marginRight="10dp"
-								android:layout_marginTop="10dp"
-								android:text="nothing"
-								android:textOff="@string/czero_off"
-								android:textOn="@string/czero_on" />
-						</LinearLayout>
-					</LinearLayout>
-					<LinearLayout
-						android:id="@+id/tab2"
-						android:layout_width="match_parent"
-						android:layout_height="match_parent"
-						android:layout_marginLeft="10dp"
-						android:layout_marginRight="10dp"
-						android:layout_marginTop="15dp"
-						android:background="#333333"
-						android:orientation="vertical"
-						android:text="@string/text_tab2">
-						<TextView
-							android:id="@+id/textView_path2"
-							android:layout_width="fill_parent"
-							android:layout_height="40dp"
-							android:layout_marginBottom="2dp"
-							android:layout_marginLeft="10dp"
-							android:background="#444444"
-							android:layout_marginRight="10dp"
-							android:layout_marginTop="13dp"
-							android:text="@string/text_res_tittle3"
-							android:textAppearance="?android:attr/textAppearanceMedium"
-							android:textSize="20sp"
-							android:gravity="center_vertical|center_horizontal" />
-						<LinearLayout 
-							android:layout_width="match_parent"
-							android:layout_height="match_parent"
-							android:layout_marginBottom="10dp"
-							android:layout_marginLeft="10dp"
-							android:layout_marginRight="10dp"
-							android:layout_marginTop="10dp"
-							android:background="#444444"
-							android:orientation="vertical"
-							android:weightSum="1">
-							<TextView
-								android:id="@+id/textView_args"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginBottom="10dp"
-								android:layout_marginLeft="10dp"
-								android:layout_marginRight="10dp"
-								android:layout_marginTop="20dp"
-								android:text="@string/cmd_args_text"
-								android:textAppearance="?android:attr/textAppearanceMedium" />
-							<TextView
-								android:id="@+id/textView_args"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginBottom="10dp"
-								android:layout_marginLeft="10dp"
-								android:layout_marginRight="10dp"
-								android:layout_marginTop="20dp"
-								android:text="@string/cmd_args_text2"
-								android:textAppearance="?android:attr/textAppearanceSmall" />
-							<EditText
-								android:id="@+id/cmdArgs"
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-								android:layout_marginBottom="10dp"
-								android:layout_marginLeft="10dp"
-								android:layout_marginRight="10dp"
-								android:layout_marginTop="3dp"
-								android:hint="@string/defCmdArgs"/>
-						</LinearLayout>
-					</LinearLayout>
-				</FrameLayout>
-			</ScrollView>
-		</LinearLayout>
-	</TabHost>		
+					android:layout_height="wrap_content"
+					android:layout_marginBottom="10dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:layout_marginTop="1dp"
+					android:hint="@string/defCmdArgs"/>
+				<ToggleButton
+					android:id="@+id/use_zbot"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_margin="10dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:layout_marginTop="10dp"
+					android:text="nothing"
+					android:textOff="@string/zbot_off"
+					android:textOn="@string/zbot_on" />
+				<ToggleButton
+					android:id="@+id/use_yapb"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_margin="10dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:layout_marginTop="10dp"
+					android:text="nothing"
+					android:textOff="@string/yapb_off"
+					android:textOn="@string/yapb_on" />
+				<ToggleButton
+					android:id="@+id/enableczero"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_margin="10dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:layout_marginTop="10dp"
+					android:text="nothing"
+					android:textOff="@string/czero_off"
+					android:textOn="@string/czero_on" />
+			</LinearLayout>
+		</ScrollView>
+	</LinearLayout>
 	<com.google.android.gms.ads.AdView
 		android:id="@+id/adView"
 		android:layout_width="fill_parent"
