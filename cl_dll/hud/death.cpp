@@ -104,7 +104,7 @@ int CHudDeathNotice :: Draw( float flTime )
 			}
 			else
 			{
-				y = ScreenHeight / 7 + 2 + (20 * i);
+				y = ScreenHeight / 5 + 2 + (20 * i);
 			}
 
 			int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;

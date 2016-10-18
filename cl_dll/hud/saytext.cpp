@@ -298,10 +298,14 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	m_iFlags |= HUD_DRAW;
 	PlaySound( "misc/talk.wav", 1 );
 
-	if ( ScreenHeight >= 480 )
+	if( !g_iUser1 )
+	{
 		Y_START = ScreenHeight - 60;
+	}
 	else
-		Y_START = ScreenHeight - 45;
+	{
+		Y_START = ScreenHeight / 5;
+	}
 	Y_START -= (line_height * (MAX_LINES+1));
 
 }
