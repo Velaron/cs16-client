@@ -243,7 +243,7 @@ bool CHudRadar::FlashTime( float flTime, extra_player_info_t *pplayer )
 
 bool CHudRadar::FlashTime( float flTime, hostage_info_t *pplayer )
 {
-	if( pplayer->radarflashon )
+	if( !pplayer->radarflashon )
 		return false; //!!!: hostages can only flash(CS rules)
 
 	// radar flashing
