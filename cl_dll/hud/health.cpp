@@ -522,7 +522,7 @@ Returns 1 if health is <= 0
 */
 bool CL_IsDead()
 {
-    if( gHUD.m_Health.m_iHealth <= 0 )
-        return true;
-    return false;
+	if( gHUD.m_Health.m_iHealth <= 0 )
+		return true;
+	return false;
 }

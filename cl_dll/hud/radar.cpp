@@ -220,7 +220,7 @@ int CHudRadar::MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf )
 	return 1;
 }
 
-bool Radar_FlashTime( float flTime, extra_player_info_t *pplayer )
+bool CHudRadar::FlashTime( float flTime, extra_player_info_t *pplayer )
 {
 	if( !pplayer->radarflashon )
 		return true;
@@ -241,10 +241,10 @@ bool Radar_FlashTime( float flTime, extra_player_info_t *pplayer )
 	return pplayer->nextflash;
 }
 
-bool Radar_FlashTime( float flTime, hostage_info_t *pplayer )
+bool CHudRadar::FlashTime( float flTime, hostage_info_t *pplayer )
 {
-	if( !pplayer->radarflashon )
-		return true;
+	if( pplayer->radarflashon )
+		return false; //!!!: hostages can only flash(CS rules)
 
 	// radar flashing
 	if( pplayer->radarflashes )
@@ -262,6 +262,21 @@ bool Radar_FlashTime( float flTime, hostage_info_t *pplayer )
 	return pplayer->nextflash;
 }
 
+void CHudRadar::DrawZAxis( Vector pos, int r, int g, int b, int a )
+{
+	if( pos.z >= -20 && pos.z <= 20 )
+	{
+		DrawRadarDot( pos.x, pos.y, r, g, b, a );
+	}
+	else if( pos.z <= -20 )
+	{
+		DrawFlippedT( pos.x, pos.y, r, g, b, a );
+	}
+	else
+	{
+		DrawT( pos.x, pos.y, r, g, b, a );
+	}
+}
 
 int CHudRadar::Draw(float flTime)
 {
@@ -305,7 +320,7 @@ int CHudRadar::Draw(float flTime)
 
 		// decide should player draw at this time. For flashing.
 		// Always true for non-flashing players
-		if( !Radar_FlashTime( flTime, &g_PlayerExtraInfo[i]) )
+		if( !FlashTime( flTime, &g_PlayerExtraInfo[i]) )
 			continue;
 
 		// player with C4 must be red
@@ -322,18 +337,7 @@ int CHudRadar::Draw(float flTime)
 		// calc radar position
 		Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[i].origin, gHUD.m_vecAngles);
 
-		if( pos.z < 20 && pos.z > -20 )
-		{
-			DrawRadarDot( pos.x, pos.y, r, g, b, 255 );
-		}
-		else if( gHUD.m_vecOrigin.z > g_PlayerExtraInfo[i].origin.z )
-		{
-			DrawFlippedT( pos.x, pos.y, r, g, b, 255 );
-		}
-		else
-		{
-			DrawT( pos.x, pos.y, r, g, b, 255 );
-		}
+		DrawZAxis( pos, r, g, b, 255 );
 	}
 
 	// Terrorist specific code( C4 Bomb )
@@ -341,7 +345,7 @@ int CHudRadar::Draw(float flTime)
 	{
 		if ( !g_PlayerExtraInfo[33].dead &&
 			 g_PlayerExtraInfo[33].radarflashon &&
-			 Radar_FlashTime( flTime, &g_PlayerExtraInfo[33] ))
+			 FlashTime( flTime, &g_PlayerExtraInfo[33] ))
 		{
 			Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[33].origin, gHUD.m_vecAngles);
 			if( g_PlayerExtraInfo[33].playerclass ) // bomb planted
@@ -350,7 +354,7 @@ int CHudRadar::Draw(float flTime)
 			}
 			else
 			{
-				DrawRadarDot( pos.x, pos.y, 255, 0, 0, 255 );
+				DrawZAxis( pos, 255, 0, 0, 255 );
 			}
 		}
 	}
@@ -363,11 +367,11 @@ int CHudRadar::Draw(float flTime)
 			if( g_HostageInfo[i].dead )
 				continue;
 
-			if( !Radar_FlashTime( flTime, &g_HostageInfo[i] ) )
+			if( !FlashTime( flTime, &g_HostageInfo[i] ) )
 				continue;
 
 			Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_HostageInfo[i].origin, gHUD.m_vecAngles);
-			DrawRadarDot( pos.x, pos.y, 255, 0, 0, 255 );
+			DrawZAxis( pos, 4, 25, 110, 255 );
 		}
 	}
 
@@ -483,11 +487,11 @@ int CHudRadar::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 	g_PlayerExtraInfo[33].origin.y = reader.ReadCoord();
 	g_PlayerExtraInfo[33].origin.z = reader.ReadCoord();
 
-	g_PlayerExtraInfo[33].radarflashon = 1;
+	g_PlayerExtraInfo[33].radarflashon = true;
 	g_PlayerExtraInfo[33].radarflashes = 99999;
 	g_PlayerExtraInfo[33].radarflash = gHUD.m_flTime;
 	strncpy(g_PlayerExtraInfo[33].teamname, "TERRORIST", MAX_TEAM_NAME);
-	g_PlayerExtraInfo[33].dead = 0;
+	g_PlayerExtraInfo[33].dead = false;
 	g_PlayerExtraInfo[33].nextflash = true;
 
 	int Flag = reader.ReadByte();
@@ -503,10 +507,10 @@ int CHudRadar::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 
 int CHudRadar::MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf)
 {
-	g_PlayerExtraInfo[33].radarflashon = 0;
+	g_PlayerExtraInfo[33].radarflashon = false;
 	g_PlayerExtraInfo[33].radarflash = 0.0f;
 	g_PlayerExtraInfo[33].radarflashes = 0;
-	g_PlayerExtraInfo[33].dead = 1;
+	g_PlayerExtraInfo[33].dead = true;
 
 	return 1;
 }
@@ -525,11 +529,14 @@ int CHudRadar::MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf)
 		if ( Flag == 1 )
 		{
 			g_HostageInfo[idx].radarflash = gHUD.m_flTime;
-			g_HostageInfo[idx].radarflashon = 1;
+			g_HostageInfo[idx].radarflashon = true;
 			g_HostageInfo[idx].radarflashes = 99999;
 		}
-		strncpy(g_HostageInfo[idx].teamname, "CT", MAX_TEAM_NAME);
-		g_HostageInfo[idx].dead = 0;
+		else
+		{
+			g_HostageInfo[idx].radarflashon = false;
+		}
+		g_HostageInfo[idx].dead = true;
 	}
 
 	return 1;
@@ -541,7 +548,7 @@ int CHudRadar::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 	int idx = reader.ReadByte();
 	if ( idx <= MAX_HOSTAGES )
 	{
-		g_HostageInfo[idx].dead = 1;
+		g_HostageInfo[idx].dead = false;
 		g_HostageInfo[idx].radarflash = gHUD.m_flTime;
 		g_HostageInfo[idx].radarflashes = 15;
 	}

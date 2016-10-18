@@ -41,7 +41,7 @@ extern "C"
 }
 
 void			COM_Log( char *pszFile, char *fmt, ...);
-bool CL_IsDead();
+bool			CL_IsDead();
 
 float			UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 int				UTIL_SharedRandomLong( unsigned int seed, int low, int high );

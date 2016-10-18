@@ -401,7 +401,6 @@ struct team_info_t
 
 struct hostage_info_t
 {
-	char teamname[MAX_TEAM_NAME];
 	vec3_t origin;
 	float radarflash;
 	bool radarflashon;

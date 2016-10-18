@@ -27,7 +27,7 @@
 #include <ctype.h>
 #include "vgui_parser.h"
 #include "draw_util.h"
-
+#include "com_weapons.h"
 //#include "vgui_TeamFortressViewport.h"
 
 extern float *GetClientColor( int clientIndex );
@@ -219,7 +219,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	case CHAT_ALLDEAD:
 	case CHAT_ALLSPEC:
 	case CHAT_SPEC:
-		if( !gHUD.m_fPlayerDead || !g_iUser1 )
+		if( !CL_IsDead() && !g_iUser1 )
 			return 1;
 	}
 #endif
