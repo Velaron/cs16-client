@@ -111,9 +111,9 @@ void CHudRadar::Reset()
 	// make radar don't draw old players after new map
 	for( int i = 0; i < 34; i++ )
 	{
-		g_PlayerExtraInfo[i].radarflashon = false;
+		g_PlayerExtraInfo[i].radarflashes = 0;
 
-		if( i <= MAX_HOSTAGES ) g_HostageInfo[i].radarflashon = false;
+		if( i <= MAX_HOSTAGES ) g_HostageInfo[i].radarflashes = 0;
 	}
 }
 
@@ -222,59 +222,61 @@ int CHudRadar::MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf )
 
 bool CHudRadar::FlashTime( float flTime, extra_player_info_t *pplayer )
 {
-	if( !pplayer->radarflashon )
-		return true;
-
 	// radar flashing
 	if( pplayer->radarflashes )
 	{
-		float timer = (flTime - pplayer->radarflash);
-		if( timer > 0.5f )
+		if( flTime > pplayer->radarflashtime )
 		{
 			pplayer->nextflash = !pplayer->nextflash;
-			pplayer->radarflash = flTime;
+			pplayer->radarflashtime += pplayer->radarflashtimedelta;
 			pplayer->radarflashes--;
 		}
 	}
-	else pplayer->radarflashon = 0;
+	else
+	{
+		return false;
+	}
 
 	return pplayer->nextflash;
 }
 
-bool CHudRadar::FlashTime( float flTime, hostage_info_t *pplayer )
+bool CHudRadar::HostageFlashTime( float flTime, hostage_info_t *pplayer )
 {
-	if( !pplayer->radarflashon )
-		return false; //!!!: hostages can only flash(CS rules)
-
 	// radar flashing
 	if( pplayer->radarflashes )
 	{
-		float timer = (flTime - pplayer->radarflash);
-		if( timer > 0.5f )
+		if( flTime > pplayer->radarflashtime )
 		{
 			pplayer->nextflash = !pplayer->nextflash;
-			pplayer->radarflash = flTime;
+			pplayer->radarflashtime += pplayer->radarflashtimedelta;
 			pplayer->radarflashes--;
 		}
 	}
-	else pplayer->radarflashon = 0;
+	else
+	{
+		return false;
+	}
 
 	return pplayer->nextflash;
 }
 
 void CHudRadar::DrawZAxis( Vector pos, int r, int g, int b, int a )
 {
-	if( pos.z >= -20 && pos.z <= 20 )
+	const float diff = 128;
+
+	if( pos.z > -diff && pos.z < diff )
 	{
 		DrawRadarDot( pos.x, pos.y, r, g, b, a );
 	}
-	else if( pos.z <= -20 )
+	else if( pos.z <= -diff )
 	{
-		DrawFlippedT( pos.x, pos.y, r, g, b, a );
+		// higher than player
+		DrawT( pos.x, pos.y, r, g, b, a );
 	}
 	else
 	{
-		DrawT( pos.x, pos.y, r, g, b, a );
+		// lower than player
+		DrawFlippedT( pos.x, pos.y, r, g, b, a );
 	}
 }
 
@@ -344,7 +346,7 @@ int CHudRadar::Draw(float flTime)
 	if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST )
 	{
 		if ( !g_PlayerExtraInfo[33].dead &&
-			 g_PlayerExtraInfo[33].radarflashon &&
+			 g_PlayerExtraInfo[33].radarflashes &&
 			 FlashTime( flTime, &g_PlayerExtraInfo[33] ))
 		{
 			Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_PlayerExtraInfo[33].origin, gHUD.m_vecAngles);
@@ -364,14 +366,20 @@ int CHudRadar::Draw(float flTime)
 		// draw hostages for CT
 		for( int i = 0; i < MAX_HOSTAGES; i++ )
 		{
-			if( g_HostageInfo[i].dead )
+			if( !HostageFlashTime( flTime, g_HostageInfo + i ) )
+			{
 				continue;
-
-			if( !FlashTime( flTime, &g_HostageInfo[i] ) )
-				continue;
+			}
 
 			Vector pos = WorldToRadar(gHUD.m_vecOrigin, g_HostageInfo[i].origin, gHUD.m_vecAngles);
-			DrawZAxis( pos, 4, 25, 110, 255 );
+			if( g_HostageInfo[i].dead )
+			{
+				DrawZAxis( pos, 255, 0, 0, 255 );
+			}
+			else
+			{
+				DrawZAxis( pos, 4, 25, 110, 255 );
+			}
 		}
 	}
 
@@ -487,9 +495,9 @@ int CHudRadar::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 	g_PlayerExtraInfo[33].origin.y = reader.ReadCoord();
 	g_PlayerExtraInfo[33].origin.z = reader.ReadCoord();
 
-	g_PlayerExtraInfo[33].radarflashon = true;
 	g_PlayerExtraInfo[33].radarflashes = 99999;
-	g_PlayerExtraInfo[33].radarflash = gHUD.m_flTime;
+	g_PlayerExtraInfo[33].radarflashtime = gHUD.m_flTime;
+	g_PlayerExtraInfo[33].radarflashtimedelta = 0.5f;
 	strncpy(g_PlayerExtraInfo[33].teamname, "TERRORIST", MAX_TEAM_NAME);
 	g_PlayerExtraInfo[33].dead = false;
 	g_PlayerExtraInfo[33].nextflash = true;
@@ -507,9 +515,7 @@ int CHudRadar::MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf)
 
 int CHudRadar::MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf)
 {
-	g_PlayerExtraInfo[33].radarflashon = false;
-	g_PlayerExtraInfo[33].radarflash = 0.0f;
-	g_PlayerExtraInfo[33].radarflashes = 0;
+	g_PlayerExtraInfo[33].radarflashes = false;
 	g_PlayerExtraInfo[33].dead = true;
 
 	return 1;
@@ -521,22 +527,19 @@ int CHudRadar::MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf)
 	BufferReader reader( pszName, pbuf, iSize );
 	int Flag = reader.ReadByte();
 	int idx = reader.ReadByte();
-	if ( idx <= MAX_HOSTAGES )
+	if( idx <= MAX_HOSTAGES )
 	{
 		g_HostageInfo[idx].origin.x = reader.ReadCoord();
 		g_HostageInfo[idx].origin.y = reader.ReadCoord();
 		g_HostageInfo[idx].origin.z = reader.ReadCoord();
-		if ( Flag == 1 )
+		g_HostageInfo[idx].dead = false;
+
+		if( Flag == 1 ) // first message about this hostage, start flashing
 		{
-			g_HostageInfo[idx].radarflash = gHUD.m_flTime;
-			g_HostageInfo[idx].radarflashon = true;
 			g_HostageInfo[idx].radarflashes = 99999;
+			g_HostageInfo[idx].radarflashtime = gHUD.m_flTime;
+			g_HostageInfo[idx].radarflashtimedelta = 0.5f;
 		}
-		else
-		{
-			g_HostageInfo[idx].radarflashon = false;
-		}
-		g_HostageInfo[idx].dead = true;
 	}
 
 	return 1;
@@ -548,9 +551,10 @@ int CHudRadar::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 	int idx = reader.ReadByte();
 	if ( idx <= MAX_HOSTAGES )
 	{
-		g_HostageInfo[idx].dead = false;
-		g_HostageInfo[idx].radarflash = gHUD.m_flTime;
+		g_HostageInfo[idx].dead = true;
+		g_HostageInfo[idx].radarflashtime = gHUD.m_flTime;
 		g_HostageInfo[idx].radarflashes = 15;
+		g_HostageInfo[idx].radarflashtimedelta = 0.1f;
 	}
 
 	return 1;

@@ -364,7 +364,6 @@ protected:
 	cvar_t *hud_centerid;
 };
 
-
 struct extra_player_info_t 
 {
 	short frags;
@@ -377,12 +376,12 @@ struct extra_player_info_t
 	bool dead;
 	bool showhealth;
 	bool nextflash;
-	bool radarflashon;
 	bool talking;
 	Vector origin;
 	int health;
 	int radarflashes;
-	float radarflash;
+	float radarflashtime;
+	float radarflashtimedelta;
 	char location[32];
 };
 
@@ -402,8 +401,8 @@ struct team_info_t
 struct hostage_info_t
 {
 	vec3_t origin;
-	float radarflash;
-	bool radarflashon;
+	float radarflashtimedelta;
+	float radarflashtime;
 	bool dead;
 	bool nextflash;
 	int radarflashes;
