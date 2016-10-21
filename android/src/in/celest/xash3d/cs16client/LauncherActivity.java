@@ -90,9 +90,11 @@ public class LauncherActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		if ( sdk >= 21 )
-			super.setTheme( 0x01030224 );
-		else super.setTheme( 0x01030005 );
+		
+		// disable as there is not stupid holo blue tabs
+		//if ( sdk >= 21 )
+		//	super.setTheme( 0x01030224 );
+		//else super.setTheme( 0x01030005 );
 
 		setContentView(R.layout.activity_launcher);
 		
