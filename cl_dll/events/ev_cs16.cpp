@@ -100,7 +100,7 @@ void EV_HLDM_NewExplode( float x, float y, float z, float ScaleExplode1 )
 
 }
 
-char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vecEnd, int iBulletType )
+char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vecEnd, int iBulletType, bool& isSky )
 {
 	// hit the world, try to play sound based on texture material type
 	char chTextureType = CHAR_TEX_CONCRETE;
@@ -136,13 +136,16 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 			strncpy( texname, pTextureName, sizeof( texname ) );
 			pTextureName = texname;
 
+			if( !strcmp( pTextureName, "sky" ) )
+			{
+				isSky = true;
+			}
 			// strip leading '-0' or '+0~' or '{' or '!'
-			if (*pTextureName == '-' || *pTextureName == '+')
+			else if (*pTextureName == '-' || *pTextureName == '+')
 			{
 				pTextureName += 2;
 			}
-
-			if (*pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ')
+			else if (*pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ')
 			{
 				pTextureName++;
 			}
@@ -416,9 +419,12 @@ void EV_HugWalls(TEMPENTITY *te, pmtrace_s *ptr)
 }
 
 
-void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r, int g, int b, bool bCreateWallPuff, bool bCreateSparks, char cTextureType)
+void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r, int g, int b, bool bCreateWallPuff, bool bCreateSparks, char cTextureType, bool isSky)
 {
 	physent_t *pe;
+
+	if( isSky )
+		return; // don't try to draw decals, spawn wall puff on skybox?
 
 	pe = gEngfuncs.pEventAPI->EV_GetPhysent( pTrace->ent );
 
@@ -600,6 +606,7 @@ void EV_HLDM_FireBullets(int idx,
 	int iShot;
 	int iPenetrationPower;
 	float flPenetrationDistance;
+	bool isSky;
 
 	EV_DescribeBulletTypeParameters( iBulletType, iPenetrationPower, flPenetrationDistance );
 
@@ -659,7 +666,7 @@ void EV_HLDM_FireBullets(int idx,
 				iShotPenetration = 0;
 			else iShotPenetration--;
 
-			char cTextureType = EV_HLDM_PlayTextureSound(idx, &tr, vecShotSrc, vecEnd, iBulletType );
+			char cTextureType = EV_HLDM_PlayTextureSound(idx, &tr, vecShotSrc, vecEnd, iBulletType, isSky );
 			bool bSparks = true;
 			int r_smoke, g_smoke, b_smoke;
 			r_smoke = g_smoke = b_smoke = 40;
@@ -692,7 +699,7 @@ void EV_HLDM_FireBullets(int idx,
 			}
 
 			// do damage, paint decals
-			EV_HLDM_DecalGunshot( &tr, iBulletType, 0, r_smoke, g_smoke, b_smoke, true, bSparks, cTextureType );
+			EV_HLDM_DecalGunshot( &tr, iBulletType, 0, r_smoke, g_smoke, b_smoke, true, bSparks, cTextureType, isSky );
 
 			if( iBulletType == BULLET_PLAYER_BUCKSHOT || iShotPenetration == 0 )
 			{
@@ -712,7 +719,7 @@ void EV_HLDM_FireBullets(int idx,
 			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 			gEngfuncs.pEventAPI->EV_PlayerTrace(vecShotSrc, vecSrc, 0, -1, &trOriginal);
 			if( !trOriginal.startsolid )
-				EV_HLDM_DecalGunshot( &trOriginal, iBulletType, 0, r_smoke, g_smoke, b_smoke, true, bSparks, cTextureType );
+				EV_HLDM_DecalGunshot( &trOriginal, iBulletType, 0, r_smoke, g_smoke, b_smoke, true, bSparks, cTextureType, isSky );
 		}
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
