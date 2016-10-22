@@ -503,6 +503,8 @@ Animate weapon model
 */
 void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal )
 {
+	//gEngfuncs.Con_DPrintf( "Predict::SendWeaponAnim( %i )\n", iAnim );
+
 	m_pPlayer->pev->weaponanim = iAnim;
 	HUD_SendWeaponAnim( iAnim, m_iId, 0, 0 );
 }
@@ -998,6 +1000,17 @@ int GetWeaponAccuracyFlags( int weaponid )
 }
 
 
+// Name says it!
+// Override stupid Xash(or even GoldSrc?) bug with overwriting
+// already predicted values, like maxspeed or punchangle vector
+#define _CS16CLIENT_TAKE_PREDICTED_INFO_FOR_WEAPON_PREDICTION
+
+#ifdef _CS16CLIENT_TAKE_PREDICTED_INFO_FOR_WEAPON_PREDICTION
+#define STATE to
+#else
+#define STATE from
+#endif
+
 /*
 =====================
 HUD_WeaponsPostThink
@@ -1222,15 +1235,15 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 	player.pev->deadflag   = from->client.deadflag;
 	player.pev->waterlevel = from->client.waterlevel;
-	player.pev->maxspeed   = from->client.maxspeed;
-	player.pev->punchangle = from->client.punchangle;
+	player.pev->maxspeed   = STATE->client.maxspeed; //!!! Taking "to"
+	player.pev->punchangle = STATE->client.punchangle; //!!! Taking "to"
 	player.pev->fov        = from->client.fov;
 	player.pev->weaponanim = from->client.weaponanim;
 	player.pev->viewmodel  = from->client.viewmodel;
 	player.m_flNextAttack  = from->client.m_flNextAttack;
 
 	g_iPlayerFlags    = player.pev->flags = from->client.flags;
-	g_flPlayerSpeed	  = from->client.velocity.Length();
+	g_flPlayerSpeed	  = player.pev->velocity.Length();
 
 	//Stores all our ammo info, so the client side weapons can use them.
 	player.ammo_9mm			= from->client.ammo_nails;
@@ -1247,7 +1260,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	cl_entity_t *pplayer = gEngfuncs.GetLocalPlayer();
 	if( pplayer )
 	{
-		player.pev->origin = from->client.origin;
+		player.pev->origin = STATE->client.origin; //!!! Taking "to"
 		player.pev->angles	= pplayer->angles;
 		player.pev->v_angle = v_angles;
 	}
