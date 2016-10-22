@@ -234,7 +234,7 @@ bool CHudRadar::FlashTime( float flTime, extra_player_info_t *pplayer )
 	}
 	else
 	{
-		return false;
+		return true;
 	}
 
 	return pplayer->nextflash;
@@ -254,7 +254,7 @@ bool CHudRadar::HostageFlashTime( float flTime, hostage_info_t *pplayer )
 	}
 	else
 	{
-		return false;
+		return false; // non-flashing hostage must be never drawn on radar!
 	}
 
 	return pplayer->nextflash;
