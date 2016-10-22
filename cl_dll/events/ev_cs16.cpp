@@ -119,6 +119,7 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	//
 
 	chTextureType = 0;
+	isSky = false;
 
 	// Player
 	if ( entity >= 1 && entity <= gEngfuncs.GetMaxClients() )
