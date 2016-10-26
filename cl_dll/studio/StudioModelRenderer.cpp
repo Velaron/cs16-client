@@ -784,6 +784,9 @@ void CStudioModelRenderer::StudioMergeBones(model_t *m_pSubModel)
 	float bonematrix[3][4];
 	static vec4_t q[MAXSTUDIOBONES];
 
+	if( !m_pStudioHeader || !m_pCurrentEntity )
+		return;
+
 	if (m_pCurrentEntity->curstate.sequence >= m_pStudioHeader->numseq)
 		m_pCurrentEntity->curstate.sequence = 0;
 
@@ -791,9 +794,9 @@ void CStudioModelRenderer::StudioMergeBones(model_t *m_pSubModel)
 
 	f = StudioEstimateFrame(pseqdesc);
 
-	if (m_pCurrentEntity->latched.prevframe > f)
+	/*if (m_pCurrentEntity->latched.prevframe > f)
 	{
-	}
+	}*/
 
 	panim = StudioGetAnim(m_pSubModel, pseqdesc);
 	StudioCalcRotations(pos, q, pseqdesc, panim, f);
