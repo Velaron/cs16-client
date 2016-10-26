@@ -94,6 +94,11 @@ int CHud :: Redraw( float flTime, int intermission )
 			ConsolePrint( "cl_predict is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
 			gEngfuncs.Cvar_SetValue( "cl_predict", 1.0f );
 		}
+		if( sv_skipshield && !sv_skipshield->value )
+		{
+			ConsolePrint( "sv_skipshield is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
+			gEngfuncs.Cvar_SetValue( "sv_skipshield", 1.0f );
+		}
 	}
 #endif
 	

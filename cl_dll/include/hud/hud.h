@@ -882,6 +882,7 @@ public:
 				return i;
 		}
 
+		gEngfuncs.Con_Printf( "GetSpriteIndex: %s sprite not found", SpriteName );
 		return -1; // invalid sprite
 	}
 
@@ -928,6 +929,7 @@ public:
 	cvar_t *default_fov;
 	cvar_t *hud_textmode;
 	cvar_t *hud_colored;
+	cvar_t *sv_skipshield;
 #ifdef __ANDROID__
 	cvar_t *cl_android_force_defaults;
 #endif

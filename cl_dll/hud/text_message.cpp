@@ -27,6 +27,7 @@
 #include "parsemsg.h"
 #include "vgui_parser.h"
 #include "ctype.h"
+#include "draw_util.h"
 
 DECLARE_MESSAGE( m_TextMessage, TextMsg )
 
@@ -208,10 +209,18 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	switch ( msg_dest )
 	{
 	case HUD_PRINTCENTER:
+	{
 		snprintf( psz, MAX_TEXTMSG_STRING, msg_text, sstr1, sstr2, sstr3, sstr4 );
+
+		/*ConvertCRtoNL( psz );
+
+		int len = DrawUtils::ConsoleStringLen( psz );
+
+		DrawUtils::DrawConsoleString( (ScreenWidth - len) / 2, ScreenHeight / 3, psz );*/
+
 		CenterPrint( ConvertCRtoNL( psz ) );
 		break;
-
+	}
 	case HUD_PRINTNOTIFY:
 		psz[0] = 1;  // mark this message to go into the notify buffer
 		snprintf( psz+1, MAX_TEXTMSG_STRING - 1, msg_text, sstr1, sstr2, sstr3, sstr4 );
