@@ -165,6 +165,7 @@ void CHud :: Init( void )
 	cl_weapon_sparks = CVAR_CREATE( "cl_weapon_sparks", "1", FCVAR_ARCHIVE );
 	cl_weapon_wallpuff = CVAR_CREATE( "cl_weapon_wallpuff", "1", FCVAR_ARCHIVE );
 	zoom_sens_ratio = CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
+	sv_skipshield = gEngfuncs.pfnGetCvarPointer( "sv_skipshield" );
 
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
 
@@ -292,18 +293,17 @@ void CHud :: VidInit( void )
 	m_iRes = 640;
 
 	// Only load this once
-	if ( !m_pSpriteList )
+	if( !m_pSpriteList )
 	{
 		// we need to load the hud.txt, and all sprites within
 		m_pSpriteList = SPR_GetList("sprites/hud.txt", &m_iSpriteCountAllRes);
 
-		if (m_pSpriteList)
+		if( m_pSpriteList )
 		{
 			// count the number of sprites of the appropriate res
 			m_iSpriteCount = 0;
 			client_sprite_t *p = m_pSpriteList;
-			int j;
-			for ( j = 0; j < m_iSpriteCountAllRes; j++ )
+			for ( int j = 0; j < m_iSpriteCountAllRes; j++ )
 			{
 				if ( p->iRes == m_iRes )
 					m_iSpriteCount++;
@@ -311,13 +311,19 @@ void CHud :: VidInit( void )
 			}
 
 			// allocated memory for sprite handle arrays
-			m_rghSprites = new HSPRITE[m_iSpriteCount];
-			m_rgrcRects = new wrect_t[m_iSpriteCount];
-			m_rgszSpriteNames = new char[m_iSpriteCount * MAX_SPRITE_NAME_LENGTH];;
+			m_rghSprites      = new(std::nothrow) HSPRITE[m_iSpriteCount];
+			m_rgrcRects       = new(std::nothrow) wrect_t[m_iSpriteCount];
+			m_rgszSpriteNames = new(std::nothrow) char[m_iSpriteCount * MAX_SPRITE_NAME_LENGTH];;
+
+			if( !m_rghSprites || !m_rgrcRects || !m_rgszSpriteNames )
+			{
+				gEngfuncs.pfnConsolePrint("CHud::VidInit(): Cannot allocate memory");
+				if( g_iXash )
+					gRenderAPI.Host_Error("CHud::VidInit(): Cannot allocate memory");
+			}
 
 			p = m_pSpriteList;
-			int index = 0;
-			for ( j = 0; j < m_iSpriteCountAllRes; j++ )
+			for ( int index = 0, j = 0; j < m_iSpriteCountAllRes; j++ )
 			{
 				if ( p->iRes == m_iRes )
 				{
@@ -357,11 +363,18 @@ void CHud :: VidInit( void )
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
 	m_HUD_number_0 = GetSpriteIndex( "number_0" );
 
-	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
+	if( m_HUD_number_0 == -1 && g_iXash )
+	{
+		gRenderAPI.Host_Error( "Failed to get number_0 sprite index. Check your game data!" );
+		return;
+	}
+
+	m_iFontHeight = GetSpriteRect(m_HUD_number_0).bottom - GetSpriteRect(m_HUD_number_0).top;
 
 	m_hGasPuff = SPR_Load("sprites/gas_puff_01.spr");
 
-	m_Ammo.VidInit();
+
+	/*m_Ammo.VidInit();
 	m_Health.VidInit();
 	m_Spectator.VidInit();
 	m_Geiger.VidInit();
@@ -383,7 +396,10 @@ void CHud :: VidInit( void )
 	m_ProgressBar.VidInit();
 	m_SniperScope.VidInit();
 	m_Radar.VidInit();
-	m_SpectatorGui.VidInit();
+	m_SpectatorGui.VidInit();*/
+
+	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
+		pList->p->VidInit();
 }
 
 void CHud::Shutdown( void )
