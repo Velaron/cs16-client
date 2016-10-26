@@ -392,6 +392,18 @@ void EV_WallPuff_Wind( struct tempent_s *te, float frametime, float currenttime 
 	}
 }
 
+void EV_SmokeRise( struct tempent_s *te, float frametime, float currenttime )
+{
+	if ( te->entity.curstate.frame > 7.0 )
+	{
+		te->entity.baseline.origin = 0.97f * te->entity.baseline.origin;
+		te->entity.baseline.origin.z += 0.7f;
+
+		if( te->entity.baseline.origin.z > 70.0f )
+			te->entity.baseline.origin.z = 70.0f;
+	}
+}
+
 void EV_HugWalls(TEMPENTITY *te, pmtrace_s *ptr)
 {
 	Vector norm = te->entity.baseline.origin.Normalize();
@@ -419,6 +431,81 @@ void EV_HugWalls(TEMPENTITY *te, pmtrace_s *ptr)
 	te->entity.baseline.origin.z = v2.x * len * 1.5;
 }
 
+void EV_CS16Client_CreateSmoke(int type, Vector origin, Vector dir, int speed, float scale, int r, int g, int b , bool wind, Vector velocity, int framerate )
+{
+	TEMPENTITY *te = NULL;
+	void ( *callback )( struct tempent_s *ent, float frametime, float currenttime ) = NULL;
+	char path[64];
+
+	switch( type )
+	{
+	case SMOKE_WALLPUFF:
+		if( !gHUD.fastsprites->value )
+		{
+			strcpy( path, "sprites/wall_puff1.spr" );
+
+			path[17] += Com_RandomLong(0, 3); // randomize a bit
+		}
+		else
+		{
+			strcpy( path, "sprites/fast_wallpuff1.spr" );
+			te = gEngfuncs.pEfxAPI->R_DefaultSprite( origin,
+								gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/fast_wallpuff1.spr"), 30.0f );
+		}
+		break;
+	case SMOKE_RIFLE:
+		strcpy( path, "sprites/rifle_smoke1.spr" );
+		path[19] += Com_RandomLong(0, 2); // randomize a bit
+
+
+		break;
+	case SMOKE_PISTOL:
+		strcpy( path, "sprites/pistol_smoke1.spr" );
+		path[20] += Com_RandomLong(0, 1);  // randomize a bit
+
+
+		break;
+	case SMOKE_BLACK:
+		strcpy( path, "sprites/black_smoke1.spr" );
+		path[19] += Com_RandomLong(0, 3); // randomize a bit
+
+
+		break;
+	default:
+		assert(("Unknown smoketype!"));
+	}
+
+	if( wind )
+		callback = EV_WallPuff_Wind;
+	else
+		callback = EV_SmokeRise;
+
+
+	te = gEngfuncs.pEfxAPI->R_DefaultSprite( origin, gEngfuncs.pEventAPI->EV_FindModelIndex( path ), framerate );
+
+	if( te )
+	{
+		te->callback = callback;
+		te->hitcallback = EV_HugWalls;
+		te->flags |= FTENT_COLLIDEALL | FTENT_CLIENTCUSTOM;
+		te->entity.curstate.rendermode = kRenderTransAdd;
+		te->entity.curstate.rendercolor.r = r;
+		te->entity.curstate.rendercolor.g = g;
+		te->entity.curstate.rendercolor.b = b;
+		te->entity.curstate.renderamt = Com_RandomLong( 100, 180 );
+		te->entity.curstate.scale = scale;
+		te->entity.baseline.origin = speed * dir;
+
+		if( !velocity.IsNull() )
+		{
+			velocity.x *= 0.5;
+			velocity.y *= 0.5;
+			velocity.z *= 0.9;
+			te->entity.baseline.origin = te->entity.baseline.origin + velocity;
+		}
+	}
+}
+
 
 void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r, int g, int b, bool bCreateWallPuff, bool bCreateSparks, char cTextureType, bool isSky)
 {
@@ -433,6 +520,7 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 	{
 		EV_HLDM_GunshotDecalTrace( pTrace, EV_HLDM_DamageDecal( pe ), cTextureType );
 
+		// create sparks
 		if( gHUD.cl_weapon_sparks && gHUD.cl_weapon_sparks->value && bCreateSparks )
 		{
 			Vector dir = pTrace->plane.normal;
@@ -442,9 +530,10 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, Com_RandomLong( 5, 10 ), dir.z, -75.0f, 75.0f );
 		}
 
+		// create wallpuff
 		if( gHUD.cl_weapon_wallpuff && gHUD.cl_weapon_wallpuff->value && bCreateWallPuff )
 		{
-			TEMPENTITY *te = NULL;
+			/*TEMPENTITY *te = NULL;
 			if( gHUD.fastsprites && !gHUD.fastsprites->value )
 			{
 				char path[] = "sprites/wall_puff1.spr";
@@ -471,7 +560,9 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 				te->entity.curstate.renderamt = Com_RandomLong( 100, 180 );
 				te->entity.curstate.scale = 0.5;
 				te->entity.baseline.origin = (25 + Com_RandomLong( 0, 4 ) ) * pTrace->plane.normal;
-			}
+			}*/
+
+			EV_CS16Client_CreateSmoke( SMOKE_WALLPUFF, pTrace->endpos, pTrace->plane.normal, 25, 0.5, r, g, b, true );
 		}
 	}
 }

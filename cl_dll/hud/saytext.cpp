@@ -304,7 +304,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	}
 	else
 	{
-		Y_START = ScreenHeight / 5;
+		Y_START = ScreenHeight * 4 / 5;
 	}
 	Y_START -= (line_height * (MAX_LINES+1));
 

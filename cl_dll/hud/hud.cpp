@@ -73,6 +73,14 @@ void __CmdFunc_InputCommandSpecial()
 #endif
 }
 
+void __CmdFunc_GunSmoke()
+{
+	if( gHUD.cl_gunsmoke->value )
+		gEngfuncs.Cvar_SetValue( "cl_gunsmoke", 0 );
+	else
+		gEngfuncs.Cvar_SetValue( "cl_gunsmoke", 1 );
+}
+
 #define XASH_GENERATE_BUILDNUM
 
 #if defined(XASH_GENERATE_BUILDNUM)
@@ -121,6 +129,7 @@ char *Q_buildnum( void )
 void CHud :: Init( void )
 {
 	HOOK_COMMAND( "special", InputCommandSpecial );
+	//HOOK_COMMAND( "gunsmoke", GunSmoke );
 
 	HOOK_MESSAGE( Logo );
 	HOOK_MESSAGE( ResetHUD );
@@ -152,9 +161,11 @@ void CHud :: Init( void )
 	default_fov  = CVAR_CREATE( "default_fov", "90", 0 );
 	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	fastsprites  = CVAR_CREATE( "fastsprites", "0", FCVAR_ARCHIVE );
+	cl_gunsmoke  = CVAR_CREATE( "cl_gunsmoke", "0", FCVAR_ARCHIVE );
 	cl_weapon_sparks = CVAR_CREATE( "cl_weapon_sparks", "1", FCVAR_ARCHIVE );
 	cl_weapon_wallpuff = CVAR_CREATE( "cl_weapon_wallpuff", "1", FCVAR_ARCHIVE );
 	zoom_sens_ratio = CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
+
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
 
 	m_iLogo = 0;

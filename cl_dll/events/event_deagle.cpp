@@ -92,7 +92,7 @@ void EV_FireDEAGLE( event_args_t *args )
 
 	EV_GetGunPosition( args, vecSrc, origin );
 	Vector vSpread( args->fparam1, args->fparam2, 0.0f );
-	int tracerCount;
+	
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		1, vecSrc, forward,

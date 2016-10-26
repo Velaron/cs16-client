@@ -87,7 +87,7 @@ void EV_FireElite( event_args_s *args, int sequence )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 	Vector vSpread;
-	int tracerCount;
+	
 	vSpread.x = args->fparam1;
 	vSpread.y = args->fparam2;
 	EV_HLDM_FireBullets( idx,

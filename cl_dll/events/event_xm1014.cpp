@@ -83,7 +83,7 @@ void EV_FireXM1014(event_args_s *args)
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 	Vector vSpread;
-	int tracerCount;
+	
 	vSpread.x = 0.0725;
 	vSpread.y = 0.0725;
 	EV_HLDM_FireBullets( idx,

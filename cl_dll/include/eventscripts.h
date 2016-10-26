@@ -82,6 +82,9 @@ Flag weapon/view model for muzzle flash
 */
 inline void EV_MuzzleFlash( void )
 {
+	if( gHUD.cl_lw->value )
+		return;
+
 	// Add muzzle flash to current weapon model
 	cl_entity_t *ent = gEngfuncs.GetViewModel();
 	if ( !ent )
