@@ -476,40 +476,6 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 	}
 }
 
-int EV_HLDM_CheckTracer( int idx, float *vecSrc, float *end, float *forward, float *right, int iBulletType, int iTracerFreq, int *tracerCount )
-{
-	int tracer = 0;
-	int i;
-
-	if ( iTracerFreq != 0 && ( (*tracerCount)++ % iTracerFreq) == 0 )
-	{
-		vec3_t vecTracerSrc;
-
-		if ( EV_IsPlayer( idx ) )
-		{
-			vec3_t offset( 0, 0, -4 );
-
-			// adjust tracer position for player
-			for ( i = 0; i < 3; i++ )
-			{
-				vecTracerSrc[ i ] = vecSrc[ i ] + offset[ i ] + right[ i ] * 2 + forward[ i ] * 16;
-			}
-		}
-		else
-		{
-			VectorCopy( vecSrc, vecTracerSrc );
-		}
-
-		if ( iTracerFreq != 1 )		// guns that always trace also always decal
-			tracer = 1;
-
-
-		EV_CreateTracer( vecTracerSrc, end );
-	}
-
-	return tracer;
-}
-
 /*
 ============
 EV_DescribeBulletTypeParameters
@@ -600,7 +566,7 @@ void EV_HLDM_FireBullets(int idx,
 						 float *forward, float *right, float *up,
 						 int cShots,
 						 float *vecSrc, float *vecDirShooting, float *vecSpread,
-						 float flDistance, int iBulletType, int iTracerFreq, int *tracerCount, int iPenetration)
+						 float flDistance, int iBulletType, int iPenetration)
 {
 	int i;
 	pmtrace_t tr;
@@ -653,8 +619,7 @@ void EV_HLDM_FireBullets(int idx,
 		while (iShotPenetration != 0)
 		{
 			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-			gEngfuncs.pEventAPI->EV_PlayerTrace(vecShotSrc, vecEnd, 0, -1, &tr);
-			EV_HLDM_CheckTracer( idx, vecShotSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount );
+			gEngfuncs.pEventAPI->EV_PlayerTrace( vecShotSrc, vecEnd, 0, -1, &tr );
 
 			float flCurrentDistance = tr.fraction * flDistance;
 
@@ -702,7 +667,7 @@ void EV_HLDM_FireBullets(int idx,
 			// do damage, paint decals
 			EV_HLDM_DecalGunshot( &tr, iBulletType, 0, r_smoke, g_smoke, b_smoke, true, bSparks, cTextureType, isSky );
 
-			if( iBulletType == BULLET_PLAYER_BUCKSHOT || iShotPenetration == 0 )
+			if(/* iBulletType == BULLET_PLAYER_BUCKSHOT ||*/ iShotPenetration <= 0 )
 			{
 				break;
 			}

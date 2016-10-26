@@ -93,7 +93,7 @@ void EV_FireElite( event_args_s *args, int sequence )
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		1, vecSrc, vecAiming,
-		vSpread, 8192.0, BULLET_PLAYER_9MM, 0, &tracerCount,
+		vSpread, 8192.0, BULLET_PLAYER_9MM,
 		2 );
 }
 

@@ -96,6 +96,6 @@ void EV_FireDEAGLE( event_args_t *args )
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		1, vecSrc, forward,
-		vSpread, 8192.0, BULLET_PLAYER_50AE, 0, &tracerCount,
+		vSpread, 8192.0, BULLET_PLAYER_50AE,
 		2 );
 }

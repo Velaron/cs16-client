@@ -85,6 +85,6 @@ void EV_FireAUG( struct event_args_s *args )
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		1, vecSrc, vecAiming,
-		vSpread, 8192.0, BULLET_PLAYER_556MM, 0, &tracerCount,
+		vSpread, 8192.0, BULLET_PLAYER_556MM,
 		2 );
 }

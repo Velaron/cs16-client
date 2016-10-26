@@ -34,11 +34,10 @@ Bullet;
 
 void EV_HLDM_GunshotDecalTrace(pmtrace_t *pTrace, char *decalName , char chTextureType);
 void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r, int g, int b, bool bCreateSparks, char cTextureType, bool isSky);
-int EV_HLDM_CheckTracer( int idx, float *vecSrc, float *end, float *forward, float *right, int iBulletType, int iTracerFreq, int *tracerCount );
 void EV_HLDM_FireBullets(int idx,
 						 float *forward, float *right, float *up,
 						 int cShots,
 						 float *vecSrc, float *vecDirShooting, float *vecSpread,
-						 float flDistance, int iBulletType, int iTracerFreq, int *tracerCount, int iPenetration);
+						 float flDistance, int iBulletType, int iPenetration);
 void EV_CS16Client_KillEveryRound( struct tempent_s *te, float frametime, float currenttime );
 #endif // EV_HLDMH

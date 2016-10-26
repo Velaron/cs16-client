@@ -131,6 +131,6 @@ void EV_Fireglock18( event_args_t *args )
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		1, vecSrc, vecAiming,
-		vSpread, 4096.0, BULLET_PLAYER_9MM, 0, &tracerCount,
+		vSpread, 4096.0, BULLET_PLAYER_9MM,
 		2 );
 }

@@ -93,18 +93,6 @@ inline void EV_MuzzleFlash( void )
 
 /*
 =================
-EV_CreateTracer
-
-Creates a tracer effect
-=================
-*/
-inline void EV_CreateTracer( float *start, float *end )
-{
-	gEngfuncs.pEfxAPI->R_TracerEffect( start, end );
-}
-
-/*
-=================
 EV_IsPlayer
 
 Is the entity's index in the player range?

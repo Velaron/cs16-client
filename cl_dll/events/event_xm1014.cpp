@@ -89,6 +89,6 @@ void EV_FireXM1014(event_args_s *args)
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		6, vecSrc, vecAiming,
-		vSpread, 8192.0, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount,
+		vSpread, 8192.0, BULLET_PLAYER_BUCKSHOT,
 		1 );
 }
