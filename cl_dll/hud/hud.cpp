@@ -250,8 +250,8 @@ CHud :: ~CHud()
 
 void CHud :: VidInit( void )
 {
-	m_scrinfo.iSize = sizeof(m_scrinfo);
-	GetScreenInfo(&m_scrinfo);
+	m_scrinfo.iSize = sizeof( m_scrinfo );
+	GetScreenInfo( &m_scrinfo );
 
 	m_truescrinfo.iWidth = CVAR_GET_FLOAT("width");
 	m_truescrinfo.iHeight = CVAR_GET_FLOAT("height");
@@ -263,18 +263,20 @@ void CHud :: VidInit( void )
 	
 	m_hsprLogo = 0;
 
-	if( TrueWidth < 640 )
+	float maxScale = (float)TrueWidth / 640.0f;
+
+	if( CVAR_GET_FLOAT("hud_scale") > maxScale )
 	{
-		gEngfuncs.Cvar_SetValue("hud_scale", TrueWidth / 640.0f );
+		gEngfuncs.Cvar_SetValue( "hud_scale", maxScale );
+		gEngfuncs.Con_Printf("^3Maximum scale factor reached. Reset: %f\n", maxScale );
+		GetScreenInfo( &m_scrinfo );
 	}
 
-	GetScreenInfo(&m_scrinfo);
 	m_flScale = CVAR_GET_FLOAT( "hud_scale" );
 
 	// give a real values to other code. It's not anymore an actual CVar value
 	if( m_flScale == 0.0f )
 		m_flScale = 1.0f;
-
 
 	m_iRes = 640;
 
