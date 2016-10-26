@@ -687,6 +687,10 @@ void CGameStudioModelRenderer::SetupClientAnimation(entity_state_t *pplayer)
 
 	void *pmodel = (studiohdr_t *)IEngineStudio.Mod_Extradata(ent->model);
 
+	if( !pmodel )
+		return;
+
+
 	GetSequenceInfo(pmodel, st, &fr, &gs);
 	st->m_fSequenceLoops = ((GetSequenceFlags(pmodel, st) & STUDIO_LOOPING) != 0);
 	StudioFrameAdvance(st, fr, dt);
@@ -863,6 +867,10 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 	}
 
 	m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(m_pRenderModel);
+
+	if( !m_pStudioHeader )
+		return 0;
+
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
@@ -981,6 +989,9 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 			model_t *pweaponmodel = IEngineStudio.GetModelByIndex(pplayer->weaponmodel);
 
 			m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(pweaponmodel);
+			if( !m_pStudioHeader )
+				return 0;
+
 			IEngineStudio.StudioSetHeader(m_pStudioHeader);
 
 			StudioMergeBones(pweaponmodel);
