@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">CS16Client</string>
-    <string name="title_activity_launcher">CS16Client Launcher</string>
-    <string name="launch_button">Launch cs16-client!</string>
-    <string name="cmd_args_text">Command line arguments:</string>
-    <string name="cmd_args_text2">Don\'t touch if you don\'t know why you need this!</string>
-    <string name="not_found_msg">Nothing was found. Check your APK or choose another server</string>
-    <string name="not_found_title">Something got wrong...</string>
-    <string name="not_implemented_msg">This feature is not implemented yet</string>
-    <string name="not_implemented_title">Not implemented!</string>
+	<string name="app_name" translatable="false">CS16Client</string>
+	<string name="defCmdArgs" translatable="false">-console -game cstrike -bots, etc</string>
+	<string name="title_activity_launcher">CS16Client Launcher</string>
+	<string name="launch_button">Launch cs16-client!</string>
+	<string name="cmd_args_text">Command line arguments:</string>
+	<string name="cmd_args_text2">Don\'t touch if you don\'t know why you need this!</string>
+	<string name="not_found_msg">Nothing was found. Check your installation</string>
+	<string name="not_found_title">Something got wrong...</string>
+	<string name="not_implemented_msg">This feature is not implemented yet</string>
+	<string name="not_implemented_title">Not implemented!</string>
 	<string name="not_implemented_fully">This is not ready! Bugreports are not accepted when this feature is on.</string>
 	<string name="zbot_on">ZBot Enabled</string>
 	<string name="zbot_off">ZBot Disabled</string>
@@ -17,11 +17,6 @@
 	<string name="yapb_off">YaPB Disabled</string>
 	<string name="czero_on">Condition Zero Enabled</string>
 	<string name="czero_off">Condition Zero Disabled</string>
-	<string name="defCmdArgs">-console -game cstrike -bots, etc</string>
-    <string name="text_tab1">Normal</string>
-    <string name="text_tab2">Advanced</string>
-    <string name="text_res_tittle2">Normal settings</string>
-    <string name="text_res_tittle3">Advanced settings</string>
 	<string name="xash_not_installed_title">No engine found</string>
 	<string name="xash_not_installed_msg">To continue, you must install Xash3D engine on your device</string>
 	<string name="install_xash">Install</string>
