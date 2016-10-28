@@ -51,6 +51,7 @@ struct
 
 	int      dripsPerSecond;
 	int	     weatherMode;	// 0 - snow, 1 - rain
+	int      weatherValue;
 
 	float    curtime;    // current time
 	float    oldtime;    // last time we have updated drips
@@ -59,11 +60,14 @@ struct
 
 	int dripcounter;
 	int fxcounter;
+	float heightFromPlayer;
 
 	HSPRITE hsprRain;
 	HSPRITE hsprSnow;
 	HSPRITE hsprRipple;
 } Rain;
+
+static bool initialized = false;
 
 enum
 {
@@ -159,6 +163,14 @@ void ProcessRain( void )
 	Rain.curtime = gEngfuncs.GetClientTime();
 	Rain.timedelta = Rain.curtime - Rain.oldtime;
 
+	if( Rain.dripsPerSecond == 0 )
+		return; // disabled
+
+	if( gHUD.cl_weather->value > 3.0f )
+		gEngfuncs.Cvar_Set( "cl_weather", "3" );
+
+	Rain.weatherValue = gHUD.cl_weather->value;
+
 	// first frame
 	if( Rain.oldtime == 0 || ( Rain.dripsPerSecond == 0 && FirstChainDrip.p_Next == NULL ) )
 	{
@@ -170,7 +182,8 @@ void ProcessRain( void )
 	if( !Rain.timedelta )
 		return; // not in pause
 
-	double timeBetweenDrips = 1 / (double)Rain.dripsPerSecond;
+	int spawnDrips = (Rain.dripsPerSecond + (Rain.weatherValue - 1) * 150);
+	double timeBetweenDrips = 1.0 / (double)(spawnDrips);
 
 #ifdef _DEBUG
 	// save debug info
@@ -221,25 +234,27 @@ void ProcessRain( void )
 			debug_attempted++;
 #endif
 				
-		if( Rain.dripcounter < MAXDRIPS ) // check for overflow
+		if( Rain.dripcounter < spawnDrips ) // check for overflow
 		{
 			float deathHeight;
-			Vector vecStart, vecEnd;
+			Vector vecStart, vecEnd, vecStartStart;
 			Vector2D Delta( Rain.wind.x + gEngfuncs.pfnRandomFloat( Rain.rand.x * -1, Rain.rand.x ),
 							Rain.wind.y + gEngfuncs.pfnRandomFloat( Rain.rand.y * -1, Rain.rand.y ));
+			pmtrace_t pmtrace, pmtrace2;
 
 			vecStart.x = gEngfuncs.pfnRandomFloat( gHUD.m_vecOrigin.x - Rain.distFromPlayer, gHUD.m_vecOrigin.x + Rain.distFromPlayer );
 			vecStart.y = gEngfuncs.pfnRandomFloat( gHUD.m_vecOrigin.y - Rain.distFromPlayer, gHUD.m_vecOrigin.y + Rain.distFromPlayer );
-			vecStart.z = Rain.globalHeight;
+			vecStart.z = gHUD.m_vecOrigin.z + Rain.heightFromPlayer;
 
 			// find a point at bottom of map
 			vecEnd.x = falltime * Delta.x;
 			vecEnd.y = falltime * Delta.y;
 			vecEnd.z = -4096;
 
-			pmtrace_t *pmtrace = gEngfuncs.PM_TraceLine( vecStart, vecEnd, PM_STUDIO_IGNORE, 2, -1 );
+			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+			gEngfuncs.pEventAPI->EV_PlayerTrace( vecStart, vecEnd, PM_WORLD_ONLY, -1, &pmtrace );
 
-			if( pmtrace->startsolid )
+			if( pmtrace.startsolid )
 			{
 #ifdef _DEBUG
 				if( debug_rain->value )
@@ -247,12 +262,26 @@ void ProcessRain( void )
 #endif
 				continue; // drip cannot be placed
 			}
+
+			vecStartStart = vecStart;
+			vecStartStart.z = 999999;
+
+			// second trace. Check that player have a real sky above him
+			const char *s = gEngfuncs.pEventAPI->EV_TraceTexture( pmtrace.ent, vecStart, vecStartStart );
+			if( !s || strcmp( s, "sky" ) )
+			{
+#ifdef _DEBUG
+				if( debug_rain->value )
+					debug_dropped++;
+#endif
+				continue;
+			}
 			
 			// falling to water?
-			int contents = gEngfuncs.PM_PointContents( pmtrace->endpos, NULL );
+			int contents = gEngfuncs.PM_PointContents( pmtrace.endpos, NULL );
 			if( contents == CONTENTS_WATER )
 			{
-				int waterEntity = gEngfuncs.PM_WaterEntity( pmtrace->endpos );
+				int waterEntity = gEngfuncs.PM_WaterEntity( pmtrace.endpos );
 				if( waterEntity > 0 )
 				{
 					cl_entity_t *pwater = gEngfuncs.GetEntityByIndex( waterEntity );
@@ -274,7 +303,7 @@ void ProcessRain( void )
 			}
 			else
 			{
-				deathHeight = pmtrace->endpos[2];
+				deathHeight = pmtrace.endpos[2];
 			}
 
 			// just in case..
@@ -437,6 +466,7 @@ int __MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
 	Rain.rand.x = Rain.rand.y = 0;
 	Rain.weatherMode = iWeatherType - 1;
 	Rain.globalHeight = 100;
+	Rain.heightFromPlayer = 100;
 
 	return 1;
 }
@@ -462,7 +492,12 @@ void InitRain( void )
 	Rain.hsprSnow = SPR_Load("sprites/effects/snowflake.spr");
 	Rain.hsprRipple = SPR_Load("sprites/effects/ripple.spr");
 
-	HOOK_MESSAGE( ReceiveW );
+	if( !initialized )
+	{
+		HOOK_MESSAGE( ReceiveW );
+
+		initialized = true;
+	}
 }
 
 
@@ -551,7 +586,9 @@ void DrawRain( void )
 			matrix[2][3] = Drip->origin.z;
 
 			// apply start fading effect
-			float alpha = (Drip->origin.z <= visibleHeight) ? Drip->alpha : ((Rain.globalHeight - Drip->origin.z) / (float)SNOWFADEDIST) * Drip->alpha;
+			float alpha = (Drip->origin.z <= visibleHeight) ?
+							  Drip->alpha :
+							  (((gHUD.m_vecOrigin.z + Rain.distFromPlayer) - Drip->origin.z) / (float)SNOWFADEDIST) * Drip->alpha;
 
 			// --- draw quad --------------------------
 			gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, alpha );
@@ -590,9 +627,10 @@ void DrawFXObjects( void )
 	// go through objects list
 	for( cl_rainfx_t *curFX = FirstChainFX.p_Next; curFX; curFX = curFX->p_Next )
 	{
-		if( curFX->type == WATER_LANDING )
+		switch( curFX->type )
 		{
-
+		case WATER_LANDING:
+		{
 			// fadeout
 			float alpha = ((curFX->birthTime + curFX->life - Rain.curtime) / curFX->life) * curFX->alpha;
 			float size = (Rain.curtime - curFX->birthTime) * MAXRINGHALFSIZE;
@@ -615,6 +653,7 @@ void DrawFXObjects( void )
 
 			gEngfuncs.pTriAPI->End();
 			// --- draw quad end ----------------------
+		}
 		}
 	}
 }

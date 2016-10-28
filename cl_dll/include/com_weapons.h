@@ -66,6 +66,7 @@ extern bool g_bHoldingShield;
 extern bool g_bHoldingKnife;
 extern int g_iPlayerFlags;
 extern float g_flPlayerSpeed;
+extern Vector g_vPlayerVelocity;
 extern struct local_state_s *g_curstate;
 extern struct local_state_s *g_finalstate;
 extern int g_iShotsFired;
