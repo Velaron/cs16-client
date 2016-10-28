@@ -121,7 +121,7 @@ void LandingEffect( cl_drip_t *drip )
 
 	if (Rain.fxcounter >= MAXFX)
 	{
-		gEngfuncs.Con_Printf( "Rain error: FX limit overflow!\n" );
+		//gEngfuncs.Con_Printf( "Rain error: FX limit overflow!\n" );
 		return;
 	}
 
@@ -163,13 +163,13 @@ void ProcessRain( void )
 	Rain.curtime = gEngfuncs.GetClientTime();
 	Rain.timedelta = Rain.curtime - Rain.oldtime;
 
-	if( Rain.dripsPerSecond == 0 )
-		return; // disabled
-
 	if( gHUD.cl_weather->value > 3.0f )
 		gEngfuncs.Cvar_Set( "cl_weather", "3" );
 
 	Rain.weatherValue = gHUD.cl_weather->value;
+
+	if( Rain.dripsPerSecond == 0 || !Rain.weatherValue )
+		return; // disabled
 
 	// first frame
 	if( Rain.oldtime == 0 || ( Rain.dripsPerSecond == 0 && FirstChainDrip.p_Next == NULL ) )
@@ -357,7 +357,7 @@ void ProcessRain( void )
 		}
 		else
 		{
-			gEngfuncs.Con_Printf( "Rain error: Drip limit overflow!\n" );
+			//gEngfuncs.Con_Printf( "Rain error: Drip limit overflow!\n" );
 			return;
 		}
 	}
@@ -588,7 +588,7 @@ void DrawRain( void )
 			// apply start fading effect
 			float alpha = (Drip->origin.z <= visibleHeight) ?
 							  Drip->alpha :
-							  (((gHUD.m_vecOrigin.z + Rain.distFromPlayer) - Drip->origin.z) / (float)SNOWFADEDIST) * Drip->alpha;
+							  (((gHUD.m_vecOrigin.z + Rain.heightFromPlayer) - Drip->origin.z) / (float)SNOWFADEDIST) * Drip->alpha;
 
 			// --- draw quad --------------------------
 			gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, alpha );
