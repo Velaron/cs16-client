@@ -124,6 +124,17 @@ char *Q_buildnum( void )
 	return buildnum;
 }
 
+int __MsgFunc_ADStop( const char *name, int size, void *buf ) { return 1; }
+int __MsgFunc_ItemStatus( const char *name, int size, void *buf ) { return 1; }
+int __MsgFunc_ReqState( const char *name, int size, void *buf ) { return 1; }
+int __MsgFunc_ForceCam( const char *name, int size, void *buf ) { return 1; }
+int __MsgFunc_Spectator( const char *name, int size, void *buf ) { return 1; }
+int __MsgFunc_ServerName( const char *name, int size, void *buf )
+{
+	BufferReader reader( name, buf, size );
+	strncpy( gHUD.m_szServerName, reader.ReadString(), 64 );
+	return 1;
+}
 
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
@@ -138,6 +149,14 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( ViewMode );
 	HOOK_MESSAGE( SetFOV );
 	HOOK_MESSAGE( Concuss );
+
+	HOOK_MESSAGE( ADStop );
+	HOOK_MESSAGE( ItemStatus );
+	HOOK_MESSAGE( ReqState );
+	HOOK_MESSAGE( ForceCam );
+	HOOK_MESSAGE( Spectator ); // ignored due to touch menus
+	HOOK_MESSAGE( ServerName );
+
 
 	HOOK_MESSAGE( ShadowIdx );
 
@@ -185,6 +204,7 @@ void CHud :: Init( void )
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;
 	m_iNoConsolePrint = 0;
+	m_szServerName[0] = 0;
 
 	Localize_Init();
 

@@ -988,6 +988,8 @@ public:
 	// sprite indexes
 	int m_HUD_number_0;
 
+	char m_szServerName[64];
+
 private:
 	HUDLIST	*m_pHudList;
 	HSPRITE	m_hsprLogo;

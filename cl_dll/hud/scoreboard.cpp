@@ -147,6 +147,7 @@ int CHudScoreboard :: Draw( float flTime )
 int CHudScoreboard :: DrawScoreboard( float fTime )
 {
 	GetAllPlayersInfo();
+	char ServerName[90];
 
 //	Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 //	if ( cl_showpacketloss && cl_showpacketloss->value && ( ScreenWidth >= 400 ) )
@@ -165,7 +166,12 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 
 	int ypos = ystart + (list_slot * ROW_GAP) + 5;
 
-	DrawUtils::DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), (char*)(gHUD.m_Teamplay ? "TEAMS" : "PLAYERS"), 255, 140, 0 );
+	if( gHUD.m_szServerName[0] )
+		snprintf( ServerName, 80, "%s SERVER: %s", (char*)(gHUD.m_Teamplay ? "TEAMS" : "PLAYERS"), gHUD.m_szServerName );
+	else
+		strncpy( ServerName, gHUD.m_Teamplay ? "TEAMS" : "PLAYERS", 80 );
+
+	DrawUtils::DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), ServerName, 255, 140, 0 );
 	DrawUtils::DrawHudStringReverse( KILLS_POS_END(), ypos, 0, "KILLS", 255, 140, 0 );
 	DrawUtils::DrawHudString(	DEATHS_POS_START(), ypos, DEATHS_POS_END(), "DEATHS", 255, 140, 0 );
 	DrawUtils::DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), "PING", 255, 140, 0 );
