@@ -20,3 +20,8 @@ ifeq ($(TARGET_ARCH_ABI),x86)
 LOCAL_CFLAGS += $(CFLAGS_OPT_X86)
 endif
 
+ifeq ($(NDK_DEBUG),1)
+LOCAL_CFLAGS += -ggdb -DDEBUG
+else
+LOCAL_CFLAGS += -DNDEBUG
+endif
