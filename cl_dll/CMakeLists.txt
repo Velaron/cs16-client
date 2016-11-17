@@ -54,7 +54,7 @@ if(CMAKE_SIZEOF_VOID_P MATCHES "8")
     endif()
 endif()
 
-find_package(SDL2 REQUIRED)
+#find_package(SDL2 REQUIRED)
 
 set (CLDLL_LIBRARY client)
 

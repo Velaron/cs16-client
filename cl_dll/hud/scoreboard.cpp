@@ -173,7 +173,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 
 	DrawUtils::DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), ServerName, 255, 140, 0 );
 	DrawUtils::DrawHudStringReverse( KILLS_POS_END(), ypos, 0, "KILLS", 255, 140, 0 );
-	DrawUtils::DrawHudString(	DEATHS_POS_START(), ypos, DEATHS_POS_END(), "DEATHS", 255, 140, 0 );
+	DrawUtils::DrawHudString( DEATHS_POS_START(), ypos, DEATHS_POS_END(), "DEATHS", 255, 140, 0 );
 	DrawUtils::DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), "PING", 255, 140, 0 );
 
 	list_slot += 2;
@@ -404,9 +404,19 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 		DrawUtils::DrawHudNumberString( DEATHS_POS_END(), ypos, DEATHS_POS_START(), g_PlayerExtraInfo[best_player].deaths, r, g, b );
 
 		// draw ping & packetloss
-		static char buf[64];
-		sprintf( buf, "%d", g_PlayerInfoList[best_player].ping );
-		DrawUtils::DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), buf, r, g, b );
+		const char *value;
+		if( pl_info->ping <= 5  // must be 0, until Xash's bug not fixed
+			&& ( value = gEngfuncs.PlayerInfo_ValueForKey( best_player, "*bot" ) )
+			&& atoi( value ) > 0 )
+		{
+			DrawUtils::DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), "BOT", r, g, b );
+		}
+		else
+		{
+			static char buf[64];
+			sprintf( buf, "%d", pl_info->ping );
+			DrawUtils::DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), buf, r, g, b );
+		}
 	
 		pl_info->name = NULL;  // set the name to be NULL, so this client won't get drawn again
 		list_slot++;
