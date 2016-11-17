@@ -295,9 +295,17 @@ void CHud :: VidInit( void )
 	
 	m_hsprLogo = 0;
 
-	float maxScale = (float)TrueWidth / 640.0f;
-
-	if( CVAR_GET_FLOAT("hud_scale") > maxScale )
+	// assume cs16-client is launched in landscape mode
+	// must be only TrueWidth, but due to bug game may sometime rotate to portait mode
+	// calc scale depending on max side
+	float maxScale = (float)max( TrueWidth, TrueHeight ) / 640.0f;
+	
+	// REMOVE LATER
+	float currentScale = CVAR_GET_FLOAT("hud_scale");
+	float invalidScale = (float)min( TrueWidth, TrueHeight) / 640.0f;
+	// REMOVE LATER
+	
+	if( currentScale > maxScale || currentScale == invalidScale )
 	{
 		gEngfuncs.Cvar_SetValue( "hud_scale", maxScale );
 		gEngfuncs.Con_Printf("^3Maximum scale factor reached. Reset: %f\n", maxScale );
