@@ -77,6 +77,7 @@ public class LauncherActivity extends Activity {
 	static Boolean isExtracting = false;
 	static int mClicks;
 	static Boolean mDev;
+	static Boolean mFirstTime;
 
 	String getDefaultPath()
 	{
@@ -120,10 +121,20 @@ public class LauncherActivity extends Activity {
 		if( !mDev )
 			mEnableCZero.setVisibility(View.GONE);
 		
-		AdRequest adRequest = new AdRequest.Builder()
-			.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-			.build();
-		mAdView.loadAd(adRequest);
+		try
+		{
+			AdRequest adRequest = new AdRequest.Builder()
+				.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+				.build();
+			mAdView.loadAd(adRequest);
+		}
+		catch(Throwable e)
+		{
+			// Very dirty hack!
+			// AdMob uses some methods that are not available on some devices
+			// Just don't let app crash.
+			Log.e( TAG, "Something happened during load ad. " + e.getMessage() );
+		}
 	}
 
 	public void startXash(View view)
@@ -276,25 +287,25 @@ public class LauncherActivity extends Activity {
 
 	@Override
 	public void onResume() {
-	super.onResume();
-	if(mAdView != null)
-		mAdView.resume();
+		super.onResume();
+		if(mAdView != null)
+			mAdView.resume();
 	}
 
 	@Override
 	public void onDestroy() {
-	if(mAdView != null)
-		mAdView.destroy();
+		if(mAdView != null)
+			mAdView.destroy();
 
-	super.onDestroy();
+		super.onDestroy();
 	}
 
 	@Override
 	public void onPause() {
-	if(mAdView != null)
-		mAdView.pause();
+		if(mAdView != null)
+			mAdView.pause();
 	
-	super.onPause();
+		super.onPause();
 	}
 	
 	private static int chmod(String path, int mode) {
