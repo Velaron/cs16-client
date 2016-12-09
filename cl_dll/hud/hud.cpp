@@ -136,12 +136,22 @@ int __MsgFunc_ServerName( const char *name, int size, void *buf )
 	return 1;
 }
 
+#ifdef __ANDROID__
+void __CmdFunc_MouseSucks( void ) { }
+#endif
+
+
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
 	HOOK_COMMAND( "special", InputCommandSpecial );
 	//HOOK_COMMAND( "gunsmoke", GunSmoke );
 
+#ifdef __ANDROID__
+	HOOK_COMMAND( "evdev_mouseopen", MouseSucks );
+	HOOK_COMMAND( "evdev_mouseclose", MouseSucks );
+#endif
+	
 	HOOK_MESSAGE( Logo );
 	HOOK_MESSAGE( ResetHUD );
 	HOOK_MESSAGE( GameMode );
@@ -302,10 +312,14 @@ void CHud :: VidInit( void )
 	
 	// REMOVE LATER
 	float currentScale = CVAR_GET_FLOAT("hud_scale");
-	float invalidScale = (float)min( TrueWidth, TrueHeight) / 640.0f;
+	float invalidScale = (float)min( TrueWidth, TrueHeight ) / 640.0f;
 	// REMOVE LATER
 	
-	if( currentScale > maxScale || currentScale == invalidScale )
+	if( currentScale > maxScale ||
+		( currentScale == invalidScale &&
+		  currentScale != 1.0f &&
+		  currentScale != 0.0f &&
+		  invalidScale <  1.0f ) )
 	{
 		gEngfuncs.Cvar_SetValue( "hud_scale", maxScale );
 		gEngfuncs.Con_Printf("^3Maximum scale factor reached. Reset: %f\n", maxScale );

@@ -1717,6 +1717,10 @@ void UI_Init( void )
 	Cmd_AddCommand( "menu_playdemo", UI_PlayDemo_Menu );
 	Cmd_AddCommand( "menu_recdemo", UI_RecDemo_Menu );
 
+#ifdef __ANDROID__
+	Cmd_RemoveCommand( "evdev_mouseopen" );
+	Cmd_RemoveCommand( "evdev_mouseclose" );
+#endif
 
 	CHECK_MAP_LIST( TRUE );
 

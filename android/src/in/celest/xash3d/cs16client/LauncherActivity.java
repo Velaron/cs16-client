@@ -147,7 +147,6 @@ public class LauncherActivity extends Activity {
 		editor.putBoolean("zbots", mEnableZBot.isChecked());
 		editor.putBoolean("yapbs", mEnableYaPB.isChecked());
 		editor.commit();
-		editor.apply();
 
 		extractPAK(this, false);
 
@@ -277,7 +276,6 @@ public class LauncherActivity extends Activity {
 			SharedPreferences.Editor editor = mPref.edit();
 			editor.putBoolean("dev", true);
 			editor.commit();
-			editor.apply();
 			
 			mDev = true;
 			

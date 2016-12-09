@@ -12,6 +12,7 @@
 cvar_t	*cl_laddermode;
 cvar_t	*sensitivity;
 cvar_t	*in_joystick;
+cvar_t	*evdev_grab;
 
 
 float ac_forwardmove;
@@ -126,9 +127,12 @@ void IN_ClientMoveEvent( float forwardmove, float sidemove )
 
 void IN_ClientLookEvent( float relyaw, float relpitch )
 {
+	if( ( evdev_grab && evdev_grab->value != 0.0f ) || bMouseInUse ) return;
+	
 	rel_yaw += relyaw;
 	rel_pitch += relpitch;
 }
+
 // Rotate camera and add move values to usercmd
 void IN_Move( float frametime, usercmd_t *cmd )
 {
@@ -278,7 +282,9 @@ void IN_Init( void )
 	sensitivity = gEngfuncs.pfnRegisterVariable ( "sensitivity", "3", FCVAR_ARCHIVE );
 	in_joystick = gEngfuncs.pfnRegisterVariable ( "joystick", "0", FCVAR_ARCHIVE );
 	cl_laddermode = gEngfuncs.pfnRegisterVariable ( "cl_laddermode", "2", FCVAR_ARCHIVE );
-
+	evdev_grab = gEngfuncs.pfnGetCvarPointer("evdev_grab");
+	
+	
 #ifdef __ANDROID__
 	gEngfuncs.Cvar_SetValue("m_yaw", -1);
 	gEngfuncs.Cvar_SetValue("m_pitch", -1);
