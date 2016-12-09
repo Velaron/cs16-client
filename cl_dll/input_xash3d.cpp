@@ -23,6 +23,7 @@ float rel_pitch;
 bool bMouseInUse = false;
 
 extern Vector dead_viewangles;
+extern bool evdev_open;
 
 #define F 1U<<0	// Forward
 #define B 1U<<1	// Back
@@ -127,8 +128,9 @@ void IN_ClientMoveEvent( float forwardmove, float sidemove )
 
 void IN_ClientLookEvent( float relyaw, float relpitch )
 {
-	if( ( evdev_grab && evdev_grab->value != 0.0f ) || bMouseInUse ) return;
-	
+#ifdef __ANDROID__
+	if( evdev_open || bMouseInUse ) return;
+#endif
 	rel_yaw += relyaw;
 	rel_pitch += relpitch;
 }

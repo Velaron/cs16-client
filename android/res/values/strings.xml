@@ -21,5 +21,8 @@
 	<string name="xash_not_installed_msg">To continue, you must install Xash3D engine on your device</string>
 	<string name="install_xash">Install</string>
 	<string name="cancel">Cancel</string>
+	<string name="first_run_reminder_title">First run reminder</string>
+	<string name="first_run_reminder_msg">Welcome to CS16Client! I just want to remind you that to play this game you must copy original Counter-Strike 1.6 files(only "cstrike" and "valve" folders) from your Steam installation of the game to your device. Good luck, have fun!</string>
+	<string name="ok">OK!</string>
 	<!--<string name="ad_unit_id">Не дам! :P</string>-->
 </resources>

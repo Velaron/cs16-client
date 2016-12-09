@@ -137,7 +137,9 @@ int __MsgFunc_ServerName( const char *name, int size, void *buf )
 }
 
 #ifdef __ANDROID__
-void __CmdFunc_MouseSucks( void ) { }
+bool evdev_open = false;
+void __CmdFunc_MouseSucksOpen( void ) { evdev_open = true; }
+void __CmdFunc_MouseSucksClose( void ) { evdev_open = false; }
 #endif
 
 
@@ -148,8 +150,8 @@ void CHud :: Init( void )
 	//HOOK_COMMAND( "gunsmoke", GunSmoke );
 
 #ifdef __ANDROID__
-	HOOK_COMMAND( "evdev_mouseopen", MouseSucks );
-	HOOK_COMMAND( "evdev_mouseclose", MouseSucks );
+	HOOK_COMMAND( "evdev_mouseopen", MouseSucksOpen );
+	HOOK_COMMAND( "evdev_mouseclose", MouseSucksClose );
 #endif
 	
 	HOOK_MESSAGE( Logo );
@@ -263,10 +265,10 @@ void CHud :: Init( void )
 
 	if( g_iMobileAPIVersion )
 	{
-		static byte color[] = {255, 255, 255, 255};
-		gMobileAPI.pfnTouchResetDefaultButtons();
-		gMobileAPI.pfnTouchAddDefaultButton("_settings", "touch_defaults/settings.tga", "menu_touchoptions",
-			0.0, 0.0, 1.0, 1.0, color, 0, 1.0f, TOUCH_FL_NOEDIT | TOUCH_FL_DEF_SHOW );
+		if( gEngfuncs.CheckParm( "-firsttime", NULL ) )
+		{
+			ClientCmd( "touch_presets/phone_ahsim.cfg" );
+		}
 	}
 
 

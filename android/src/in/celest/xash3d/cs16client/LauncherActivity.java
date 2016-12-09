@@ -61,7 +61,7 @@ import com.google.android.gms.common.ConnectionResult;
 import in.celest.xash3d.cs16client.R;
 
 public class LauncherActivity extends Activity {
-	public static final int PAK_VERSION = 3;
+	public static final int PAK_VERSION = 4;
 	public final static int sdk = Integer.valueOf(Build.VERSION.SDK);
 	public final static String TAG = "LauncherActivity";
 	
@@ -78,14 +78,6 @@ public class LauncherActivity extends Activity {
 	static int mClicks;
 	static Boolean mDev;
 	static Boolean mFirstTime;
-
-	String getDefaultPath()
-	{
-		File dir = Environment.getExternalStorageDirectory();
-		if( dir != null && dir.exists() )
-			return dir.getPath() + "/xash";
-		return "/sdcard/xash";
-	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +105,9 @@ public class LauncherActivity extends Activity {
 		mClicks = 0;
 		mDev = mPref.getBoolean("dev", false);
 		
+		// TODO: extend firsttime with requesting player nickname!
+		mFirstTime = mPref.getBoolean( "firsttime", true );
+		
 		mCmdArgs.   setText   (mPref.getString ("argv"   , "-console"));
 		mEnableZBot.setChecked(mPref.getBoolean("zbots"  , true ));
 		mEnableYaPB.setChecked(mPref.getBoolean("yapbs"  , false));
@@ -135,6 +130,11 @@ public class LauncherActivity extends Activity {
 			// Just don't let app crash.
 			Log.e( TAG, "Something happened during load ad. " + e.getMessage() );
 		}
+		
+		if( mFirstTime )
+		{
+			showTutorial();
+		}
 	}
 
 	public void startXash(View view)
@@ -146,6 +146,7 @@ public class LauncherActivity extends Activity {
 		editor.putString("argv", argv);
 		editor.putBoolean("zbots", mEnableZBot.isChecked());
 		editor.putBoolean("yapbs", mEnableYaPB.isChecked());
+		if( mFirstTime ) editor.putBoolean("firsttime", false);
 		editor.commit();
 
 		extractPAK(this, false);
@@ -190,6 +191,9 @@ public class LauncherActivity extends Activity {
 		// Check myself for GP version
 		argv = argv + " -noch"; 
 		
+		if( mFirstTime ) 
+			argv = argv + " -firsttime";
+		
 		Intent intent = new Intent();
 		intent.setAction("in.celest.xash3d.START");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -209,6 +213,18 @@ public class LauncherActivity extends Activity {
 			showXashInstallDialog( );
 		}
 	}
+	
+	public void showTutorial( )
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder( this );
+		
+		// TODO: must be less dumb someday...
+		builder.setTitle( R.string.first_run_reminder_title )
+			.setMessage( R.string.first_run_reminder_msg )
+			.setPositiveButton( R.string.ok, 
+			.show();
+	}
+
 	
 	public void showXashInstallDialog( )
 	{
