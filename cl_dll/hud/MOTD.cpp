@@ -39,7 +39,7 @@ int CHudMOTD :: Init( void )
 
 	m_iFlags &= ~HUD_DRAW;  // start out inactive
 	m_szMOTD[0] = 0;
-	cl_hide_motd = CVAR_CREATE("cl_hide_motd", "1", FCVAR_ARCHIVE); // hide motd
+	cl_hide_motd = CVAR_CREATE("cl_hide_motd", "0", FCVAR_ARCHIVE); // hide motd
 
 	return 1;
 }
@@ -56,6 +56,7 @@ void CHudMOTD :: Reset( void )
 	m_szMOTD[0] = 0;
 	m_iLines = 0;
 	m_bShow = 0;
+	ignoreThisMotd = false;
 }
 
 #define LINE_HEIGHT  13
@@ -136,10 +137,20 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 		Reset(); // clear the current MOTD in prep for this one
 	}
 
+	if( ignoreThisMotd )
+		return 1;
+
 	BufferReader reader( pszName, pbuf, iSize );
 
 	int is_finished = reader.ReadByte();
 	strcat( m_szMOTD, reader.ReadString() );
+
+	// we still don't support html tags in motd :(
+	if( strcasestr( m_szMOTD, "<!DOCTYPE HTML>" ) )
+	{
+		Reset();
+		ignoreThisMotd = true;
+	}
 
 	if ( is_finished )
 	{

@@ -286,6 +286,7 @@ protected:
 	
 	int m_iLines;
 	int m_iMaxLength;
+	bool ignoreThisMotd;
 };
 
 
