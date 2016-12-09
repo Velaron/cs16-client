@@ -192,7 +192,7 @@ public class LauncherActivity extends Activity {
 		argv = argv + " -noch"; 
 		
 		if( mFirstTime ) 
-			argv = argv + " -firsttime";
+			argv = argv + " -firsttime umu"; // pass argument, because xash have a bug related to client's CheckParm
 		
 		Intent intent = new Intent();
 		intent.setAction("in.celest.xash3d.START");
@@ -221,7 +221,7 @@ public class LauncherActivity extends Activity {
 		// TODO: must be less dumb someday...
 		builder.setTitle( R.string.first_run_reminder_title )
 			.setMessage( R.string.first_run_reminder_msg )
-			.setPositiveButton( R.string.ok, 
+			.setNeutralButton( R.string.ok, new DialogInterface.OnClickListener() { public void onClick( DialogInterface dialog, int which ) { } } )
 			.show();
 	}
 
