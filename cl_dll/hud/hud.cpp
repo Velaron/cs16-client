@@ -263,15 +263,6 @@ void CHud :: Init( void )
 	gEngfuncs.Cvar_SetValue( "hud_fastswitch", 1 );
 #endif
 
-	if( g_iMobileAPIVersion )
-	{
-		if( gEngfuncs.CheckParm( "-firsttime", NULL ) )
-		{
-			ClientCmd( "touch_presets/phone_ahsim.cfg" );
-		}
-	}
-
-
 	MsgFunc_ResetHUD(0, 0, NULL );
 }
 
@@ -294,6 +285,7 @@ CHud :: ~CHud()
 
 void CHud :: VidInit( void )
 {
+	static bool firstinit = true;
 	m_scrinfo.iSize = sizeof( m_scrinfo );
 	GetScreenInfo( &m_scrinfo );
 
@@ -444,6 +436,16 @@ void CHud :: VidInit( void )
 
 	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 		pList->p->VidInit();
+
+	if( firstinit && gEngfuncs.CheckParm( "-firsttime", NULL ) )
+	{
+		ConsolePrint( "firstrun\n" );
+
+		ClientCmd( "exec touch_presets/phone_ahsim" );
+		gEngfuncs.Cvar_Set( "touch_config_file", "touch_presets/phone_ahsim.cfg" );
+	}
+
+	firstinit = false;
 }
 
 void CHud::Shutdown( void )

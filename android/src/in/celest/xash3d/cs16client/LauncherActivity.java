@@ -49,6 +49,7 @@ import android.widget.TabHost;
 import android.os.Environment;
 import android.os.Build;
 import android.net.Uri;
+import android.util.DisplayMetrics;
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -191,8 +192,10 @@ public class LauncherActivity extends Activity {
 		// Check myself for GP version
 		argv = argv + " -noch"; 
 		
-		if( mFirstTime ) 
+		if( mFirstTime )
+		{
 			argv = argv + " -firsttime umu"; // pass argument, because xash have a bug related to client's CheckParm
+		}
 		
 		Intent intent = new Intent();
 		intent.setAction("in.celest.xash3d.START");
