@@ -79,6 +79,8 @@ cvar_t	*cl_bob;
 cvar_t	*cl_bobup;
 cvar_t	*cl_waterdist;
 cvar_t	*cl_chasedist;
+cvar_t	*cl_weaponlag;
+cvar_t	*cl_enable_weaponlag;
 
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
@@ -417,6 +419,63 @@ void V_CalcViewRoll ( struct ref_params_s *pparams )
 	}
 }
 
+void V_SmoothInterpolateAngles( float * startAngle, float * endAngle, float * finalAngle, float degreesPerSec )
+{
+	float absd,frac,d,threshold;
+
+	NormalizeAngles( startAngle );
+	NormalizeAngles( endAngle );
+
+	for ( int i = 0 ; i < 3 ; i++ )
+	{
+		d = endAngle[i] - startAngle[i];
+
+		if ( d > 180.0f )
+		{
+			d -= 360.0f;
+		}
+		else if ( d < -180.0f )
+		{
+			d += 360.0f;
+		}
+
+		absd = fabs(d);
+
+		if ( absd > 0.01f )
+		{
+			frac = degreesPerSec * v_frametime;
+
+			threshold= degreesPerSec / 4;
+
+			if ( absd < threshold )
+			{
+				float h = absd / threshold;
+				h *= h;
+				frac*= h;  // slow down last degrees
+			}
+
+			if ( frac >  absd )
+			{
+				finalAngle[i] = endAngle[i];
+			}
+			else
+			{
+				if ( d>0)
+					finalAngle[i] = startAngle[i] + frac;
+				else
+					finalAngle[i] = startAngle[i] - frac;
+			}
+		}
+		else
+		{
+			finalAngle[i] = endAngle[i];
+		}
+
+	}
+
+	NormalizeAngles( finalAngle );
+}
+
 
 /*
 ==================
@@ -462,15 +521,76 @@ void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 
 struct viewinterp_t
 {
-	float Origins[ ORIGIN_BACKUP ][3];
+	Vector Origins[ ORIGIN_BACKUP ];
 	float OriginTime[ ORIGIN_BACKUP ];
 
-	float Angles[ ORIGIN_BACKUP ][3];
+	Vector Angles[ ORIGIN_BACKUP ];
 	float AngleTime[ ORIGIN_BACKUP ];
 
 	int CurrentOrigin;
 	int CurrentAngle;
 };
+
+//==========================
+// V_CalcViewModelLag
+//==========================
+void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, const Vector &original_angles )
+{
+	static Vector m_vecLastFacing;
+	static Vector vecLastAngles = angles;
+	Vector interpAngles;
+
+	// Calculate our drift
+	Vector forward, right, up;
+
+	if( !cl_enable_weaponlag->value || cl_weaponlag->value <= 0.0f )
+		return;
+
+	// V_SmoothInterpolateAngles( vecLastAngles, angles, interpAngles, cl_enable_weaponlag->value );
+	interpAngles = angles;
+
+	AngleVectors( interpAngles, forward, NULL, NULL );
+
+	if( pparams->frametime != 0.0f )	// not in paused
+	{
+		Vector vDifference = forward - m_vecLastFacing;
+
+		float flSpeed = 5.0f;
+
+		// If we start to lag too far behind, we'll increase the "catch up" speed.
+		// Solves the problem with fast cl_yawspeed, m_yaw or joysticks rotating quickly.
+		// The old code would slam lastfacing with origin causing the viewmodel to pop to a new position
+		float flDiff = vDifference.Length();
+		if( flDiff > cl_weaponlag->value )
+		{
+			flSpeed *= flDiff / cl_weaponlag->value;
+		}
+
+		// FIXME:  Needs to be predictable?
+		m_vecLastFacing = m_vecLastFacing + vDifference * ( flSpeed * pparams->frametime );
+		// Make sure it doesn't grow out of control!!!
+		m_vecLastFacing = m_vecLastFacing.Normalize();
+		origin = origin + flSpeed * -vDifference;
+	}
+
+	AngleVectors( original_angles, forward, right, up );
+
+	float pitch = original_angles[PITCH];
+
+	if( pitch > 180.0f )
+		pitch -= 360.0f;
+	else if( pitch < -180.0f )
+		pitch += 360.0f;
+
+	pitch = -pitch;
+
+	// FIXME: These are the old settings that caused too many exposed polys on some models
+	origin = origin + forward * ( pitch * 0.035f )
+					+ right   * ( pitch * 0.03f  )
+					+ up      * ( pitch * 0.02f  );
+
+	vecLastAngles = angles;
+}
 
 /*
 ==================
@@ -492,8 +612,6 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	vec3_t camAngles, camForward, camRight, camUp;
 	cl_entity_t *pwater;
 
-	//V_DriftPitch ( pparams );
-
 	if ( gEngfuncs.IsSpectateOnly() )
 	{
 		ent = gEngfuncs.GetEntityByIndex( g_iUser2 );
@@ -506,6 +624,12 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 
 	// view is the weapon model (only visible from inside body)
 	view = gEngfuncs.GetViewModel();
+	Vector lastAngles;
+
+	if( view )
+		lastAngles = view->angles;
+	else
+		lastAngles = vec3_origin;
 
 	// transform the view offset by the model's matrix to get the offset from
 	// model origin for the view
@@ -736,32 +860,31 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	}
 #endif
 
-	static float lastorg[3];
-	vec3_t delta;
+	static Vector lastorg;
+	Vector delta;
 
-	VectorSubtract( pparams->simorg, lastorg, delta );
+	delta = pparams->simorg - lastorg;
 
-	if ( Length( delta ) != 0.0 )
+	if( delta.x || delta.y || delta.z )
 	{
-		VectorCopy( pparams->simorg, ViewInterp.Origins[ ViewInterp.CurrentOrigin & ORIGIN_MASK ] );
+		ViewInterp.Origins[ ViewInterp.CurrentOrigin & ORIGIN_MASK ] = pparams->simorg;
 		ViewInterp.OriginTime[ ViewInterp.CurrentOrigin & ORIGIN_MASK ] = pparams->time;
 		ViewInterp.CurrentOrigin++;
 
-		VectorCopy( pparams->simorg, lastorg );
+		lastorg = pparams->simorg;
 	}
 
+	V_CalcViewModelLag( pparams, view->origin, view->angles, lastAngles );
+
 	// Smooth out whole view in multiplayer when on trains, lifts
-	if ( cl_vsmoothing && cl_vsmoothing->value &&
-		 ( pparams->smoothing && ( pparams->maxclients > 1 ) ) )
+	if ( cl_vsmoothing && cl_vsmoothing->value && ( pparams->smoothing && ( pparams->maxclients > 1 ) ) )
 	{
 		int foundidx;
 		int i;
 		float t;
 
 		if ( cl_vsmoothing->value < 0.0 )
-		{
 			gEngfuncs.Cvar_SetValue( "cl_vsmoothing", 0.0 );
-		}
 
 		t = pparams->time - cl_vsmoothing->value;
 
@@ -772,7 +895,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 				break;
 		}
 
-		if ( i < ORIGIN_MASK &&  ViewInterp.OriginTime[ foundidx & ORIGIN_MASK ] != 0.0 )
+		if ( i < ORIGIN_MASK && ViewInterp.OriginTime[ foundidx & ORIGIN_MASK ] != 0.0 )
 		{
 			// Interpolate
 			vec3_t delta;
@@ -801,6 +924,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 			}
 		}
 	}
+
 
 	// Store off v_angles before munging for third person
 	v_angles = pparams->viewangles;
@@ -845,63 +969,6 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	lasttime = pparams->time;
 
 	v_origin = pparams->vieworg;
-}
-
-void V_SmoothInterpolateAngles( float * startAngle, float * endAngle, float * finalAngle, float degreesPerSec )
-{
-	float absd,frac,d,threshold;
-
-	NormalizeAngles( startAngle );
-	NormalizeAngles( endAngle );
-
-	for ( int i = 0 ; i < 3 ; i++ )
-	{
-		d = endAngle[i] - startAngle[i];
-
-		if ( d > 180.0f )
-		{
-			d -= 360.0f;
-		}
-		else if ( d < -180.0f )
-		{
-			d += 360.0f;
-		}
-
-		absd = fabs(d);
-
-		if ( absd > 0.01f )
-		{
-			frac = degreesPerSec * v_frametime;
-
-			threshold= degreesPerSec / 4;
-
-			if ( absd < threshold )
-			{
-				float h = absd / threshold;
-				h *= h;
-				frac*= h;  // slow down last degrees
-			}
-
-			if ( frac >  absd )
-			{
-				finalAngle[i] = endAngle[i];
-			}
-			else
-			{
-				if ( d>0)
-					finalAngle[i] = startAngle[i] + frac;
-				else
-					finalAngle[i] = startAngle[i] - frac;
-			}
-		}
-		else
-		{
-			finalAngle[i] = endAngle[i];
-		}
-
-	}
-
-	NormalizeAngles( finalAngle );
 }
 
 // Get the origin of the Observer based around the target's position and angles
@@ -1729,4 +1796,7 @@ void V_Init (void)
 	cl_bobup			= gEngfuncs.pfnRegisterVariable( "cl_bobup","0.5", 0 );
 	cl_waterdist		= gEngfuncs.pfnRegisterVariable( "cl_waterdist","4", 0 );
 	cl_chasedist		= gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
+
+	cl_enable_weaponlag = gEngfuncs.pfnRegisterVariable( "cl_enable_weaponlag", "0", FCVAR_ARCHIVE );
+	cl_weaponlag		= gEngfuncs.pfnRegisterVariable( "cl_weaponlag", "1.5", FCVAR_ARCHIVE );
 }
