@@ -64,3 +64,5 @@ local.properties
 .settings
 release/
 *.tasks
+regamebuild/
+*.tasks

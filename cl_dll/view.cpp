@@ -80,7 +80,8 @@ cvar_t	*cl_bobup;
 cvar_t	*cl_waterdist;
 cvar_t	*cl_chasedist;
 cvar_t	*cl_weaponlag;
-cvar_t	*cl_enable_weaponlag;
+cvar_t	*cl_weaponlag_enable;
+cvar_t	*cl_quakeguns_enable;
 
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
@@ -531,6 +532,73 @@ struct viewinterp_t
 	int CurrentAngle;
 };
 
+float GetGunOffset(cl_entity_s* vm)
+{
+	if(!vm->model)
+		return 0;
+
+	char* gunname = vm->model->name;
+
+	if(!gunname || !gunname[0])
+		return 0;
+
+	gunname += 9;
+
+	#define CHECKGUNOFFSET(a,b) if(!strcmp(a,gunname)) return b;
+	CHECKGUNOFFSET("glock18.mdl", -4.55f);
+	CHECKGUNOFFSET("usp.mdl", -4.64f);
+	CHECKGUNOFFSET("p228.mdl", -4.65f);
+	CHECKGUNOFFSET("deagle.mdl", -4.71f);
+	CHECKGUNOFFSET("fiveseven.mdl", -4.84f);
+	CHECKGUNOFFSET("m3.mdl", -5.03f);
+	CHECKGUNOFFSET("xm1014.mdl", -5.82f);
+	CHECKGUNOFFSET("mac10.mdl", -5.05f);
+	CHECKGUNOFFSET("tmp.mdl", -6.47f);
+	CHECKGUNOFFSET("mp5.mdl", -5.53f);
+	CHECKGUNOFFSET("ump45.mdl", -6.07f);
+	CHECKGUNOFFSET("p90.mdl", -4.32f);
+	CHECKGUNOFFSET("scout.mdl", -5.14f);
+	CHECKGUNOFFSET("awp.mdl", -6.02f);
+	CHECKGUNOFFSET("famas.mdl", -4.84f);
+	CHECKGUNOFFSET("aug.mdl", -6.22f);
+	CHECKGUNOFFSET("m4a1.mdl", -6.74f);
+	CHECKGUNOFFSET("sg550.mdl", -7.11f);
+	CHECKGUNOFFSET("ak47.mdl", -6.79f);
+	CHECKGUNOFFSET("g3sg1.mdl", -6.19f);
+	CHECKGUNOFFSET("sg552.mdl", -5.27f);
+	CHECKGUNOFFSET("galil.mdl", -4.78f);
+	CHECKGUNOFFSET("m249.mdl", -5.13f);
+	return 0;
+}
+
+void V_CalcQuakeGuns()
+{
+	cl_entity_s * vm = gEngfuncs.GetViewModel();
+
+	if(!cl_quakeguns_enable->value)
+		return;
+	
+	if(!vm)
+		return;
+
+	float gunoffsetr = GetGunOffset(vm);
+	if(gunoffsetr == 0)
+		return;
+
+	float* org = vm->origin;
+	float* ang = vm->angles;
+	VectorCopy(v_angles, ang);
+
+	vec3_t forward, right, up;
+
+	gEngfuncs.pfnAngleVectors(v_angles, forward, right, up);
+
+	org[0] += forward[0] + up[0] + right[0]*gunoffsetr;
+	org[1] += forward[1] + up[1] + right[1]*gunoffsetr;
+	org[2] += forward[2] + up[2] + right[2]*gunoffsetr;
+}
+
+
 //==========================
 // V_CalcViewModelLag
 //==========================
@@ -543,10 +611,10 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 	// Calculate our drift
 	Vector forward, right, up;
 
-	if( !cl_enable_weaponlag->value || cl_weaponlag->value <= 0.0f )
+	if( !cl_weaponlag_enable->value || cl_weaponlag->value <= 0.0f )
 		return;
 
-	// V_SmoothInterpolateAngles( vecLastAngles, angles, interpAngles, cl_enable_weaponlag->value );
+	// TODO: interpolate
 	interpAngles = angles;
 
 	AngleVectors( interpAngles, forward, NULL, NULL );
@@ -874,6 +942,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 		lastorg = pparams->simorg;
 	}
 
+	V_CalcQuakeGuns();
 	V_CalcViewModelLag( pparams, view->origin, view->angles, lastAngles );
 
 	// Smooth out whole view in multiplayer when on trains, lifts
@@ -1797,6 +1866,7 @@ void V_Init (void)
 	cl_waterdist		= gEngfuncs.pfnRegisterVariable( "cl_waterdist","4", 0 );
 	cl_chasedist		= gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
 
-	cl_enable_weaponlag = gEngfuncs.pfnRegisterVariable( "cl_enable_weaponlag", "0", FCVAR_ARCHIVE );
+	cl_quakeguns_enable	= gEngfuncs.pfnRegisterVariable( "cl_quakeguns_enable", "0", FCVAR_ARCHIVE );
+	cl_weaponlag_enable = gEngfuncs.pfnRegisterVariable( "cl_weaponlag_enable", "0", FCVAR_ARCHIVE );
 	cl_weaponlag		= gEngfuncs.pfnRegisterVariable( "cl_weaponlag", "1.5", FCVAR_ARCHIVE );
 }
