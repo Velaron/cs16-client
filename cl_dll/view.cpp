@@ -602,7 +602,7 @@ void V_CalcQuakeGuns()
 //==========================
 // V_CalcViewModelLag
 //==========================
-void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, const Vector &original_angles )
+void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles )
 {
 	static Vector m_vecLastFacing;
 	static Vector vecLastAngles = angles;
@@ -641,21 +641,26 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 		origin = origin + flSpeed * -vDifference;
 	}
 
-	AngleVectors( original_angles, forward, right, up );
+	// this just breaks centered weapons on pitch changing
+	if( !cl_quakeguns_enable->value )
+	{
+		AngleVectors( v_angles, forward, right, up );
 
-	float pitch = original_angles[PITCH];
+		float pitch = v_angles[PITCH];
 
-	if( pitch > 180.0f )
-		pitch -= 360.0f;
-	else if( pitch < -180.0f )
-		pitch += 360.0f;
+		if( pitch > 180.0f )
+			pitch -= 360.0f;
+		else if( pitch < -180.0f )
+			pitch += 360.0f;
 
-	pitch = -pitch;
+		pitch = -pitch;
 
-	// FIXME: These are the old settings that caused too many exposed polys on some models
-	origin = origin + forward * ( pitch * 0.035f )
-					+ right   * ( pitch * 0.03f  )
-					+ up      * ( pitch * 0.02f  );
+		// FIXME: These are the old settings that caused too many exposed polys on some models
+		origin = origin + forward * ( pitch * 0.035f )
+						+ right   * ( pitch * 0.03f  )
+						+ up      * ( pitch * 0.02f  );
+
+	}
 
 	vecLastAngles = angles;
 }
@@ -692,12 +697,6 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 
 	// view is the weapon model (only visible from inside body)
 	view = gEngfuncs.GetViewModel();
-	Vector lastAngles;
-
-	if( view )
-		lastAngles = view->angles;
-	else
-		lastAngles = vec3_origin;
 
 	// transform the view offset by the model's matrix to get the offset from
 	// model origin for the view
@@ -943,7 +942,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	}
 
 	V_CalcQuakeGuns();
-	V_CalcViewModelLag( pparams, view->origin, view->angles, lastAngles );
+	V_CalcViewModelLag( pparams, view->origin, view->angles );
 
 	// Smooth out whole view in multiplayer when on trains, lifts
 	if ( cl_vsmoothing && cl_vsmoothing->value && ( pparams->smoothing && ( pparams->maxclients > 1 ) ) )
