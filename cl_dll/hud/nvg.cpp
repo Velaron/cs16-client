@@ -129,10 +129,12 @@ int CHudNVG::MsgFunc_NVGToggle(const char *pszName, int iSize, void *pbuf)
 
 void CHudNVG::UserCmd_NVGAdjustDown()
 {
-	m_iAlpha = max( 220, m_iAlpha + 20 );
+m_iAlpha = m_iAlpha + 20;
+m_iAlpha = min( 220, m_iAlpha );
 }
 
 void CHudNVG::UserCmd_NVGAdjustUp()
 {
-	m_iAlpha = min( 30, m_iAlpha - 20 );
+m_iAlpha = m_iAlpha - 20;
+m_iAlpha = max( 30, m_iAlpha );
 }
