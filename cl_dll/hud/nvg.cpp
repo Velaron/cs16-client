@@ -43,6 +43,8 @@ int CHudNVG::Init()
 	HOOK_MESSAGE(NVGToggle)
 	HOOK_COMMAND("+nvgadjust", NVGAdjustUp);
 	HOOK_COMMAND("-nvgadjust", NVGAdjustDown);
+	HOOK_COMMAND("nvgadjustup", NVGAdjustUp);
+	HOOK_COMMAND("nvgadjustdown", NVGAdjustDown);
 
 	cl_fancy_nvg = CVAR_CREATE( "cl_fancy_nvg", "0", FCVAR_ARCHIVE );
 
