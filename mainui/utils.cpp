@@ -398,7 +398,7 @@ const char *UI_ScrollList_Key( menuScrollList_s *sl, int key, int down )
 	int		i, y;
 	bool noscroll = false;
 
-	if( !down ) 
+	if( !down )
 	{
 		sl->scrollBarSliding = false;
 		return uiSoundNull;
@@ -595,7 +595,7 @@ void UI_ScrollList_Draw( menuScrollList_s *sl )
 
 	if( !sl->background )
 	{
-		// draw the opaque outlinebox first 
+		// draw the opaque outlinebox first
 		UI_FillRect( x, y, w, h, uiColorBlack );
 	}
 
@@ -683,14 +683,14 @@ void UI_ScrollList_Draw( menuScrollList_s *sl )
 			static float ac_y = 0;
 			ac_y += cursorDY;
 			cursorDY = 0;
-			if( ac_y > sl->generic.charHeight / 2 )
+			if( ac_y > sl->generic.charHeight / 2.0f )
 			{
 				sl->topItem -= ac_y/ sl->generic.charHeight - 0.5;
 				if( sl->topItem < 0 )
 					sl->topItem = 0;
 				ac_y = 0;
 			}
-			if( ac_y < -sl->generic.charHeight / 2 )
+			if( ac_y < -sl->generic.charHeight / 2.0f )
 			{
 				sl->topItem -= ac_y/ sl->generic.charHeight - 0.5 ;
 				if( sl->topItem > sl->numItems - sl->numRows )
@@ -753,7 +753,7 @@ void UI_ScrollList_Draw( menuScrollList_s *sl )
 			{
 				sl->topItem++;
 			}
-			
+
 			if((dist / 2) < -(sl->generic.charHeight / 2) && sl->topItem > 0 )
 			{
 				sl->topItem--;
@@ -780,7 +780,7 @@ void UI_ScrollList_Draw( menuScrollList_s *sl )
 		UI_DrawPic( downX, downY, arrowWidth, arrowHeight, uiColorDkGrey, sl->downArrow );
 	}
 	else
-	{	
+	{
 		scrollbarFocus = UI_CursorInRect( sl->scrollBarX, sl->scrollBarY, sl->scrollBarWidth, sl->scrollBarHeight );
 
 		// special case if we sliding but lost focus
@@ -788,7 +788,7 @@ void UI_ScrollList_Draw( menuScrollList_s *sl )
 
 		// Draw scrollbar itself
 		UI_FillRect( sl->scrollBarX, sl->scrollBarY, sl->scrollBarWidth, sl->scrollBarHeight, scrollbarFocus ? uiInputTextColor : uiColorBlack );
-	
+
 		if((menuCommon_s *)sl != (menuCommon_s *)UI_ItemAtCursor(sl->generic.parent))
 		{
 			UI_DrawPic( upX, upY, arrowWidth, arrowHeight, uiColorWhite, sl->upArrow );
@@ -828,7 +828,7 @@ void UI_ScrollList_Draw( menuScrollList_s *sl )
 			}
 		}
 	}
-	
+
 	// Draw the list
 	x = sl->generic.x2;
 	w = sl->generic.width2;
