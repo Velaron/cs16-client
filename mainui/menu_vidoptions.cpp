@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "utils.h"
 #include "menu_btnsbmp_table.h"
 
-#define ART_BANNER	  	"gfx/shell/head_vidoptions"
+#define ART_BANNER		"gfx/shell/head_video"
 #define ART_GAMMA		"gfx/shell/gamma"
 
 #define ID_BACKGROUND 	0
@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ID_GLARE_REDUCTION	5 
 #define ID_SIMPLE_SKY	6
 #define ID_ALLOW_MATERIALS	7
+#define ID_VERTICALSYNC	7
 
 typedef struct
 {
@@ -51,6 +52,7 @@ typedef struct
 	menuSlider_s	glareReduction;
 	menuCheckBox_s	fastSky;
 	menuCheckBox_s	hiTextures;
+	menuCheckBox_s	vsync;
 
 	HIMAGE		hTestImage;
 } uiVidOptions_t;
@@ -81,6 +83,9 @@ static void UI_VidOptions_GetConfig( void )
 	if( CVAR_GET_FLOAT( "host_allow_materials" ))
 		uiVidOptions.hiTextures.enabled = 1;
 
+	if( CVAR_GET_FLOAT( "gl_swapInterval" ))
+		uiVidOptions.vsync.enabled = 1;
+
 	uiVidOptions.outlineWidth = 2;
 	UI_ScaleCoords( NULL, NULL, &uiVidOptions.outlineWidth, NULL );
 }
@@ -96,6 +101,7 @@ static void UI_VidOptions_UpdateConfig( void )
 	CVAR_SET_FLOAT( "r_flaresize", (uiVidOptions.glareReduction.curValue * 200.0f ) + 100.0f );
 	CVAR_SET_FLOAT( "r_fastsky", uiVidOptions.fastSky.enabled );
 	CVAR_SET_FLOAT( "host_allow_materials", uiVidOptions.hiTextures.enabled );
+	CVAR_SET_FLOAT( "gl_swapInterval", uiVidOptions.vsync.enabled );
 
 	if( CVAR_GET_FLOAT( "gl_ignorehwgamma" ))
 		PIC_SetGamma( uiVidOptions.hTestImage, RemapVal( uiVidOptions.gammaIntensity.curValue, 0.0f, 1.0f, 1.8f, 7.0f ));
@@ -108,6 +114,7 @@ static void UI_VidOptions_SetConfig( void )
 	CVAR_SET_FLOAT( "r_flaresize", (uiVidOptions.glareReduction.curValue * 200.0f ) + 100.0f );
 	CVAR_SET_FLOAT( "r_fastsky", uiVidOptions.fastSky.enabled );
 	CVAR_SET_FLOAT( "host_allow_materials", uiVidOptions.hiTextures.enabled );
+	CVAR_SET_FLOAT( "gl_swapInterval", uiVidOptions.vsync.enabled );
 
 	if( CVAR_GET_FLOAT( "gl_ignorehwgamma" ))
 		CVAR_SET_FLOAT( "gamma", RemapVal( uiVidOptions.gammaIntensity.curValue, 0.0f, 1.0f, 1.8f, 7.0f ));
@@ -279,6 +286,15 @@ static void UI_VidOptions_Init( void )
 	uiVidOptions.glareReduction.maxValue = 1.0;
 	uiVidOptions.glareReduction.range = 0.05f;
 
+	uiVidOptions.vsync.generic.id = ID_VERTICALSYNC;
+	uiVidOptions.vsync.generic.type = QMTYPE_CHECKBOX;
+	uiVidOptions.vsync.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_DROPSHADOW;
+	uiVidOptions.vsync.generic.name = "Vertical sync";
+	uiVidOptions.vsync.generic.x = 72;
+	uiVidOptions.vsync.generic.y = 565;
+	uiVidOptions.vsync.generic.callback = UI_VidOptions_Callback;
+	uiVidOptions.vsync.generic.statusText = "enable vertical synchronization";
+
 	uiVidOptions.fastSky.generic.id = ID_SIMPLE_SKY;
 	uiVidOptions.fastSky.generic.type = QMTYPE_CHECKBOX;
 	uiVidOptions.fastSky.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_ACT_ONRELEASE|QMF_DROPSHADOW;
@@ -308,6 +324,7 @@ static void UI_VidOptions_Init( void )
 	UI_AddItem( &uiVidOptions.menu, (void *)&uiVidOptions.fastSky );
 	UI_AddItem( &uiVidOptions.menu, (void *)&uiVidOptions.hiTextures );
 	UI_AddItem( &uiVidOptions.menu, (void *)&uiVidOptions.testImage );
+	UI_AddItem( &uiVidOptions.menu, (void *)&uiVidOptions.vsync );
 }
 
 /*

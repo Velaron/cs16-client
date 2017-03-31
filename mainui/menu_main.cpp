@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -36,12 +36,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ID_CONSOLE		1
 #define ID_RESUME		2
 #define ID_NEWGAME		3
-#define ID_HAZARDCOURSE	4
-#define ID_CONFIGURATION	5
-#define ID_SAVERESTORE	6	
+#define ID_CONFIGURATION 5
 #define ID_MULTIPLAYER	7
-#define ID_CUSTOMGAME	8
-#define ID_credits		9
+#define ID_PREVIEWS		9
 #define ID_QUIT		10
 #define ID_QUIT_BUTTON	11
 #define ID_MINIMIZE		12
@@ -50,6 +47,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ID_DISCONNECT	15
 #define ID_YES	 	130
 #define ID_NO	 	131
+#define ID_OK       132
 
 typedef struct
 {
@@ -59,6 +57,7 @@ typedef struct
 	menuPicButton_s	console;
 	menuPicButton_s	resumeGame;
 	menuPicButton_s	disconnect;
+	menuPicButton_s	newGame;
 	menuPicButton_s	configuration;
 	menuPicButton_s	multiPlayer;
 	menuPicButton_s	credits;
@@ -73,6 +72,9 @@ typedef struct
 	menuAction_s	dlgMessage1;
 	menuPicButton_s	yes;
 	menuPicButton_s	no;
+	menuPicButton_s	ok;
+	void ( *promptAction )( void );
+	int promptAlert; // no cancel button
 } uiMain_t;
 
 static uiMain_t		uiMain;
@@ -125,9 +127,10 @@ static void UI_QuitDialog( void )
 {
 	// toggle main menu between active\inactive
 	// show\hide quit dialog
-	uiMain.console.generic.flags ^= QMF_INACTIVE; 
+	uiMain.console.generic.flags ^= QMF_INACTIVE;
 	uiMain.resumeGame.generic.flags ^= QMF_INACTIVE;
 	uiMain.disconnect.generic.flags ^= QMF_INACTIVE;
+	uiMain.newGame.generic.flags ^= QMF_INACTIVE;
 	uiMain.configuration.generic.flags ^= QMF_INACTIVE;
 	uiMain.multiPlayer.generic.flags ^= QMF_INACTIVE;
 	uiMain.credits.generic.flags ^= QMF_INACTIVE;
@@ -146,9 +149,10 @@ static void UI_PromptDialog( void )
 {
 	// toggle main menu between active\inactive
 	// show\hide quit dialog
-	uiMain.console.generic.flags ^= QMF_INACTIVE; 
+	uiMain.console.generic.flags ^= QMF_INACTIVE;
 	uiMain.resumeGame.generic.flags ^= QMF_INACTIVE;
 	uiMain.disconnect.generic.flags ^= QMF_INACTIVE;
+	uiMain.newGame.generic.flags ^= QMF_INACTIVE;
 	uiMain.configuration.generic.flags ^= QMF_INACTIVE;
 	uiMain.multiPlayer.generic.flags ^= QMF_INACTIVE;
 	uiMain.credits.generic.flags ^= QMF_INACTIVE;
@@ -158,9 +162,35 @@ static void UI_PromptDialog( void )
 
 	uiMain.msgBox.generic.flags ^= QMF_HIDDEN;
 	uiMain.dlgMessage1.generic.flags ^= QMF_HIDDEN;
-	uiMain.no.generic.flags ^= QMF_HIDDEN;
-	uiMain.yes.generic.flags ^= QMF_HIDDEN;
+	if( uiMain.promptAlert )
+		uiMain.ok.generic.flags ^= QMF_HIDDEN;
+	else
+	{
+		uiMain.no.generic.flags ^= QMF_HIDDEN;
+		uiMain.yes.generic.flags ^= QMF_HIDDEN;
+	}
+}
 
+static void UI_ShowPrompt( void ( *action )( void ), const char *message )
+{
+	uiMain.promptAction = action;
+	uiMain.dlgMessage1.generic.name = message;
+	UI_PromptDialog();
+}
+
+void UI_ShowMessageBox( void )
+{
+	static char msg[1024];
+
+	strncpy( msg, CMD_ARGV(1), 1023 );
+	msg[1023] = 0;
+
+	UI_SetActiveMenu( TRUE );
+
+	UI_Main_Menu();
+	uiMain.dlgMessage1.generic.name = msg;
+	uiMain.promptAlert = 1;
+	UI_PromptDialog();
 }
 
 /*
@@ -201,30 +231,18 @@ static void UI_Main_ActivateFunc( void )
 
 	if( gpGlobals->developer )
 	{
-		uiMain.console.generic.y = CL_IsActive() ? 330 : 430;
+		uiMain.console.generic.y = CL_IsActive() ? 280 : 380;
 		UI_ScaleCoords( NULL, &uiMain.console.generic.y, NULL, NULL );
 	}
 }
 
-/*
-=================
-UI_Main_HazardCourse
-=================
-*/
-static void UI_Main_HazardCourse( void )
+static void UI_Main_Disconnect( void )
 {
-	if( CVAR_GET_FLOAT( "host_serverstate" ) && CVAR_GET_FLOAT( "maxplayers" ) > 1 )
-		HOST_ENDGAME( "end of the game" );
-
-	CVAR_SET_FLOAT( "skill", 1.0f );
-	CVAR_SET_FLOAT( "deathmatch", 0.0f );
-	CVAR_SET_FLOAT( "teamplay", 0.0f );
-	CVAR_SET_FLOAT( "pausable", 1.0f ); // singleplayer is always allowing pause
-	CVAR_SET_FLOAT( "coop", 0.0f );
-
-	BACKGROUND_TRACK( NULL, NULL );
-
-	CLIENT_COMMAND( FALSE, "hazardcourse\n" );
+	if( CVAR_GET_FLOAT( "host_serverstate" ) )
+		CLIENT_COMMAND( TRUE, "endgame;wait;wait;wait;menu_options;menu_main\n");
+	else
+		CLIENT_COMMAND( TRUE, "cmd disconnect;wait;wait;wait;menu_options;menu_main\n");
+	UI_Main_Menu();
 }
 
 /*
@@ -263,11 +281,11 @@ static void UI_Main_Callback( void *self, int event )
 		UI_CloseMenu();
 		break;
 	case ID_DISCONNECT:
-		if( CVAR_GET_FLOAT( "host_serverstate" ) )
-			CLIENT_COMMAND( TRUE, "endgame;wait;wait;wait;menu_options;menu_main\n");
-		else
-			CLIENT_COMMAND( TRUE, "cmd disconnect;wait;wait;wait;menu_options;menu_main\n");
-		UI_Main_Menu();
+		UI_ShowPrompt( UI_Main_Disconnect, "Really disconnect?" );
+		break;
+	case ID_NEWGAME:
+		CVAR_SET_FLOAT( "public", 0 );
+		UI_CreateGame_Menu();
 		break;
 	case ID_MULTIPLAYER:
 		UI_MultiPlayer_Menu();
@@ -275,7 +293,7 @@ static void UI_Main_Callback( void *self, int event )
 	case ID_CONFIGURATION:
 		UI_Options_Menu();
 		break;
-	case ID_credits:
+	case ID_PREVIEWS:
 		UI_Credits_Menu();
 		break;
 	case ID_QUIT:
@@ -288,7 +306,12 @@ static void UI_Main_Callback( void *self, int event )
 	case ID_YES:
 		if( !( uiMain.quitMessage.generic.flags & QMF_HIDDEN ))
 			CLIENT_COMMAND( FALSE, "quit\n" );
-		else UI_Main_HazardCourse();
+		else
+			uiMain.promptAction();
+		break;
+	case ID_OK:
+		UI_PromptDialog();
+		uiMain.promptAlert = 0;
 		break;
 	case ID_NO:
 		if( !( uiMain.quitMessage.generic.flags & QMF_HIDDEN ))
@@ -329,7 +352,7 @@ static void UI_Main_Init( void )
 	uiMain.console.generic.name = "Console";
 	uiMain.console.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW;
 	uiMain.console.generic.x = 72;
-	uiMain.console.generic.y = CL_IsActive() ? 330 : 430;
+	uiMain.console.generic.y = CL_IsActive() ? 280 : 380;
 	uiMain.console.generic.callback = UI_Main_Callback;
 
 	UI_UtilSetupPicButton( &uiMain.console, PC_CONSOLE );
@@ -340,7 +363,7 @@ static void UI_Main_Init( void )
 	uiMain.resumeGame.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
 	uiMain.resumeGame.generic.statusText = MenuStrings[HINT_RESUME_GAME];
 	uiMain.resumeGame.generic.x = 72;
-	uiMain.resumeGame.generic.y = 380;
+	uiMain.resumeGame.generic.y = 330;
 	uiMain.resumeGame.generic.callback = UI_Main_Callback;
 
 	UI_UtilSetupPicButton( &uiMain.resumeGame, PC_RESUME_GAME );
@@ -351,10 +374,27 @@ static void UI_Main_Init( void )
 	uiMain.disconnect.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
 	uiMain.disconnect.generic.statusText = "Disconnect from server";
 	uiMain.disconnect.generic.x = 72;
-	uiMain.disconnect.generic.y = 430;
+	uiMain.disconnect.generic.y = 380;
 	uiMain.disconnect.generic.callback = UI_Main_Callback;
 
 	UI_UtilSetupPicButton( &uiMain.disconnect, PC_DISCONNECT );
+
+	uiMain.newGame.generic.id = ID_NEWGAME;
+	uiMain.newGame.generic.type = QMTYPE_BM_BUTTON;
+	uiMain.newGame.generic.name = "Create game";
+	uiMain.newGame.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
+	uiMain.newGame.generic.statusText = "Start a local game server";
+	uiMain.newGame.generic.x = 72;
+	uiMain.newGame.generic.y = 430;
+	uiMain.newGame.generic.callback = UI_Main_Callback;
+
+	UI_UtilSetupPicButton( &uiMain.newGame, PC_CREATE_GAME );
+
+	// server.dll needs for reading savefiles or startup newgame
+	if( !CheckGameDll( ))
+	{
+		uiMain.newGame.generic.flags |= QMF_GRAYED;
+	}
 
 	uiMain.configuration.generic.id = ID_CONFIGURATION;
 	uiMain.configuration.generic.type = QMTYPE_BM_BUTTON;
@@ -378,11 +418,11 @@ static void UI_Main_Init( void )
 
 	UI_UtilSetupPicButton( &uiMain.multiPlayer, PC_MULTIPLAYER );
 
-	uiMain.credits.generic.id = ID_credits;
+	uiMain.credits.generic.id = ID_PREVIEWS;
 	uiMain.credits.generic.type = QMTYPE_BM_BUTTON;
 	uiMain.credits.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_NOTIFY;
 	uiMain.credits.generic.name = "Credits";
-	uiMain.credits.generic.statusText = "Show developer credits";
+	uiMain.credits.generic.statusText = "Developer credits";
 	uiMain.credits.generic.x = 72;
 	uiMain.credits.generic.y = 580;
 	uiMain.credits.generic.callback = UI_Main_Callback;
@@ -459,6 +499,16 @@ static void UI_Main_Init( void )
 
 	UI_UtilSetupPicButton( &uiMain.yes, PC_OK );
 
+	uiMain.ok.generic.id = ID_OK;
+	uiMain.ok.generic.type = QMTYPE_BM_BUTTON;
+	uiMain.ok.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_HIDDEN;
+	uiMain.ok.generic.name = "Ok";
+	uiMain.ok.generic.x = DLG_X + 490;
+	uiMain.ok.generic.y = 460;
+	uiMain.ok.generic.callback = UI_Main_Callback;
+
+	UI_UtilSetupPicButton( &uiMain.ok, PC_OK );
+
 	uiMain.no.generic.id = ID_NO;
 	uiMain.no.generic.type = QMTYPE_BM_BUTTON;
 	uiMain.no.generic.flags = QMF_HIGHLIGHTIFFOCUS|QMF_DROPSHADOW|QMF_HIDDEN;
@@ -466,7 +516,7 @@ static void UI_Main_Init( void )
 	uiMain.no.generic.x = DLG_X + 530;
 	uiMain.no.generic.y = 460;
 	uiMain.no.generic.callback = UI_Main_Callback;
-	
+
 	UI_UtilSetupPicButton( &uiMain.no, PC_CANCEL );
 
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.background );
@@ -476,6 +526,7 @@ static void UI_Main_Init( void )
 
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.disconnect );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.resumeGame );
+	UI_AddItem( &uiMain.menu, (void *)&uiMain.newGame );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.configuration );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.multiPlayer );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.credits );
@@ -487,6 +538,7 @@ static void UI_Main_Init( void )
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.dlgMessage1 );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.no );
 	UI_AddItem( &uiMain.menu, (void *)&uiMain.yes );
+	UI_AddItem( &uiMain.menu, (void *)&uiMain.ok );
 }
 
 /*

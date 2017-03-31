@@ -134,7 +134,7 @@ static void UI_Options_Callback( void *self, int event )
 		UI_Audio_Menu();
 		break;
 	case ID_VIDEO:
-		UI_Video_Menu();
+		UI_VidOptions_Menu();
 		break;
 	case ID_TOUCH:
 		UI_Touch_Menu();

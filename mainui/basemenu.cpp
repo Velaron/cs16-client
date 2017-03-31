@@ -1475,7 +1475,6 @@ void UI_Precache( void )
 	UI_Audio_Precache();
 	UI_Video_Precache();
 	UI_VidOptions_Precache();
-	UI_VidModes_Precache();
 	UI_Credits_Precache();
 	UI_Touch_Precache();
 	UI_TouchOptions_Precache();
@@ -1679,6 +1678,8 @@ int UI_VidInit( void )
 	return 1;
 }
 
+void UI_ShowMessageBox( void );
+
 /*
 =================
 UI_Init
@@ -1705,9 +1706,8 @@ void UI_Init( void )
 	Cmd_AddCommand( "menu_creategame", UI_CreateGame_Menu );
 	Cmd_AddCommand( "menu_gamepad", UI_GamePad_Menu );
 	Cmd_AddCommand( "menu_audio", UI_Audio_Menu );
-	Cmd_AddCommand( "menu_video", UI_Video_Menu );
+	Cmd_AddCommand( "menu_video", UI_VidOptions_Menu );
 	Cmd_AddCommand( "menu_vidoptions", UI_VidOptions_Menu );
-	Cmd_AddCommand( "menu_vidmodes", UI_VidModes_Menu );
 	Cmd_AddCommand( "menu_touch", UI_Touch_Menu );
 	Cmd_AddCommand( "menu_touchoptions", UI_TouchOptions_Menu );
 	Cmd_AddCommand( "menu_touchbuttons", UI_TouchButtons_Menu );
@@ -1716,6 +1716,7 @@ void UI_Init( void )
 	Cmd_AddCommand( "menu_playrec", UI_PlayRec_Menu );
 	Cmd_AddCommand( "menu_playdemo", UI_PlayDemo_Menu );
 	Cmd_AddCommand( "menu_recdemo", UI_RecDemo_Menu );
+	Cmd_AddCommand( "menu_showmessagebox", UI_ShowMessageBox );
 
 #ifdef __ANDROID__
 	Cmd_RemoveCommand( "evdev_mouseopen" );
@@ -1770,6 +1771,7 @@ void UI_Shutdown( void )
 	Cmd_RemoveCommand( "menu_playrec" );
 	Cmd_RemoveCommand( "menu_playdemo" );
 	Cmd_RemoveCommand( "menu_recdemo" );
+	Cmd_RemoveCommand( "menu_showmessagebox" );
 
 	memset( &uiStatic, 0, sizeof( uiStatic_t ));
 }

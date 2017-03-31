@@ -385,8 +385,10 @@ static void UI_TouchButtons_Callback( void *self, int event )
         uiTouchButtons.dialogAction = UI_DeleteButton;
 		break;
 	case ID_YES:
-    if( uiTouchButtons.dialogAction )
-        uiTouchButtons.dialogAction();
+		if( uiTouchButtons.dialogAction )
+		{
+			uiTouchButtons.dialogAction();
+		}
 	case ID_NO:
 		UI_TouchButtons_EnableButtons();
 
