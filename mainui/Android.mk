@@ -44,8 +44,6 @@ LOCAL_SRC_FILES := basemenu.cpp \
            menu_multiplayer.cpp \
            menu_playersetup.cpp \
            menu_strings.cpp \
-           menu_video.cpp \
-           menu_vidmodes.cpp \
            menu_vidoptions.cpp \
 	   menu_touchoptions.cpp \
 	   menu_touch.cpp \
