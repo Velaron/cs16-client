@@ -12,15 +12,21 @@
 
 **Install**:
 
-1) Install the APK from [GitHub Releases](https://github.com/SDLash3D/cs16-client/releases/latest). 
-* If you have **multi-core** device, choose APK with `omp` postfix. 
-* If you have **single-core** device or you have **problems** with OMP version, choose APK with `noomp` postfix.
+1) Install the APK from [Google Play](https://play.google.com/store/apps/details?id=in.celest.xash3d.cs16client).
 
-2) Install the latest [Xash3D Android](https://github.com/SDLash3D/xash3d-android-project/releases/latest).
+2) Install the latest [Xash3D FWGS](https://play.google.com/store/apps/details?id=in.celest.xash3d.hl).
 
-3) Copy `cstrike` and `valve` folders from your **Steam CS1.6** installation to `xash` folder on SDCard.
+3) Copy `cstrike` and `valve` folders from your **Steam CS1.6** installation to `xash` folder on SDCard. 
 
 4) Run CS16Client and enjoy!
+
+### How to build
+
+* Install Android NDK and SDK.
+* Run script named "build" in android/ directory. 
+NOTE: Don't forget to init git submodules!
+
+Other platforms than Android is **not** officially supported. Issues for platforms other than Android will not be accepted.
 
 ## Contributing
 
@@ -28,19 +34,13 @@ There is many things must be done. For example:
 
 * Translations!
 * Better and user-friendly Java Launcher design.
-* Better weapon prediction system, animation fixes.
 * Fixing crashes.
-* Ports to another platforms.
 * CZero support.
-
-### Issues
-
-**Issues temporarily disabled due to spam. Sorry about that.**
 
 #### CS1.6 incompability
 1) Explain what's wrong with cs16-client.
 
-2) Attach a screenshot from Steam version of CS1.6. Please, please, don't send issues about modificated servers!
+2) Attach a screenshot from Steam version of CS1.6. 
 
 #### Crashes or bugs
 1) Explain what's wrong with cs16-client
