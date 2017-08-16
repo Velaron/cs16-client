@@ -1,9 +1,0 @@
-*.user
-*.so
-*.obj
-*.o
-*.exp
-*.lib
-*.dll
-Makefile
-build/
