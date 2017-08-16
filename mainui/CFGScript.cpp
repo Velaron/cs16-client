@@ -16,7 +16,6 @@ GNU General Public License for more details.
 
 #include "extdll_menu.h"
 #include "BaseMenu.h"
-#include "Utils.h"
 #include "enginecallback_menu.h"
 #include "CFGScript.h"
 #include "vgui_parser.h"

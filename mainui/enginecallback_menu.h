@@ -16,8 +16,10 @@ GNU General Public License for more details.
 #ifndef ENGINECALLBACKS_H
 #define ENGINECALLBACKS_H
 
-#include "menu_int.h"
-#include "BaseMenu.h"
+#include "extdll_menu.h"
+#include "Primitive.h"
+#include "netadr.h"
+
 class EngFuncs
 {
 public:

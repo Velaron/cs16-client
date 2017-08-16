@@ -43,8 +43,17 @@ GNU General Public License for more details.
 
 // C++11 stuff
 #ifndef MY_COMPILER_SUCKS
+
+#define FINAL final
+#define CONSTEXPR constexpr
+
 // Not needed anymore
 // #include <functional>
+#else
+
+#define FINAL
+#define CONSTEXPR
+
 #endif
 
 #define bound( min, num, max )	((num) >= (min) ? ((num) < (max) ? (num) : (max)) : (min))
@@ -58,13 +67,13 @@ GNU General Public License for more details.
 #define TRUE	(!FALSE)
 #endif
 
-#ifndef _WIN32
-#define stricmp	strcasecmp
+#if !defined(_WIN32) && !defined(__MINGW32__)
+#define stricmp		strcasecmp
 #define strnicmp	strncasecmp
 #else
-#define strnicmp _strnicmp
-#define stricmp _stricmp
-#define snprintf _snprintf
+#define strnicmp	_strnicmp
+#define stricmp		_stricmp
+#define snprintf	_snprintf
 #endif
 
 typedef int (*cmpfunc)( const void *a, const void *b );

@@ -65,6 +65,9 @@ public:
 	// Determine, is this item is visible
 	virtual bool IsVisible() { return !(iFlags & QMF_HIDDEN); }
 
+	// Key value data reading, both parameters are zero-terminated string
+	virtual bool KeyValueData( const char *key, const char *data );
+
 	// Toggle visibiltiy.
 	void ToggleVisibility()
 	{
@@ -109,12 +112,16 @@ public:
 	// called when CL_IsActive returns true, otherwise onActivate
 	CEventCallback onActivatedClActive;
 
-	void SetCoord( int x, int y )                { pos.x = x, pos.y = y; }
-	void SetSize( int w, int h )                 { size.w = w; size.h = h; }
-	void SetRect( int x, int y, int w, int h )   { SetCoord( x, y ); SetSize( w, h ); }
-	void SetCharSize( int w, int h )             { charSize.w = w; charSize.h = h; }
+	inline void SetCoord( int x, int y )                { pos.x = x, pos.y = y; }
+	inline void SetSize( int w, int h )                 { size.w = w; size.h = h; }
+	inline void SetRect( int x, int y, int w, int h )   { SetCoord( x, y ); SetSize( w, h ); }
+	inline void SetCharSize( int w, int h )             { charSize.w = w; charSize.h = h; }
 	void SetCharSize( EFontSizes fs );
-	void SetNameAndStatus( const char *name, const char *status ) { szName = name, szStatusText = status; }
+	inline void SetNameAndStatus( const char *name, const char *status, const char *tag = NULL )
+	{
+		szName = name, szStatusText = status;
+		if( tag ) szTag = tag;
+	}
 
 	CMenuItemsHolder* Parent() const			{ return m_pParent; }
 	template <class T> T* Parent() const	{ return (T*) m_pParent; } // a shortcut to parent
@@ -129,6 +136,7 @@ public:
 
 	const char *szName;
 	const char *szStatusText;
+	const char *szTag; // tag for searching in res file
 
 	unsigned int iColor;
 	unsigned int iFocusColor;
@@ -151,9 +159,13 @@ protected:
 	bool	m_bPressed;
 	int		m_iLastFocusTime;
 
+	bool	m_bAllocName;
+
 	Point m_scPos;
 	Size m_scSize;
 	Size m_scChSize;
 };
+
+#include "ItemsHolder.h"
 
 #endif // BASEITEM_H

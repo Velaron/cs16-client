@@ -21,10 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Bitmap.h"
 #include "YesNoMessageBox.h"
 #include "ScrollList.h"
-#include "Utils.h"
 #include "keydefs.h"
 #include "Switch.h"
-#include "BtnsBMPTable.h"
 
 #define ART_BANNER_INET		"gfx/shell/head_inetgames"
 #define ART_BANNER_LAN		"gfx/shell/head_lan"

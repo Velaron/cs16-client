@@ -16,6 +16,23 @@ GNU General Public License for more details.
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
 
+#define BIT( x ) ( 1U << x )
+
+// engine constants
+enum
+{
+	GAME_NORMAL = 0,
+	GAME_SINGLEPLAYER_ONLY,
+	GAME_MULTIPLAYER_ONLY
+};
+
+enum
+{
+	KEY_CONSOLE = 0,
+	KEY_GAME,
+	KEY_MENU
+};
+
 enum
 {
 	QMF_GRAYED             = BIT( 1 ), // Grays and disables
@@ -28,6 +45,7 @@ enum
 	QMF_ACT_ONRELEASE      = BIT( 10 ), // call Key_Event when button is released
 	QMF_HASKEYBOARDFOCUS   = BIT( 11 ),
 	QMF_DIALOG             = BIT( 12 ), // modal windows. Will grab key, char and mousemove events
+	QMF_DISABLESCAILING    = BIT( 13 ), // disables CalcPosition and CalcSizes
 
 	QMF_HIDDEN             = BIT( 31 ), // DEPREACTED: Use Show/Hide/SetVisibility/ToggleVisibility
 };

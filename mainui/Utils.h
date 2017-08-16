@@ -125,4 +125,11 @@ extern int COM_CompareSaves( const void **a, const void **b );
 extern void UI_LoadCustomStrings( void );
 extern void UI_EnableTextInput( bool enable );
 
+#define CS_SIZE			64	// size of one config string
+#define CS_TIME			16	// size of time string
+
+// color strings
+#define ColorIndex( c )		((( c ) - '0' ) & 7 )
+#define IsColorString( p )		( p && *( p ) == '^' && *(( p ) + 1) && *(( p ) + 1) >= '0' && *(( p ) + 1 ) <= '9' )
+
 #endif//UTILS_H

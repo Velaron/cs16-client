@@ -20,6 +20,7 @@
 #define END_EVENT_THIS( callback ) } EVNAME(callback);; this->callback = EVNAME(callback)::callback;
 
 #else
+
 #define SET_EVENT( item, callback ) (item).callback = [](CMenuBaseItem *pSelf, void *pExtra)
 #define END_EVENT( item, callback ) ;
 
@@ -46,6 +47,7 @@
 	DECLARE_NAMED_EVENT_TO_ITEM_METHOD( className, method, method )
 
 class CMenuBaseItem;
+class CMenuItemsHolder;
 
 enum menuEvent_e
 {
@@ -63,12 +65,12 @@ typedef void (*VoidCallback)(void);
 class CEventCallback
 {
 public:
-	CEventCallback() : pExtra( NULL ), callback( NULL ) {}
-	CEventCallback( EventCallback cb, void *ex ) : pExtra( ex ), callback( cb ) {}
+	CEventCallback() : pExtra( NULL ), callback( NULL ), szName( NULL ) {}
+	CEventCallback( EventCallback cb, void *ex = NULL ) : pExtra( ex ), callback( cb ), szName( NULL ) {}
 
 	void *pExtra;
 
-	operator bool() { return (bool)callback; }
+	operator bool() { return callback != NULL; }
 	operator EventCallback() { return callback; }
 
 	void operator() ( CMenuBaseItem *pSelf ) { callback( pSelf, pExtra ); }
@@ -115,11 +117,17 @@ private:
 	{
 		((VoidCallback)pExtra)();
 	}
+
 	static void CmdCallbackWrapperCb( CMenuBaseItem *pSelf, void *pExtra )
 	{
 		CmdCallback *cmd = (CmdCallback*)pExtra;
 		EngFuncs::ClientCmd( cmd->execute_now, cmd->cmd );
 	}
+
+	// to find event command by name(for items holder)
+	const char *szName;
+
+	friend class CMenuItemsHolder;
 };
 
 

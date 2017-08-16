@@ -15,32 +15,11 @@ GNU General Public License for more details.
 
 #ifndef BASEMENU_H
 #define BASEMENU_H
-#include "netadr.h"
+#include "enginecallback_menu.h"
 #include "keydefs.h"
+#include "EventSystem.h"
+#include "Utils.h"
 
-#define BIT( x ) ( 1U << x )
-
-// engine constants
-enum
-{
-	GAME_NORMAL = 0,
-	GAME_SINGLEPLAYER_ONLY,
-	GAME_MULTIPLAYER_ONLY
-};
-
-enum
-{
-	KEY_CONSOLE = 0,
-	KEY_GAME,
-	KEY_MENU
-};
-
-#define CS_SIZE			64	// size of one config string
-#define CS_TIME			16	// size of time string
-
-// color strings
-#define ColorIndex( c )		((( c ) - '0' ) & 7 )
-#define IsColorString( p )		( p && *( p ) == '^' && *(( p ) + 1) && *(( p ) + 1) >= '0' && *(( p ) + 1 ) <= '9' )
 
 #define UI_MAX_MENUDEPTH		64
 #define UI_MAX_MENUITEMS		64
@@ -84,12 +63,6 @@ enum
 #define UI_DOWNARROW		"gfx/shell/dnarrowd"
 #define UI_DOWNARROWFOCUS		"gfx/shell/dnarrowf"
 #define UI_DOWNARROWPRESSED		"gfx/shell/dnarrowp"
-
-#include "Primitive.h"
-#include "extdll_menu.h"
-#include "enginecallback_menu.h"
-#include "EventSystem.h"
-#include "Utils.h"
 
 // =====================================================================
 // Main menu interface

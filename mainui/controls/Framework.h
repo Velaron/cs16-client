@@ -10,8 +10,8 @@ public:
 	CMenuFramework( const char *name = "Unnamed Framework" );
 
 	void Show();
-	void Init();
-	void VidInit();
+	void Init() FINAL;
+	void VidInit() FINAL;
 	void Hide();
 	bool IsVisible();
 	bool IsRoot() { return true; }

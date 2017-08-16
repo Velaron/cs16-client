@@ -7,7 +7,9 @@
 #include <string.h>
 
 CMenuItemsHolder::CMenuItemsHolder() :
-	CMenuBaseItem(), m_iCursor( 0 ), m_iCursorPrev( 0 ), m_pItems( ), m_numItems( 0 ), m_bInit( false ), m_bAllowEnterActivate( false )
+	CMenuBaseItem(), m_iCursor( 0 ), m_iCursorPrev( 0 ), m_pItems( ), m_numItems( 0 ),
+	m_events(), m_numEvents(), m_bInit( false ), m_bAllowEnterActivate( false ),
+	m_szResFile( 0 )
 {
 	;
 }
@@ -183,6 +185,10 @@ void CMenuItemsHolder::Init()
 	{
 		_Init();
 		// m_pLayout->Init();
+
+		if( m_szResFile )
+			LoadRES( m_szResFile );
+
 		m_bInit = true;
 	}
 }
@@ -341,6 +347,20 @@ CMenuBaseItem *CMenuItemsHolder::ItemAtCursorPrev()
 	return m_pItems[m_iCursorPrev];
 }
 
+CMenuBaseItem *CMenuItemsHolder::FindItemByTag(const char *tag)
+{
+	if( !tag )
+		return NULL;
+
+	for( int i = 0; i < m_numItems; i++ )
+	{
+		if( !strcmp( m_pItems[i]->szTag, tag ) )
+			return m_pItems[i];
+	}
+
+	return NULL;
+}
+
 void CMenuItemsHolder::SetCursorToItem(CMenuBaseItem &item, bool notify )
 {
 	for( int i = 0; i < m_numItems; i++ )
@@ -434,4 +454,136 @@ void CMenuItemsHolder::RemoveItem(CMenuBaseItem &item)
 			break;
 		}
 	}
+}
+
+bool RES_ExpectString( char **data, const char *expect, bool skip = true )
+{
+	char token[1024];
+	char *tmp;
+
+	if( !data || !*data )
+		return true;
+
+	tmp = EngFuncs::COM_ParseFile( *data, token );
+
+	if( skip )
+		*data = tmp;
+
+	if( !*data )
+		return true;
+
+	if( !strncmp( token, expect, 1024 ) )
+	{
+		*data = tmp; // skip anyway, if expected string was here
+		return true;
+	}
+
+	return false;
+}
+
+inline bool FreeFile( byte *pfile, const bool retval )
+{
+	EngFuncs::COM_FreeFile( pfile );
+	return retval;
+}
+
+bool CMenuItemsHolder::LoadRES(const char *filename)
+{
+	byte *pfile = EngFuncs::COM_LoadFile( filename );
+	char *afile = (char*)pfile;
+	char token[1024];
+
+	if( !pfile )
+		return false;
+
+	afile = EngFuncs::COM_ParseFile( afile, token );
+
+	Con_DPrintf( "Loading res file from %s, name %s\n", filename, token );
+
+	if( !afile )
+		return FreeFile( pfile, false );
+
+	if( !RES_ExpectString( &afile, "{" ) )
+	{
+		Con_DPrintf( "LoadRES: failed to parse, want '{'\n" );
+		return FreeFile( pfile, false );
+	}
+
+	do
+	{
+		CMenuBaseItem *item;
+
+		afile = EngFuncs::COM_ParseFile( afile, token );
+
+		if( !afile )
+			return FreeFile( pfile, false );
+
+		item = FindItemByTag( token );
+
+		if( !RES_ExpectString( &afile, "{" ))
+		{
+			Con_DPrintf( "LoadRES: failed to parse, want '{', near %s\n", token );
+			return FreeFile( pfile, false );
+		}
+
+		if( item )
+		{
+			do
+			{
+				char key[1024];
+				char value[1024];
+
+				afile = EngFuncs::COM_ParseFile( afile, key );
+				if( !afile )
+					return FreeFile( pfile, false );
+
+				afile = EngFuncs::COM_ParseFile( afile, value );
+				if( !afile )
+					return FreeFile( pfile, false );
+
+				item->KeyValueData( key, value );
+			}
+			while( !RES_ExpectString( &afile, "}", false ) );
+		}
+		else
+		{
+			Con_DPrintf( "LoadRES: cannot find item %s, skipping!\n", token );
+
+			while( !RES_ExpectString( &afile, "}" ) );
+		}
+	}
+	while( !RES_ExpectString( &afile, "}", false ) );
+
+	if( !RES_ExpectString( &afile, "}" ))
+	{
+		Con_DPrintf( "LoadRES: failed to parse, want '{'\n" );
+		return FreeFile( pfile, false );
+	}
+
+	return FreeFile( pfile, true );
+}
+
+void CMenuItemsHolder::RegisterNamedEvent(CEventCallback ev, const char *name)
+{
+	if( m_numEvents >= UI_MAX_MENUITEMS )
+		Host_Error( "RegisterNamedEvent: UI_MAX_MENUITEMS limit exceeded\n" );
+
+	ASSERT( name );
+	ASSERT( ev );
+
+	ev.szName = name;
+	m_events[m_numItems] = ev;
+
+	m_numItems++;
+}
+
+CEventCallback CMenuItemsHolder::FindEventByName(const char *name)
+{
+	for( int i = 0; i < m_numItems; i++ )
+	{
+		if( !strcmp( m_events[i].szName, name ))
+			return m_events[i];
+	}
+
+	return CEventCallback();
 }

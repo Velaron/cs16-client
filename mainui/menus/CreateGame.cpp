@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Framework.h"
 #include "BtnsBMPTable.h"
+#include "keydefs.h"
 #include "Bitmap.h"
 #include "Field.h"
 #include "CheckBox.h"

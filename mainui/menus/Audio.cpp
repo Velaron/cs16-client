@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Bitmap.h"
 #include "PicButton.h"
 #include "CheckBox.h"
-#include "BtnsBMPTable.h"
 
 #define ART_BANNER			"gfx/shell/head_audio"
 
