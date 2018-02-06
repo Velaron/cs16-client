@@ -115,7 +115,11 @@ EXPORT int GetMenuAPI( UI_FUNCTIONS *pFunctionTable, ui_enginefuncs_t* pEngfuncs
 	char filename[1024];
 
 #ifdef __ANDROID__
-	snprintf( filename, 1024, "%s/libclient.so", getenv( "XASH3D_GAMELIBDIR" ) );
+	#ifdef LOAD_HARDFP
+		snprintf( filename, 1024, "%s/libclient_hardfp.so", getenv( "XASH3D_GAMELIBDIR" ) );
+	#else
+		snprintf( filename, 1024, "%s/libclient.so", getenv( "XASH3D_GAMELIBDIR" ) );
+	#endif
 #else
 	char gamedir[64];
 	pEngfuncsFromEngine->pfnGetGameDir( gamedir );
