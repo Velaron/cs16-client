@@ -65,7 +65,6 @@ int CHudScenario::Draw(float flTime)
 		return 1;
 
 	int r, g, b;
-	int width = m_sprite.rect.right - m_sprite.rect.left;
 	int x, y;
 	DrawUtils::UnpackRGB( r, g, b, RGB_YELLOWISH );
 
@@ -80,7 +79,7 @@ int CHudScenario::Draw(float flTime)
 	DrawUtils::ScaleColors( r, g, b, m_iAlpha );
 
 	x = gHUD.m_Timer.m_right + gHUD.m_iFontWidth * 1.5;
-	y = ScreenHeight - 1.5 * gHUD.m_iFontHeight - ( m_sprite.rect.bottom - m_sprite.rect.top - gHUD.m_iFontHeight ) / 2 ;
+	y = ScreenHeight - 1.5 * gHUD.m_iFontHeight - ( m_sprite.rect.Height() - gHUD.m_iFontHeight ) / 2 ;
 
 	SPR_Set( m_sprite.spr, r, g, b );
 	SPR_DrawAdditive( 0, x, y, &m_sprite.rect );

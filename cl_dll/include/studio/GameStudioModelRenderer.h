@@ -81,5 +81,9 @@ private:
 };
 
 extern CGameStudioModelRenderer g_StudioRenderer;
+extern int g_rseq;
+extern int g_gaitseq;
+extern Vector g_clorg;
+extern Vector g_clang;
 
 #endif

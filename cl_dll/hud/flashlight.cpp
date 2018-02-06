@@ -57,7 +57,7 @@ int CHudFlashlight::VidInit(void)
 	m_hSprite1.SetSpriteByName("flash_empty");
 	m_hSprite2.SetSpriteByName("flash_full");
 	m_hBeam.SetSpriteByName("flash_beam");
-	m_iWidth = m_hSprite1.rect.right - m_hSprite1.rect.left;
+	m_iWidth = m_hSprite1.rect.Width();
 
 	return 1;
 }
@@ -106,7 +106,7 @@ int CHudFlashlight::Draw(float flTime)
 
 	DrawUtils::ScaleColors(r, g, b, a);
 
-	y = (m_hSprite1.rect.bottom - m_hSprite1.rect.top)/2;
+	y = (m_hSprite1.rect.Height())/2;
 	x = ScreenWidth - m_iWidth - m_iWidth/2 ;
 
 	// Draw the flashlight casing

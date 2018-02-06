@@ -61,8 +61,8 @@ GNU General Public License for more details.
 
 	#define VGUI_SUPPORT_DLL "libvgui_support." OS_LIB_EXT
 
-    #define TRUE	    1
-    #define FALSE	    0
+	#define TRUE	    1
+	#define FALSE	    0
 
     // Windows-specific
     #define _stdcall

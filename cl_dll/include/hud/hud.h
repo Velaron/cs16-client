@@ -136,8 +136,14 @@ public:
 	int Draw(float flTime);
 	void Think(void);
 	void Reset(void);
+	void SetCrosshair( HSPRITE hSpr, wrect_t rect, int r, int g, int b );
+	void HideCrosshair();
 
-	void DrawCrosshair(float flTime);
+	// replace engine's buggy crosshair
+	void DrawSpriteCrosshair();
+
+	// dynamic crosshair
+	void DrawCrosshair();
 	void CalcCrosshairSize();
 	void CalcCrosshairDrawMode();
 	void CalcCrosshairColor();
@@ -188,6 +194,7 @@ private:
 	bool m_bAdditive;
 	bool m_bObserverCrosshair ;
 	bool m_bDrawCrosshair;
+	bool m_bStaticCrosshair;
 	int m_iAmmoLastCheck;
 
 	convar_t *m_pClCrosshairColor;
@@ -197,6 +204,10 @@ private:
 	cvar_t *m_pHud_FastSwitch;
 	cvar_t *m_pHud_DrawHistory_Time;
 
+	// replace buggy engine's crosshair
+	HSPRITE m_hStaticSpr;
+	wrect_t m_rcStaticRc;
+	RGBA m_staticRgba;
 };
 
 //
@@ -505,7 +516,6 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw(float flTime);
-	void InitHUDData( void );
 	CHudMsgFunc(Battery);
 	CHudMsgFunc(ArmorType);
 	
