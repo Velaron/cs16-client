@@ -46,7 +46,7 @@ void COM_Log( char *pszFile, char *fmt, ...)
 	va_list		argptr;
 	char		string[1024];
 	FILE *fp;
-	char *pfilename;
+	const char *pfilename;
 	
 	if ( !pszFile )
 	{
@@ -143,61 +143,53 @@ void HUD_PlaybackEvent( int flags, const edict_t *pInvoker, unsigned short event
 
 /*
 =====================
-HUD_SetMaxSpeed
-
-=====================
-*/
-void HUD_SetMaxSpeed( const edict_t *ed, float speed )
-{
-}
-
-
-/*
-=====================
 UTIL_WeaponTimeBase
 
 Always 0.0 on client, even if not predicting weapons ( won't get called
  in that case )
 =====================
 */
+/*
+moved in util.h
+
 float UTIL_WeaponTimeBase( void )
 {
 	return 0.0;
 }
+*/
 
 static unsigned int glSeed = 0; 
 
-unsigned int seed_table[ 256 ] =
+unsigned int seed_table[256] =
 {
-	28985, 27138, 26457, 9451, 17764, 10909, 28790, 8716, 6361, 4853, 17798, 21977, 19643, 20662, 10834, 20103,
-	27067, 28634, 18623, 25849, 8576, 26234, 23887, 18228, 32587, 4836, 3306, 1811, 3035, 24559, 18399, 315,
-	26766, 907, 24102, 12370, 9674, 2972, 10472, 16492, 22683, 11529, 27968, 30406, 13213, 2319, 23620, 16823,
-	10013, 23772, 21567, 1251, 19579, 20313, 18241, 30130, 8402, 20807, 27354, 7169, 21211, 17293, 5410, 19223,
-	10255, 22480, 27388, 9946, 15628, 24389, 17308, 2370, 9530, 31683, 25927, 23567, 11694, 26397, 32602, 15031,
-	18255, 17582, 1422, 28835, 23607, 12597, 20602, 10138, 5212, 1252, 10074, 23166, 19823, 31667, 5902, 24630,
-	18948, 14330, 14950, 8939, 23540, 21311, 22428, 22391, 3583, 29004, 30498, 18714, 4278, 2437, 22430, 3439,
-	28313, 23161, 25396, 13471, 19324, 15287, 2563, 18901, 13103, 16867, 9714, 14322, 15197, 26889, 19372, 26241,
-	31925, 14640, 11497, 8941, 10056, 6451, 28656, 10737, 13874, 17356, 8281, 25937, 1661, 4850, 7448, 12744,
-	21826, 5477, 10167, 16705, 26897, 8839, 30947, 27978, 27283, 24685, 32298, 3525, 12398, 28726, 9475, 10208,
-	617, 13467, 22287, 2376, 6097, 26312, 2974, 9114, 21787, 28010, 4725, 15387, 3274, 10762, 31695, 17320,
-	18324, 12441, 16801, 27376, 22464, 7500, 5666, 18144, 15314, 31914, 31627, 6495, 5226, 31203, 2331, 4668,
-	12650, 18275, 351, 7268, 31319, 30119, 7600, 2905, 13826, 11343, 13053, 15583, 30055, 31093, 5067, 761,
-	9685, 11070, 21369, 27155, 3663, 26542, 20169, 12161, 15411, 30401, 7580, 31784, 8985, 29367, 20989, 14203,
-	29694, 21167, 10337, 1706, 28578, 887, 3373, 19477, 14382, 675, 7033, 15111, 26138, 12252, 30996, 21409,
-	25678, 18555, 13256, 23316, 22407, 16727, 991, 9236, 5373, 29402, 6117, 15241, 27715, 19291, 19888, 19847
+	28985U, 27138U, 26457U, 9451U, 17764U, 10909U, 28790U, 8716U, 6361U, 4853U, 17798U, 21977U, 19643U, 20662U, 10834U, 20103,
+	27067U, 28634U, 18623U, 25849U, 8576U, 26234U, 23887U, 18228U, 32587U, 4836U, 3306U, 1811U, 3035U, 24559U, 18399U, 315,
+	26766U, 907U, 24102U, 12370U, 9674U, 2972U, 10472U, 16492U, 22683U, 11529U, 27968U, 30406U, 13213U, 2319U, 23620U, 16823,
+	10013U, 23772U, 21567U, 1251U, 19579U, 20313U, 18241U, 30130U, 8402U, 20807U, 27354U, 7169U, 21211U, 17293U, 5410U, 19223,
+	10255U, 22480U, 27388U, 9946U, 15628U, 24389U, 17308U, 2370U, 9530U, 31683U, 25927U, 23567U, 11694U, 26397U, 32602U, 15031,
+	18255U, 17582U, 1422U, 28835U, 23607U, 12597U, 20602U, 10138U, 5212U, 1252U, 10074U, 23166U, 19823U, 31667U, 5902U, 24630,
+	18948U, 14330U, 14950U, 8939U, 23540U, 21311U, 22428U, 22391U, 3583U, 29004U, 30498U, 18714U, 4278U, 2437U, 22430U, 3439,
+	28313U, 23161U, 25396U, 13471U, 19324U, 15287U, 2563U, 18901U, 13103U, 16867U, 9714U, 14322U, 15197U, 26889U, 19372U, 26241,
+	31925U, 14640U, 11497U, 8941U, 10056U, 6451U, 28656U, 10737U, 13874U, 17356U, 8281U, 25937U, 1661U, 4850U, 7448U, 12744,
+	21826U, 5477U, 10167U, 16705U, 26897U, 8839U, 30947U, 27978U, 27283U, 24685U, 32298U, 3525U, 12398U, 28726U, 9475U, 10208,
+	617U, 13467U, 22287U, 2376U, 6097U, 26312U, 2974U, 9114U, 21787U, 28010U, 4725U, 15387U, 3274U, 10762U, 31695U, 17320,
+	18324U, 12441U, 16801U, 27376U, 22464U, 7500U, 5666U, 18144U, 15314U, 31914U, 31627U, 6495U, 5226U, 31203U, 2331U, 4668,
+	12650U, 18275U, 351U, 7268U, 31319U, 30119U, 7600U, 2905U, 13826U, 11343U, 13053U, 15583U, 30055U, 31093U, 5067U, 761,
+	9685U, 11070U, 21369U, 27155U, 3663U, 26542U, 20169U, 12161U, 15411U, 30401U, 7580U, 31784U, 8985U, 29367U, 20989U, 14203,
+	29694U, 21167U, 10337U, 1706U, 28578U, 887U, 3373U, 19477U, 14382U, 675U, 7033U, 15111U, 26138U, 12252U, 30996U, 21409,
+	25678U, 18555U, 13256U, 23316U, 22407U, 16727U, 991U, 9236U, 5373U, 29402U, 6117U, 15241U, 27715U, 19291U, 19888U, 19847U
 };
 
 unsigned int U_Random( void ) 
 { 
-	glSeed *= 69069; 
-	glSeed += seed_table[ glSeed & 0xff ];
- 
-	return ( ++glSeed & 0x0fffffff ); 
-} 
+	glSeed *= 69069;
+	glSeed += seed_table[glSeed & 0xFF] + 1;
+	return (glSeed & 0xFFFFFFF);
+}
 
-void U_Srand( unsigned int seed )
+void U_Srand(unsigned int seed)
 {
-	glSeed = seed_table[ seed & 0xff ];
+	glSeed = seed_table[seed & 0xFF];
 }
 
 /*
@@ -205,28 +197,18 @@ void U_Srand( unsigned int seed )
 UTIL_SharedRandomLong
 =====================
 */
-int UTIL_SharedRandomLong( unsigned int seed, int low, int high )
+int UTIL_SharedRandomLong(unsigned int seed, int low, int high)
 {
-	unsigned int range;
-
-	U_Srand( (int)seed + low + high );
-
-	range = high - low + 1;
-	if ( !(range - 1) )
+	unsigned int range = high - low + 1;
+	U_Srand((unsigned int)(high + low + seed));
+	if (range != 1)
 	{
-		return low;
-	}
-	else
-	{
-		int offset;
-		int rnum;
-
-		rnum = U_Random();
-
-		offset = rnum % range;
-
+		int rnum = U_Random();
+		int offset = rnum % range;
 		return (low + offset);
 	}
+
+	return low;
 }
 
 /*
@@ -234,32 +216,22 @@ int UTIL_SharedRandomLong( unsigned int seed, int low, int high )
 UTIL_SharedRandomFloat
 =====================
 */
-float UTIL_SharedRandomFloat( unsigned int seed, float low, float high )
+float UTIL_SharedRandomFloat(unsigned int seed, float low, float high)
 {
-	//
-	unsigned int range;
-
-	U_Srand( (int)seed + *(int *)&low + *(int *)&high );
+	unsigned int range = high - low;
+	U_Srand((unsigned int)seed + *(unsigned int *)&low + *(unsigned int *)&high);
 
 	U_Random();
 	U_Random();
 
-	range = high - low;
-	if ( !range )
+	if (range)
 	{
-		return low;
+		int tensixrand = U_Random() & 0xFFFFu;
+		float offset = float(tensixrand) / 0x10000u;
+		return (low + offset * range);
 	}
-	else
-	{
-		int tensixrand;
-		float offset;
 
-		tensixrand = U_Random() & 65535;
-
-		offset = (float)tensixrand / 65536.0;
-
-		return (low + offset * range );
-	}
+	return low;
 }
 
 

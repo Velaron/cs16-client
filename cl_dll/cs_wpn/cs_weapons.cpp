@@ -46,7 +46,8 @@
 #include "cl_entity.h"
 
 #include "pm_shared.h"
-
+#include "GameStudioModelRenderer.h"
+#include "ammohistory.h"
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
 #endif
@@ -55,13 +56,11 @@
 #define max(a,b)  (((a) > (b)) ? (a) : (b))
 #endif
 
-extern globalvars_t *gpGlobals;
-extern int g_iUser1;
-extern bool g_bGlockBurstMode;
-extern int g_rseq;
-extern int g_gaitseq;
-extern Vector g_clorg;
-extern Vector g_clang;
+// Globals used by game logic
+const Vector g_vecZero = Vector( 0, 0, 0 );
+enginefuncs_t g_engfuncs;
+globalvars_t  *gpGlobals;
+ItemInfo CBasePlayerItem::ItemInfoArray[MAX_WEAPONS];
 
 // Pool of client side entities/entvars_t
 static entvars_t	ev[ 32 ];
@@ -198,27 +197,30 @@ CBaseEntity *EHANDLE::operator ->(void)
 	return (CBaseEntity *)GET_PRIVATE(Get());
 }
 
-
-void HUD_PrepEntity( CBaseEntity *pEntity, CBasePlayer *pWeaponOwner )
+void HUD_PrepEntity( CBaseEntity *pEntity )
 {
 	memset( &ev[ num_ents ], 0, sizeof( entvars_t ) );
 	pEntity->pev = &ev[ num_ents++ ];
 
 	pEntity->Precache();
 	pEntity->Spawn();
+}
 
-	if ( pWeaponOwner )
-	{
-		ItemInfo info;
-		memset( &info, 0, sizeof( ItemInfo ) );
 
-		((CBasePlayerWeapon *)pEntity)->m_pPlayer = pWeaponOwner;
+void HUD_PrepEntity( CBasePlayerWeapon *pEntity, CBasePlayer *pWeaponOwner )
+{
+	ItemInfo info = {};
 
-		((CBasePlayerWeapon *)pEntity)->GetItemInfo( &info );
+	memset( &ev[ num_ents ], 0, sizeof( entvars_t ) );
+	pEntity->pev = &ev[ num_ents++ ];
 
-		g_pWpns[ info.iId ] = (CBasePlayerWeapon *)pEntity;
-		CBasePlayerItem::ItemInfoArray[ info.iId ] = info;
-	}
+	pEntity->Precache();
+	pEntity->Spawn();
+	pEntity->m_pPlayer = pWeaponOwner;
+	pEntity->GetItemInfo( &info );
+
+	g_pWpns[ info.iId ] = pEntity;
+	CBasePlayerItem::ItemInfoArray[ info.iId ] = info;
 }
 
 /*
@@ -269,36 +271,7 @@ CBasePlayerWeapon :: CanDeploy
 */
 BOOL CBasePlayerWeapon :: CanDeploy( void )
 {
-#if 0
-	BOOL bHasAmmo = 0;
-
-	if ( !pszAmmo1() )
-	{
-		// this weapon doesn't use ammo, can always deploy.
-		return TRUE;
-	}
-
-	if ( pszAmmo1() )
-	{
-		bHasAmmo |= (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] != 0);
-	}
-	if ( pszAmmo2() )
-	{
-		bHasAmmo |= (m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] != 0);
-	}
-	if (m_iClip > 0)
-	{
-		bHasAmmo |= 1;
-	}
-	if (!bHasAmmo)
-	{
-		return FALSE;
-	}
-
 	return TRUE;
-#else
-	return TRUE;
-#endif
 }
 /*
 =====================
@@ -319,10 +292,30 @@ CBasePlayerWeapon::HasSecondaryAttack()
 */
 bool CBasePlayerWeapon::HasSecondaryAttack()
 {
-	if (g_bHoldingShield == false)
+	if (m_pPlayer->HasShield())
 	{
-		if (m_iId == WEAPON_AK47 || m_iId == WEAPON_XM1014 || m_iId == WEAPON_MAC10 || m_iId == WEAPON_ELITE || m_iId == WEAPON_FIVESEVEN || m_iId == WEAPON_MP5N || m_iId == WEAPON_M249 || m_iId == WEAPON_M3 || m_iId == WEAPON_TMP || m_iId == WEAPON_DEAGLE || m_iId == WEAPON_P228 || m_iId == WEAPON_P90 || m_iId == WEAPON_C4 || m_iId == WEAPON_GALIL)
-			return false;
+		return true;
+	}
+
+	switch (m_iId)
+	{
+	case WEAPON_AK47:
+	case WEAPON_XM1014:
+	case WEAPON_MAC10:
+	case WEAPON_ELITE:
+	case WEAPON_FIVESEVEN:
+	case WEAPON_MP5N:
+	case WEAPON_M249:
+	case WEAPON_M3:
+	case WEAPON_TMP:
+	case WEAPON_DEAGLE:
+	case WEAPON_P228:
+	case WEAPON_P90:
+	case WEAPON_C4:
+	case WEAPON_GALIL:
+		return false;
+	default:
+		break;
 	}
 
 	return true;
@@ -342,62 +335,56 @@ void CBasePlayerWeapon::FireRemaining(int &shotsFired, float &shootTime, BOOL is
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
+	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecDir;
 
 	if (isGlock18)
 	{
-		vecDir = m_pPlayer->FireBullets3(m_pPlayer->GetGunPosition(), gpGlobals->v_forward, 0.05, 8192, 1, BULLET_PLAYER_9MM, 18, 0.9, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
+		vecDir = m_pPlayer->FireBullets3(vecSrc, gpGlobals->v_forward, 0.05, 8192, 1, BULLET_PLAYER_9MM, 18, 0.9, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, ENT(m_pPlayer->pev), m_usFireGlock18, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000), (int)(m_pPlayer->pev->punchangle.y * 10000), m_iClip == 0, FALSE);
 		m_pPlayer->ammo_9mm--;
 	}
 	else
 	{
-		vecDir = m_pPlayer->FireBullets3(m_pPlayer->GetGunPosition(), gpGlobals->v_forward, m_fBurstSpread, 8192, 2, BULLET_PLAYER_556MM, 30, 0.96, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
-		PLAYBACK_EVENT_FULL(FEV_NOTHOST, ENT(m_pPlayer->pev), m_usFireFamas, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000000), (int)(m_pPlayer->pev->punchangle.y * 10000000), m_iClip == 0, FALSE);
+		vecDir = m_pPlayer->FireBullets3(vecSrc, gpGlobals->v_forward, m_fBurstSpread, 8192, 2, BULLET_PLAYER_556MM, 30, 0.96, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, ENT(m_pPlayer->pev), m_usFireFamas, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000000), (int)(m_pPlayer->pev->punchangle.y * 10000000), FALSE, FALSE);
 		m_pPlayer->ammo_556nato--;
 	}
 
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
-#ifndef CLIENT_DLL
-	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-#endif
-	shotsFired++;
 
-	if (shotsFired == 3)
-		shootTime = 0;
-	else
+	if (++shotsFired != 3)
 		shootTime = gpGlobals->time + 0.1;
+	else
+		shootTime = 0;
 }
 
-bool CBasePlayerWeapon::ShieldSecondaryFire(int up_anim, int down_anim)
+bool CBasePlayerWeapon::ShieldSecondaryFire(int iUpAnim, int iDownAnim)
 {
-	if (m_pPlayer->HasShield() == false)
+	if (!m_pPlayer->HasShield())
 		return false;
 
 	if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
 	{
 		m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
-		SendWeaponAnim(down_anim, UseDecrement() != FALSE);
-		strncpy(m_pPlayer->m_szAnimExtention, "shieldgun", sizeof(m_pPlayer->m_szAnimExtention));
-		m_fMaxSpeed = 250;
+		SendWeaponAnim(iDownAnim, UseDecrement() != FALSE);
+		strcpy(m_pPlayer->m_szAnimExtention, "shieldgun");
+		m_fMaxSpeed = 250.0f;
 		m_pPlayer->m_bShieldDrawn = false;
 	}
 	else
 	{
 		m_iWeaponState |= WPNSTATE_SHIELD_DRAWN;
-		SendWeaponAnim(up_anim, UseDecrement() != FALSE);
-		strncpy(m_pPlayer->m_szAnimExtention, "shielded", sizeof(m_pPlayer->m_szAnimExtention));
-		m_fMaxSpeed = 180;
+		SendWeaponAnim(iUpAnim, UseDecrement() != FALSE);
+		strcpy(m_pPlayer->m_szAnimExtention, "shielded");
+		m_fMaxSpeed = 180.0f;
 		m_pPlayer->m_bShieldDrawn = true;
 	}
 
-#ifndef CLIENT_DLL
-	m_pPlayer->UpdateShieldCrosshair((m_iWeaponState & WPNSTATE_SHIELD_DRAWN) ? true : false);
-	m_pPlayer->ResetMaxSpeed();
-#endif
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.4;
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.4;
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.6;
+	m_flNextSecondaryAttack = 0.4f;
+	m_flNextPrimaryAttack = 0.4f;
+	m_flTimeWeaponIdle = 0.6f;
+
 	return true;
 }
 
@@ -408,21 +395,27 @@ void CBasePlayerWeapon::KickBack(float up_base, float lateral_base, float up_mod
 
 void CBasePlayerWeapon::SetPlayerShieldAnim(void)
 {
-	if (m_pPlayer->HasShield() == true)
+	if (!m_pPlayer->HasShield())
+		return;
+
+	if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
 	{
-		if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-			strncpy(m_pPlayer->m_szAnimExtention, "shield", sizeof(m_pPlayer->m_szAnimExtention));
-		else
-			strncpy(m_pPlayer->m_szAnimExtention, "shieldgun", sizeof(m_pPlayer->m_szAnimExtention));
+		strcpy(m_pPlayer->m_szAnimExtention, "shield");
+	}
+	else
+	{
+		strcpy(m_pPlayer->m_szAnimExtention, "shieldgun");
 	}
 }
 
 void CBasePlayerWeapon::ResetPlayerShieldAnim(void)
 {
-	if (m_pPlayer->HasShield() == true)
+	if (m_pPlayer->HasShield())
 	{
 		if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-			strncpy(m_pPlayer->m_szAnimExtention, "shieldgun", sizeof(m_pPlayer->m_szAnimExtention));
+		{
+			strcpy(m_pPlayer->m_szAnimExtention, "shieldgun");
+		}
 	}
 }
 
@@ -518,7 +511,7 @@ void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal )
 void CBasePlayerWeapon::RetireWeapon()
 {
 	// TODO: Implement
-	//UTIL_GetNextBestWeapon( m_pPlayer, this );
+	// UTIL_GetNextBestWeapon( m_pPlayer, this );
 }
 
 Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, entvars_t *pevAttacker, bool bPistol, int shared_rand )
@@ -857,28 +850,6 @@ void UTIL_MakeVectors( const Vector &vec )
 	gEngfuncs.pfnAngleVectors( vec, gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up );
 }
 
-
-/*
-=====================
-CBasePlayerWeapon::PrintState
-
-For debugging, print out state variables to log file
-=====================
-*/
-/*void CBasePlayerWeapon::PrintState( void )
-{
-	COM_Log( "c:\\hl.log", "%.4f ", gpGlobals->time );
-	COM_Log( "c:\\hl.log", "%.4f ", m_pPlayer->m_flNextAttack );
-	COM_Log( "c:\\hl.log", "%.4f ", m_flNextPrimaryAttack );
-	COM_Log( "c:\\hl.log", "%.4f ", m_flTimeWeaponIdle - gpGlobals->time);
-	COM_Log( "c:\\hl.log", "%i ", m_iClip );
-}*/
-
-int RandomLong( int a, int b )
-{
-	return gEngfuncs.pfnRandomLong( a, b );
-}
-
 /*
 =====================
 HUD_InitClientWeapons
@@ -910,7 +881,7 @@ void HUD_InitClientWeapons( void )
 	// Pass through to engine
 	g_engfuncs.pfnPrecacheEvent		= gEngfuncs.pfnPrecacheEvent;
 	g_engfuncs.pfnRandomFloat		= gEngfuncs.pfnRandomFloat;
-	g_engfuncs.pfnRandomLong		= RandomLong;
+	g_engfuncs.pfnRandomLong		= gEngfuncs.pfnRandomLong;
 
 	// Allocate a slot for the local player
 	HUD_PrepEntity( &player		, NULL );
