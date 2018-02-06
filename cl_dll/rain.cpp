@@ -254,6 +254,15 @@ void ProcessRain( void )
 			vecEnd.y = falltime * Delta.y;
 			vecEnd.z = -4096;
 
+			if( gEngfuncs.PM_PointContents( vecStart, NULL ) == CONTENTS_SOLID )
+			{
+#ifdef _DEBUG
+				if( debug_rain->value )
+					debug_dropped++;
+#endif
+				continue; // drip cannot be placed
+			}
+
 			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 			gEngfuncs.pEventAPI->EV_PlayerTrace( vecStart, vecEnd, PM_WORLD_ONLY, -1, &pmtrace );
 

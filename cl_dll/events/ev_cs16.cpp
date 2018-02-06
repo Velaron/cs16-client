@@ -627,7 +627,11 @@ void EV_HLDM_FireBullets(int idx,
 
 		while (iShotPenetration != 0)
 		{
+			if( gEngfuncs.PM_PointContents( vecShortSrc, NULL ) == CONTENTS_SOLID )
+				break;
+
 			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+
 			gEngfuncs.pEventAPI->EV_PlayerTrace( vecShotSrc, vecEnd, 0, -1, &tr );
 
 			float flCurrentDistance = tr.fraction * flDistance;
@@ -682,19 +686,19 @@ void EV_HLDM_FireBullets(int idx,
 			}
 
 			flDistance = (flDistance - flCurrentDistance) * 0.5;
-			for( int i = 0; i < 3; i++ )
-			{
-				vecShotSrc[i] = tr.endpos[i]  + iPenetrationPower * vecDir[i];
-				vecEnd[i]     = vecShotSrc[i] + flDistance        * vecDir[i];
-			}
-
+			VectorMA( tr.endpos, iPenetration, vecDir, vecShotSrc );
+			VectorMA( vecShotSrc, flDistance, vecDir, vecEnd );
 
 			// trace back, so we will have a decal on the other side of solid area
 			pmtrace_t trOriginal;
-			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-			gEngfuncs.pEventAPI->EV_PlayerTrace(vecShotSrc, vecSrc, 0, -1, &trOriginal);
-			if( !trOriginal.startsolid )
-				EV_HLDM_DecalGunshot( &trOriginal, iBulletType, 0, r_smoke, g_smoke, b_smoke, true, bSparks, cTextureType, isSky );
+
+			if( gEngfuncs.PM_PointContents( vecShotSrc, NULL ) != CONTENTS_SOLID )
+			{
+				gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+				gEngfuncs.pEventAPI->EV_PlayerTrace(vecShotSrc, vecSrc, 0, -1, &trOriginal);
+				if( !trOriginal.startsolid )
+					EV_HLDM_DecalGunshot( &trOriginal, iBulletType, 0, r_smoke, g_smoke, b_smoke, true, bSparks, cTextureType, isSky );
+			}
 		}
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
