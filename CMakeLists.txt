@@ -29,6 +29,7 @@ project (CS16CLIENT)
 
 option(BUILD_CLIENT "Build client dll" ON)
 option(BUILD_MAINUI "Build mainui dll" ON)
+option(BUILD_SERVER "Build server dll" ON)
 option(ALLOW64BUILD "Allow amd64 build" OFF)
 
 #-----------------
@@ -52,10 +53,14 @@ if(BUILD_CLIENT)
 	add_subdirectory(cl_dll)
 endif()
 
-if(BUILD_MAINUI)
-	add_subdirectory(mainui)
+if(BUILD_SERVER)
+	add_subdirectory(3rdparty/regamedll/regamedll/dlls)
 endif()
 
+#if(BUILD_MAINUI)
+#	add_subdirectory(mainui)
+#endif()
+
 if(NOT BUILD_SERVER AND NOT BUILD_MAINUI)
-	error("Nothing to build")
+	message(ERROR "Nothing to build")
 endif()

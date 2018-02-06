@@ -97,7 +97,6 @@ set (WEAPONEVENT_SRCS
 
 set (CLWEAPON_SRCS
 	./cs_wpn/com_weapons.cpp
-	./cs_wpn/cs_baseentity.cpp
 	./cs_wpn/cs_weapons.cpp
 	../dlls/wpn_shared/wpn_ak47.cpp
 	../dlls/wpn_shared/wpn_aug.cpp
@@ -322,6 +321,13 @@ add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT
 	-D_DEBUG  -D_CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
 	-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp )
 add_compile_options(-Wl,--no-undefined)
+
+if( CS16CLIENT_PRINT_SOURCES )
+	get_target_property(MY_PROJECT_SOURCES ${CLDLL_LIBRARY} SOURCES)
+	foreach( i IN LISTS MY_PROJECT_SOURCES)
+		message(${i}   \\)
+	endforeach()
+endif()
 
 if( CS16CLIENT_ANALYZE )
 	include(../cmake/PVS-Studio.cmake)
