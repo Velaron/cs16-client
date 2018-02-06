@@ -43,8 +43,8 @@ void EV_FireGALIL( event_args_t *args )
 	int idx = args->entindex;
 	Vector origin( args->origin );
 	Vector angles(
-		args->iparam1 / 100.0f + args->angles[0],
-		args->iparam2 / 100.0f + args->angles[1],
+		args->iparam1 / 10000000.0f + args->angles[0],
+		args->iparam2 / 10000000.0f + args->angles[1],
 		args->angles[2]
 		);
 	Vector velocity( args->velocity );
