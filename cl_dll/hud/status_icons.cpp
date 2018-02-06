@@ -62,7 +62,7 @@ int CHudStatusIcons::Draw( float flTime )
 	{
 		if ( m_IconList[i].spr )
 		{
-			y -= ( m_IconList[i].rc.bottom - m_IconList[i].rc.top ) + 5;
+			y -= ( m_IconList[i].rc.Height() ) + 5;
 			
 			if( g_bInBombZone && !strcmp(m_IconList[i].szSpriteName, "c4") && ((int)(flTime * 10) % 2))
 				SPR_Set( m_IconList[i].spr, 255, 16, 16 );
