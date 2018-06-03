@@ -21,7 +21,7 @@
 #
 
 cmake_minimum_required(VERSION 2.6.0)
-project (CLDLL)
+project (CLDLL CXX)
 
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
 
@@ -171,68 +171,6 @@ set (PLAYERMOVE_SRCS
 	../pm_shared/pm_shared.cpp
 )
 
-set (MAINUI_CONTROLS_SOURCES
-	../mainui/controls/Framework.cpp
-	../mainui/controls/BaseItem.cpp
-	../mainui/controls/Action.cpp
-	../mainui/controls/Bitmap.cpp
-	../mainui/controls/CheckBox.cpp
-	../mainui/controls/ItemsHolder.cpp
-	../mainui/controls/Field.cpp
-	../mainui/controls/PicButton.cpp
-	../mainui/controls/ScrollList.cpp
-	../mainui/controls/Slider.cpp
-	../mainui/controls/SpinControl.cpp
-	../mainui/controls/YesNoMessageBox.cpp
-	../mainui/controls/MessageBox.cpp
-	../mainui/controls/Editable.h
-	../mainui/controls/Switch.cpp
-	../mainui/controls/BaseWindow.cpp
-	../mainui/controls/ProgressBar.cpp
-	../mainui/controls/BackgroundBitmap.cpp
-	)
-
-set (MAINUI_MENUS_SOURCES
-	../mainui/menus/Audio.cpp
-	../mainui/menus/Configuration.cpp
-	../mainui/menus/Controls.cpp
-	../mainui/menus/CreateGame.cpp
-	../mainui/menus/Credits.cpp
-	../mainui/menus/FileDialog.cpp
-	../mainui/menus/GameOptions.cpp
-	../mainui/menus/Gamepad.cpp
-	../mainui/menus/Main.cpp
-	../mainui/menus/Multiplayer.cpp
-	../mainui/menus/PlayerSetup.cpp
-	../mainui/menus/ServerBrowser.cpp
-	../mainui/menus/TouchButtons.cpp
-	../mainui/menus/Touch.cpp
-	../mainui/menus/TouchEdit.cpp
-	../mainui/menus/TouchOptions.cpp
-	../mainui/menus/Video.cpp
-	../mainui/menus/ConnectionProgress.cpp
-	../mainui/menus/dynamic/ScriptMenu.cpp
-
-	../mainui/menus/client/BaseClientMenu.cpp
-	../mainui/menus/client/SpectatorMenu.cpp
-	../mainui/menus/client/JoinMenu.cpp
-	../mainui/menus/client/BuyMenu.cpp
-	)
-
-set (MAINUI_SOURCES
-	../mainui/EventSystem.h
-	../mainui/BaseMenu.cpp
-	../mainui/Btns.cpp
-	../mainui/MenuStrings.cpp
-	../mainui/CFGScript.cpp
-	../mainui/Utils.cpp
-	../mainui/Scissor.cpp
-	../mainui/udll_int.cpp
-	)
-
-list(APPEND MAINUI_SOURCES ${MAINUI_CONTROLS_SOURCES})
-list(APPEND MAINUI_SOURCES ${MAINUI_MENUS_SOURCES})
-
 set (CLDLL_SOURCES
 	./cdll_int.cpp
     ./demo.cpp
@@ -280,7 +218,6 @@ set (CLDLL_SOURCES
 	${WEAPONEVENT_SRCS}
 	${CLWEAPON_SRCS}
 	${STUDIORENDER_SRCS}
-	${MAINUI_SOURCES}
 )
 
 include_directories (
