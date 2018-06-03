@@ -54,12 +54,12 @@ if(BUILD_CLIENT)
 endif()
 
 if(BUILD_SERVER)
-	add_subdirectory(3rdparty/regamedll/regamedll/dlls)
+	add_subdirectory(3rdparty/ReGameDLL_CS/regamedll/dlls)
 endif()
 
-#if(BUILD_MAINUI)
-#	add_subdirectory(mainui)
-#endif()
+if(BUILD_MAINUI)
+	add_subdirectory(mainui_cpp)
+endif()
 
 if(NOT BUILD_SERVER AND NOT BUILD_MAINUI)
 	message(ERROR "Nothing to build")
