@@ -50,86 +50,6 @@ float rsqrt( float number )
 
 	return y;
 }
-/* // defined in pm_math.cpp
-float Length(const float *v)
-{
-	int		i;
-	float	length;
-	
-	length = 0;
-	for (i=0 ; i< 3 ; i++)
-		length += v[i]*v[i];
-	length = sqrt (length);		// FIXME
-
-	return length;
-}
-void VectorAngles( const float *forward, float *angles )
-{
-	float	tmp, yaw, pitch;
-	
-	if (forward[1] == 0 && forward[0] == 0)
-	{
-		yaw = 0;
-		if (forward[2] > 0)
-			pitch = 90;
-		else
-			pitch = 270;
-	}
-	else
-	{
-		yaw = (atan2(forward[1], forward[0]) * 180 / M_PI);
-		if (yaw < 0)
-			yaw += 360;
-
-		tmp = sqrt (forward[0]*forward[0] + forward[1]*forward[1]);
-		pitch = (atan2(forward[2], tmp) * 180 / M_PI);
-		if (pitch < 0)
-			pitch += 360;
-	}
-	
-	angles[0] = pitch;
-	angles[1] = yaw;
-	angles[2] = 0;
-}
-
-float VectorNormalize (float *v)
-{
-	float	length;
-
-	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = rsqrt (length);
-
-	if (length)
-	{
-		v[0] *= length;
-		v[1] *= length;
-		v[2] *= length;
-	}
-
-	return length;
-
-}
-
-void VectorInverse ( float *v )
-{
-	v[0] = -v[0];
-	v[1] = -v[1];
-	v[2] = -v[2];
-}
-void VectorScale (const float *in, float scale, float *out)
-{
-	out[0] = in[0]*scale;
-	out[1] = in[1]*scale;
-	out[2] = in[2]*scale;
-}
-
-void VectorMA (const float *veca, float scale, const float *vecb, float *vecc)
-{
-	vecc[0] = veca[0] + scale*vecb[0];
-	vecc[1] = veca[1] + scale*vecb[1];
-	vecc[2] = veca[2] + scale*vecb[2];
-}
-*/
 
 int HUD_GetSpriteIndexByName( const char *sz )
 {
@@ -147,9 +67,9 @@ wrect_t HUD_GetSpriteRect( int index )
 }
 
 vec3_t g_ColorBlue	= { 0.6, 0.8, 1.0 };
-vec3_t g_ColorRed		= { 1.0, 0.25, 0.25 };
+vec3_t g_ColorRed	= { 1.0, 0.25, 0.25 };
 vec3_t g_ColorGreen	= { 0.6, 1.0, 0.6 };
-vec3_t g_ColorYellow	= { 1.0, 0.7, 0.0 };
+vec3_t g_ColorYellow= { 1.0, 0.7, 0.0 };
 vec3_t g_ColorGrey	= { 0.8, 0.8, 0.8 };
 
 float *GetClientColor( int clientIndex )
@@ -164,5 +84,3 @@ float *GetClientColor( int clientIndex )
 	default:              return g_ColorGrey;
 	}
 }
-
-

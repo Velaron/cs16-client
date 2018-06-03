@@ -52,70 +52,6 @@ void SinCosFastVector(float r1, float r2, float r3, float r4,
 
 /*
 ====================
-AngleMatrix
-
-====================
-*/
-/* // defined in pm_math.cpp
-void AngleMatrix (const float *angles, float (*matrix)[4] )
-{
-	float		sr, sp, sy, cr, cp, cy;
-	
-
-#ifdef VECTORIZE_SINCOS
-	SinCosFastVector( DEG2RAD(angles[YAW]),
-					  DEG2RAD(angles[PITCH]),
-					  DEG2RAD(angles[ROLL]), 0,
-					  &sy, &sp, &sr, NULL,
-					  &cy, &cp, &cr, NULL);
-#else
-	float		angle;
-
-	angle = angles[YAW] * (M_PI*2 / 360);
-	sy = sin(angle);
-	cy = cos(angle);
-	angle = angles[PITCH] * (M_PI*2 / 360);
-	sp = sin(angle);
-	cp = cos(angle);
-	angle = angles[ROLL] * (M_PI*2 / 360);
-	sr = sin(angle);
-	cr = cos(angle);
-#endif
-
-	// matrix = (YAW * PITCH) * ROLL
-	matrix[0][0] = cp*cy;
-	matrix[1][0] = cp*sy;
-	matrix[2][0] = -sp;
-	matrix[0][1] = sr*sp*cy+cr*-sy;
-	matrix[1][1] = sr*sp*sy+cr*cy;
-	matrix[2][1] = sr*cp;
-	matrix[0][2] = (cr*sp*cy+-sr*-sy);
-	matrix[1][2] = (cr*sp*sy+-sr*cy);
-	matrix[2][2] = cr*cp;
-	matrix[0][3] = 0.0;
-	matrix[1][3] = 0.0;
-	matrix[2][3] = 0.0;
-}
-*/
-/*
-====================
-VectorCompare
-
-====================
-*//* //defined in pm_math.cpp
-int VectorCompare (const float *v1, const float *v2)
-{
-	int		i;
-	
-	for (i=0 ; i<3 ; i++)
-		if (v1[i] != v2[i])
-			return 0;
-			
-	return 1;
-}
-*/
-/*
-====================
 CrossProduct
 
 ====================
@@ -125,22 +61,7 @@ void CrossProduct (const float *v1, const float *v2, float *cross)
 	cross[0] = v1[1]*v2[2] - v1[2]*v2[1];
 	cross[1] = v1[2]*v2[0] - v1[0]*v2[2];
 	cross[2] = v1[0]*v2[1] - v1[1]*v2[0];
-}*/
-
-/*
-====================
-VectorTransform
-
-====================
-*/
-#ifdef _MSVC
-void VectorTransform (const float *in1, float in2[3][4], float *out)
-{
-	out[0] = DotProduct(in1, in2[0]) + in2[0][3];
-	out[1] = DotProduct(in1, in2[1]) + in2[1][3];
-	out[2] = DotProduct(in1, in2[2]) + in2[2][3];
 }
-#endif
 
 /*
 ================
@@ -285,15 +206,4 @@ void QuaternionMatrix( vec4_t quaternion, float (*matrix)[4] )
 	matrix[0][2] = 2.0 * quaternion[0] * quaternion[2] + 2.0 * quaternion[3] * quaternion[1];
 	matrix[1][2] = 2.0 * quaternion[1] * quaternion[2] - 2.0 * quaternion[3] * quaternion[0];
 	matrix[2][2] = 1.0 - 2.0 * quaternion[0] * quaternion[0] - 2.0 * quaternion[1] * quaternion[1];
-}
-
-/*
-====================
-MatrixCopy
-
-====================
-*/
-void MatrixCopy( float in[3][4], float out[3][4] )
-{
-	memcpy( out, in, sizeof( float ) * 3 * 4 );
 }

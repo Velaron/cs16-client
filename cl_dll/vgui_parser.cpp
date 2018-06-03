@@ -66,7 +66,7 @@ void Localize_Init( )
 	char filename[64];
 	snprintf( filename, sizeof( filename ), "%s/resource/%s_english.txt", gamedir, gamedir );
 
-#ifndef OPENBINARY
+#ifndef _WIN32
 	FILE *wf = fopen( filename, "r" );
 #else
 	FILE *wf = fopen( filename, "rb" );

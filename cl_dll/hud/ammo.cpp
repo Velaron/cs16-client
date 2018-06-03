@@ -51,7 +51,7 @@ int g_iShotsFired;
 
 void WeaponsResource :: LoadAllWeaponSprites( void )
 {
-	for (int i = 0; i < MAX_WEAPONS; i++)
+	for( int i = 0; i < MAX_WEAPONS; i++ )
 	{
 		if ( rgWeapons[i].iId )
 			LoadWeaponSprites( &rgWeapons[i] );

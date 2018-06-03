@@ -30,7 +30,7 @@ int		VectorCompare (const float *v1, const float *v2);
 void	CrossProduct (const float *v1, const float *v2, float *cross);
 void	VectorTransform( const float *in1, float ( *in2 )[4], float *out );
 void	ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
-void	MatrixCopy( float in[3][4], float out[3][4] );
+#define MatrixCopy( in, out ) memcpy( ( out ), ( in ), sizeof( float ) * 3 * 4 );
 void	QuaternionMatrix( vec4_t quaternion, float (*matrix)[4] );
 void	QuaternionSlerp( vec4_t p, vec4_t q, float t, vec4_t qt );
 void	AngleQuaternion( float *angles, vec4_t quaternion );
