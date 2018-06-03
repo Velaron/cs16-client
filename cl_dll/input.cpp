@@ -91,6 +91,8 @@ state bit 2 is edge triggered on the down to up transition
 kbutton_t	in_mlook;
 kbutton_t	in_klook;
 kbutton_t	in_jlook;
+kbutton_t	in_left;
+kbutton_t	in_right;
 kbutton_t	in_forward;
 kbutton_t	in_back;
 kbutton_t	in_lookup;
@@ -368,7 +370,6 @@ int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding
 	return 1;
 }
 
-void IN_Stub( void ) { }
 void IN_BreakDown( void ) { KeyDown( &in_break );}
 void IN_BreakUp( void ) { KeyUp( &in_break ); }
 void IN_KLookDown (void) {KeyDown(&in_klook);}
@@ -380,6 +381,10 @@ void IN_UpDown(void) {KeyDown(&in_up);}
 void IN_UpUp(void) {KeyUp(&in_up);}
 void IN_DownDown(void) {KeyDown(&in_down);}
 void IN_DownUp(void) {KeyUp(&in_down);}
+void IN_LeftDown(void) {KeyDown(&in_left);}
+void IN_LeftUp(void) {KeyUp(&in_left);}
+void IN_RightDown(void) {KeyDown(&in_right);}
+void IN_RightUp(void) {KeyUp(&in_right);}
 
 void IN_ForwardDown(void)
 {
@@ -596,6 +601,12 @@ void CL_AdjustAngles ( float frametime, float *viewangles )
 		speed = frametime;
 	}
 
+	if (!(in_strafe.state & 1))
+	{
+		viewangles[YAW] -= speed*cl_yawspeed->value*CL_KeyState (&in_right);
+		viewangles[YAW] += speed*cl_yawspeed->value*CL_KeyState (&in_left);
+		viewangles[YAW] = anglemod(viewangles[YAW]);
+	}
 	if (in_klook.state & 1)
 	{
 		//V_StopPitchDrift ();
@@ -791,6 +802,16 @@ int CL_ButtonBits( int bResetState )
 	{
 		bits |= IN_CANCEL;
 	}
+
+	if ( in_left.state & 3 )
+	{
+		bits |= IN_LEFT;
+	}
+	
+	if (in_right.state & 3)
+	{
+		bits |= IN_RIGHT;
+	}
 	
 	if ( in_moveleft.state & 3 )
 	{
@@ -836,6 +857,8 @@ int CL_ButtonBits( int bResetState )
 		in_forward.state &= ~2;
 		in_back.state &= ~2;
 		in_use.state &= ~2;
+		in_left.state &= ~2;
+		in_right.state &= ~2;
 		in_moveleft.state &= ~2;
 		in_moveright.state &= ~2;
 		in_attack2.state &= ~2;
@@ -884,10 +907,10 @@ void InitInput (void)
 	gEngfuncs.pfnAddCommand ("-moveup",IN_UpUp);
 	gEngfuncs.pfnAddCommand ("+movedown",IN_DownDown);
 	gEngfuncs.pfnAddCommand ("-movedown",IN_DownUp);
-	gEngfuncs.pfnAddCommand ("+left",IN_Stub);
-	gEngfuncs.pfnAddCommand ("-left",IN_Stub);
-	gEngfuncs.pfnAddCommand ("+right",IN_Stub);
-	gEngfuncs.pfnAddCommand ("-right",IN_Stub);
+	gEngfuncs.pfnAddCommand ("+left",IN_LeftDown);
+	gEngfuncs.pfnAddCommand ("-left",IN_LeftUp);
+	gEngfuncs.pfnAddCommand ("+right",IN_RightDown);
+	gEngfuncs.pfnAddCommand ("-right",IN_RightUp);
 	gEngfuncs.pfnAddCommand ("+forward",IN_ForwardDown);
 	gEngfuncs.pfnAddCommand ("-forward",IN_ForwardUp);
 	gEngfuncs.pfnAddCommand ("+back",IN_BackDown);
