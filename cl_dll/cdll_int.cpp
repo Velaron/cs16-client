@@ -31,9 +31,9 @@
 #include "mobility_int.h"
 #include "vgui_parser.h"
 
-cl_enginefunc_t gEngfuncs = { };
-render_api_t gRenderAPI = { };
-mobile_engfuncs_t gMobileAPI = { };
+cl_enginefunc_t		gEngfuncs  = { };
+render_api_t		gRenderAPI = { };
+mobile_engfuncs_t	gMobileAPI = { };
 CHud gHUD;
 int g_iXash = 0; // indicates a buildnum
 int g_iMobileAPIVersion = 0;
@@ -314,9 +314,7 @@ Called when Xash3D sends render api to us
 int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback )
 {
 	if( version != CL_RENDER_INTERFACE_VERSION )
-	{
 		return false;
-	}
 
 	gRenderAPI = *renderfuncs;
 
@@ -324,12 +322,10 @@ int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, re
 	// *callback = renderInterface;
 
 	// we have here a Host_Error, so check Xash for version
-#ifdef __ANDROID__
-	if( g_iXash < 3224 )
+	if( g_iXash < 3366 )
 	{
 		gRenderAPI.Host_Error("Xash3D Android version check failed!\nPlease update your Xash3D Android!\n");
 	}
-#endif
 
 	return true;
 }
@@ -346,19 +342,14 @@ int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 		gEngfuncs.Con_Printf("Client Error: Mobile API version mismatch. Got: %i, want: %i\n",
 			mobileapi->version, MOBILITY_API_VERSION);
 
-#ifdef __ANDROID__
-		if( gRenderAPI.Host_Error )
-		{
-			gRenderAPI.Host_Error("Xash3D Android version check failed!\nPlease update your Xash3D Android!\n");
-		}
-#endif
+		gRenderAPI.Host_Error("Xash3D Android version check failed!\nPlease update your Xash3D Android!\n");
 		return 1;
 	}
 
 	g_iMobileAPIVersion = MOBILITY_API_VERSION;
 	gMobileAPI = *mobileapi;
 
-	#define TOUCH_ADDDEFAULT (*gMobileAPI.pfnTouchAddDefaultButton)
+#define TOUCH_ADDDEFAULT (*gMobileAPI.pfnTouchAddDefaultButton)
 
 	gMobileAPI.pfnTouchResetDefaultButtons();
 	unsigned char color[] = { 255, 255, 255, 150 };
@@ -396,7 +387,7 @@ int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 	TOUCH_ADDDEFAULT( "cmd", "touch/gfx/cmdmenu.tga", "exec touch/cmd/cmd", 0.100000, 0.248889, 0.200000, 0.426815, color, 2, 1.000000, 1 );
 	TOUCH_ADDDEFAULT( "radio", "touch/gfx/radio.tga", "showvguimenu 38", 0.000000, 0.248889, 0.100000, 0.426815, color, 2, 1.000000, 0 );
 	TOUCH_ADDDEFAULT( "walk", "touch/gfx/walk.tga", "+speed", 0.000000, 0.640000, 0.100000, 0.817926, color, 2, 1.000000, 0 );
-	
+
 	return 0;
 }
 
@@ -484,11 +475,7 @@ public:
 	// returns the name of the server the user is connected to, if any
 	virtual const char *GetServerHostName()
 	{
-		/*if (gViewPortInterface)
-		{
-			return gViewPortInterface->GetServerName();
-		}*/
-		return "";
+		return gHUD.m_szServerName;
 	}
 
 	// ingame voice manipulation
