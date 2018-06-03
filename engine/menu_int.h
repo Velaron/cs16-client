@@ -23,10 +23,10 @@ GNU General Public License for more details.
 typedef int		HIMAGE;		// handle to a graphic
 
 // flags for PIC_Load
-#define PIC_NEAREST		(1<<0)		// disable texfilter
-#define PIC_KEEP_RGBDATA	(1<<1)		// some images keep source
-#define PIC_NOFLIP_TGA	(1<<2)		// Steam background completely ignore tga attribute 0x20
-#define PIC_KEEP_8BIT	(1<<3)		// keep original 8-bit image (if present)
+#define PIC_NEAREST		(1U << 0)		// disable texfilter
+#define PIC_KEEP_RGBDATA	(1U << 1)		// some images keep source
+#define PIC_NOFLIP_TGA	(1U << 2)		// Steam background completely ignore tga attribute 0x20
+#define PIC_KEEP_8BIT	(1U << 3)		// keep original 8-bit image (if present)
 
 typedef struct ui_globalvars_s
 {	
@@ -158,9 +158,11 @@ typedef struct ui_enginefuncs_s
 	long	(*pfnRandomLong)( long lLow, long lHigh );
 
 	void	(*pfnSetCursor)( void *hCursor );			// change cursor
-	int	(*pfnIsMapValid)( char *filename );
+	int	(*pfnIsMapValid)( const char *filename );
 	void	(*pfnProcessImage)( int texnum, float gamma, int topColor, int bottomColor );
 	int	(*pfnCompareFileTime)( char *filename1, char *filename2, int *iCompare );
+
+	const char *(*pfnGetModeString)( int vid_mode );
 } ui_enginefuncs_t;
 
 typedef struct ui_textfuncs_s {
@@ -195,4 +197,8 @@ typedef int (*MENUAPI)( UI_FUNCTIONS *pFunctionTable, ui_enginefuncs_t* engfuncs
 typedef int (*UITEXTAPI)( ui_textfuncs_t* engfuncs );
 
 typedef void (*ADDTOUCHBUTTONTOLIST)( const char *name, const char *texture, const char *command, unsigned char *color, int flags );
+
+#define PLATFORM_UPDATE_PAGE "PlatformUpdatePage"
+#define GENERIC_UPDATE_PAGE "GenericUpdatePage"
+
 #endif//MENU_INT_H
