@@ -5,6 +5,3 @@
 [submodule "android/extras_src/extras"]
 	path = 3rdparty/extras
 	url = https://bitbucket.org/SergioPoverony/cs16client-vgui-menus
-[submodule "3rdparty/regamedll"]
-	path = 3rdparty/regamedll
-	url = https://github.com/FWGS/regamedll
