@@ -33,6 +33,7 @@
 #include "com_model.h"
 #include "kbutton.h"
 #include "input.h"
+#include "com_weapons.h"
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
@@ -532,47 +533,65 @@ struct viewinterp_t
 	int CurrentAngle;
 };
 
-float GetGunOffset(cl_entity_s* vm)
+float GetGunOffset( cl_entity_t *e )
 {
-	if(!vm->model)
-		return 0;
+	int id = HUD_GetWeapon();
 
-	char* gunname = vm->model->name;
-
-	if(!gunname || !gunname[0])
-		return 0;
-
-	gunname += 9;
-
-	#define CHECKGUNOFFSET(a,b) if(!strcmp(a,gunname)) return b;
-	CHECKGUNOFFSET("glock18.mdl", -4.55f);
-	CHECKGUNOFFSET("usp.mdl", -4.64f);
-	CHECKGUNOFFSET("p228.mdl", -4.65f);
-	CHECKGUNOFFSET("deagle.mdl", -4.71f);
-	CHECKGUNOFFSET("fiveseven.mdl", -4.84f);
-	CHECKGUNOFFSET("m3.mdl", -5.03f);
-	CHECKGUNOFFSET("xm1014.mdl", -5.82f);
-	CHECKGUNOFFSET("mac10.mdl", -5.05f);
-	CHECKGUNOFFSET("tmp.mdl", -6.47f);
-	CHECKGUNOFFSET("mp5.mdl", -5.53f);
-	CHECKGUNOFFSET("ump45.mdl", -6.07f);
-	CHECKGUNOFFSET("p90.mdl", -4.32f);
-	CHECKGUNOFFSET("scout.mdl", -5.14f);
-	CHECKGUNOFFSET("awp.mdl", -6.02f);
-	CHECKGUNOFFSET("famas.mdl", -4.84f);
-	CHECKGUNOFFSET("aug.mdl", -6.22f);
-	CHECKGUNOFFSET("m4a1.mdl", -6.74f);
-	CHECKGUNOFFSET("sg550.mdl", -7.11f);
-	CHECKGUNOFFSET("ak47.mdl", -6.79f);
-	CHECKGUNOFFSET("g3sg1.mdl", -6.19f);
-	CHECKGUNOFFSET("sg552.mdl", -5.27f);
-	CHECKGUNOFFSET("galil.mdl", -4.78f);
-	CHECKGUNOFFSET("m249.mdl", -5.13f);
+	switch( id )
+	{
+	case WEAPON_GLOCK18:
+		return -4.55f;
+	case WEAPON_USP:
+		return -4.64f;
+	case WEAPON_P228:
+		return -4.65f;
+	case WEAPON_DEAGLE:
+		return -4.71f;
+	case WEAPON_FIVESEVEN:
+		return -4.84f;
+	case WEAPON_M3:
+		return -5.03f;
+	case WEAPON_XM1014:
+		return -5.82f;
+	case WEAPON_MAC10:
+		return -5.05f;
+	case WEAPON_TMP:
+		return -6.47f;
+	case WEAPON_MP5N:
+		return -5.53f;
+	case WEAPON_UMP45:
+		return -5.53f;
+	case WEAPON_P90:
+		return -4.32f;
+	case WEAPON_SCOUT:
+		return -5.14f;
+	case WEAPON_AWP:
+		return -6.02f;
+	case WEAPON_FAMAS:
+		return -4.84f;
+	case WEAPON_AUG:
+		return -6.02f;
+	case WEAPON_M4A1:
+		return -7.0f; //-6.47f;
+	case WEAPON_SG550:
+		return -7.11f;
+	case WEAPON_AK47:
+		return -6.79f;
+	case WEAPON_G3SG1:
+		return -6.19f;
+	case WEAPON_SG552:
+		return -5.27f;
+	case WEAPON_GALIL:
+		return -4.78f;
+	case WEAPON_M249:
+		return -5.13f;
+	}
 	return 0;
 }
 
 void V_CalcQuakeGuns()
 {
+#if 1
 	cl_entity_s * vm = gEngfuncs.GetViewModel();
 
 	if(!cl_quakeguns_enable->value)
@@ -586,8 +605,6 @@ void V_CalcQuakeGuns()
 		return;
 
 	float* org = vm->origin;
-	float* ang = vm->angles;
-	VectorCopy(v_angles, ang);
 
 	vec3_t forward, right, up;
 
