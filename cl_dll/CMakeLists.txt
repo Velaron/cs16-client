@@ -41,8 +41,7 @@ set (WEAPONEVENT_SRCS
 	./events/event_createsmoke.cpp
 	./events/event_deagle.cpp
 	./events/event_decal_reset.cpp
-	./events/event_elite_left.cpp
-	./events/event_elite_right.cpp
+	./events/event_elite.cpp
 	./events/event_famas.cpp
 	./events/event_fiveseven.cpp
 	./events/event_g3sg1.cpp
