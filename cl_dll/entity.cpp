@@ -298,7 +298,7 @@ void CL_MuzzleFlash( const cl_entity_t *entity, vec3_t pos, int type )
 		pTemp->entity.angles[2] = Com_RandomLong( 0, 359 );
 	}
 
-	if( /*gHUD.cl_gunsmoke->value && */EV_IsLocal( entity->index ))
+	if( gHUD.cl_gunsmoke->value && EV_IsLocal( entity->index ))
 	{
 		Vector smoke_origin = pos;
 		Vector forward;

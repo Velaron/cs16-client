@@ -86,24 +86,6 @@ void EV_Fireglock18( event_args_t *args )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, 14.0, 0);
 		}
-
-		if( gHUD.cl_gunsmoke->value )
-		{
-			cl_entity_t *ent = gEngfuncs.GetViewModel();
-
-			if( ent )
-			{
-				Vector smoke_origin = ent->attachment[0];
-
-				smoke_origin = smoke_origin - forward * 3;
-
-				float scale = Com_RandomFloat( 0.15, 0.3 );
-
-				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 0,  scale, 7,7,7, false, velocity );
-				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 20, scale + 0.1, 10,10,10, false, velocity );
-				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 40, scale, 13,13,13, false, velocity );
-			}
-		}
 	}
 	else
 	{

@@ -51,7 +51,6 @@ void EV_FireM4A1( event_args_t *args )
 		);
 	Vector velocity( args->velocity );
 	Vector forward, right, up;
-	ESmoke smokeType;
 
 	AngleVectors( angles, forward, right, up );
 
@@ -62,12 +61,10 @@ void EV_FireM4A1( event_args_t *args )
 		if( args->bparam1 )
 		{
 			sequence = Com_RandomLong( M4A1_SHOOT1, M4A1_SHOOT3 );
-			smokeType = SMOKE_BLACK;
 		}
 		else
 		{
 			sequence = Com_RandomLong( M4A1_UNSIL_SHOOT1, M4A1_UNSIL_SHOOT3 );
-			smokeType = SMOKE_RIFLE;
 		}
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(sequence, 2);
 		if( !gHUD.cl_righthand->value )
@@ -77,16 +74,6 @@ void EV_FireM4A1( event_args_t *args )
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, 10.0, 0);
-		}
-
-		if( gHUD.cl_gunsmoke->value )
-		{
-			cl_entity_t *ent = gEngfuncs.GetViewModel();
-
-			if( ent )
-			{
-				EV_CS16Client_CreateSmoke( smokeType, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
-			}
 		}
 	}
 	else

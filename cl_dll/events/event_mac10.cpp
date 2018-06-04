@@ -60,16 +60,6 @@ void EV_FireMAC10(event_args_s *args)
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -9.0, 11.0, 0);
 		}
-
-		if( gHUD.cl_gunsmoke->value )
-		{
-			cl_entity_t *ent = gEngfuncs.GetViewModel();
-
-			if( ent )
-			{
-				EV_CS16Client_CreateSmoke( SMOKE_RIFLE, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
-			}
-		}
 	}
 	else
 	{

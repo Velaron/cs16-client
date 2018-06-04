@@ -50,16 +50,6 @@ void EV_FireM3( event_args_t *args )
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(Com_RandomLong(M3_FIRE1, M3_FIRE2), 2);
-
-		if( gHUD.cl_gunsmoke->value )
-		{
-			cl_entity_t *ent = gEngfuncs.GetViewModel();
-
-			if( ent )
-			{
-				EV_CS16Client_CreateSmoke( SMOKE_BLACK, ent->attachment[0], forward, 3, 0.4, 20, 20, 20, false, velocity );
-			}
-		}
 	}
 
 	PLAY_EVENT_SOUND( SOUNDS_NAME );

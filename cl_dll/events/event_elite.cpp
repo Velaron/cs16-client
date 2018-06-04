@@ -73,18 +73,6 @@ void EV_FireElite( event_args_s *args, bool isRight )
 		}
 
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(sequence, 2);
-
-		if( gHUD.cl_gunsmoke->value )
-		{
-			cl_entity_t *ent = gEngfuncs.GetViewModel();
-
-			if( ent )
-			{
-				int i = isRight ? 1 : 0;
-
-				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, ent->attachment[i], forward, 3, 0.3, 20, 20, 20, false, velocity );
-			}
-		}
 	}
 	else
 	{

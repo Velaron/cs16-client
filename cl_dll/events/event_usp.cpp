@@ -89,22 +89,6 @@ void EV_FireUSP( event_args_t *args )
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, 14.0, 0);
 		}
-
-		if( gHUD.cl_gunsmoke->value )
-		{
-			cl_entity_t *ent = gEngfuncs.GetViewModel();
-
-			if( ent )
-			{
-				Vector smoke_origin = ent->attachment[0];
-
-				smoke_origin = smoke_origin - forward * 3;
-
-				float scale = Com_RandomFloat( 0.2, 0.35 );
-
-				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 20, scale + 0.1, 10,10,10, false, velocity );
-			}
-		}
 	}
 	else
 	{
