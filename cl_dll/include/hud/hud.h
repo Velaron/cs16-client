@@ -780,10 +780,14 @@ public:
 	int VidInit( void );
 	int Draw( float flTime );
 	void Shutdown( void );
-
 private:
+	int InitBuiltinTextures();
+
 	float left, right, centerx, centery;
 	int m_iScopeArc[4];
+
+	bool m_bUseBuiltin;
+	bool m_bBuiltinInitialized;
 };
 
 //
