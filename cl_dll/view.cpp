@@ -622,19 +622,14 @@ void V_CalcQuakeGuns()
 void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles )
 {
 	static Vector m_vecLastFacing;
-	static Vector vecLastAngles = angles;
-	Vector interpAngles;
-
-	// Calculate our drift
-	Vector forward, right, up;
 
 	if( !cl_weaponlag_enable->value || cl_weaponlag->value <= 0.0f )
 		return;
 
-	// TODO: interpolate
-	interpAngles = angles;
+	// Calculate our drift
+	Vector forward, right, up;
 
-	AngleVectors( interpAngles, forward, NULL, NULL );
+	AngleVectors( angles, forward, right, up );
 
 	if( pparams->frametime != 0.0f )	// not in paused
 	{
@@ -647,9 +642,7 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles )
 		// The old code would slam lastfacing with origin causing the viewmodel to pop to a new position
 		float flDiff = vDifference.Length();
 		if( flDiff > cl_weaponlag->value )
-		{
 			flSpeed *= flDiff / cl_weaponlag->value;
-		}
 
 		// FIXME:  Needs to be predictable?
 		m_vecLastFacing = m_vecLastFacing + vDifference * ( flSpeed * pparams->frametime );
@@ -678,8 +671,6 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles )
 						+ up      * ( pitch * 0.02f  );
 
 	}
-
-	vecLastAngles = angles;
 }
 
 /*

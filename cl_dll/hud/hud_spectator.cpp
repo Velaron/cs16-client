@@ -440,7 +440,6 @@ int CHudSpectator::VidInit()
 	m_hsprBomb			= SPR_Load("sprites/ic4.spr");
 	m_hsprBackpack		= SPR_Load("sprites/ibackpack.spr");
 	m_hsprHostage		= SPR_Load("sprites/ihostage.spr");
-	m_hCrosshair		= SPR_Load("sprites/crosshairs.spr");
 	
 	return 1;
 }

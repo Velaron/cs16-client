@@ -1267,7 +1267,25 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.m_bCanShoot	= (flags & PLAYER_CAN_SHOOT) != 0;
 	g_iFreezeTimeOver	= !(flags & PLAYER_FREEZE_TIME_OVER);
 	g_bInBombZone		= (flags & PLAYER_IN_BOMB_ZONE) != 0;
-	g_bHoldingShield	= (flags & PLAYER_HOLDING_SHIELD) != 0;
+
+	// validate if we can hold shield with specified weapon
+	switch( from->client.m_iId )
+	{
+	case WEAPON_KNIFE:
+	case WEAPON_GLOCK18:
+	case WEAPON_USP:
+	case WEAPON_P228:
+	case WEAPON_DEAGLE:
+	case WEAPON_FIVESEVEN:
+	case WEAPON_HEGRENADE:
+	case WEAPON_FLASHBANG:
+	case WEAPON_SMOKEGRENADE:
+		g_bHoldingShield	= (flags & PLAYER_HOLDING_SHIELD) != 0;
+		break;
+	default:
+		g_bHoldingShield = false;
+		break;
+	}
 
 	// Point to current weapon object
 	if ( from->client.m_iId )
