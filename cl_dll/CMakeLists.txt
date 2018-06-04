@@ -28,16 +28,6 @@ project (CLDLL CXX)
 add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-parameter -Wl,--no-undefined)
 set(CMAKE_CXX_STANDARD 11)
 
-# force build 32bit libraries
-if(CMAKE_SIZEOF_VOID_P MATCHES "8")
-    if(APPLE)
-        SET(CMAKE_OSX_ARCHITECTURES "i386")
-    else()
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-    endif()
-endif()
-
 # find_package(SDL2 REQUIRED)
 
 set (CLDLL_LIBRARY client)
@@ -181,8 +171,8 @@ set (CLDLL_SOURCES
     ./tri.cpp
 	./util.cpp
 	./view.cpp
-	#./input_xash3d.cpp
-	./input_sdl.cpp
+	./input_xash3d.cpp
+	#./input_sdl.cpp
     ./vgui_parser.cpp
     ./unicode_strtools.cpp
 	./draw_util.cpp
@@ -242,25 +232,3 @@ add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT
 	-D_DEBUG  -D_CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
 	-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp )
 add_compile_options(-Wl,--no-undefined)
-
-if( CS16CLIENT_PRINT_SOURCES )
-	get_target_property(MY_PROJECT_SOURCES ${CLDLL_LIBRARY} SOURCES)
-	foreach( i IN LISTS MY_PROJECT_SOURCES)
-		message(${i}   \\)
-	endforeach()
-endif()
-
-if( CS16CLIENT_ANALYZE )
-	include(../cmake/PVS-Studio.cmake)
-	pvs_studio_add_target(TARGET analyze ALL
-		FORMAT tasklist
-		LOG "${CMAKE_CURRENT_LIST_DIR}/cs16client.tasks"
-		ANALYZE ${CLDLL_LIBRARY})
-endif()
-
-target_link_libraries( ${CLDLL_LIBRARY} ${CMAKE_DL_LIBS} -lSDL2 )
-
-
-set_target_properties (${CLDLL_SHARED} PROPERTIES
-	VERSION 1.6 SOVERSION 1.6
-	POSITION_INDEPENDENT_CODE 1)
