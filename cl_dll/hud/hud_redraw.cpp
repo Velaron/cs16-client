@@ -22,6 +22,8 @@
 #include "cl_util.h"
 #include "triangleapi.h"
 
+#include "smoke.h"
+
 #include <string.h>
 #define MAX_LOGO_FRAMES 56
 
@@ -41,6 +43,12 @@ float HUD_GetFOV( void );
 void CHud::Think(void)
 {
 	int newfov;
+
+	extern int g_weaponselect_frames;
+	if( g_weaponselect_frames )
+		g_weaponselect_frames--;
+
+	EV_AnimateSmoke();
 
 	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 	{

@@ -17,6 +17,7 @@
 #include "cl_entity.h"
 #include "triangleapi.h"
 #include "rain.h"
+#include "smoke.h"
 
 /*
 =================
@@ -47,4 +48,6 @@ void DLLEXPORT HUD_DrawTransparentTriangles( void )
 		DrawRain();
 		DrawFXObjects();
 	}
+
+	EV_RenderSmoke();
 }

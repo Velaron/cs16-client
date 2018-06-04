@@ -27,9 +27,9 @@
 *    version.
 *
 */
-#include "events.h"
-
 #include <math.h>
+#include "events.h"
+#include "smoke.h"
 
 // HACKHACK: This is very unreliable way to get round time
 float g_flRoundTime = 0.0f;
@@ -39,7 +39,9 @@ void EV_DecalReset(event_args_s *args)
 	int decalnum = (int)(gEngfuncs.pfnGetCvarFloat("r_decals"));
 
 	for( int i = 0; i < decalnum; i++ )
-		gEngfuncs.pEfxAPI->R_DecalRemoveAll(i);
+		gEngfuncs.pEfxAPI->R_DecalRemoveAll( i );
 
 	g_flRoundTime = gEngfuncs.GetClientTime();
+
+	EV_CleanupSmoke();
 }

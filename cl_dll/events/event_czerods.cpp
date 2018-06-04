@@ -121,6 +121,7 @@ void EV_IdleBlowtorch( event_args_t *args )
 {
 	g_iBlowTorchFiring = 1;
 }
+
 void EV_FireBlowtorch( event_args_t *args )
 {
 	int idx = args->entindex;

@@ -33,6 +33,7 @@
 #include "demo_api.h"
 #include "vgui_parser.h"
 #include "rain.h"
+#include "smoke.h"
 
 #include "camera.h"
 
@@ -236,7 +237,6 @@ void CHud :: Init( void )
 	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "2", FCVAR_ARCHIVE );
 	default_fov  = CVAR_CREATE( "default_fov", "90", 0 );
 	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
-	fastsprites  = CVAR_CREATE( "fastsprites", "0", FCVAR_ARCHIVE );
 	cl_gunsmoke  = CVAR_CREATE( "cl_gunsmoke", "0", FCVAR_ARCHIVE );
 	cl_weapon_sparks = CVAR_CREATE( "cl_weapon_sparks", "1", FCVAR_ARCHIVE );
 	cl_weapon_wallpuff = CVAR_CREATE( "cl_weapon_wallpuff", "1", FCVAR_ARCHIVE );
@@ -311,6 +311,8 @@ void CHud :: Init( void )
 	m_Scoreboard.Init();
 
 	InitRain();
+	EV_InitSmokeRenderer();
+
 
 	//ServersInit();
 
@@ -485,8 +487,6 @@ void CHud :: VidInit( void )
 	m_iFontWidth  = GetSpriteRect(m_HUD_number_0).Width();
 	m_iFontHeight = GetSpriteRect(m_HUD_number_0).Height();
 
-	m_hGasPuff = SPR_Load("sprites/gas_puff_01.spr");
-
 	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 		pList->p->VidInit();
 
@@ -504,6 +504,8 @@ void CHud :: VidInit( void )
 void CHud::Shutdown( void )
 {
 	gEngfuncs.Con_DPrintf( "%s\n", __PRETTY_FUNCTION__ );
+
+	EV_ShutdownSmokeRenderer();
 
 	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 	{
