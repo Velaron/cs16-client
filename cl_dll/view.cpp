@@ -1876,5 +1876,5 @@ void V_Init (void)
 
 	cl_quakeguns_enable	= gEngfuncs.pfnRegisterVariable( "cl_quakeguns_enable", "0", FCVAR_ARCHIVE );
 	cl_weaponlag_enable = gEngfuncs.pfnRegisterVariable( "cl_weaponlag_enable", "0", FCVAR_ARCHIVE );
-	cl_weaponlag		= gEngfuncs.pfnRegisterVariable( "cl_weaponlag", "1.5", FCVAR_ARCHIVE );
+	cl_weaponlag		= gEngfuncs.pfnRegisterVariable( "cl_weaponlag", "1.0", FCVAR_ARCHIVE );
 }
