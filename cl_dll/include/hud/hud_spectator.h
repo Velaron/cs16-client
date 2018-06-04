@@ -125,7 +125,6 @@ private:
 	HSPRITE		m_hsprViewcone;
 	HSPRITE		m_hsprUnkownMap;
 	HSPRITE		m_hsprBeam;
-	HSPRITE		m_hCrosshair;
 
 	wrect_t		m_crosshairRect;
 
