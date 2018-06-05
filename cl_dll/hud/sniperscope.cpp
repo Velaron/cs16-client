@@ -214,6 +214,7 @@ int CHudSniperScope::Draw(float flTime)
 {
 	if( gHUD.m_iFOV > 40 )
 		return 1;
+
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
 	gEngfuncs.pTriAPI->Brightness(1.0);
 	gEngfuncs.pTriAPI->Color4ub(0, 0, 0, 255);
@@ -236,8 +237,10 @@ int CHudSniperScope::Draw(float flTime)
 	gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
 	DrawUtils::Draw2DQuad( 0, 0, left + 2, TrueHeight );
 	DrawUtils::Draw2DQuad( right, 0, right + ( TrueWidth - right ), TrueHeight );
-	DrawUtils::Draw2DQuad( left, centery - 1, right, centery + 1 );
-	DrawUtils::Draw2DQuad( centerx - 1, 0, centerx + 1, TrueHeight );
+
+	// default crosshair pixel perfect lines
+	DrawUtils::Draw2DQuad( left, centery + 1, right, centery + 2 );
+	DrawUtils::Draw2DQuad( centerx - 1, 0, centerx, TrueHeight );
 
 	return 0;
 }
