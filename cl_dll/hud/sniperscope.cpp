@@ -47,9 +47,8 @@ int CHudSniperScope::Init()
 	return 1;
 }
 
-void DrawCircle( byte *buf, int radius, int w, int h )
+void DrawCircle( byte *buf, int radius, int x0, int y0, int w, int h )
 {
-	int x0 = radius, y0 = radius;
 	int x = radius-1, y = 0, dx = 1, dy = 1;
 	int err = dx - (radius << 1);
 
@@ -88,11 +87,11 @@ void DrawCircle( byte *buf, int radius, int w, int h )
 
 void SniperScope_InitBitmap( int w, int h, byte *buf )
 {
-	int radius = ( w - 1 ) >> 1;
+	int radius = ( w - 1 ) * 0.45;
 
 	// TODO: optimize!
 	memset( buf, 0, w * h * 4 );
-	DrawCircle( buf, radius, w, h );
+	DrawCircle( buf, radius, w / 2, w / 2, w, h );
 
 	for( int i = 0; i < h; i++ )
 	{

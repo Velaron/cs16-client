@@ -291,7 +291,6 @@ void DrawUtils::Draw2DQuad( float x1, float y1, float x2, float y2 )
 	// REMOVE WHEN NANOGL BUG WILL BE FIXED
 	gEngfuncs.pTriAPI->End( );
 	// REMOVE WHEN NANOGL BUG WILL BE FIXED
-
 }
 
 int DrawUtils::HudStringLen( const char *szIt, float scale )
