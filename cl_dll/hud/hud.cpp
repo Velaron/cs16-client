@@ -248,6 +248,7 @@ void CHud :: Init( void )
 	m_cvarChecker.AddToCheckList( "sv_skipshield", 1.0f );
 	m_cvarChecker.AddToCheckList( "hand", 0.0f );
 	m_cvarChecker.AddToCheckList( "viewsize", 140.0f );
+	m_cvarChecker.AddToCheckList( "ui_renderworld", 1.0f );
 
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
 

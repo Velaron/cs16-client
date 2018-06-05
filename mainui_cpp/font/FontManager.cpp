@@ -28,17 +28,11 @@ GNU General Public License for more details.
 
 #include "BitmapFont.h"
 
-#ifdef __ANDROID__
 #define DEFAULT_MENUFONT "RobotoCondensed"
 #define DEFAULT_CONFONT  "DroidSans"
 #define SCALE_FONTS // Probably isn't a good idea until I don't have implemented SDF
 #define DEFAULT_WEIGHT 1000
-#else
-#define DEFAULT_MENUFONT "Trebuchet MS"
-#define DEFAULT_CONFONT  "Tahoma"
-#define DEFAULT_WEIGHT 500
-#define MIMIC_MAKEFONT_SCALES
-#endif
+//#define MIMIC_MAKEFONT_SCALES
 
 // #define SCALE_FONTS
 
@@ -92,13 +86,13 @@ void CFontManager::VidInit( void )
 			.Create();
 
 #ifdef MAINUI_RENDER_PICBUTTON_TEXT
-		uiStatic.hLightBlur = CFontBuilder( DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * scale, 1000 )
+		uiStatic.hLightBlur = CFontBuilder( DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * 1.5 * scale, 1000 )
 			.SetHandleNum( QM_LIGHTBLUR )
 			.SetBlurParams( 2, 1.0f )
 			.SetFlags( FONT_ADDITIVE )
 			.Create();
 
-		uiStatic.hHeavyBlur = CFontBuilder( DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * scale, 1000 )
+		uiStatic.hHeavyBlur = CFontBuilder( DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * 1.5 * scale, 1000 )
 			.SetHandleNum( QM_HEAVYBLUR )
 			.SetBlurParams( 8, 1.75f )
 			.SetFlags( FONT_ADDITIVE )

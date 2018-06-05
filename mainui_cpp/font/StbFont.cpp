@@ -407,8 +407,8 @@ void CStbFont::GetCharABCWidths(int ch, int &a, int &b, int &c)
 	width = x1 - x0;
 
 	find.a = horiBearingX * scale - m_iBlur - m_iOutlineSize;
-	find.b = width * scale + ( m_iBlur + m_iOutlineSize ) * 2;
-	find.c = (horiAdvance - horiBearingX - width) * scale - m_iBlur - m_iOutlineSize;
+	find.b = width + ( m_iBlur + m_iOutlineSize ) * 2;
+	find.c = (horiAdvance - horiBearingX) * scale - width - m_iBlur - m_iOutlineSize;
 
 	// HACKHACK: stbtt does not support hinting,
 	// so we add 1 pixel margin here and stbtt
