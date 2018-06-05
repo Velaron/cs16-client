@@ -701,7 +701,7 @@ void EV_HLDM_FireBullets(int idx,
 
 void EV_CS16Client_KillEveryRound( TEMPENTITY *te, float frametime, float current_time )
 {
-	if( g_flRoundTime > te->entity.curstate.fuser4 )
+	if( !g_flRoundTime && current_time > g_flRoundTime )
 	{
 		// Mark it die on next TempEntUpdate
 		te->die = 0.0f;
@@ -720,7 +720,8 @@ void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAn
 
 	if( model )
 	{
-		model->flags = FTENT_COLLIDEWORLD;
+		model->flags = FTENT_COLLIDEWORLD|FTENT_FADEOUT;
+		model->fadeSpeed = 25;
 		model->entity.curstate.animtime = flAnimTime;
 		model->entity.curstate.framerate = 1.0;
 		model->entity.curstate.frame = 0;
@@ -729,22 +730,6 @@ void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAn
 		model->entity.curstate.fuser2 = gHUD.m_flTime + gEngfuncs.pfnGetCvarFloat("cl_corpsestay");
 		model->entity.curstate.fuser4 = gHUD.m_flTime;
 		model->hitcallback = NULL;
-		model->callback = []( TEMPENTITY *te, float frametime, float current_time ) -> void
-		{
-			// go underground...
-			if( current_time >= te->entity.curstate.fuser2 )
-			{
-				// I think it's VERY scary when you playing and see parts of corpse
-				// on the ceiling(ceiling is thin)
-			#if 0
-					te->flags = FTENT_NONE;
-					te->entity.origin.z -= 5.0 * frametime;
-			#else
-					te->entity.curstate.rendermode = kRenderTransAlpha;
-					te->entity.curstate.renderamt -= ceil(frametime * 100);
-			#endif
-			}
-			EV_CS16Client_KillEveryRound( te, frametime, current_time );
-		};
+		model->callback = EV_CS16Client_KillEveryRound;
 	}
 }
