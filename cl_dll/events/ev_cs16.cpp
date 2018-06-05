@@ -462,7 +462,7 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 		EV_HLDM_GunshotDecalTrace( pTrace, EV_HLDM_DamageDecal( pe ), cTextureType );
 
 		// create sparks
-		if( gHUD.cl_weapon_sparks && gHUD.cl_weapon_sparks->value && bCreateSparks )
+		if( gHUD.cl_weapon_sparks->value && bCreateSparks )
 		{
 			Vector dir = pTrace->plane.normal;
 			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
@@ -472,7 +472,7 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 		}
 
 		// create wallpuff
-		if( gHUD.cl_weapon_wallpuff && gHUD.cl_weapon_wallpuff->value && bCreateWallPuff )
+		if( gHUD.cl_weapon_wallpuff->value && bCreateWallPuff )
 		{
 			EV_CS16Client_CreateSmoke( SMOKE_WALLPUFF, pTrace->endpos, pTrace->plane.normal, 25, 0.5, r, g, b, true );
 		}
