@@ -64,7 +64,6 @@ set (WEAPONEVENT_SRCS
 	./events/event_vehicle.cpp
 	./events/event_xm1014.cpp
 	./events/event_czerods.cpp
-	./events/hl_events.cpp
 	./events/ev_common.cpp
 )
 
@@ -225,7 +224,12 @@ include_directories (
 	../mainui/controls
 	../mainui/menus
 	/usr/include/SDL2 )
+
 add_library (${CLDLL_LIBRARY} SHARED ${CLDLL_SOURCES})
+
+target_link_libraries(${CLDLL_LIBRARY} ${CMAKE_DL_LIBS})
+
+
 add_definitions( -D_CS16CLIENT_ENABLE_GSRC_SUPPORT
 	-DLINUX -D_LINUX -DCLIENT_WEAPONS -DCLIENT_DLL
 	-D_DEBUG  -D_CS16CLIENT_ALLOW_SPECIAL_SCRIPTING

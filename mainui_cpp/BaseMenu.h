@@ -126,9 +126,6 @@ typedef struct
 	int		framecount;	// how many frames menu visible
 	int		initialized;
 
-	// btns_main.bmp stuff
-	HIMAGE	buttonsPics[PC_BUTTONCOUNT];
-
 	int		buttons_width;	// btns_main.bmp global width
 	int		buttons_height;	// per one button with all states (inactive, focus, pressed)
 
@@ -236,7 +233,6 @@ inline int UI_DrawString( HFont font, Point pos, Size size, const char *str, con
 }
 
 void UI_StartSound( const char *sound );
-void UI_LoadBmpButtons( void );
 
 void UI_RefreshInternetServerList( void );
 void UI_RefreshServerList( void );

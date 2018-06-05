@@ -450,7 +450,6 @@ void DLLEXPORT HUD_TempEntUpdate (
 				pTemp->entity.curstate.renderamt = pTemp->entity.baseline.renderamt * ( 1 + life * pTemp->fadeSpeed );
 				if ( pTemp->entity.curstate.renderamt <= 0 )
 					active = 0;
-
 			}
 			else 
 				active = 0;

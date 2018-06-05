@@ -68,17 +68,13 @@ set(MAINUI_MENUS_SOURCES
 	menus/Controls.cpp
 	menus/CreateGame.cpp
 	menus/Credits.cpp
-	menus/CustomGame.cpp
 	menus/FileDialog.cpp
 	menus/GameOptions.cpp
 	menus/Gamepad.cpp
 	menus/InputDevices.cpp
-	menus/LoadGame.cpp
 	menus/Main.cpp
 	menus/Multiplayer.cpp
-	menus/NewGame.cpp
 	menus/PlayerSetup.cpp
-	menus/SaveLoad.cpp
 	menus/ServerBrowser.cpp
 	menus/TouchButtons.cpp
 	menus/Touch.cpp
@@ -104,10 +100,10 @@ set(MAINUI_FONT_RENDER_SOURCES
 )
 
 set(MAINUI_SOURCES
+	../common/interface.cpp
 	EventSystem.cpp
 	EngineCallback.cpp
 	BaseMenu.cpp
-	Btns.cpp
 	Color.cpp
 	MenuStrings.cpp
 	CFGScript.cpp
@@ -182,6 +178,8 @@ if(XASH_64BIT)
 	set_target_properties(${MAINUI_LIBRARY} PROPERTIES 
 		OUTPUT_NAME ${MAINUI_NAME}64)
 endif()
+
+target_link_libraries(${MAINUI_LIBRARY} ${CMAKE_DL_LIBS})
 
 fwgs_set_default_properties(${MAINUI_LIBRARY})
 fwgs_install(${MAINUI_LIBRARY})
