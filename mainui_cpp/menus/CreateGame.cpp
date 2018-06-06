@@ -68,8 +68,6 @@ public:
 	CMenuField	hostName;
 	CMenuField	password;
 	CMenuCheckBox   nat;
-	CMenuCheckBox	hltv;
-	CMenuCheckBox	dedicatedServer;
 
 	// newgame prompt dialog
 	CMenuYesNoMessageBox msgBox;
@@ -124,40 +122,23 @@ void CMenuCreateGame::Begin( CMenuBaseItem *pSelf, void *pExtra )
 	EngFuncs::CvarSetValue( "sv_nat", EngFuncs::GetCvarFloat( "public" ) ? menu->nat.bChecked : 0 );
 	menu->password.WriteCvar();
 	menu->hostName.WriteCvar();
-	menu->hltv.WriteCvar();
 	menu->maxClients.WriteCvar();
 
 	EngFuncs::PlayBackgroundTrack( NULL, NULL );
 
-	// all done, start server
-	if( menu->dedicatedServer.bChecked )
-	{
-		EngFuncs::WriteServerConfig( EngFuncs::GetCvarString( "servercfgfile" ));
+	EngFuncs::WriteServerConfig( EngFuncs::GetCvarString( "lservercfgfile" ));
 
-		char cmd[128];
-		sprintf( cmd, "#%s", gMenu.m_gameinfo.gamefolder );
-
-		// NOTE: dedicated server will be executed "defaultmap"
-		// from engine after restarting
-		EngFuncs::ChangeInstance( cmd, "Starting dedicated server...\n" );
-	}
-	else
-	{
-		EngFuncs::WriteServerConfig( EngFuncs::GetCvarString( "lservercfgfile" ));
-
-		char cmd[128];
-		sprintf( cmd, "exec %s\n", EngFuncs::GetCvarString( "lservercfgfile" ) );
+	char cmd[128];
+	sprintf( cmd, "exec %s\n", EngFuncs::GetCvarString( "lservercfgfile" ) );
 	
-		EngFuncs::ClientCmd( TRUE, cmd );
+	EngFuncs::ClientCmd( TRUE, cmd );
 
-		// dirty listenserver config form old xash may rewrite maxplayers
-		EngFuncs::CvarSetValue( "maxplayers", atoi( menu->maxClients.GetBuffer() ));
+	// dirty listenserver config form old xash may rewrite maxplayers
+	EngFuncs::CvarSetValue( "maxplayers", atoi( menu->maxClients.GetBuffer() ));
 
-		// hack: wait three frames allowing server to completely shutdown, reapply maxplayers and start new map
-		sprintf( cmd, "endgame;menu_connectionprogress localserver;wait;wait;wait;maxplayers %i;latch;map %s\n", atoi( menu->maxClients.GetBuffer() ), mapName );
-		EngFuncs::ClientCmd( FALSE, cmd );
-
-	}
+	// hack: wait three frames allowing server to completely shutdown, reapply maxplayers and start new map
+	sprintf( cmd, "endgame;menu_connectionprogress localserver;wait;wait;wait;maxplayers %i;latch;map %s\n", atoi( menu->maxClients.GetBuffer() ), mapName );
+	EngFuncs::ClientCmd( FALSE, cmd );
 }
 
 /*
@@ -214,11 +195,6 @@ void CMenuCreateGame::_Init( void )
 
 	nat.SetNameAndStatus( "NAT", "Use NAT Bypass instead of direct mode" );
 	nat.bChecked = true;
-
-	dedicatedServer.SetNameAndStatus( "Dedicated server", "faster, but you can't join the server from this machine" );
-
-	hltv.SetNameAndStatus( "HLTV", "Enable HLTV mode in Multiplayer" );
-	hltv.LinkCvar( "hltv" );
 
 	// add them here, so "done" button can be used by mapsListModel::Update
 	AddItem( background );
@@ -278,21 +254,16 @@ void CMenuCreateGame::_Init( void )
 	AddItem( maxClients );
 	AddItem( hostName );
 	AddItem( password );
-	AddItem( dedicatedServer );
-	AddItem( hltv );
 	AddItem( nat );
 	AddItem( mapsList );
 }
 
 void CMenuCreateGame::_VidInit()
 {
-	nat.SetCoord( 72, 585 );
+	nat.SetCoord( 72, 685 );
 	if( !EngFuncs::GetCvarFloat("public") )
 		nat.Hide();
 	else nat.Show();
-
-	hltv.SetCoord( 72, 635 );
-	dedicatedServer.SetCoord( 72, 685 );
 
 	mapsList.SetRect( 590, 245, -20, 440 );
 
