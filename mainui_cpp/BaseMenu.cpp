@@ -1165,7 +1165,6 @@ void UI_Precache( void )
 		return;
 
 	UI_Main_Precache();
-	UI_MultiPlayer_Precache();
 	UI_Options_Precache();
 	UI_InternetGames_Precache();
 	UI_PlayerSetup_Precache();
@@ -1463,7 +1462,6 @@ void UI_Init( void )
 	EngFuncs::Cmd_AddCommand( "menu_updatedialog", UI_UpdateDialog_f ); // only for engine updates
 	EngFuncs::Cmd_AddCommand( "menu_main", UI_Main_Menu );
 	EngFuncs::Cmd_AddCommand( "menu_options", UI_Options_Menu );
-	EngFuncs::Cmd_AddCommand( "menu_multiplayer", UI_MultiPlayer_Menu );
 	EngFuncs::Cmd_AddCommand( "menu_langame", UI_LanGame_Menu );
 	EngFuncs::Cmd_AddCommand( "menu_internetgames", UI_InternetGames_Menu );
 	EngFuncs::Cmd_AddCommand( "menu_audio", UI_Audio_Menu );

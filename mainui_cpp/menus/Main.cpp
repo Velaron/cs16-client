@@ -155,12 +155,12 @@ void CMenuMain::_Init( void )
 		UI_CreateGame_Menu();
 	});
 
-	multiPlayer.SetNameAndStatus( "Multiplayer", MenuStrings[IDS_MAIN_MULTIPLAYERHELP] );
+	multiPlayer.SetNameAndStatus( "Find Servers", MenuStrings[IDS_MAIN_MULTIPLAYERHELP] );
 	multiPlayer.SetPicture( PC_MULTIPLAYER );
 	multiPlayer.iFlags |= QMF_NOTIFY;
-	multiPlayer.onActivated = UI_MultiPlayer_Menu;
+	multiPlayer.onActivated = UI_InternetGames_Menu;
 
-	configuration.SetNameAndStatus( "Configuration", MenuStrings[IDS_MAIN_CONFIGUREHELP] );
+	configuration.SetNameAndStatus( "Options", MenuStrings[IDS_MAIN_CONFIGUREHELP] );
 	configuration.SetPicture( PC_CONFIG );
 	configuration.iFlags |= QMF_NOTIFY;
 	configuration.onActivated = UI_Options_Menu;
@@ -227,4 +227,9 @@ void UI_Main_Menu( void )
 {
 	UI_Main_Precache();
 	uiMain.Show();
+
+	if( !UI::Names::CheckIsNameValid( EngFuncs::GetCvarString( "name" ) ) )
+	{
+		UI_PlayerIntroduceDialog_Show();
+	}
 }

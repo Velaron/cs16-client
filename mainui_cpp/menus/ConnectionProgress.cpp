@@ -161,10 +161,9 @@ void CMenuConnectionProgress::HandleDisconnect( void )
 			UI_CloseMenu();
 			UI_SetActiveMenu( true );
 			UI_Main_Menu();
-			UI_MultiPlayer_Menu();
-			UI_ServerBrowser_Menu();
 			if( m_iSource == SOURCE_CREATEGAME )
 				UI_CreateGame_Menu();
+			else UI_ServerBrowser_Menu();
 			if( m_iState == STATE_DOWNLOAD )
 			{
 				Show();

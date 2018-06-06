@@ -38,11 +38,12 @@ public:
 	{
 		CMenuEditable::LinkCvar( name, CMenuEditable::CVAR_VALUE );
 	}
+	void AddSwitch( const char *text );
 
-	const char *szLeftName;
-	const char *szRightName;
-	bool bState;
+	int GetState() { return m_iState; }
+
 	bool bMouseToggle;
+	bool bKeepToggleWidth;
 
 	CColor iSelectColor;
 	CColor iBackgroundColor;
@@ -52,9 +53,13 @@ public:
 	float fTextOffsetX;
 	float fTextOffsetY;
 private:
-	Point m_rightPoint, m_leftPoint;
-	Size m_rightSize, m_leftSize;
+	const char *m_szNames[UI_MAX_MENUITEMS];
+	int m_iSwitches;
 
+	int m_iState;
+
+	Point m_Points[UI_MAX_MENUITEMS];
+	Size m_Sizes[UI_MAX_MENUITEMS];
 	Point m_scTextPos;
 	Size m_scTextSize;
 };

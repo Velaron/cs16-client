@@ -23,9 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 CMenuSwitch::CMenuSwitch( ) : BaseClass( )
 {
-	szLeftName = szRightName = NULL;
 	bMouseToggle = true;
-	bState = false;
+	bKeepToggleWidth = false;
 	SetSize( 220, 35 );
 	SetCharSize( QM_BOLDFONT );
 
@@ -36,6 +35,17 @@ CMenuSwitch::CMenuSwitch( ) : BaseClass( )
 
 	eTextAlignment = QM_CENTER;
 	iFlags |= QMF_DROPSHADOW;
+
+	m_iState = 0;
+	m_iSwitches = 0;
+	memset( m_szNames, 0, sizeof( m_szNames ));
+	memset( m_Sizes, 0, sizeof( m_Sizes ));
+	memset( m_Points, 0, sizeof( m_Points ));
+}
+
+void CMenuSwitch::AddSwitch(const char *text)
+{
+	m_szNames[m_iSwitches++] = text;
 }
 
 void CMenuSwitch::VidInit()
@@ -47,28 +57,30 @@ void CMenuSwitch::VidInit()
 
 	BaseClass::VidInit();
 
-	int leftSize, rightSize;
+	int sizes[UI_MAX_MENUITEMS];
+	int sum = 0;
 
-	if( szLeftName )
-		leftSize = g_FontMgr.GetTextWideScaled( font, szLeftName, m_scChSize.h );
-	else
-		leftSize = m_scSize.w / 2;
+	for( int i = 0; i < m_iSwitches; i++ )
+	{
+		if( m_szNames[i] != NULL && !bKeepToggleWidth )
+			sizes[i] = g_FontMgr.GetTextWideScaled( font, m_szNames[i], m_scChSize.h );
+		else sizes[i] = (float)m_scSize.w / (float)m_iSwitches;
 
-	if( szRightName )
-		rightSize = g_FontMgr.GetTextWideScaled( font, szRightName, m_scChSize.h );
-	else
-		rightSize = m_scSize.w / 2;
+		sum += sizes[i];
+	}
 
-	// calculate fraction from two string sizes
-	float frac = (float)leftSize / (float)( leftSize + rightSize );
+	for( int i = 0; i < m_iSwitches; i++ )
+	{
+		float frac = (float)sizes[i] / (float)sum;
 
-	// then adjust widths
-	m_leftSize.w = m_scSize.w * frac;
-	m_rightSize.w = m_scSize.w - m_leftSize.w;
-	m_rightSize.h = m_leftSize.h = m_scSize.h; // height... height never changes...
+		m_Sizes[i].w = m_scSize.w * frac;
+		m_Sizes[i].h = m_scSize.h;
 
-	m_rightPoint = m_leftPoint = m_scPos; // correct positions based on width sizes
-	m_rightPoint.x += m_leftSize.w;
+		m_Points[i] = m_scPos;
+
+		if( i != 0 )
+			m_Points[i].x = m_Points[i-1].x + m_Sizes[i-1].w;
+	}
 
 	m_scTextPos.x = m_scPos.x + (m_scSize.w * 1.5f );
 	m_scTextPos.y = m_scPos.y;
@@ -80,6 +92,8 @@ void CMenuSwitch::VidInit()
 const char * CMenuSwitch::Key(int key, int down)
 {
 	const char *sound = NULL;
+	bool haveNewState = false;
+	int state;
 
 	switch( key )
 	{
@@ -92,10 +106,14 @@ const char * CMenuSwitch::Key(int key, int down)
 		}
 		else
 		{
-			if( (UI_CursorInRect( m_leftPoint, m_leftSize ) && bState) ||
-				(UI_CursorInRect( m_rightPoint, m_rightSize ) && !bState) )
+			for( int i = 0; i < m_iSwitches; i++ )
 			{
-				sound = uiSoundGlow;
+				if( ( UI_CursorInRect( m_Points[i], m_Sizes[i] ) && m_iState != i))
+				{
+					sound = uiSoundGlow;
+					haveNewState = true;
+					state = i;
+				}
 			}
 		}
 		break;
@@ -119,19 +137,20 @@ const char * CMenuSwitch::Key(int key, int down)
 			{
 				event = QM_PRESSED;
 				m_bPressed = true;
+				_Event( event );
 			}
-			else
+			else if( haveNewState )
 			{
 				event = QM_CHANGED;
-				bState = !bState;
-				SetCvarValue( bState );
+				m_iState = state;
+				SetCvarValue( m_iState );
+				_Event( event );
 			}
-			_Event( event );
 		}
-		else if( down )
+		else if( down && haveNewState )
 		{
-			bState = !bState;
-			SetCvarValue( bState );
+			m_iState = state;
+			SetCvarValue( m_iState );
 			_Event( QM_CHANGED );
 		}
 	}
@@ -147,7 +166,6 @@ void CMenuSwitch::Draw( void )
 	bool shadow = (iFlags & QMF_DROPSHADOW);
 
 	int selectColor = iSelectColor;
-	int bgColor = iBackgroundColor;
 	UI_DrawString( font, m_scTextPos, m_scTextSize, szName, uiColorHelp, true, m_scChSize, eTextAlignment, shadow );
 
 	if( szStatusText && iFlags & QMF_NOTIFY )
@@ -175,33 +193,36 @@ void CMenuSwitch::Draw( void )
 			selectColor = iFocusColor;
 		}
 	}
-	else
+
+	for( int i = 0; i < m_iSwitches; i++ )
 	{
-		if( bState && UI_CursorInRect( m_leftPoint, m_leftSize ) )
+		Point pt = m_Points[i];
+
+		pt.x += fTextOffsetX * uiStatic.scaleX;
+		pt.y += fTextOffsetY * uiStatic.scaleY;
+
+		// draw toggle rectangles
+		if( m_iState == i )
 		{
-			bgColor = iFocusColor;
+			UI_FillRect( m_Points[i], m_Sizes[i], selectColor );
+			UI_DrawString( font, pt, m_Sizes[i], m_szNames[i], iFgTextColor, 1, m_scChSize, eTextAlignment, shadow);
 		}
-		else if(!bState && UI_CursorInRect( m_rightPoint, m_rightSize ))
+		else
 		{
-			bgColor = iFocusColor;
+			int bgColor = iBackgroundColor;
+			bool haveFocus = false;
+
+			if( UI_CursorInRect( m_Points[i], m_Sizes[i] ) && !(iFlags & (QMF_GRAYED|QMF_INACTIVE)))
+			{
+				bgColor = iFocusColor;
+				haveFocus = true;
+			}
+
+			UI_FillRect( m_Points[i], m_Sizes[i], haveFocus ? selectColor : bgColor );
+			UI_DrawString( font, pt, m_Sizes[i], m_szNames[i],
+				haveFocus ? iFgTextColor : iBgTextColor, haveFocus, m_scChSize, eTextAlignment, shadow );
 		}
 	}
-
-	// draw toggle rectangles
-	UI_FillRect( m_leftPoint, m_leftSize, bState? bgColor: selectColor );
-	UI_FillRect( m_rightPoint, m_rightSize, bState? selectColor: bgColor );
-
-	// strings with same coordinates looks a bit ugly
-	Point stringLeftPoint = m_leftPoint;
-	stringLeftPoint.x += fTextOffsetX * uiStatic.scaleX;
-	stringLeftPoint.y += fTextOffsetY * uiStatic.scaleY;
-
-	Point stringRightPoint = m_rightPoint;
-	stringRightPoint.x += fTextOffsetX * uiStatic.scaleX;
-	stringRightPoint.y += fTextOffsetY * uiStatic.scaleY;
-
-	UI_DrawString( font, stringLeftPoint, m_leftSize, szLeftName, bState?iBgTextColor: iFgTextColor, iColor, m_scChSize, eTextAlignment, shadow );
-	UI_DrawString( font, stringRightPoint, m_rightSize, szRightName, bState?iFgTextColor:iBgTextColor, iColor, m_scChSize, eTextAlignment, shadow );
 
 	// draw rectangle
 	UI_DrawRectangle( m_scPos, m_scSize, uiInputFgColor );
@@ -209,5 +230,5 @@ void CMenuSwitch::Draw( void )
 
 void CMenuSwitch::UpdateEditable()
 {
-	bState = !!EngFuncs::GetCvarFloat( m_szCvarName );
+	m_iState = EngFuncs::GetCvarFloat( m_szCvarName );
 }

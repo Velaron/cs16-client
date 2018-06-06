@@ -73,7 +73,6 @@ set(MAINUI_MENUS_SOURCES
 	menus/Gamepad.cpp
 	menus/InputDevices.cpp
 	menus/Main.cpp
-	menus/Multiplayer.cpp
 	menus/PlayerSetup.cpp
 	menus/ServerBrowser.cpp
 	menus/TouchButtons.cpp
