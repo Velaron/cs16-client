@@ -1396,7 +1396,7 @@ void UI_OpenUpdatePage( bool engine, bool preferstore )
 {
 	const char *updateUrl;
 
-	if( engine || !gMenu.m_gameinfo.update_url[0] )
+	if( engine )
 	{
 #ifndef XASH_DISABLE_FWGS_EXTENSIONS
 		if( preferstore )
@@ -1410,7 +1410,7 @@ void UI_OpenUpdatePage( bool engine, bool preferstore )
 	}
 	else
 	{
-		updateUrl = gMenu.m_gameinfo.update_url;
+		updateUrl = "https://play.google.com/store/apps/details?id=in.celest.xash3d.cs16client";
 	}
 
 	EngFuncs::ShellExecute( updateUrl, NULL, TRUE );

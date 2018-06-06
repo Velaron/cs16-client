@@ -68,6 +68,8 @@ void CMenuOptions::_Init( void )
 		PC_TOUCH, UI_Touch_Menu, QMF_NOTIFY );
 	AddButton( "Gamepad",  "Change gamepad axis and button settings",
 		PC_GAMEPAD, UI_GamePad_Menu, QMF_NOTIFY );
+	AddButton( "Multiplayer", "Change multiplayer settings",
+		PC_MULTIPLAYER, UI_PlayerSetup_Menu, QMF_NOTIFY );
 	AddButton( "Update",   "Check for updates",
 		PC_UPDATE, msgBox.MakeOpenEvent(), QMF_NOTIFY );
 	AddButton( "Done",     "Go back to the Main menu",
