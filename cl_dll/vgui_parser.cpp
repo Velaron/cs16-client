@@ -59,12 +59,10 @@ const char *Localize( const char *szStr )
 	return got->second;
 }
 
-void Localize_Init( )
+static void Localize_AddToDictionary( const char *gamedir, const char *name, const char *lang )
 {
-	const char *gamedir = gEngfuncs.pfnGetGameDirectory( );
-
 	char filename[64];
-	snprintf( filename, sizeof( filename ), "%s/resource/%s_english.txt", gamedir, gamedir );
+	snprintf( filename, sizeof( filename ), "%s/resource/%s_%s.txt", gamedir, name, lang );
 
 #ifndef _WIN32
 	FILE *wf = fopen( filename, "r" );
@@ -90,26 +88,78 @@ void Localize_Init( )
 		char *afile = new char[ansiLength]; // save original pointer, so we can free it later
 		char *pfile = afile;
 		char *token = new char[MAX_LOCALIZEDSTRING_SIZE];
+		int i = 0;
 
 		Q_UTF16ToUTF8( unicodeBuf + 1, afile, ansiLength, STRINGCONVERT_ASSERT_REPLACE );
 
+		pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+		if( stricmp( token, "lang" ))
+		{
+			gEngfuncs.Con_Printf( "Localize_AddToDict( %s, %s, %s ): invalid header, got %s", gamedir, name, lang, token );
+			goto error;
+		}
+
+		pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+		if( strcmp( token, "{" ))
+		{
+			gEngfuncs.Con_Printf( "Localize_AddToDict( %s, %s, %s ): want {, got %s", gamedir, name, lang, token );
+			goto error;
+		}
+
+		pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+		if( stricmp( token, "Language" ))
+		{
+			gEngfuncs.Con_Printf( "Localize_AddToDict( %s, %s, %s ): want Language, got %s", gamedir, name, lang, token );
+			goto error;
+		}
+
+		// skip language actual name
+		pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+		pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+		if( stricmp( token, "Tokens" ))
+		{
+			gEngfuncs.Con_Printf( "Localize_AddToDict( %s, %s, %s ): want Tokens, got %s", gamedir, name, lang, token );
+			goto error;
+		}
+
+		pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+		if( strcmp( token, "{" ))
+		{
+			gEngfuncs.Con_Printf( "Localize_AddToDict( %s, %s, %s ): want { after Tokens, got %s", gamedir, name, lang, token );
+			goto error;
+		}
+
 		while( (pfile = gEngfuncs.COM_ParseFile( pfile, token )) && gTitlesTXT.size() < gTitlesTXT.max_size() )
 		{
-			if( strlen( token ) > 5 )
-			{
-				char szLocString[MAX_LOCALIZEDSTRING_SIZE];
-				pfile = gEngfuncs.COM_ParseFile( pfile, szLocString );
+			if( !strcmp( token, "}" ))
+				break;
 
-				if( pfile && gTitlesTXT.size() < gTitlesTXT.max_size() )
-				{
-					size_t iLen = strlen( szLocString ) + 1;
-					char *szLocCopyString = new char[iLen];
-					strncpy(szLocCopyString, szLocString, iLen );
-					gTitlesTXT[ string(token) ] = szLocCopyString;
-				}
+			char szLocString[MAX_LOCALIZEDSTRING_SIZE];
+			pfile = gEngfuncs.COM_ParseFile( pfile, szLocString );
+
+			if( !strcmp( szLocString, "}" ))
+				break;
+
+			if( pfile && gTitlesTXT.size() < gTitlesTXT.max_size() )
+			{
+				size_t iLen = strlen( szLocString ) + 1;
+				char *szLocCopyString = new char[iLen];
+				strncpy(szLocCopyString, szLocString, iLen );
+				szLocCopyString[iLen-1] = 0;
+				gTitlesTXT[ string(token) ] = szLocCopyString;
+				i++;
 			}
 		}
 
+		gEngfuncs.Con_Printf( "Localize_AddToDict: loaded %i words from %s\n", i, filename );
+
+error:
 		delete[] token;
 		delete[] afile;
 	}
@@ -123,12 +173,19 @@ void Localize_Init( )
 	delete[] unicodeBuf;
 }
 
+void Localize_Init( )
+{
+	const char *gamedir = gEngfuncs.pfnGetGameDirectory( );
+
+	Localize_AddToDictionary( gamedir, gamedir,  "english" );
+	Localize_AddToDictionary( "valve", "valve",  "english" );
+	Localize_AddToDictionary( "valve", "gameui", "english" );
+}
+
 void Localize_Free( )
 {
 	for( auto it = gTitlesTXT.begin(); it != gTitlesTXT.end(); ++it )
-	{
 		delete[] it->second;
-	}
 	gTitlesTXT.clear();
 	return;
 }
