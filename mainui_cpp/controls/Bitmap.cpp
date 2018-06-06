@@ -165,14 +165,29 @@ void CMenuBannerBitmap::Draw()
 		window->eTransitionType == CMenuBaseWindow::ANIM_OUT )
 		return;
 
-	BaseClass::Draw();
+	const char *text = CMenuPicButton::GetBannerText();
+
+	if( !text )
+		return;
+
+	Size chSize = m_scChSize;
+	chSize.w = m_scChSize.w * 3;
+	chSize.h = m_scChSize.h * 3;
+
+	UI_DrawString( font, m_scPos, m_scSize, text, iColor, 0, chSize, QM_LEFT, false, false );
+
+	// BaseClass::Draw();
 }
 
 void CMenuBannerBitmap::VidInit()
 {
+	iColor.SetDefault( uiPromptTextColor );
+	iFocusColor.SetDefault( uiPromptFocusColor );
+
 	BaseClass::VidInit();
 	if( !szPic )
 		return;
+
 	// CMenuPicButton::SetTitleAnim( CMenuPicButton::AS_TO_TITLE );
 	CMenuPicButton::SetupTitleQuadForLast( uiStatic.xOffset + pos.x, uiStatic.yOffset + pos.y, size.w, size.h );
 #if defined(TA_ALT_MODE2) && !defined(TA_ALT_MODE)

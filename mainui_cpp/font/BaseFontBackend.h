@@ -21,9 +21,7 @@ GNU General Public License for more details.
 #include "utlrbtree.h"
 
 // #ifdef XASH_MOBILE_PLATFORM
-#if defined(__ANDROID__) || TARGET_OS_IPHONE
 #define SCALE_FONTS
-#endif
 
 struct charRange_t
 {

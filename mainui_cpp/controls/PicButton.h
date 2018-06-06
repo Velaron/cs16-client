@@ -51,6 +51,7 @@ public:
 
 	static void SetupTitleQuadForLast( int x,int y, int w, int h);
 	static void SetTransPicForLast( HIMAGE pic );
+	static const char *GetBannerText( void );
 
 	void SetupTitleQuad( int x,int y, int w, int h);
 	void SetTransPic( HIMAGE pic );

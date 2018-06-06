@@ -437,6 +437,17 @@ void CMenuPicButton::SetTransPicForLast( HIMAGE pic )
 	ButtonStack[ButtonStackDepth-1]->SetTransPic( pic );
 }
 
+const char *CMenuPicButton::GetBannerText( void )
+{
+	if( !ButtonStackDepth )
+		return 0;
+
+	if( !ButtonStack[ButtonStackDepth-1] )
+		return 0;
+
+	return ButtonStack[ButtonStackDepth-1]->szName;
+}
+
 // TODO: Find CMenuBannerBitmap in next menu page and correct
 void CMenuPicButton::SetupTitleQuad( int x, int y, int w, int h )
 {
