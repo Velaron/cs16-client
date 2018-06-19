@@ -134,10 +134,12 @@ CMenuScriptConfig::CMenuScriptConfig() : CMenuFramework( "ScriptConfig" ),
 CMenuScriptConfig::~CMenuScriptConfig()
 {
 	CSCR_FreeList( m_pVars );
+	m_pVars = NULL;
 	for( int i = m_iPagesIndex; i < m_iPagesIndex + m_iPagesCount; i++ )
 	{
 		delete m_pItems[i];
 	}
+	m_iPagesCount = 0;
 }
 
 void CMenuScriptConfig::ListItemCvarWriteCb(CMenuBaseItem *pSelf, void *pExtra)

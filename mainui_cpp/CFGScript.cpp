@@ -149,9 +149,9 @@ bool CSCR_ParseSingleCvar( parserstate_t *ps, scrvardef_t *result )
 			if( !szValue[0] )
 				goto error;
 
-			entry = (scrvarlistentry_t*)MALLOC( sizeof( scrvarlistentry_t ) );
+			entry = new scrvarlistentry_t;
 			entry->next = NULL;
-			entry->szName = (char*)MALLOC( strlen( szName ) + 1 );
+			entry->szName = new char[strlen( szName ) + 1];
 			strcpy( entry->szName, szName );
 			entry->flValue = atof( szValue );
 
@@ -301,7 +301,7 @@ scrvardef_t *CSCR_LoadDefaultCVars( const char *scriptfilename, int *count )
 		if( CSCR_ParseSingleCvar( &state, &var ) )
 		{
 			// Cvar_Get( var.name, var.value, var.flags, var.desc );
-			scrvardef_t *entry = (scrvardef_t*)MALLOC( sizeof( scrvardef_t ) );
+			scrvardef_t *entry = new scrvardef_t;
 			*entry = var;
 
 			if( !list )
@@ -353,14 +353,14 @@ void CSCR_FreeList( scrvardef_t *list )
 			while( i->list.pEntries )
 			{
 				scrvarlistentry_s *next = i->list.pEntries->next;
-				FREE( i->list.pEntries->szName );
-				FREE( i->list.pEntries );
+				delete[] i->list.pEntries->szName;
+				delete i->list.pEntries;
 
 				i->list.pEntries = next;
 			}
 		}
 
-		FREE( i );
+		delete i;
 		i = next;
 	}
 }
