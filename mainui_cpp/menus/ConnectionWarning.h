@@ -1,6 +1,0 @@
-#ifndef CMENUCONNECTIONWARNING_H
-#define CMENUCONNECTIONWARNING_H
-
-void UI_ConnectionWarning_f();
-
-#endif // CMENUCONNECTIONWARNING_H
