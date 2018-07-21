@@ -58,7 +58,7 @@ if(BUILD_SERVER)
 endif()
 
 if(BUILD_MAINUI)
-	add_subdirectory(mainui_cpp)
+	add_subdirectory(mainui)
 endif()
 
 if(NOT BUILD_SERVER AND NOT BUILD_MAINUI)

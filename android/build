@@ -40,12 +40,15 @@ cp -r ../3rdparty/extras/* pak/
 python2 makepak.py pak/ assets/extras.pak
 
 # Build
-ndk-build -j8 NDK_TOOLCHAIN_VERSION=4.8 _CS16CLIENT_ENABLE_OPENMP=$OMP NDK_DEBUG=$RELEASE V=$VERBOSE
+ndk-build -j8 NDK_TOOLCHAIN_VERSION=6 _CS16CLIENT_ENABLE_OPENMP=$OMP NDK_DEBUG=$RELEASE V=$VERBOSE
 ant $1
 
 if [[ "$1" = "release" ]]; then
 	jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ../../myks.keystore bin/cs16-client-$1-unsigned.apk xashdroid -tsa https://timestamp.geotrust.com/tsa
-	$HOME/.android/android-sdk-linux/build-tools/23.0.3/zipalign 4 bin/cs16-client-$1-unsigned.apk bin/cs16-client.apk
+	HOME/.android/build-tools/27.0.2/zipalign 4 bin/cs16-client-$1-unsigned.apk bin/cs16-client.apk
+else
+	./signapk.sh bin/cs16-client-debug.apk ~/projects/xash/myks.keystore xashdroid 529459
 fi
-mv bin/cs16-client.apk cs16-client-$1-$NAME_POSTFIX.apk
+
+mv bin/cs16-client-$1.apk cs16-client-$1-$NAME_POSTFIX.apk
 

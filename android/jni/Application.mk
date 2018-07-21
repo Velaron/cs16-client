@@ -1,4 +1,4 @@
-CFLAGS_OPT :=  -O3 -fomit-frame-pointer -funsafe-math-optimizations -ftree-vectorize -fgraphite-identity -floop-interchange -floop-block -funsafe-loop-optimizations -finline-limit=1024
+CFLAGS_OPT :=  -O3 -fomit-frame-pointer -funsafe-math-optimizations -ftree-vectorize -funsafe-loop-optimizations -finline-limit=1024 -fno-exceptions
 CFLAGS_OPT_ARM := -mthumb -mfpu=neon -mcpu=cortex-a9 -pipe -mvectorize-with-neon-quad -DVECTORIZE_SINCOS
 CFLAGS_OPT_ARMv5 :=-march=armv6 -mfpu=vfp -marm -pipe
 CFLAGS_OPT_X86 := -mtune=atom -march=atom -mssse3 -mfpmath=sse -funroll-loops -pipe -DVECTORIZE_SINCOS
@@ -7,7 +7,9 @@ APPLICATIONMK_PATH = $(call my-dir)
 
 XASH3D_CONFIG := $(APPLICATIONMK_PATH)/bs_config.mk
 
-APP_ABI := x86 armeabi-v7a-hard armeabi
+APP_ABI := armeabi-v7a-hard 
+# x86 armeabi
 APP_MODULES := menu client server yapb
 APP_PLATFORM := android-9
-APP_STL := gnustl_static
+APP_STL := stlport_static
+# APP_LIBCRYSTAX := static
