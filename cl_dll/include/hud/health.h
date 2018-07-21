@@ -112,10 +112,6 @@ public:
 	int MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_ClCorpse(const char *pszName,  int iSize, void *pbuf);
 
-	void UserCmd_Fart( void );
-	void UserCmd_Pee( void );
-
-
 	int m_iHealth;
 	int m_HUD_dmg_bio;
 	int m_HUD_cross;

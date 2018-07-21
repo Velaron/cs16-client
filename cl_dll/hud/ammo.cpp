@@ -83,7 +83,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 {
 	int i, iRes = gHUD.GetSpriteRes();
 
-	char sz[128];
+	char sz[256];
 
 	if ( !pWeapon )
 		return;

@@ -239,7 +239,7 @@ Do muzzleflash
 ==============
 */
 #define MAX_MUZZLEFLASH 4
-void CL_MuzzleFlash( const cl_entity_t *entity, vec3_t pos, int type )
+void CL_MuzzleFlash( cl_entity_t *entity, vec3_t pos, int type )
 {
 	const char *muzzleflash;
 
@@ -336,8 +336,9 @@ The entity's studio model description indicated an event was
 fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound )
 =========================
 */
-void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity )
+void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, struct cl_entity_s *entity )
 {
+// #define CL_MuzzleFlash( x, y, z ) gEngfuncs.pEfxAPI->R_MuzzleFlash( y, z )
 	switch( event->event )
 	{
 	case 5001:

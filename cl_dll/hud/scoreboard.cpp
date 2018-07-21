@@ -112,9 +112,6 @@ void CHudScoreboard :: InitHUDData( void )
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 }
 
-// Y positions
-#define ROW_GAP  15
-
 int CHudScoreboard :: Draw( float flTime )
 {
 	if( !m_bForceDraw )
@@ -142,6 +139,8 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 {
 	GetAllPlayersInfo();
 	char ServerName[90];
+	const int ROW_GAP = DrawUtils::HudFontHeight( 1.0f );
+
 
 //	Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 //	if ( cl_showpacketloss && cl_showpacketloss->value && ( ScreenWidth >= 400 ) )
@@ -191,6 +190,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 int CHudScoreboard :: DrawTeams( float list_slot )
 {
 	int j;
+	const int ROW_GAP = DrawUtils::HudFontHeight( 1.0f );
 	int ypos = ystart + (list_slot * ROW_GAP) + 5;
 
 	// clear out team scores
@@ -334,6 +334,8 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 // returns the ypos where it finishes drawing
 int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *team )
 {
+	const int ROW_GAP = DrawUtils::HudFontHeight( 1.0f );
+
 	// draw the players, in order,  and restricted to team if set
 	while ( 1 )
 	{

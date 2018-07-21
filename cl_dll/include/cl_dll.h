@@ -41,6 +41,7 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
 #include "render_api.h"
 #include "mobility_int.h"
+#include "cl_dll/IGameClientExports.h"
 
 extern "C"
 {
@@ -63,7 +64,7 @@ int        DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi );
 void       DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed );
 int        DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
 void       DLLEXPORT HUD_CreateEntities( void );
-void       DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
+void       DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s *event, cl_entity_s *entity );
 void       DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
 void       DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
 void       DLLEXPORT HUD_TxferPredictionData( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd );
@@ -95,6 +96,7 @@ void       DLLEXPORT IN_ClientLookEvent( float relyaw, float relpitch );
 extern cl_enginefunc_t gEngfuncs;
 extern render_api_t gRenderAPI;
 extern mobile_engfuncs_t gMobileAPI;
+extern IGameMenuExports *g_pMenu;
 extern int g_iXash; // indicates buildnum
 extern int g_iMobileAPIVersion; // indicates version. 0 if no mobile API
 #endif // CL_DLL_H

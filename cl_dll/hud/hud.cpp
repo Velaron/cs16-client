@@ -361,35 +361,6 @@ void CHud :: VidInit( void )
 	
 	m_hsprLogo = 0;
 
-#if 0
-	// assume cs16-client is launched in landscape mode
-	// must be only TrueWidth, but due to bug game may sometime rotate to portait mode
-	// calc scale depending on max side
-	float maxScale = (float)max( TrueWidth, TrueHeight ) / 640.0f;
-
-	// REMOVE LATER
-	float currentScale = CVAR_GET_FLOAT("hud_scale");
-	float invalidScale = (float)min( TrueWidth, TrueHeight ) / 640.0f;
-	// REMOVE LATER
-
-	if( currentScale > maxScale ||
-		( currentScale == invalidScale &&
-		  currentScale != 1.0f &&
-		  currentScale != 0.0f &&
-		  invalidScale <  1.0f ) )
-	{
-		gEngfuncs.Cvar_SetValue( "hud_scale", maxScale );
-		gEngfuncs.Con_Printf("^3Maximum scale factor reached. Reset: %f\n", maxScale );
-		GetScreenInfo( &m_scrinfo );
-	}
-
-	m_flScale = CVAR_GET_FLOAT( "hud_scale" );
-
-	// give a real values to other code. It's not anymore an actual CVar value
-	if( m_flScale == 0.0f )
-		m_flScale = 1.0f;
-#else
-
 	m_flScale = CVAR_GET_FLOAT( "hud_scale" );
 
 	if( m_flScale < 1.0f )
@@ -397,8 +368,6 @@ void CHud :: VidInit( void )
 		gEngfuncs.Cvar_SetValue( "hud_scale", 1.0f );
 		m_flScale = 1.0f;
 	}
-
-#endif
 
 	m_iRes = 640;
 
@@ -498,6 +467,10 @@ void CHud :: VidInit( void )
 		ClientCmd( "exec touch_presets/phone_ahsim" );
 		gEngfuncs.Cvar_Set( "touch_config_file", "touch_presets/phone_ahsim.cfg" );
 	}
+
+	hSmallFont = g_pMenu->GetBuiltinFont( QM_SMALLFONT );
+	hDefaultFont = g_pMenu->GetBuiltinFont( QM_DEFAULTFONT );
+	hBigFont = g_pMenu->GetBuiltinFont( QM_BIGFONT );
 
 	firstinit = false;
 }

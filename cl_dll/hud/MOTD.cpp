@@ -56,12 +56,12 @@ void CHudMOTD :: Reset( void )
 	ignoreThisMotd = false;
 }
 
-#define LINE_HEIGHT  13
-#define ROW_GAP  13
 #define ROW_RANGE_MIN 30
 #define ROW_RANGE_MAX ( ScreenHeight - 100 )
 int CHudMOTD :: Draw( float fTime )
 {
+	const int LINE_HEIGHT = DrawUtils::HudFontHeight( 1.0f );
+
 	gHUD.m_iNoConsolePrint &= ~( 1 << 1 );
 	if( !m_bShow )
 		return 1;

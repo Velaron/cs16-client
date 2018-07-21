@@ -32,18 +32,126 @@
 #include "render_api.h"
 #include "mobility_int.h"
 #include "vgui_parser.h"
+#include "cl_dll/IGameClientExports.h"
+
+#include <dlfcn.h>
 
 cl_enginefunc_t		gEngfuncs  = { };
 render_api_t		gRenderAPI = { };
 mobile_engfuncs_t	gMobileAPI = { };
+IGameMenuExports *g_pMenu = NULL;
 CHud gHUD;
 int g_iXash = 0; // indicates a buildnum
 int g_iMobileAPIVersion = 0;
+static HINTERFACEMODULE hMenu = 0;
 
 void InitInput (void);
 void Game_HookEvents( void );
 void IN_Commands( void );
 void Input_Shutdown (void);
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Exports functions that are used by the gameUI for UI dialogs
+//-----------------------------------------------------------------------------
+class CClientExports : public IGameClientExports
+{
+public:
+	// returns the name of the server the user is connected to, if any
+	virtual const char *GetServerHostName()
+	{
+		return gHUD.m_szServerName;
+	}
+
+	// ingame voice manipulation
+	virtual bool IsPlayerGameVoiceMuted(int playerIndex)
+	{
+		/*if (GetClientVoiceMgr())
+			return GetClientVoiceMgr()->IsPlayerBlocked(playerIndex);*/
+		return false;
+	}
+
+	virtual void MutePlayerGameVoice(int playerIndex)
+	{
+		/*if (GetClientVoiceMgr())
+		{
+			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, true);
+		}*/
+	}
+
+	virtual void UnmutePlayerGameVoice(int playerIndex)
+	{
+		/*if (GetClientVoiceMgr())
+		{
+			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, false);
+		}*/
+	}
+
+	virtual const char *Localize( const char *string )
+	{
+		return ::Localize( string );
+	}
+};
+
+EXPOSE_SINGLE_INTERFACE( CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION )
+
+static void LoadMenuInterface( void )
+{
+	const char *menupaths[] =
+	{
+		"%s/libmenu_hardfp.so", ""
+		"%s/libmenu.so", ""
+#ifndef __ANDROID__
+		"cstrike/cl_dlls/libxashmenu.so", NULL
+#endif
+	};
+	const char *dllpath;
+	char path[4096];
+
+	dllpath = getenv( "XASH3D_GAMELIBDIR" );
+	if( dllpath == NULL ) dllpath = "";
+
+	for( int i = 0; i < sizeof( menupaths ) / sizeof( menupaths[0] ); i += 2 )
+	{
+		snprintf( path, 4096, menupaths[i], dllpath );
+
+		hMenu = Sys_LoadModule( path, menupaths[i+1] ? true : false );
+		if( !hMenu )
+		{
+			gEngfuncs.Con_Printf( "Failed to load menu from %s: %s\n", path, dlerror() );
+			continue;
+		}
+
+		gEngfuncs.Con_Printf( "Loaded menu from %s\n", path );
+
+		CreateInterfaceFn factory = Sys_GetFactory( hMenu );
+		if( !factory )
+		{
+			Sys_FreeModule( hMenu );
+			hMenu = 0;
+			continue;
+		}
+
+		g_pMenu = (IGameMenuExports*)factory(GAMEMENUEXPORTS_INTERFACE_VERSION, NULL);
+		if( !g_pMenu )
+		{
+			Sys_FreeModule( hMenu );
+			hMenu = 0;
+			continue;
+		}
+
+		if( !g_pMenu->Initialize( Sys_GetFactoryThis() ))
+		{
+			Sys_FreeModule( hMenu );
+			hMenu = 0;
+			continue;
+		}
+
+		return;
+	}
+
+	gRenderAPI.Host_Error( "Cannot load menu library!\n" );
+}
 
 /*
 ========================== 
@@ -78,6 +186,8 @@ void DLLEXPORT HUD_Shutdown( void )
 	gHUD.Shutdown();
 	Input_Shutdown();
 	Localize_Free();
+	if( hMenu )
+		Sys_FreeModule( hMenu );
 }
 
 
@@ -207,6 +317,7 @@ the hud variables.
 
 void DLLEXPORT HUD_Init( void )
 {
+	LoadMenuInterface();
 	InitInput();
 	gHUD.Init();
 	//Scheme_Init();
@@ -465,50 +576,3 @@ extern "C" void DLLEXPORT F(void *pv)
 
 	*pcldll_func = cldll_func;
 }
-
-#include "cl_dll/IGameClientExports.h"
-
-//-----------------------------------------------------------------------------
-// Purpose: Exports functions that are used by the gameUI for UI dialogs
-//-----------------------------------------------------------------------------
-class CClientExports : public IGameClientExports
-{
-public:
-	// returns the name of the server the user is connected to, if any
-	virtual const char *GetServerHostName()
-	{
-		return gHUD.m_szServerName;
-	}
-
-	// ingame voice manipulation
-	virtual bool IsPlayerGameVoiceMuted(int playerIndex)
-	{
-		/*if (GetClientVoiceMgr())
-			return GetClientVoiceMgr()->IsPlayerBlocked(playerIndex);*/
-		return false;
-	}
-
-	virtual void MutePlayerGameVoice(int playerIndex)
-	{
-		/*if (GetClientVoiceMgr())
-		{
-			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, true);
-		}*/
-	}
-
-	virtual void UnmutePlayerGameVoice(int playerIndex)
-	{
-		/*if (GetClientVoiceMgr())
-		{
-			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, false);
-		}*/
-	}
-
-	virtual const char *Localize( const char *string )
-	{
-		return ::Localize( string );
-	}
-};
-
-EXPOSE_SINGLE_INTERFACE(CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION)
-

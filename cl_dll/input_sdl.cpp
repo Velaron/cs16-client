@@ -1,3 +1,4 @@
+#ifndef __ANDROID__
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 //========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
@@ -1037,3 +1038,4 @@ void IN_Init (void)
 	IN_StartupMouse ();
 	IN_StartupJoystick ();
 }
+#endif // __ANDROID__

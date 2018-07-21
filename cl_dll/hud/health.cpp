@@ -72,10 +72,6 @@ int CHudHealth::Init(void)
 	HOOK_MESSAGE(gHUD.m_Health, ScoreAttrib);
 	HOOK_MESSAGE(gHUD.m_Health, ClCorpse);
 
-	// OMG. It's so shameful
-	// HOOK_COMMAND(gHUD.m_Health, "fart", Fart);
-	// HOOK_COMMAND(gHUD.m_Health, "pee", Pee);
-
 	m_iHealth = 100;
 	m_fFade = 0;
 	m_iFlags = 0;
@@ -511,60 +507,6 @@ int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 	}
 	CreateCorpse( origin, angles, szModel, delay, seq, classID );
 	return 0;
-}
-
-void CHudHealth::UserCmd_Fart( void )
-{
-	cl_entity_t *e = gEngfuncs.GetLocalPlayer();
-	if(!e)
-		return;
-
-	Vector org = e->origin;
-	Vector ang = e->angles;
-	Vector dir;
-	ang.x = 0; // ignore yaw
-
-	gEngfuncs.pfnAngleVectors( ang, dir, NULL, NULL );
-
-
-	if( !(g_iPlayerFlags & FL_DUCKING) )
-	{
-		org = org - dir * 10;
-		org.z -= 5;
-	}
-	else
-	{
-		org = org - dir * 15;
-	}
-
-	EV_CS16Client_CreateSmoke( SMOKE_WALLPUFF, org, -dir, 10, 0.5, 75, 42, 15, true,
-		g_vPlayerVelocity, 35, FTENT_COLLIDEWORLD );
-}
-
-void CHudHealth::UserCmd_Pee( void )
-{
-	cl_entity_t *e = gEngfuncs.GetLocalPlayer();
-	if(!e)
-		return;
-
-	Vector org = e->origin;
-	Vector ang = e->angles;
-	Vector dir;
-	//ang.x = 0; // ignore yaw
-
-	gEngfuncs.pfnAngleVectors( ang, dir, NULL, NULL );
-
-	if( !(g_iPlayerFlags & FL_DUCKING) )
-	{
-		org = org + dir * 5;
-		org.z -= 5;
-	}
-	else
-	{
-		org = org - dir * 10;
-	}
-
-	gEngfuncs.pEfxAPI->R_BloodStream( org, dir, gEngfuncs.pEfxAPI->R_LookupColor( 255, 160, 0 ), 50 );
 }
 
 /*
