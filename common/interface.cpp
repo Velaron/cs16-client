@@ -68,27 +68,31 @@ EXPORT_FUNCTION IBaseInterface *CreateInterface( const char *pName, int *pReturn
 
 
 #ifdef _WIN32
-HINTERFACEMODULE Sys_LoadModule(const char *pModuleName)
+HINTERFACEMODULE Sys_LoadModule(const char *pModuleName, bool absolute)
 {
 	return (HINTERFACEMODULE)LoadLibrary(pModuleName);
 }
 
 #else  // LINUX
-HINTERFACEMODULE Sys_LoadModule(const char *pModuleName)
+HINTERFACEMODULE Sys_LoadModule(const char *pModuleName, bool absolute)
 {
 	// Linux dlopen() doesn't look in the current directory for libraries.
 	// We tell it to, so people don't have to 'install' libraries as root.
+	if( !absolute )
+	{
+		char szCwd[1024];
+		char szAbsoluteLibFilename[1024];
 
-	char szCwd[1024];
-	char szAbsoluteLibFilename[1024];
+		getcwd( szCwd, sizeof( szCwd ) );
+		if ( szCwd[ strlen( szCwd ) - 1 ] == '/' )
+			szCwd[ strlen( szCwd ) - 1 ] = 0;
 
-	getcwd( szCwd, sizeof( szCwd ) );
-	if ( szCwd[ strlen( szCwd ) - 1 ] == '/' )
-		szCwd[ strlen( szCwd ) - 1 ] = 0;
+		sprintf( szAbsoluteLibFilename, "%s/%s", szCwd, pModuleName );
+		return (HINTERFACEMODULE)dlopen( szAbsoluteLibFilename, RTLD_NOW | RTLD_GLOBAL );
+	}
 
-	sprintf( szAbsoluteLibFilename, "%s/%s", szCwd, pModuleName );
+	return (HINTERFACEMODULE)dlopen( pModuleName, RTLD_NOW | RTLD_GLOBAL);
 
-	return (HINTERFACEMODULE)dlopen( szAbsoluteLibFilename, RTLD_NOW );
 }
 
 #endif
