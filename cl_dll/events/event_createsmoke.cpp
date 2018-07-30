@@ -195,9 +195,9 @@ void EV_CreateSmoke(event_args_s *args)
 					g_clouds[i].color.g =
 					g_clouds[i].color.r = Com_RandomLong(210, 230);
 			g_clouds[i].color.a = 150;
-			g_clouds[i].direction.x = Com_RandomFloat(-5, 5);
-			g_clouds[i].direction.y = Com_RandomFloat(-5, 5);
-			g_clouds[i].direction.z = Com_RandomFloat(-5, 5);
+			g_clouds[i].direction.x = Com_RandomFloat( -5, 5 );
+			g_clouds[i].direction.y = Com_RandomFloat( -5, 5 );
+			g_clouds[i].direction.z = Com_RandomFloat( -5, 5 );
 			g_clouds[i].fadetime = gEngfuncs.GetClientTime() + 5.0f;
 			g_clouds[i].fadespeed = Com_RandomFloat( 5, 7 );
 		}

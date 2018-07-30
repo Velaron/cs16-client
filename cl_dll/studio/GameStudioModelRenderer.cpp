@@ -40,6 +40,7 @@
 #include "GameStudioModelRenderer.h"
 #include "pm_defs.h"
 #include "camera.h"
+#include "eventscripts.h"
 
 #define ANIM_WALK_SEQUENCE 3
 #define ANIM_JUMP_SEQUENCE 6
@@ -766,6 +767,12 @@ int CGameStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t *pplaye
 	bool isLocalPlayer = false;
 
 	m_pplayer = pplayer;
+
+	if( g_iUser1 == OBS_IN_EYE && g_iUser2 == pplayer->number )
+		return 0;
+
+	if( !g_iUser1 && !cam_thirdperson && gEngfuncs.pEventAPI->EV_IsLocal( pplayer->number - 1 ))
+		return 0;
 
 	if (m_bLocal && IEngineStudio.GetCurrentEntity() == gEngfuncs.GetLocalPlayer())
 		isLocalPlayer = true;

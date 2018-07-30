@@ -110,8 +110,8 @@ int CHudMenu :: Draw( float flTime )
 	i = 0;
 	while ( i < MAX_MENU_STRING && g_szMenuString[i] != '\0' )
 	{
-		DrawUtils::DrawHudString( x, y, 320, g_szMenuString + i, 255, 255, 255 );
-		y += 24;
+		DrawUtils::DrawHudString( x, y, 640, g_szMenuString + i, 255, 255, 255 );
+		y += DrawUtils::HudFontHeight( );
 
 		while ( i < MAX_MENU_STRING && g_szMenuString[i] != '\0' && g_szMenuString[i] != '\n' )
 			i++;

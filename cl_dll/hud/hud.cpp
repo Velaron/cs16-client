@@ -248,7 +248,6 @@ void CHud :: Init( void )
 	m_cvarChecker.AddToCheckList( "sv_skipshield", 1.0f );
 	m_cvarChecker.AddToCheckList( "hand", 0.0f );
 	m_cvarChecker.AddToCheckList( "viewsize", 140.0f );
-	m_cvarChecker.AddToCheckList( "ui_renderworld", 1.0f );
 
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
 
@@ -467,10 +466,6 @@ void CHud :: VidInit( void )
 		ClientCmd( "exec touch_presets/phone_ahsim" );
 		gEngfuncs.Cvar_Set( "touch_config_file", "touch_presets/phone_ahsim.cfg" );
 	}
-
-	hSmallFont = g_pMenu->GetBuiltinFont( QM_SMALLFONT );
-	hDefaultFont = g_pMenu->GetBuiltinFont( QM_DEFAULTFONT );
-	hBigFont = g_pMenu->GetBuiltinFont( QM_BIGFONT );
 
 	firstinit = false;
 }

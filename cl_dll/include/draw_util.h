@@ -30,35 +30,30 @@
 #define DRAW_UTIL_H
 // Drawing primitives
 
+#include "cl_dll.h"
+#include "cl_util.h"
+
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
 #define DHN_3DIGITS  4
 
-
 class DrawUtils
 {
 public:
-	static int DrawHudNumber(int x, int y, int iFlags, int iNumber,
-						 int r, int g, int b );
-
-	static int DrawHudNumber2( int x, int y, bool DrawZero, int iDigits, int iNumber,
-						   int r, int g, int b);
-
-	static int DrawHudNumber2( int x, int y, int iNumber,
-						   int r, int g, int b);
-
+	static int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b );
+	static int DrawHudNumber2( int x, int y, bool DrawZero, int iDigits, int iNumber, int r, int g, int b);
+	static int DrawHudNumber2( int x, int y, int iNumber, int r, int g, int b);
 	static int DrawHudString(int x, int y, int iMaxX, const char *szString,
-						 int r, int g, int b, float scale = 0.0f, bool drawing = false );
-
-	static int DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString,
+							 int r, int g, int b, float scale = 0.0f, bool drawing = false );
+	static int DrawHudStringReverse( int x, int y, int iMinX, const char *szString,
 								 int r, int g, int b, float scale = 0.0f, bool drawing = false );
 
-	static inline int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber,
+	static inline int DrawHudNumberString( int x, int y, int iMinX, int iNumber,
 								int r, int g, int b, float scale = 0.0f )
 	{
 		char szString[16];
 		snprintf( szString, sizeof(szString), "%d", iNumber );
-		return DrawHudStringReverse( xpos, ypos, iMinX, szString, r, g, b, scale );
+		return DrawHudStringReverse( x, y, iMinX, szString, r, g, b, scale );
 	}
 
 	static int HudStringLen( const char *szIt, float scale = 1 );
@@ -86,64 +81,53 @@ public:
 
 	static inline int DrawConsoleString(int x, int y, const char *string)
 	{
-		if ( gHUD.hud_textmode->value )
-		{
-			int ret  = DrawHudString( x, y, 9999, (char *)string, color[0] * 255, color[1] * 255, color[2] * 255 );
-			color[0] = color[1] = color[2] = 1.0f;
-			return ret;
-		}
-		else
-			return gEngfuncs.pfnDrawConsoleString( x, y, (char *)string );
+		int ret  = DrawHudString( x, y, 9999, string, color[0], color[1], color[2] );
+		color[0] = color[1] = color[2] = 255;
+		return ret;
 	}
 
 	static inline void SetConsoleTextColor( float r, float g, float b )
 	{
-		if ( gHUD.hud_textmode->value )
-			color[0] = r, color[1] = g, color[2] = b;
-		else
-			gEngfuncs.pfnDrawSetTextColor( r, g, b );
+		color[0] = bound( 0, r * 255.0f, 255 );
+		color[1] = bound( 0, g * 255.0f, 255 );
+		color[2] = bound( 0, b * 255.0f, 255 );
 	}
 
 	static inline void SetConsoleTextColor( unsigned char r, unsigned char g, unsigned char b )
 	{
-		if ( gHUD.hud_textmode->value )
-			color[0] = r / 255.0f, color[1] = g / 255.0f, color[2] = b / 255.0f;
-		else
-			gEngfuncs.pfnDrawSetTextColor( r / 255.0f, g / 255.0f, b / 255.0f );
+		color[0] = r;
+		color[1] = g;
+		color[2] = b;
 	}
 
 	static inline int ConsoleStringLen(  const char *szIt )
 	{
-		if ( gHUD.hud_textmode->value )
-		{
-			return HudStringLen( (char *)szIt );
-		}
-		else
-		{
-			int _width;
-			int _height;
-
-			gEngfuncs.pfnDrawConsoleStringLen( szIt, &_width, &_height );
-			return _width;
-		}
+		return HudStringLen( szIt );
 	}
 
 	static inline void ConsoleStringSize( const char *szIt, int *width, int *height )
 	{
-		if ( gHUD.hud_textmode->value )
-			*height = 13, *width = HudStringLen( (char *)szIt );
-		else
-			gEngfuncs.pfnDrawConsoleStringLen( szIt, width, height );
+		g_pMenu->GetTextSize( QM_SMALLFONT, szIt, width, height );
 	}
 
-	static inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b, float scale = 0.0f )
+	static inline unsigned int PackRGB( int r, int g, int b )
 	{
-		int ret;
-		if( scale && g_iMobileAPIVersion )
-			ret = gMobileAPI.pfnDrawScaledCharacter( x, y, number, r, g, b, scale ) / gHUD.m_flScale;
-		else
-			ret = gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b );
-		return ret;
+		return ((0xFF)<<24|(r)<<16|(g)<<8|(b));
+	}
+
+	static inline unsigned int PackRGBA( int r, int g, int b, int a )
+	{
+		return ((a)<<24|(r)<<16|(g)<<8|(b));
+	}
+
+	static inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b, float scale = 1.0f )
+	{
+		return g_pMenu->DrawCharacter( QM_SMALLFONT, number, x, y, UI_SMALL_CHAR_HEIGHT * scale, PackRGB( r, g, b ), true );
+	}
+
+	static inline int HudFontHeight( float scale = 1.0f )
+	{
+		return g_pMenu->GetFontTall( QM_SMALLFONT ) * scale;
 	}
 
 	static inline void UnpackRGB( int &r, int &g, int &b, const unsigned long ulRGB )
@@ -178,11 +162,9 @@ public:
 	static void Draw2DQuad( float x1, float y1, float x2, float y2 );
 	static void DrawStretchPic( float x, float y, float w, float h,
 								float s1 = 0, float t1 = 0, float s2 = 1, float t2 = 1);
-
-
 private:
 	// console string color
-	static float color[3];
+	static int color[3];
 };
 
 #endif // DRAW_UTIL_H

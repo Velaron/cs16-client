@@ -36,7 +36,7 @@ version.
 #include <string.h>
 #include <ctype.h>
 
-float DrawUtils::color[3];
+int DrawUtils::color[3];
 
 #define IsColorString( p )	( p && *( p ) == '^' && *(( p ) + 1) && *(( p ) + 1) >= '0' && *(( p ) + 1 ) <= '9' )
 #define ColorIndex( c )	((( c ) - '0' ) & 7 )
@@ -54,36 +54,165 @@ byte g_color_table[][4] =
 {240, 180,  24, 255},	// default color (can be changed by user)
 };
 
+/*
+============================
+Con_UtfProcessChar
+
+Ripped from engine.
+
+Xash3D FWGS uses multibyte, converting it to current single-byte encoding
+Converting to single-byte not necessary anymore, as UI uses custom font render which works with 32-bit chars
+============================
+*/
+int Con_UtfProcessChar( int in )
+{
+#ifndef XASH_DISABLE_FWGS_EXTENSIONS
+	static int m = -1, k = 0; //multibyte state
+	static int uc = 0; //unicode char
+
+	if( !in )
+	{
+		m = -1;
+		k = 0;
+		uc = 0;
+		return 0;
+	}
+
+	// Get character length
+	if(m == -1)
+	{
+		uc = 0;
+		if( in >= 0xF8 )
+		{
+			return 0;
+		}
+		else if( in >= 0xF0 )
+		{
+			uc = in & 0x07;
+			m = 3;
+		}
+		else if( in >= 0xE0 )
+		{
+			uc = in & 0x0F;
+			m = 2;
+		}
+		else if( in >= 0xC0 )
+		{
+			uc = in & 0x1F;
+			m = 1;
+		}
+		else if( in <= 0x7F )
+		{
+			return in; // ascii
+		}
+		// return 0 if we need more chars to decode one
+		k = 0;
+		return 0;
+	}
+	// get more chars
+	else if( k <= m )
+	{
+		uc <<= 6;
+		uc += in & 0x3F;
+		k++;
+	}
+	if( in > 0xBF || m < 0 )
+	{
+		m = -1;
+		return 0;
+	}
+	if( k == m )
+	{
+		k = m = -1;
+
+		return uc;
+
+		// not implemented yet
+		// return '?';
+	}
+	return 0;
+#else
+	// remap in unicode
+	if( in >= 0xC0 && in <= 0xFF )
+	{
+		return in - 0xC0 + 0x410;
+	}
+	return in;
+#endif
+}
+
+/*
+=================
+Con_UtfMoveLeft
+
+get position of previous printful char
+=================
+*/
+int Con_UtfMoveLeft( const char *str, int pos )
+{
+	int i, k = 0;
+	// int j;
+	Con_UtfProcessChar( 0 );
+	if(pos == 1) return 0;
+	for( i = 0; i < pos-1; i++ )
+		if( Con_UtfProcessChar( (unsigned char)str[i] ) )
+			k = i+1;
+	Con_UtfProcessChar( 0 );
+	return k;
+}
+
+/*
+=================
+Con_UtfMoveRight
+
+get next of previous printful char
+=================
+*/
+int Con_UtfMoveRight( const char *str, int pos, int length )
+{
+	int i;
+	Con_UtfProcessChar( 0 );
+	for( i = pos; i <= length; i++ )
+	{
+		if( Con_UtfProcessChar( (unsigned char)str[i] ) )
+			return i+1;
+	}
+	Con_UtfProcessChar( 0 );
+
+	return pos + 1;
+}
+
 
 int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, int r, int g, int b, float scale, bool drawing )
 {
+	int first_xpos = xpos;
 	char *szIt = (char *)str;
+	Con_UtfProcessChar( 0 );
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		int next = xpos + gHUD.GetCharWidth((unsigned char)*szIt); // variable-width fonts look cool
-		if ( next > iMaxX )
-			return xpos;
-
 		if ( *szIt == '\\' && *( szIt + 1 ) != '\n' && *( szIt + 1 ) != 0 )
 		{
 			// an escape character
 
-			switch ( *( ++szIt ) )
+			switch ( *( szIt + 1 ) )
 			{
 			case 'y':
 				UnpackRGB( r, g, b, RGB_YELLOWISH );
+				szIt++;
 				continue;
 			case 'w':
 				r = g = b = 255;
+				szIt++;
 				continue;
 			case 'd':
+				szIt++;
 				continue;
 			case 'R':
-				//if( drawing ) return xpos;
-				//return DrawHudStringReverse( iMaxX, ypos, first_xpos, szIt, r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
-				xpos = iMaxX - gHUD.GetCharWidth('M') * 10;
-				++szIt;
+				if( drawing )
+					return xpos;
+				// set 'drawing' to true, to stop when '\R' is catched
+				return DrawHudStringReverse( iMaxX, ypos, first_xpos, szIt + 2, r, g, b, true );
 			}
 		}
 		else if( IsColorString( szIt ) )
@@ -98,7 +227,16 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 			continue;
 		}
 
-		xpos += TextMessageDrawChar( xpos, ypos, *szIt, r, g, b, scale );
+		int uch = Con_UtfProcessChar( (unsigned char)*szIt );
+
+		if( !uch )
+			continue;
+
+		int next = xpos + gHUD.GetCharWidth(uch, scale); // variable-width fonts look cool
+		if ( next > iMaxX )
+			return xpos;
+
+		xpos += TextMessageDrawChar( xpos, ypos, uch, r, g, b, scale );
 	}
 
 	return xpos;
@@ -107,15 +245,22 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 
 int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, float scale, bool drawing )
 {
-	// iterate throug the string in reverse
-	for ( signed int i = strlen( szString ); i >= 0; i-- )
-	{
-		int next = xpos - gHUD.GetCharWidth((unsigned char)szString[i]); // variable-width fonts look cool
-		if ( next < iMinX )
-			return xpos;
-		xpos = next;
+	int first_xpos = xpos;
+	int i;
 
-		if ( i > 1 )
+	for( const char *szIt = szString; *szIt; szIt++ )
+	{
+		if( *szIt == '\n' )
+		{
+			i = szIt - szString;
+			break;
+		}
+	}
+
+	// iterate throug the string in reverse
+	for ( ; i >= 0; i-- )
+	{
+		if( i )
 		{
 			if( szString[i - 1] == '\\' )
 			{
@@ -125,15 +270,18 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 				{
 				case 'y':
 					UnpackRGB( r, g, b, RGB_YELLOWISH );
+					i--;
 					break;
 				case 'w':
 					r = g = b = 255;
+					i--;
 					break;
 				case 'R':
-				//if( drawing ) return xpos;
-				//else return DrawHudString( iMinX, ypos, first_xpos, &szString[i - 1], r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
-				//xpos = iMinX + gHUD.m_scrinfo.charWidths['M'] * i ;
+					if( drawing )
+						return xpos;
+					return DrawHudString( iMinX, ypos, first_xpos, &szString[i - 1], r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
 				case 'd':
+					i--;
 					break;
 				}
 				continue;
@@ -151,7 +299,18 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 			}
 		}
 
-		TextMessageDrawChar( xpos, ypos, szString[i], r, g, b, scale );
+		int uch = Con_UtfProcessChar( (unsigned char)szString[i] );
+
+		if( !uch )
+			continue;
+
+
+		int next = xpos - gHUD.GetCharWidth(uch, scale); // variable-width fonts look cool
+		if ( next < iMinX )
+			return xpos;
+		xpos = next;
+
+		TextMessageDrawChar( xpos, ypos, uch, r, g, b, scale );
 	}
 
 	return xpos;
@@ -306,13 +465,13 @@ int DrawUtils::HudStringLen( const char *szIt, float scale )
 			continue;
 		}
 
-		if( szIt[0] == '^' && isdigit( szIt[1] ) ) // suck down, unreadable nicknames. Check even if hud_colored is off
+		if( IsColorString( szIt ))// suck down, unreadable nicknames. Check even if hud_colored is off
 		{
 			szIt++;
 			continue;
 		}
 
-		l += gHUD.m_scrinfo.charWidths[(unsigned char)*szIt] * scale;
+		l += gHUD.GetCharWidth( (unsigned char)*szIt, scale );
 	}
 	return l;
 }

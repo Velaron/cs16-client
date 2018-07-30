@@ -36,6 +36,8 @@
 #include "csprite.h"
 #include "cvardef.h"
 #include "cvar_checker.h"
+#include "cl_dll/IGameClientExports.h"
+
 
 #define MIN_ALPHA	 100	
 #define	HUDELEM_ACTIVE	1
@@ -666,8 +668,6 @@ private:
 		HSPRITE spr;
 		wrect_t rc;
 		unsigned char r, g, b;
-		unsigned char secR, secG, secB;
-		float flTimeToChange;
 	} icon_sprite_t;
 
 	icon_sprite_t m_IconList[MAX_ICONSPRITES];
@@ -929,13 +929,14 @@ public:
 		return -1; // invalid sprite
 	}
 
-	inline short GetCharWidth ( unsigned char ch )
+	inline int GetCharWidth ( int ch, float scale = 1.0f )
 	{
-		return m_scrinfo.charWidths[ ch ];
+		return g_pMenu->GetCharacterWidth( QM_SMALLFONT, ch, UI_SMALL_CHAR_HEIGHT * scale ); // TODO
 	}
-	inline int GetCharHeight( )
+
+	inline int GetCharHeight( float scale = 1.0f )
 	{
-		return m_scrinfo.iCharHeight;
+		return g_pMenu->GetFontTall( QM_SMALLFONT ) * scale; // TODO
 	}
 
 	inline int GetGameType( )

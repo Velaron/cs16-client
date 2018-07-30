@@ -42,6 +42,7 @@
 
 #include "pm_shared.h"
 #include "com_weapons.h"
+#include "draw_util.h"
 
 extern float g_flRoundTime;
 
@@ -449,7 +450,6 @@ TEMPENTITY *EV_CS16Client_CreateSmoke( ESmoke type, Vector origin, Vector dir,
 	return te;
 }
 
-
 void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r, int g, int b, bool bCreateWallPuff, bool bCreateSparks, char cTextureType, bool isSky)
 {
 	physent_t *pe;
@@ -467,9 +467,11 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 		if( gHUD.cl_weapon_sparks->value && bCreateSparks )
 		{
 			Vector dir = pTrace->plane.normal;
+
 			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			dir.y = dir.y * dir.y * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			dir.z = dir.z * dir.z * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
+
 			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, Com_RandomLong( 5, 7 ), dir.z, -75.0f, 75.0f );
 		}
 
@@ -724,6 +726,7 @@ void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAn
 	{
 		model->flags = FTENT_COLLIDEWORLD|FTENT_FADEOUT;
 		model->fadeSpeed = 25;
+		model->entity.curstate.renderfx = kRenderFxDeadPlayer;
 		model->entity.curstate.animtime = flAnimTime;
 		model->entity.curstate.framerate = 1.0;
 		model->entity.curstate.frame = 0;
