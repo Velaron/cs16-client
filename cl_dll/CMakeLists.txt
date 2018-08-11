@@ -138,8 +138,6 @@ set (HUD_SRCS
 	./include/hud/health.h
 	./include/hud/hud.h
 	./include/hud/hud_iface.h
-	./include/hud/hud_spectator.h
-	./include/hud/radar.h
 )
 
 set (STUDIORENDER_SRCS
@@ -176,6 +174,7 @@ set (CLDLL_SOURCES
 	./draw_util.cpp
 	../common/interface.cpp
 	./cvar_checker.cpp
+	./interpolation.cpp
 
 	./include/camera.h
 	./include/cl_dll.h

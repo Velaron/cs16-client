@@ -48,13 +48,17 @@ class RGBA
 {
 public:
 	unsigned char r, g, b, a;
+
+	unsigned int Pack()
+	{
+		return ((a)<<24|(r)<<16|(g)<<8|(b));
+	}
 };
 
 enum 
 { 
-	MAX_PLAYERS = 33, // including the bomb
+	MAX_PLAYERS = 32,
 	MAX_TEAMS = 3,
-	MAX_TEAM_NAME = 16,
 	MAX_HOSTAGES = 24,
 };
 
@@ -83,6 +87,33 @@ inline bool BIsValidCTModelIndex( int i )
 		return false;
 }
 
+struct hostage_info_t
+{
+	vec3_t origin;
+	float radarflashtimedelta;
+	float radarflashtime;
+	bool dead;
+	bool nextflash;
+	int radarflashes;
+};
+
+struct bomb_info_t
+{
+	Vector origin;
+	int radarflashes;
+	float radarflashtime;
+	float radarflashtimedelta;
+	bool dead;
+	bool nextflash;
+	bool planted;
+};
+
+extern hud_player_info_t	g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine
+extern extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];   // additional player info sent directly to the client dll
+extern team_info_t			g_TeamInfo[MAX_TEAMS];
+extern hostage_info_t		g_HostageInfo[MAX_HOSTAGES];
+extern int					g_IsSpectator[MAX_PLAYERS+1];
+
 #define HUD_DRAW         (1 << 0)
 #define HUD_THINK        (1 << 1)
 #define HUD_ACTIVE       (HUD_DRAW | HUD_THINK)
@@ -107,7 +138,6 @@ public:
 	virtual void Reset(void) {return;}
 	virtual void InitHUDData( void ) {}		// called every time a server is connected to
 	virtual void Shutdown( void ) {}
-
 };
 
 struct HUDLIST {
@@ -121,8 +151,150 @@ struct HUDLIST {
 //-----------------------------------------------------
 //
 //#include "voice_status.h"
-#include "hud_spectator.h"
+#include "interpolation.h"
 
+#define INSET_OFF				0
+#define	INSET_CHASE_FREE		1
+#define	INSET_IN_EYE			2
+#define	INSET_MAP_FREE			3
+#define	INSET_MAP_CHASE			4
+
+#define MAX_SPEC_HUD_MESSAGES	8
+
+
+
+#define OVERVIEW_TILE_SIZE		256		// don't change this
+#define OVERVIEW_MAX_LAYERS		1
+
+//-----------------------------------------------------------------------------
+// Purpose: Handles the drawing of the spectator stuff (camera & top-down map and all the things on it )
+//-----------------------------------------------------------------------------
+
+typedef struct overviewInfo_s {
+	char		map[64];	// cl.levelname or empty
+	vec3_t		origin;		// center of map
+	float		zoom;		// zoom of map images
+	int			layers;		// how may layers do we have
+	float		layersHeights[OVERVIEW_MAX_LAYERS];
+	char		layersImages[OVERVIEW_MAX_LAYERS][255];
+	qboolean	rotated;	// are map images rotated (90 degrees) ?
+
+	int			insetWindowX;
+	int			insetWindowY;
+	int			insetWindowHeight;
+	int			insetWindowWidth;
+} overviewInfo_t;
+
+typedef struct overviewEntity_s {
+
+	HSPRITE					hSprite;
+	struct cl_entity_s *	entity;
+	double					killTime;
+} overviewEntity_t;
+
+typedef struct cameraWayPoint_s
+{
+	float	time;
+	vec3_t	position;
+	vec3_t	angle;
+	float	fov;
+	int		flags;
+} cameraWayPoint_t;
+
+#define	 MAX_OVERVIEW_ENTITIES		128
+#define	 MAX_CAM_WAYPOINTS			32
+
+class CHudSpectator : public CHudBase
+{
+public:
+	void Reset();
+	int  ToggleInset(bool allowOff);
+	void CheckSettings();
+	void InitHUDData( void );
+	bool AddOverviewEntityToList( HSPRITE sprite, cl_entity_t * ent, double killTime);
+	void DeathMessage(int victim);
+	bool AddOverviewEntity( int type, struct cl_entity_s *ent, const char *modelname );
+	void CheckOverviewEntities();
+	void DrawOverview();
+	void DrawOverviewEntities();
+	void GetMapPosition( float * returnvec );
+	void DrawOverviewLayer();
+	void LoadMapSprites();
+	bool ParseOverviewFile();
+	bool IsActivePlayer(cl_entity_t * ent);
+	void SetModes(int iMainMode, int iInsetMode);
+	void HandleButtonsDown(int ButtonPressed);
+	void HandleButtonsUp(int ButtonPressed);
+	void FindNextPlayer( bool bReverse );
+	void FindPlayer(const char *name);
+	void DirectorMessage( int iSize, void *pbuf );
+	void SetSpectatorStartPosition();
+	int Init();
+	int VidInit();
+
+	int Draw(float flTime);
+
+	void	AddWaypoint( float time, vec3_t pos, vec3_t angle, float fov, int flags );
+	void	SetCameraView( vec3_t pos, vec3_t angle, float fov);
+	float	GetFOV();
+	bool	GetDirectorCamera(vec3_t &position, vec3_t &angle);
+	void	SetWayInterpolation(cameraWayPoint_t * prev, cameraWayPoint_t * start, cameraWayPoint_t * end, cameraWayPoint_t * next);
+
+	int m_iDrawCycle;
+	client_textmessage_t m_HUDMessages[MAX_SPEC_HUD_MESSAGES];
+	char				m_HUDMessageText[MAX_SPEC_HUD_MESSAGES][128];
+	int					m_lastHudMessage;
+	overviewInfo_t		m_OverviewData;
+	overviewEntity_t	m_OverviewEntities[MAX_OVERVIEW_ENTITIES];
+	int					m_iObserverFlags;
+	int					m_iSpectatorNumber;
+
+	float				m_mapZoom;		// zoom the user currently uses
+	vec3_t				m_mapOrigin;	// origin where user rotates around
+	cvar_t *			m_drawnames;
+	cvar_t *			m_drawcone;
+	cvar_t *			m_drawstatus;
+	cvar_t *			m_autoDirector;
+	cvar_t *			m_pip;
+
+
+	qboolean			m_chatEnabled;
+
+	qboolean			m_IsInterpolating;
+	int					m_ChaseEntity;	// if != 0, follow this entity with viewangles
+	int					m_WayPoint;		// current waypoint 1
+	int					m_NumWayPoints;	// current number of waypoints
+	vec3_t				m_cameraOrigin;	// a help camera
+	vec3_t				m_cameraAngles;	// and it's angles
+	CInterpolation		m_WayInterpolation;
+private:
+	vec3_t		m_vPlayerPos[MAX_PLAYERS];
+	HSPRITE		m_hsprPlayerC4;
+	HSPRITE		m_hsprPlayerVIP;
+	HSPRITE		m_hsprHostage;
+	HSPRITE		m_hsprBackpack;
+	HSPRITE		m_hsprBomb;
+	HSPRITE		m_hsprPlayerBlue;
+	HSPRITE		m_hsprPlayerRed;
+	HSPRITE		m_hsprPlayer;
+	HSPRITE		m_hsprCamera;
+	HSPRITE		m_hsprPlayerDead;
+	HSPRITE		m_hsprViewcone;
+	HSPRITE		m_hsprUnkownMap;
+	HSPRITE		m_hsprBeam;
+
+	wrect_t		m_crosshairRect;
+
+	struct model_s * m_MapSprite;	// each layer image is saved in one sprite, where each tile is a sprite frame
+	float		m_flNextObserverInput;
+	float		m_zoomDelta;
+	float		m_moveDelta;
+	float		m_FOV;
+	int			m_lastPrimaryObject;
+	int			m_lastSecondaryObject;
+
+	cameraWayPoint_t	m_CamPath[MAX_CAM_WAYPOINTS];
+};
 
 //
 //-----------------------------------------------------
@@ -238,7 +410,57 @@ private:
 
 
 #include "health.h"
-#include "radar.h"
+
+//
+//-----------------------------------------------------
+//
+class CHudRadar: public CHudBase
+{
+public:
+	virtual int Init();
+	virtual int VidInit();
+	virtual int Draw( float flTime );
+	virtual void InitHUDData();
+	virtual void Reset();
+	virtual void Shutdown();
+
+	int MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf);
+
+	void UserCmd_ShowRadar();
+	void UserCmd_HideRadar();
+	CClientSprite m_hRadar;
+	CClientSprite m_hRadarOpaque;
+
+	int MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_Location(const char *pszName, int iSize, void *pbuf);
+private:
+
+	cvar_t *cl_radartype;
+
+	int InitBuiltinTextures();
+	void DrawPlayerLocation(int y);
+	void DrawRadarDot(int x, int y, int r, int g, int b, int a = 255 );
+	void DrawCross(int x, int y, int r, int g, int b, int a = 255 );
+
+	// Call DrawT, DrawFlippedT or DrawRadarDot considering z value
+	inline void DrawZAxis( Vector pos, int r, int g, int b, int a = 255 );
+
+	void DrawT( int x, int y, int r, int g, int b, int a = 255 );
+	void DrawFlippedT( int x, int y, int r, int g, int b, int a = 255 );
+	bool FlashTime( float flTime, hostage_info_t &pplayer );
+	bool FlashTime( float flTime, extra_player_info_t &pplayer );
+	bool FlashTime( float flTime, bomb_info_t &pplayer );
+	Vector WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles );
+	inline void DrawColoredTexture( int x, int y, int size, byte r, byte g, byte b, byte a, uint texHandle );
+
+	bool bUseRenderAPI, bTexturesInitialized;
+	uint hCross, hT, hFlippedT;
+	int iMaxRadius;
+	bomb_info_t m_bombInfo;
+};
 
 #define FADE_TIME 100
 
@@ -336,14 +558,14 @@ public:
 
 	int m_iPlayerNum;
 	int m_iNumTeams;
+	bool m_bForceDraw; // if called by showscoreboard2
+	bool m_bShowscoresHeld;
 
 private:
 	int m_iLastKilledBy;
 	int m_fLastKillTime;
 	RGBA m_colors;
 	bool m_bDrawStroke;
-	bool m_bForceDraw; // if called by showscoreboard2
-	bool m_bShowscoresHeld;
 	cvar_t *cl_showpacketloss;
 	cvar_t *cl_showplayerversion;
 };
@@ -381,57 +603,6 @@ protected:
 
 	cvar_t *hud_centerid;
 };
-
-struct extra_player_info_t 
-{
-	short frags;
-	short deaths;
-	short playerclass;
-	short teamnumber;
-	char teamname[MAX_TEAM_NAME];
-	bool has_c4;
-	bool vip;
-	bool dead;
-	bool showhealth;
-	bool nextflash;
-	bool talking;
-	Vector origin;
-	int health;
-	int radarflashes;
-	float radarflashtime;
-	float radarflashtimedelta;
-	char location[32];
-};
-
-struct team_info_t 
-{
-	char name[MAX_TEAM_NAME];
-	short frags;
-	short deaths;
-	short ownteam;
-	short players;
-	int already_drawn;
-	int scores_overriden;
-	int sumping;
-	int teamnumber;
-};
-
-struct hostage_info_t
-{
-	vec3_t origin;
-	float radarflashtimedelta;
-	float radarflashtime;
-	bool dead;
-	bool nextflash;
-	int radarflashes;
-};
-
-extern hud_player_info_t	g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine
-extern extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];   // additional player info sent directly to the client dll
-extern team_info_t			g_TeamInfo[MAX_TEAMS+1];
-extern hostage_info_t		g_HostageInfo[MAX_HOSTAGES+1];
-extern int					g_IsSpectator[MAX_PLAYERS+1];
-
 
 //
 //-----------------------------------------------------
@@ -855,7 +1026,6 @@ public:
 	void CalcAllNeededData( );
 
 	bool m_bBombPlanted;
-	int m_iPlayerLastPointedAt;
 
 private:	
 	// szMapName is 64 bytes only. Removing "maps/" and ".bsp" gived me this result

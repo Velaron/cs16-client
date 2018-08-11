@@ -20,6 +20,7 @@
 // this implementation handles the linking of the engine to the DLL
 //
 
+#include "cl_dll/IGameClientExports.h"
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
@@ -32,7 +33,6 @@
 #include "render_api.h"
 #include "mobility_int.h"
 #include "vgui_parser.h"
-#include "cl_dll/IGameClientExports.h"
 
 #include <dlfcn.h>
 
@@ -58,20 +58,20 @@ class CClientExports : public IGameClientExports
 {
 public:
 	// returns the name of the server the user is connected to, if any
-	virtual const char *GetServerHostName()
+	const char *GetServerHostName() override
 	{
 		return gHUD.m_szServerName;
 	}
 
 	// ingame voice manipulation
-	virtual bool IsPlayerGameVoiceMuted(int playerIndex)
+	bool IsPlayerGameVoiceMuted(int playerIndex) override
 	{
 		/*if (GetClientVoiceMgr())
 			return GetClientVoiceMgr()->IsPlayerBlocked(playerIndex);*/
 		return false;
 	}
 
-	virtual void MutePlayerGameVoice(int playerIndex)
+	void MutePlayerGameVoice(int playerIndex) override
 	{
 		/*if (GetClientVoiceMgr())
 		{
@@ -79,7 +79,7 @@ public:
 		}*/
 	}
 
-	virtual void UnmutePlayerGameVoice(int playerIndex)
+	void UnmutePlayerGameVoice(int playerIndex) override
 	{
 		/*if (GetClientVoiceMgr())
 		{
@@ -87,9 +87,40 @@ public:
 		}*/
 	}
 
-	virtual const char *Localize( const char *string )
+	const char *Localize( const char *string ) override
 	{
 		return ::Localize( string );
+	}
+
+	bool GetPlayerExtraInfo( int num, hud_player_info_t **player, extra_player_info_t **extra, bool *isBot ) override
+	{
+		if( num >= 0 && num < MAX_CLIENTS )
+		{
+			num++; // stupid offset
+			GetPlayerInfo( num, &g_PlayerInfoList[num] );
+
+			if( g_PlayerInfoList[num].name && g_PlayerInfoList[num].name[0] )
+			{
+				if( player ) *player = &g_PlayerInfoList[num];
+				if( extra ) *extra = &g_PlayerExtraInfo[num];
+				if( isBot ) *isBot = atoi( gEngfuncs.PlayerInfo_ValueForKey( num, "*bot" ) ) == 1;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool GetTeamInfo( int num, team_info_t **team ) override
+	{
+		if( num >= 0 && num < MAX_TEAMS )
+		{
+			if( g_TeamInfo[num].name[0] && team )
+			{
+				*team = &g_TeamInfo[num];
+				return true;
+			}
+		}
+		return false;
 	}
 };
 
@@ -504,18 +535,6 @@ int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 	return 0;
 }
 
-extern "C" void DLLEXPORT HUD_ChatInputPosition( int *x, int *y )
-{
-	*x = *y = 0;
-}
-
-extern "C" int DLLEXPORT HUD_GetPlayerTeam(int iplayer)
-{
-	if ( iplayer <= MAX_PLAYERS )
-		return g_PlayerExtraInfo[iplayer].teamnumber;
-	return 0;
-}
-
 #include "APIProxy.h"
 
 cldll_func_dst_t *g_pcldstAddrs;
@@ -569,8 +588,8 @@ extern "C" void DLLEXPORT F(void *pv)
 	HUD_VoiceStatus,
 	HUD_DirectorMessage,
 	HUD_GetStudioModelInterface,
-	HUD_ChatInputPosition,
-	HUD_GetPlayerTeam,
+	NULL,
+	NULL,
 	NULL
 	};
 

@@ -564,7 +564,6 @@ void CHudMessage::MessageAdd(client_textmessage_t * newMessage )
 			return;
 		}
 	}
-
 }
 
 

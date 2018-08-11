@@ -30,8 +30,8 @@
 typedef unsigned char byte;
 typedef unsigned short word;
 typedef float vec_t;
-typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
+#include "cl_dll/IGameClientExports.h"
 #include "util_vector.h"
 
 #include "../engine/cdll_int.h"
@@ -41,7 +41,6 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
 #include "render_api.h"
 #include "mobility_int.h"
-#include "cl_dll/IGameClientExports.h"
 
 extern "C"
 {

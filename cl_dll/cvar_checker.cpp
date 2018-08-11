@@ -111,10 +111,6 @@ void CCVarChecker::Run( float flTime )
 
 			break;
 		}
-
-		gEngfuncs.Con_Printf( "CVarChecker: %s is forced to %s. "
-			"Set " FORCE_DEFAULTS_CVAR " to 0, if you want to disable this behaviour.\n",
-			i.pCVar->name, i.pCVar->string );
 	}
 }
 

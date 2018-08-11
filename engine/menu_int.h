@@ -155,7 +155,7 @@ typedef struct ui_enginefuncs_s
 	// menu interface is freezed at version 0.75
 	// new functions starts here 
 	float	(*pfnRandomFloat)( float flLow, float flHigh );	
-	long	(*pfnRandomLong)( long lLow, long lHigh );
+	int	(*pfnRandomLong)( int lLow, int lHigh );
 
 	void	(*pfnSetCursor)( void *hCursor );			// change cursor
 	int	(*pfnIsMapValid)( const char *filename );

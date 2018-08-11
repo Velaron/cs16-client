@@ -106,9 +106,6 @@ int CHudSayText :: Draw( float flTime )
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
 	flScrollTime = min( flScrollTime, flTime + m_HUD_saytext_time->value );
 
-	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
-	flScrollTime = min( flScrollTime, flTime + m_HUD_saytext_time->value );
-
 	if ( flScrollTime <= flTime )
 	{
 		if ( *g_szLineBuffer[0] )

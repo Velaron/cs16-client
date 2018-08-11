@@ -39,6 +39,7 @@
 extern vec3_t vec3_origin;
 extern int nanmask;
 
+#undef IS_NAN
 #define IS_NAN(x)	((*reinterpret_cast<int *>(&(x)) & nanmask) == nanmask)
 
 float anglemod(float a);

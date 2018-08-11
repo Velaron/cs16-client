@@ -211,6 +211,7 @@ typedef struct
 } cldll_func_dst_t;
 
 
+typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
 
 // ********************************************************

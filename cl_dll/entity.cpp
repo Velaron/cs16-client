@@ -313,17 +313,17 @@ void CL_MuzzleFlash( cl_entity_t *entity, vec3_t pos, int type )
 		if( index == 1 )
 		{
 			te = EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 0,  scale, 7,7,7, false, g_vPlayerVelocity );
-			te->entity.angles[2] = pTemp->entity.angles[2];
+			if( te ) te->entity.angles[2] = pTemp->entity.angles[2];
 			te = EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 20, scale + 0.1, 10,10,10, false, g_vPlayerVelocity );
-			te->entity.angles[2] = pTemp->entity.angles[2];
+			if( te ) te->entity.angles[2] = pTemp->entity.angles[2];
 			te = EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 40, scale, 13,13,13, false, g_vPlayerVelocity );
-			te->entity.angles[2] = pTemp->entity.angles[2];
+			if( te ) te->entity.angles[2] = pTemp->entity.angles[2];
 		}
 		else
 		{
 			te = EV_CS16Client_CreateSmoke( SMOKE_RIFLE, smoke_origin, forward, 3, scale, 20, 20, 20, false, g_vPlayerVelocity );
 
-			te->entity.angles[2] = pTemp->entity.angles[2];
+			if( te ) te->entity.angles[2] = pTemp->entity.angles[2];
 		}
 	}
 }

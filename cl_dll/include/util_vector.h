@@ -57,6 +57,7 @@ public:
 	vec_t	x, y;
 };
 
+#undef DotProduct
 inline float DotProduct(const Vector2D& a, const Vector2D& b) { return( a.x*b.x + a.y*b.y ); }
 inline Vector2D operator*(float fl, const Vector2D& v)	{ return v * fl; }
 

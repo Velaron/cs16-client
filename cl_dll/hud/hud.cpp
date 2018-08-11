@@ -248,6 +248,7 @@ void CHud :: Init( void )
 	m_cvarChecker.AddToCheckList( "sv_skipshield", 1.0f );
 	m_cvarChecker.AddToCheckList( "hand", 0.0f );
 	m_cvarChecker.AddToCheckList( "viewsize", 140.0f );
+	m_cvarChecker.AddToCheckList( "r_customdraw_playermodel", 1.0f );
 
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
 
@@ -316,8 +317,6 @@ void CHud :: Init( void )
 
 	//ServersInit();
 
-	gEngfuncs.Cvar_SetValue( "hand", 1 );
-	gEngfuncs.Cvar_SetValue( "sv_skipshield", 1.0f );
 #ifdef __ANDROID__
 	gEngfuncs.Cvar_SetValue( "hud_fastswitch", 1 );
 #endif

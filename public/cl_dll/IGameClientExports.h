@@ -14,6 +14,38 @@
 #include "interface.h"
 #include "../mainui/font/FontRenderer.h"
 #include "../dlls/cdll_dll.h"
+#include "../cl_dll/include/util_vector.h"
+#include "wrect.h"
+#include "cdll_int.h"
+
+#define MAX_TEAM_NAME 16
+
+struct extra_player_info_t
+{
+	short frags;
+	short deaths;
+	short playerclass;
+	short teamnumber;
+	char teamname[MAX_TEAM_NAME];
+	bool has_c4;
+	bool vip;
+	bool dead;
+	bool nextflash;
+	bool talking;
+	Vector origin;
+	int health;
+	int radarflashes;
+	float radarflashtime;
+	float radarflashtimedelta;
+	char location[32];
+};
+
+struct team_info_t
+{
+	char name[MAX_TEAM_NAME];
+	short frags;
+	short players;
+};
 
 //-----------------------------------------------------------------------------
 // Purpose: Exports a set of functions for the GameUI interface to interact with the game client
@@ -31,6 +63,10 @@ public:
 
 	// vgui2 localizer
 	virtual const char *Localize( const char *string ) = 0;
+
+	virtual bool GetPlayerExtraInfo( int num, hud_player_info_t **player, extra_player_info_t **extra, bool *isBot ) = 0;
+
+	virtual bool GetTeamInfo( int num, team_info_t **team ) = 0;
 };
 
 #define GAMECLIENTEXPORTS_INTERFACE_VERSION "GameClientExports_CS16CLIENT_001"
@@ -60,7 +96,9 @@ public:
 
 	virtual int   DrawCharacter( HFont font, int ch, int x, int y, int charH, const unsigned int color, bool forceAdditive = false ) = 0;
 
+	virtual void  SetupScoreboard( int xstart, int xend, int ystart, int yend, unsigned int color, bool drawStroke ) = 0;
 	virtual void  DrawScoreboard( void ) = 0;
+
 	virtual void  DrawSpectatorMenu( void ) = 0;
 
 	virtual void  ShowVGUIMenu( int menuType ) = 0;

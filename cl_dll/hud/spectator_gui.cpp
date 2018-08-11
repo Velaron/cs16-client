@@ -262,15 +262,10 @@ void CHudSpectatorGui::CalcAllNeededData( )
 	label.m_iTerrorists = 0;
 	for( int i = 0; i < gHUD.m_Scoreboard.m_iNumTeams; i++ )
 	{
-		switch( g_TeamInfo[i].teamnumber )
-		{
-		case TEAM_CT:
+		if( !strcmp( g_TeamInfo[i].name, "CT" ) )
 			label.m_iCounterTerrorists = g_TeamInfo[i].frags;
-			break;
-		case TEAM_TERRORIST:
+		else if( !strcmp( g_TeamInfo[i].name, "TERRORIST" ))
 			label.m_iTerrorists = g_TeamInfo[i].frags;
-			break;
-		}
 	}
 
 	// timer
@@ -318,7 +313,6 @@ int CHudSpectatorGui::MsgFunc_SpecHealth(const char *pszName, int iSize, void *b
 	int health = reader.ReadByte();
 
 	g_PlayerExtraInfo[g_iUser2].health = health;
-	m_iPlayerLastPointedAt = g_iUser2;
 
 	return 1;
 }
@@ -330,8 +324,8 @@ int CHudSpectatorGui::MsgFunc_SpecHealth2(const char *pszName, int iSize, void *
 	int health = reader.ReadByte();
 	int client = reader.ReadByte();
 
-	g_PlayerExtraInfo[client].health = health;
-	m_iPlayerLastPointedAt = g_iUser2;
+	if( client > 0 && client <= MAX_PLAYERS )
+		g_PlayerExtraInfo[client].health = health;
 
 	return 1;
 }

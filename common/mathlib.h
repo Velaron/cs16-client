@@ -12,10 +12,13 @@
 *   without written permission from Valve LLC.
 *
 ****/
+#pragma once
 // mathlib.h
 
 typedef float vec_t;
+#ifndef VECTOR_H
 typedef vec_t vec3_t[3];
+#endif
 typedef vec_t vec4_t[4];	// x,y,z,w
 typedef vec_t vec5_t[5];
 
