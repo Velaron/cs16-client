@@ -60,7 +60,7 @@ void CHudMOTD :: Reset( void )
 #define ROW_RANGE_MAX ( ScreenHeight - 100 )
 int CHudMOTD :: Draw( float fTime )
 {
-	const int LINE_HEIGHT = DrawUtils::HudFontHeight( 1.0f );
+	const int LINE_HEIGHT = DrawUtils::HudFontHeight( );
 
 	gHUD.m_iNoConsolePrint &= ~( 1 << 1 );
 	if( !m_bShow )

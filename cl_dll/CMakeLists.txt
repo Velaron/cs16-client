@@ -169,8 +169,7 @@ set (CLDLL_SOURCES
 	./view.cpp
 	./input_xash3d.cpp
 	#./input_sdl.cpp
-    ./vgui_parser.cpp
-    ./unicode_strtools.cpp
+	./unicode_strtools.cpp
 	./draw_util.cpp
 	../common/interface.cpp
 	./cvar_checker.cpp

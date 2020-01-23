@@ -37,6 +37,8 @@
 #define DHN_2DIGITS  2
 #define DHN_3DIGITS  4
 
+float GetScale();
+
 class DrawUtils
 {
 public:
@@ -44,19 +46,19 @@ public:
 	static int DrawHudNumber2( int x, int y, bool DrawZero, int iDigits, int iNumber, int r, int g, int b);
 	static int DrawHudNumber2( int x, int y, int iNumber, int r, int g, int b);
 	static int DrawHudString(int x, int y, int iMaxX, const char *szString,
-							 int r, int g, int b, float scale = 0.0f, bool drawing = false );
+							 int r, int g, int b, bool drawing = false );
 	static int DrawHudStringReverse( int x, int y, int iMinX, const char *szString,
-								 int r, int g, int b, float scale = 0.0f, bool drawing = false );
+								 int r, int g, int b, bool drawing = false );
 
 	static inline int DrawHudNumberString( int x, int y, int iMinX, int iNumber,
-								int r, int g, int b, float scale = 0.0f )
+								int r, int g, int b )
 	{
 		char szString[16];
 		snprintf( szString, sizeof(szString), "%d", iNumber );
-		return DrawHudStringReverse( x, y, iMinX, szString, r, g, b, scale );
+		return DrawHudStringReverse( x, y, iMinX, szString, r, g, b );
 	}
 
-	static int HudStringLen( const char *szIt, float scale = 1 );
+	static int HudStringLen(const char *szIt);
 
 	// legacy shit came with Valve
 	static inline int GetNumWidth(int iNumber, int iFlags)
@@ -120,14 +122,16 @@ public:
 		return ((a)<<24|(r)<<16|(g)<<8|(b));
 	}
 
-	static inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b, float scale = 1.0f )
+	static inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b )
 	{
-		return g_pMenu->DrawCharacter( QM_SMALLFONT, number, x, y, UI_SMALL_CHAR_HEIGHT * scale, PackRGB( r, g, b ), true );
+		float hudscale = GetScale();
+		return g_pMenu->DrawCharacter( QM_SMALLFONT, number, x * hudscale, y * hudscale, UI_SMALL_CHAR_HEIGHT * hudscale, PackRGB( r, g, b ), true ) / hudscale;
 	}
 
-	static inline int HudFontHeight( float scale = 1.0f )
+	static inline int HudFontHeight( )
 	{
-		return g_pMenu->GetFontTall( QM_SMALLFONT ) * scale;
+		//float hudscale = GetScale();
+		return g_pMenu->GetFontTall( QM_SMALLFONT );
 	}
 
 	static inline void UnpackRGB( int &r, int &g, int &b, const unsigned long ulRGB )

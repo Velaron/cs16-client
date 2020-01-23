@@ -112,12 +112,14 @@ void CHudSpectatorGui::Shutdown()
 inline void DrawButtonWithText( int x1, int y1, int wide, int tall, const char *sz, int r, int g, int b )
 {
 	DrawUtils::DrawRectangle(x1, y1, wide, tall);
-	DrawUtils::DrawHudString(x1 + INT_XPOS(0.5), y1 + tall*0.5 - gHUD.GetCharHeight() * 0.5, x1 + wide, sz,
+	DrawUtils::DrawHudString(x1 + INT_XPOS(0.5), y1 + tall*0.5 - DrawUtils::HudFontHeight() * 0.5, x1 + wide, sz,
 							 r, g, b );
 }
 
 int CHudSpectatorGui::Draw( float flTime )
 {
+	return 1;
+
 	if( !g_iUser1 )
 	{
 		if( m_menuFlags & ROOT_MENU )
@@ -159,11 +161,11 @@ int CHudSpectatorGui::Draw( float flTime )
 				// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 				DrawUtils::Draw2DQuad( (INT_XPOS(12.5) + 10) * gHUD.m_flScale,
 									   (INT_YPOS(2) * 0.5) * gHUD.m_flScale,
-									   (INT_XPOS(12.5) + 10 + gHUD.GetCharHeight() ) * gHUD.m_flScale,
-									   (INT_YPOS(2) * 0.5 + gHUD.GetCharHeight() ) * gHUD.m_flScale );
+									   (INT_XPOS(12.5) + 10 + DrawUtils::HudFontHeight() ) * gHUD.m_flScale,
+									   (INT_YPOS(2) * 0.5 + DrawUtils::HudFontHeight() ) * gHUD.m_flScale );
 				// gEngfuncs.pTriAPI->End();
 			}
-			DrawUtils::DrawHudString( INT_XPOS(12.5) + gHUD.GetCharHeight() * 1.5 + gHUD.GetCharWidth('M') , INT_YPOS(2) * 0.5, ScreenWidth,
+			DrawUtils::DrawHudString( INT_XPOS(12.5) + DrawUtils::HudFontHeight() * 1.5 + gHUD.GetCharWidth('M') , INT_YPOS(2) * 0.5, ScreenWidth,
 									  label.m_szTimer, r, g, b );
 		}
 	}
@@ -222,7 +224,7 @@ int CHudSpectatorGui::Draw( float flTime )
 	//{
 		int iLen = DrawUtils::HudStringLen( label.m_szNameAndHealth );
 		GetTeamColor( r, g, b, g_PlayerExtraInfo[ g_iUser2 ].teamnumber );
-		DrawUtils::DrawHudString( ScreenWidth * 0.5 - iLen * 0.5, INT_YPOS(9) - gHUD.GetCharHeight() * 0.5 , ScreenWidth,
+		DrawUtils::DrawHudString( ScreenWidth * 0.5 - iLen * 0.5, INT_YPOS(9) - DrawUtils::HudFontHeight() * 0.5 , ScreenWidth,
 								  label.m_szNameAndHealth, r, g, b );
 	//}
 

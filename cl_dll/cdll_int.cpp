@@ -35,6 +35,8 @@
 #include "vgui_parser.h"
 
 #include <dlfcn.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 cl_enginefunc_t		gEngfuncs  = { };
 render_api_t		gRenderAPI = { };
@@ -87,11 +89,6 @@ public:
 		}*/
 	}
 
-	const char *Localize( const char *string ) override
-	{
-		return ::Localize( string );
-	}
-
 	bool GetPlayerExtraInfo( int num, hud_player_info_t **player, extra_player_info_t **extra, bool *isBot ) override
 	{
 		if( num >= 0 && num < MAX_CLIENTS )
@@ -122,6 +119,32 @@ public:
 		}
 		return false;
 	}
+
+	model_s *LoadModel( const char *path, int *index ) override
+	{
+		return gEngfuncs.CL_LoadModel( path, index );
+	}
+
+	const char *GetLevelName( void ) override
+	{
+		const char *fullname = gEngfuncs.pfnGetLevelName();
+		if( fullname[0] )
+		{
+			strncpy( mapname, fullname + 5, sizeof( mapname ));
+			mapname[strlen(mapname) - 4] = '\0';
+		}
+		else mapname[0] = 0;
+
+		return mapname;
+	}
+
+	int GetLocalPlayerTeam() override
+	{
+		return g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber;
+	}
+
+private:
+	char mapname[64];
 };
 
 EXPOSE_SINGLE_INTERFACE( CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION )
@@ -216,7 +239,6 @@ void DLLEXPORT HUD_Shutdown( void )
 {
 	gHUD.Shutdown();
 	Input_Shutdown();
-	Localize_Free();
 	if( hMenu )
 		Sys_FreeModule( hMenu );
 }
@@ -348,6 +370,9 @@ the hud variables.
 
 void DLLEXPORT HUD_Init( void )
 {
+	// create maps folder just in case
+	mkdir( "cstrike/maps", 0777 );
+	
 	LoadMenuInterface();
 	InitInput();
 	gHUD.Init();
@@ -418,6 +443,25 @@ void DLLEXPORT HUD_Frame( double time )
 #ifdef _CS16CLIENT_ENABLE_GSRC_SUPPORT
 	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
 #endif
+
+	int x, y;
+	// fix up mouse move for menu
+	if( g_pMenu->IsActive() )
+	{
+#ifdef __ANDROID__
+		gEngfuncs.pfnSetMouseEnable( false );
+#endif
+		gEngfuncs.GetMousePosition( &x, &y );
+		g_pMenu->MouseMove( x, y );
+	}
+	else if( g_pMenu->IsMainMenuActive() )
+	{
+#ifdef __ANDROID__
+		gEngfuncs.pfnSetMouseEnable( true );
+#endif
+		gEngfuncs.GetMousePosition( &x, &y );
+		g_pMenu->MouseMove( x, y );
+	}
 }
 
 

@@ -35,6 +35,9 @@ version.
 #include "draw_util.h"
 #include "triangleapi.h"
 #include "vgui_parser.h"
+#include "com_model.h"
+#include "../mainui/BMPUtils.h"
+
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
@@ -75,7 +78,38 @@ static byte	r_RadarFlippedT[8][8] =
 {1,1,1,1,1,1,1,1}
 };
 
+static cvar_t radarscale = { "cl_radarscale", "64", 0, 64.0f };
+
 #define BLOCK_SIZE_MAX 1024
+
+CBMP* CBMP::LoadFile( const char *filename )
+{
+	int length = 0;
+	bmp_t *bmp = (bmp_t*)gEngfuncs.COM_LoadFile( filename, 5, &length );
+
+	// cannot load
+	if( !bmp )
+		return NULL;
+
+	// too small for BMP
+	if( (size_t)length < sizeof( bmp_t ))
+		return NULL;
+
+	// not a BMP
+	if( bmp->id[0] != 'B' || bmp->id[1] != 'M' )
+		return NULL;
+
+	// bogus data
+	if( !bmp->width || !bmp->height )
+		return NULL;
+
+	CBMP *ret = new CBMP( bmp->width, bmp->height );
+	memcpy( ret->GetBitmap(), bmp, length );
+
+	gEngfuncs.COM_FreeFile( bmp );
+
+	return ret;
+}
 
 static byte	data2D[BLOCK_SIZE_MAX*4];	// intermediate texbuffer
 
@@ -93,10 +127,12 @@ int CHudRadar::Init()
 	m_iFlags = HUD_DRAW;
 
 	cl_radartype = CVAR_CREATE( "cl_radartype", "0", FCVAR_ARCHIVE );
+	cl_radarscale = &radarscale; // CVAR_CREATE( "cl_radarscale", "64", FCVAR_ARCHIVE );
 
 	bTexturesInitialized = bUseRenderAPI = false;
 
 	gHUD.AddHudElem( this );
+	hMap = 0;
 	return 1;
 }
 
@@ -110,6 +146,62 @@ void CHudRadar::Reset()
 		if( i < MAX_HOSTAGES ) g_HostageInfo[i].radarflashes = 0;
 	}
 	m_bombInfo.radarflashes = 0;
+
+	if( hMap )
+	{
+		gRenderAPI.GL_FreeTexture( hMap );
+		hMap = 0;
+	}
+
+	if( gEngfuncs.pfnGetLevelName()[0] != 0 && cl_radartype->value == 2.0f )
+	{
+		char buf[512];
+		char levelname[64];
+
+		strncpy(levelname, gEngfuncs.pfnGetLevelName() + 5, sizeof( levelname ));
+		levelname[strlen(levelname)-4] = 0;
+		snprintf( buf, sizeof( buf ), "overviews/%s.bmp", levelname ); // strip 'maps/'
+
+		CBMP *bmp = CBMP::LoadFile( buf );
+
+		if( bmp )
+		{
+			bmp_t *raw = bmp->GetBitmapHdr();
+			if( raw->bitsPerPixel == 8 )
+			{
+				byte *bmpdata = bmp->GetTextureData();
+				rgbquad_t *palette = bmp->GetPaletteData();
+				byte *rgbadata = new byte[raw->bitmapDataSize * 4];
+				byte *pixbuf = rgbadata;
+
+				for( uint i = 0; i < raw->colors; i++ )
+				{
+					if( palette[i].r == 0 && palette[i].g == 255 && palette[i].b == 0 )
+					{
+						palette[i].r = palette[i].g = palette[i].b = palette[i].reserved = 0;
+					}
+					else palette[i].reserved = 255;
+				}
+
+				for( uint i = 0; i < raw->height; i++ )
+				{
+					byte *bmpdata_y = bmpdata + (raw->height - i - 1) * raw->width;
+					for( uint j = 0; j < raw->width; j++, bmpdata_y++ )
+					{
+						*pixbuf++ = palette[*bmpdata_y].r;
+						*pixbuf++ = palette[*bmpdata_y].g;
+						*pixbuf++ = palette[*bmpdata_y].b;
+						*pixbuf++ = palette[*bmpdata_y].reserved;
+					}
+				}
+
+				hMap = gRenderAPI.GL_CreateTexture( "radar_overview.bmp", raw->width, raw->height, rgbadata, TF_HAS_ALPHA );
+
+				delete []rgbadata;
+			}
+			delete bmp;
+		}
+	}
 }
 
 static void Radar_InitBitmap( int w, int h, byte *buf )
@@ -191,7 +283,7 @@ int CHudRadar::VidInit(void)
 
 	m_hRadar.SetSpriteByName( "radar" );
 	m_hRadarOpaque.SetSpriteByName( "radaropaque" );
-	iMaxRadius = (m_hRadar.rect.Width()) / 2.0f;
+	cl_radarscale->value = (m_hRadar.rect.Width()) / 2.0f;
 	return 1;
 }
 
@@ -308,6 +400,128 @@ void CHudRadar::DrawZAxis( Vector pos, int r, int g, int b, int a )
 	}
 }
 
+#define OVERVIEW_MAP_SIZE 1024
+
+// Rotate a vector around the Z axis (YAW)
+void VectorYawRotate( const Vector2D &in, float flYaw, Vector2D &out)
+{
+	if (&in == &out )
+	{
+		Vector2D tmp;
+		tmp = in;
+		VectorYawRotate( tmp, flYaw, out );
+		return;
+	}
+
+	float sy, cy;
+
+	sy = sin( DEG2RAD( flYaw ));
+	cy = cos( DEG2RAD( flYaw ));
+
+	out.x = in.x * cy - in.y * sy;
+	out.y = in.x * sy + in.y * cy;
+}
+
+Vector2D CHudRadar::Map2Radar(const Vector2D &pos, const Vector2D &org, float units_per_pixel )
+{
+	Vector2D v;
+
+	v.x = pos.x - org.x;
+	v.y = pos.y - org.y;
+
+	VectorYawRotate( v, gHUD.m_vecAngles.y, v );
+
+	float addScale = 1 / ( cl_radarscale->value / 64.0f ); // 64 is default scale
+
+	v.x /= units_per_pixel * addScale;
+	v.y /= units_per_pixel * addScale;
+
+	v.x += cl_radarscale->value;
+	v.y += cl_radarscale->value;
+
+	return v;
+}
+
+Vector2D WorldToMap( const Vector2D &worldpos, float m_fMapScale )
+{
+	Vector2D mapOrigin = Vector2D( gHUD.m_Spectator.m_OverviewData.origin[0], gHUD.m_Spectator.m_OverviewData.origin[1] );
+	Vector2D offset( mapOrigin.x - worldpos.x, mapOrigin.y - worldpos.y);
+
+	offset.x /= m_fMapScale;
+	offset.y /= m_fMapScale;
+
+	return Vector2D( offset.y, offset.x );
+}
+
+void CHudRadar::DrawOverviewSprite( void )
+{
+	float zoom;
+	Vector2D v, org;
+
+	zoom = gHUD.m_Spectator.m_OverviewData.zoom;
+
+	int height = gRenderAPI.RenderGetParm( PARM_TEX_HEIGHT, hMap );
+	int width  = gRenderAPI.RenderGetParm( PARM_TEX_WIDTH, hMap );
+	int slices_w = width / 128; // 128 is maximum sprite height or width
+	int slices_h = height / 128; // 128 is maximum sprite height or width
+	int i = slices_w * slices_h / ( 4 * 3 );
+	i = sqrt( i );
+
+	float step_w = (( 2 * 4096.0f ) / gHUD.m_Spectator.m_OverviewData.zoom ) / slices_w;
+	float units_per_pixel = step_w / 128.0f;
+
+	org = WorldToMap( Vector2D( gHUD.m_vecOrigin.x, gHUD.m_vecOrigin.y ), units_per_pixel );
+
+	/*SPR_Set( m_hRadarOpaque.spr, 25, 75, 25 );
+	SPR_DrawHoles( 0, 0, 0, &m_hRadarOpaque.rect );*/
+
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
+	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+	gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, 1.0 );
+
+	gRenderAPI.GL_Bind( 0, hMap );
+
+	gEngfuncs.pTriAPI->Begin( TRI_POLYGON );
+
+	for( double angle = 0; angle < 360.0; angle += 30.0 )
+	{
+		double radian = angle * (M_PI/180.0);
+		Vector2D worldpos = { gHUD.m_vecOrigin.x, gHUD.m_vecOrigin.y };
+		Vector2D cs = { (float)sin(radian), (float)cos(radian) };
+
+		worldpos = worldpos + cs * 1024; // empirically found value!
+
+		Vector2D mappos = WorldToMap( worldpos, units_per_pixel );
+
+		mappos.x = bound( -1024/2, mappos.x, 1024/2 );
+		mappos.y = bound( -768/2, mappos.y, 768/2 );
+
+		Vector2D tc = { (mappos.x + 1024/2) / 1024, (mappos.y + 768/2) / 768 };
+
+		gEngfuncs.pTriAPI->TexCoord2f( tc.x, tc.y );
+		v = Map2Radar( mappos, org, units_per_pixel );
+		if( gHUD.m_Spectator.m_OverviewData.rotated )
+		{
+			gEngfuncs.pTriAPI->Vertex3f( v.y * gHUD.m_flScale, v.x * gHUD.m_flScale, 0 );
+		}
+		else
+		{
+			gEngfuncs.pTriAPI->Vertex3f( v.x * gHUD.m_flScale, v.y * gHUD.m_flScale, 0 );
+		}
+	}
+	gEngfuncs.pTriAPI->End( );
+
+	/*SPR_Set( m_hRadar.spr, 25, 75, 25 );
+	SPR_DrawAdditive( 0, 0, 0, &m_hRadar.rect );*/
+
+	/*gRenderAPI.GL_Bind( 0, hCross );
+	gEngfuncs.pTriAPI->Color4ub( 255,  0 , 0, 255 );
+	DrawUtils::Draw2DQuad( (cl_radarscale->value - 2 * 2) * gHUD.m_flScale,
+						   (cl_radarscale->value - 2 * 2) * gHUD.m_flScale,
+						   (cl_radarscale->value + 2 * 2) * gHUD.m_flScale,
+						   (cl_radarscale->value + 2 * 2) * gHUD.m_flScale);*/
+}
+
 int CHudRadar::Draw(float flTime)
 {
 	if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) ||
@@ -318,16 +532,33 @@ int CHudRadar::Draw(float flTime)
 
 	int iTeamNumber = g_PlayerExtraInfo[ gHUD.m_Scoreboard.m_iPlayerNum ].teamnumber;
 	int r, g, b;
-
-	if( cl_radartype->value )
+	bool valid = false;
+	if( cl_radartype->value == 2.0f )
 	{
-		SPR_Set( m_hRadarOpaque.spr, 200, 200, 200 );
-		SPR_DrawHoles(0, 0, 0, &m_hRadarOpaque.rect);
+		if( hMap )
+		{
+			DrawOverviewSprite();
+			valid = true;
+		}
 	}
-	else
+
+	if( !valid )
 	{
-		SPR_Set( m_hRadar.spr, 25, 75, 25 );
-		SPR_DrawAdditive( 0, 0, 0, &m_hRadarOpaque.rect );
+		if( cl_radarscale->value != 64.0f )
+		{
+			gEngfuncs.Cvar_SetValue( "cl_radarscale", 64 );
+		}
+
+		if( cl_radartype->value != 0.0f )
+		{
+			SPR_Set( m_hRadarOpaque.spr, 200, 200, 200 );
+			SPR_DrawHoles(0, 0, 0, &m_hRadarOpaque.rect);
+		}
+		else
+		{
+			SPR_Set( m_hRadar.spr, 25, 75, 25 );
+			SPR_DrawAdditive( 0, 0, 0, &m_hRadarOpaque.rect );
+		}
 	}
 
 	if( bUseRenderAPI )
@@ -424,10 +655,10 @@ inline void CHudRadar::DrawColoredTexture( int x, int y, int size, byte r, byte 
 {
 	gRenderAPI.GL_Bind( 0, texHandle );
 	gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
-	DrawUtils::Draw2DQuad( (iMaxRadius + x - size * 2) * gHUD.m_flScale,
-						   (iMaxRadius + y - size * 2) * gHUD.m_flScale,
-						   (iMaxRadius + x + size * 2) * gHUD.m_flScale,
-						   (iMaxRadius + y + size * 2) * gHUD.m_flScale);
+	DrawUtils::Draw2DQuad( (cl_radarscale->value + x - size * 2) * gHUD.m_flScale,
+						   (cl_radarscale->value + y - size * 2) * gHUD.m_flScale,
+						   (cl_radarscale->value + x + size * 2) * gHUD.m_flScale,
+						   (cl_radarscale->value + y + size * 2) * gHUD.m_flScale);
 }
 
 
@@ -440,7 +671,7 @@ void CHudRadar::DrawRadarDot( int x, int y, int r, int g, int b, int a )
 	}
 	else
 	{
-		FillRGBA(iMaxRadius + x - size*2, iMaxRadius + y - size*2, size*4, size*4, r, g, b, a);
+		FillRGBA(cl_radarscale->value + x - size*2, cl_radarscale->value + y - size*2, size*4, size*4, r, g, b, a);
 	}
 }
 
@@ -454,11 +685,11 @@ void CHudRadar::DrawCross( int x, int y, int r, int g, int b, int a )
 	}
 	else
 	{
-		FillRGBA(iMaxRadius + x, iMaxRadius + y, size, size, r, g, b, a);
-		FillRGBA(iMaxRadius + x - size, iMaxRadius + y - size, size, size, r, g, b, a);
-		FillRGBA(iMaxRadius + x - size, iMaxRadius + y + size, size, size, r, g, b, a);
-		FillRGBA(iMaxRadius + x + size, iMaxRadius + y - size, size, size, r, g, b, a);
-		FillRGBA(iMaxRadius + x + size, iMaxRadius + y + size, size, size, r, g, b, a);
+		FillRGBA(cl_radarscale->value + x, cl_radarscale->value + y, size, size, r, g, b, a);
+		FillRGBA(cl_radarscale->value + x - size, cl_radarscale->value + y - size, size, size, r, g, b, a);
+		FillRGBA(cl_radarscale->value + x - size, cl_radarscale->value + y + size, size, size, r, g, b, a);
+		FillRGBA(cl_radarscale->value + x + size, cl_radarscale->value + y - size, size, size, r, g, b, a);
+		FillRGBA(cl_radarscale->value + x + size, cl_radarscale->value + y + size, size, size, r, g, b, a);
 	}
 }
 
@@ -472,8 +703,8 @@ void CHudRadar::DrawT( int x, int y, int r, int g, int b, int a )
 	}
 	else
 	{
-		FillRGBA( iMaxRadius + x - size, iMaxRadius + y - size, size * 3, size, r, g, b, a);
-		FillRGBA( iMaxRadius + x, iMaxRadius + y, size, size * 2, r, g, b, a);
+		FillRGBA( cl_radarscale->value + x - size, cl_radarscale->value + y - size, size * 3, size, r, g, b, a);
+		FillRGBA( cl_radarscale->value + x, cl_radarscale->value + y, size, size * 2, r, g, b, a);
 	}
 }
 
@@ -486,8 +717,8 @@ void CHudRadar::DrawFlippedT( int x, int y, int r, int g, int b, int a )
 	}
 	else
 	{
-		FillRGBA( iMaxRadius + x, iMaxRadius + y - size, size, size*2, r, g, b, a);
-		FillRGBA( iMaxRadius + x - size, iMaxRadius + y + size, size*3, size, r, g, b, a);
+		FillRGBA( cl_radarscale->value + x, cl_radarscale->value + y - size, size, size*2, r, g, b, a);
+		FillRGBA( cl_radarscale->value + x - size, cl_radarscale->value + y + size, size*3, size, r, g, b, a);
 	}
 }
 
@@ -495,18 +726,17 @@ void CHudRadar::DrawFlippedT( int x, int y, int r, int g, int b, int a )
 Vector CHudRadar::WorldToRadar(const Vector vPlayerOrigin, const Vector vObjectOrigin, const Vector vAngles  )
 {
 	Vector2D diff = vObjectOrigin.Make2D() - vPlayerOrigin.Make2D();
-	const float RADAR_SCALE = 32.0f;
 
 	// Supply epsilon values to avoid divide-by-zero
-	if( diff.x == 0 )
+	if( diff.x == 0.0f )
 		diff.x = 0.00001f;
-	if( diff.y == 0 )
+	if( diff.y == 0.0f )
 		diff.y = 0.00001f;
 
 	float flOffset = DEG2RAD( vAngles.y - RAD2DEG( atan2( diff.y, diff.x ) ) );
 
 	// this magic 32.0f just scales position on radar
-	float iRadius = min( diff.Length() / RADAR_SCALE, iMaxRadius );
+	float iRadius = min( diff.Length() / (cl_radarscale->value * 0.5f), cl_radarscale->value );
 
 	// transform origin difference to radar source
 	Vector ret( (float)(iRadius * sin(flOffset)),

@@ -120,10 +120,10 @@ int CHudScoreboard :: Draw( float flTime )
 			return 1;
 		else
 		{
-			xstart     = 0.125f * ScreenWidth;
-			xend       = ScreenWidth - xstart;
+			xstart     = 0.125f * TrueWidth;
+			xend       = TrueWidth - xstart;
 			ystart     = 90;
-			yend       = ScreenHeight - ystart;
+			yend       = TrueHeight - ystart;
 			m_colors.r = 0;
 			m_colors.g = 0;
 			m_colors.b = 0;
@@ -332,10 +332,10 @@ void CHudScoreboard	:: UserCmd_ShowScoreboard2()
 		ConsolePrint("showscoreboard2 <xstart> <xend> <ystart> <yend> <r> <g> <b> <a>");
 	}
 
-	xstart     = atof(gEngfuncs.Cmd_Argv(1)) * ScreenWidth;
-	xend       = atof(gEngfuncs.Cmd_Argv(2)) * ScreenWidth;
-	ystart     = atof(gEngfuncs.Cmd_Argv(3)) * ScreenHeight;
-	yend       = atof(gEngfuncs.Cmd_Argv(4)) * ScreenHeight;
+	xstart     = atof(gEngfuncs.Cmd_Argv(1)) * TrueWidth;
+	xend       = atof(gEngfuncs.Cmd_Argv(2)) * TrueWidth;
+	ystart     = atof(gEngfuncs.Cmd_Argv(3)) * TrueHeight;
+	yend       = atof(gEngfuncs.Cmd_Argv(4)) * TrueHeight;
 	m_colors.r = atoi(gEngfuncs.Cmd_Argv(5));
 	m_colors.b = atoi(gEngfuncs.Cmd_Argv(6));
 	m_colors.b = atoi(gEngfuncs.Cmd_Argv(7));

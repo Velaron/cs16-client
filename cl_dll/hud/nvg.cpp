@@ -39,10 +39,10 @@ version.
 int CHudNVG::Init()
 {
 	HOOK_MESSAGE( gHUD.m_NVG, NVGToggle);
-	HOOK_COMMAND( gHUD.m_NVG,"+nvgadjust", NVGAdjustUp);
+	HOOK_COMMAND( gHUD.m_NVG, "+nvgadjust", NVGAdjustUp);
 	HOOK_COMMAND( gHUD.m_NVG, "-nvgadjust", NVGAdjustDown);
 	HOOK_COMMAND( gHUD.m_NVG, "nvgadjustup", NVGAdjustUp);
-	HOOK_COMMAND( gHUD.m_NVG,"nvgadjustdown", NVGAdjustDown);
+	HOOK_COMMAND( gHUD.m_NVG, "nvgadjustdown", NVGAdjustDown);
 
 	cl_fancy_nvg = CVAR_CREATE( "cl_fancy_nvg", "0", FCVAR_ARCHIVE );
 

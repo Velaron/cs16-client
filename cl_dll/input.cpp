@@ -367,6 +367,8 @@ Return 1 to allow engine to process the key, otherwise, act on it as needed
 */
 int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
 {
+	g_pMenu->Key( keynum, down );
+
 	return 1;
 }
 

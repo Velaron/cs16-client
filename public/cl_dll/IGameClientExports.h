@@ -61,12 +61,15 @@ public:
 	virtual void MutePlayerGameVoice(int playerIndex) = 0;
 	virtual void UnmutePlayerGameVoice(int playerIndex) = 0;
 
-	// vgui2 localizer
-	virtual const char *Localize( const char *string ) = 0;
-
 	virtual bool GetPlayerExtraInfo( int num, hud_player_info_t **player, extra_player_info_t **extra, bool *isBot ) = 0;
 
 	virtual bool GetTeamInfo( int num, team_info_t **team ) = 0;
+
+	virtual model_s *LoadModel( const char *path, int *index ) = 0;
+
+	virtual const char *GetLevelName( void ) = 0;
+
+	virtual int GetLocalPlayerTeam( void ) = 0;
 };
 
 #define GAMECLIENTEXPORTS_INTERFACE_VERSION "GameClientExports_CS16CLIENT_001"
@@ -79,7 +82,10 @@ class IGameMenuExports : public IBaseInterface
 public:
 	virtual bool  Initialize( CreateInterfaceFn factory ) = 0;
 
+	virtual const char *L( const char *szStr ) = 0;
+
 	virtual bool  IsActive( void ) = 0;
+	virtual bool  IsMainMenuActive( void ) = 0;
 
 	virtual void  Key( int key, int down ) = 0;
 	virtual void  MouseMove( int x, int y ) = 0;
@@ -101,7 +107,7 @@ public:
 
 	virtual void  DrawSpectatorMenu( void ) = 0;
 
-	virtual void  ShowVGUIMenu( int menuType ) = 0;
+	virtual void  ShowVGUIMenu( int menuType, int param1, int param2 ) = 0;
 };
 
 #define GAMEMENUEXPORTS_INTERFACE_VERSION "GameMenuExports_CS16CLIENT_001"

@@ -1323,13 +1323,13 @@ bool CHudSpectator::ParseOverviewFile( )
 
 				pfile = gEngfuncs.COM_ParseFile(pfile,token); // parse next token
 			}
-
 			m_OverviewData.layers++;
-
 		}
 	}
 
 	gEngfuncs.COM_FreeFile( pfile );
+
+	snprintf(filename, sizeof( filename ), "overviews/%s.bmp", levelname );
 
 	m_mapZoom = m_OverviewData.zoom;
 	m_mapOrigin = m_OverviewData.origin;

@@ -54,6 +54,11 @@ byte g_color_table[][4] =
 {240, 180,  24, 255},	// default color (can be changed by user)
 };
 
+float GetScale()
+{
+	return gHUD.m_flScale;
+}
+
 /*
 ============================
 Con_UtfProcessChar
@@ -183,7 +188,7 @@ int Con_UtfMoveRight( const char *str, int pos, int length )
 }
 
 
-int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, int r, int g, int b, float scale, bool drawing )
+int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, int r, int g, int b, bool drawing )
 {
 	int first_xpos = xpos;
 	char *szIt = (char *)str;
@@ -232,18 +237,18 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 		if( !uch )
 			continue;
 
-		int next = xpos + gHUD.GetCharWidth(uch, scale); // variable-width fonts look cool
+		int next = xpos + gHUD.GetCharWidth(uch); // variable-width fonts look cool
 		if ( next > iMaxX )
 			return xpos;
 
-		xpos += TextMessageDrawChar( xpos, ypos, uch, r, g, b, scale );
+		xpos += TextMessageDrawChar( xpos, ypos, uch, r, g, b );
 	}
 
 	return xpos;
 }
 
 
-int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, float scale, bool drawing )
+int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, bool drawing )
 {
 	int first_xpos = xpos;
 	int i;
@@ -305,12 +310,12 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 			continue;
 
 
-		int next = xpos - gHUD.GetCharWidth(uch, scale); // variable-width fonts look cool
+		int next = xpos - gHUD.GetCharWidth(uch); // variable-width fonts look cool
 		if ( next < iMinX )
 			return xpos;
 		xpos = next;
 
-		TextMessageDrawChar( xpos, ypos, uch, r, g, b, scale );
+		TextMessageDrawChar( xpos, ypos, uch, r, g, b );
 	}
 
 	return xpos;
@@ -452,9 +457,13 @@ void DrawUtils::Draw2DQuad( float x1, float y1, float x2, float y2 )
 	// REMOVE WHEN NANOGL BUG WILL BE FIXED
 }
 
-int DrawUtils::HudStringLen( const char *szIt, float scale )
+int DrawUtils::HudStringLen( const char *szIt )
 {
 	int l;
+	int uch;
+
+	Con_UtfProcessChar( 0 );
+
 	// count length until we hit the null character or a newline character
 	for ( l = 0; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
@@ -471,7 +480,13 @@ int DrawUtils::HudStringLen( const char *szIt, float scale )
 			continue;
 		}
 
-		l += gHUD.GetCharWidth( (unsigned char)*szIt, scale );
+		uch = Con_UtfProcessChar( (unsigned int)*szIt );
+		if( !uch )
+		{
+			continue;
+		}
+
+		l += gHUD.GetCharWidth( uch );
 	}
 	return l;
 }

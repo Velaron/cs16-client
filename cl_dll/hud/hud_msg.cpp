@@ -81,6 +81,8 @@ int CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 		pList = pList->pNext;
 	}
 
+    g_iTeamNumber = TEAM_UNASSIGNED;
+
 	g_iFreezeTimeOver = 0;
 
 	memset( g_PlayerExtraInfo, 0, sizeof(g_PlayerExtraInfo) );

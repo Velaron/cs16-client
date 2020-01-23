@@ -183,6 +183,7 @@ typedef struct overviewInfo_s {
 	int			insetWindowY;
 	int			insetWindowHeight;
 	int			insetWindowWidth;
+	unsigned int			tex;
 } overviewInfo_t;
 
 typedef struct overviewEntity_s {
@@ -267,6 +268,8 @@ public:
 	vec3_t				m_cameraOrigin;	// a help camera
 	vec3_t				m_cameraAngles;	// and it's angles
 	CInterpolation		m_WayInterpolation;
+
+	struct model_s * m_MapSprite;	// each layer image is saved in one sprite, where each tile is a sprite frame
 private:
 	vec3_t		m_vPlayerPos[MAX_PLAYERS];
 	HSPRITE		m_hsprPlayerC4;
@@ -285,7 +288,6 @@ private:
 
 	wrect_t		m_crosshairRect;
 
-	struct model_s * m_MapSprite;	// each layer image is saved in one sprite, where each tile is a sprite frame
 	float		m_flNextObserverInput;
 	float		m_zoomDelta;
 	float		m_moveDelta;
@@ -430,6 +432,9 @@ public:
 	void UserCmd_HideRadar();
 	CClientSprite m_hRadar;
 	CClientSprite m_hRadarOpaque;
+	void DrawOverviewSprite();
+	Vector2D Map2Radar(const Vector2D &pos, const Vector2D &org, float units_per_pixel);
+	Vector2D Radar2Map(const Vector2D &pos, float units_per_pixel );
 
 	int MsgFunc_BombDrop(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf);
@@ -439,6 +444,7 @@ public:
 private:
 
 	cvar_t *cl_radartype;
+	cvar_t *cl_radarscale;
 
 	int InitBuiltinTextures();
 	void DrawPlayerLocation(int y);
@@ -458,8 +464,9 @@ private:
 
 	bool bUseRenderAPI, bTexturesInitialized;
 	uint hCross, hT, hFlippedT;
-	int iMaxRadius;
 	bomb_info_t m_bombInfo;
+
+	uint hMap;
 };
 
 #define FADE_TIME 100
@@ -1099,14 +1106,9 @@ public:
 		return -1; // invalid sprite
 	}
 
-	inline int GetCharWidth ( int ch, float scale = 1.0f )
+	inline int GetCharWidth ( int ch )
 	{
-		return g_pMenu->GetCharacterWidth( QM_SMALLFONT, ch, UI_SMALL_CHAR_HEIGHT * scale ); // TODO
-	}
-
-	inline int GetCharHeight( float scale = 1.0f )
-	{
-		return g_pMenu->GetFontTall( QM_SMALLFONT ) * scale; // TODO
+		return g_pMenu->GetCharacterWidth( QM_SMALLFONT, ch, UI_SMALL_CHAR_HEIGHT ); // TODO
 	}
 
 	inline int GetGameType( )
@@ -1234,6 +1236,22 @@ private:
 
 	CCVarChecker m_cvarChecker;
 };
+
+inline bool IsASMapType()
+{
+	const char *a;
+
+	a = gEngfuncs.pfnGetLevelName();
+	return strncasecmp(a, "maps/as_", 8u) == 0;
+}
+
+inline bool IsDEMapType()
+{
+	const char *a;
+
+	a = gEngfuncs.pfnGetLevelName();
+	return strncasecmp(a, "maps/de_", 8u) == 0;
+}
 
 extern CHud gHUD;
 extern cvar_t *sensitivity;

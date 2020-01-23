@@ -193,7 +193,7 @@ void EV_CreateSmoke(event_args_s *args)
 			g_clouds[i].origin = org;
 			g_clouds[i].color.b =
 					g_clouds[i].color.g =
-					g_clouds[i].color.r = Com_RandomLong(210, 230);
+					g_clouds[i].color.r = Com_RandomLong( 210, 230 );
 			g_clouds[i].color.a = 150;
 			g_clouds[i].direction.x = Com_RandomFloat( -5, 5 );
 			g_clouds[i].direction.y = Com_RandomFloat( -5, 5 );

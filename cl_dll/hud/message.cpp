@@ -268,7 +268,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 		length++;
 	}
 	m_parms.length = length;
-	m_parms.totalHeight = (m_parms.lines * gHUD.GetCharHeight());
+	m_parms.totalHeight = (m_parms.lines * DrawUtils::HudFontHeight());
 
 
 	m_parms.y = YPosition( pMessage->y, m_parms.totalHeight );
@@ -306,7 +306,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			m_parms.x = next;
 		}
 
-		m_parms.y += gHUD.GetCharHeight();
+		m_parms.y += DrawUtils::HudFontHeight();
 	}
 }
 

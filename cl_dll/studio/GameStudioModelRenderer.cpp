@@ -840,11 +840,6 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 	if (m_nPlayerIndex < 0 || m_nPlayerIndex >= gEngfuncs.GetMaxClients())
 		return 0;
 
-	/*m_pRenderModel = IEngineStudio.SetupPlayerModel(m_nPlayerIndex);
-
-	if (m_pRenderModel == NULL)
-		return 0;*/
-
 	extra_player_info_t *pExtra = g_PlayerExtraInfo + pplayer->number;
 
 	if( gHUD.cl_minmodels && gHUD.cl_minmodels->value )
@@ -860,7 +855,9 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 		else if( team == TEAM_CT )
 		{
 			if( pExtra->vip )
+			{
 				m_pRenderModel = gEngfuncs.CL_LoadModel( sPlayerModelFiles[3], NULL );
+			}
 			else
 			{
 				// set gign, if model isn't valud
@@ -885,8 +882,8 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 	if( !m_pStudioHeader )
 		return 0;
 
-	IEngineStudio.StudioSetHeader(m_pStudioHeader);
-	IEngineStudio.SetRenderModel(m_pRenderModel);
+	IEngineStudio.StudioSetHeader( m_pStudioHeader );
+	IEngineStudio.SetRenderModel( m_pRenderModel );
 	IEngineStudio.StudioSetCullState( 0 );
 
 	if (m_pCurrentEntity->curstate.sequence >= m_pStudioHeader->numseq)
@@ -1169,6 +1166,7 @@ int R_StudioDrawModel(int flags)
 {
 	return g_StudioRenderer.StudioDrawModel(flags);
 }
+
 // The simple drawing interface we'll pass back to the engine
 r_studio_interface_t studio =
 {

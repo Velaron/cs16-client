@@ -219,6 +219,3 @@ void CInterpolation::InterpolateAngle( float t, vec3_t &angle )
 
 	NormalizeAngles( angle );
 }
-
-
-

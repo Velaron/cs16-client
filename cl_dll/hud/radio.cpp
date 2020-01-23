@@ -62,6 +62,8 @@ int CHudRadio::MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf )
 	char *sentence = reader.ReadString( );
 	int pitch = reader.ReadShort( );
 
+	gEngfuncs.Con_NPrintf( 0, "played %s at pitch\n", sentence );
+
 	Broadcast( sentence, pitch );
 
 	if( SenderID > 0 && SenderID <= MAX_PLAYERS )

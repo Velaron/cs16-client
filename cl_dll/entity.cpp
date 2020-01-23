@@ -30,6 +30,8 @@
 extern vec3_t v_origin;
 
 int iOnTrain[MAX_PLAYERS];
+extern Vector g_clorg;
+extern Vector g_clang;
 
 /*
 ========================
@@ -43,10 +45,22 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *mode
 	{
 	case ET_NORMAL:
 	case ET_PLAYER:
-		if( ent->player && iOnTrain[ent->index] )
+		if( ent->player )
 		{
-			VectorCopy(ent->curstate.origin, ent->origin);
-			VectorCopy(ent->curstate.angles, ent->angles);
+			if( iOnTrain[ent->index] )
+			{
+				VectorCopy(ent->curstate.origin, ent->origin);
+				VectorCopy(ent->curstate.angles, ent->angles);
+			}
+			else
+			{
+				// override old engine bug
+				if( ent->index == 1 ) // local player
+				{
+					ent->origin = g_clorg;
+					ent->angles = g_clang;
+				}
+			}
 		}
 		break;
 	case ET_BEAM:
@@ -607,7 +621,10 @@ void DLLEXPORT HUD_TempEntUpdate (
 					
 					gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 
-					gEngfuncs.pEventAPI->EV_PlayerTrace( pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace );					
+					if( pTemp->flags & FTENT_COLLIDEIGNORESTUDIO )
+						gEngfuncs.pEventAPI->EV_PlayerTrace( pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_IGNORE | PM_WORLD_ONLY, -1, &pmtrace );
+					else
+						gEngfuncs.pEventAPI->EV_PlayerTrace( pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace );
 
 					if ( pmtrace.fraction != 1 )
 					{

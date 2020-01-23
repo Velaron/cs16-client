@@ -179,12 +179,6 @@ char *Q_buildnum( void )
 	return buildnum;
 }
 
-int __MsgFunc_ADStop( const char *name, int size, void *buf ) { return 1; }
-int __MsgFunc_ItemStatus( const char *name, int size, void *buf ) { return 1; }
-int __MsgFunc_ReqState( const char *name, int size, void *buf ) { return 1; }
-int __MsgFunc_ForceCam( const char *name, int size, void *buf ) { return 1; }
-int __MsgFunc_Spectator( const char *name, int size, void *buf ) { return 1; }
-
 #ifdef __ANDROID__
 bool evdev_open = false;
 void __CmdFunc_MouseSucksOpen( void ) { evdev_open = true; }
@@ -217,11 +211,11 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( gHUD, ServerName );
 	HOOK_MESSAGE( gHUD, ShadowIdx );
 
-	gEngfuncs.pfnHookUserMsg( "ADStop", __MsgFunc_ADStop );
-	gEngfuncs.pfnHookUserMsg( "ItemStatus", __MsgFunc_ItemStatus );
-	gEngfuncs.pfnHookUserMsg( "ReqState", __MsgFunc_ReqState );
-	gEngfuncs.pfnHookUserMsg( "ForceCam", __MsgFunc_ForceCam );
-	gEngfuncs.pfnHookUserMsg( "Spectator", __MsgFunc_Spectator );
+	gEngfuncs.pfnHookUserMsg( "ADStop", [](const char*, int, void*) -> int { return 1; } );
+	gEngfuncs.pfnHookUserMsg( "ItemStatus", [](const char*, int, void*) -> int { return 1; } );
+	gEngfuncs.pfnHookUserMsg( "ReqState", [](const char*, int, void*) -> int { return 1; } );
+	gEngfuncs.pfnHookUserMsg( "ForceCam", [](const char*, int, void*) -> int { return 1; } );
+	gEngfuncs.pfnHookUserMsg( "Spectator", [](const char*, int, void*) -> int { return 1; } );
 
 
 	CVAR_CREATE( "_vgui_menus", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
@@ -248,7 +242,6 @@ void CHud :: Init( void )
 	m_cvarChecker.AddToCheckList( "sv_skipshield", 1.0f );
 	m_cvarChecker.AddToCheckList( "hand", 0.0f );
 	m_cvarChecker.AddToCheckList( "viewsize", 140.0f );
-	m_cvarChecker.AddToCheckList( "r_customdraw_playermodel", 1.0f );
 
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
 
@@ -272,8 +265,6 @@ void CHud :: Init( void )
 
 
 
-	Localize_Init();
-
 	// fullscreen overlays
 	m_SniperScope.Init();
 	m_NVG.Init();
@@ -292,7 +283,6 @@ void CHud :: Init( void )
 	m_Train.Init();
 	m_Battery.Init();
 	m_StatusIcons.Init();
-	m_Radar.Init();
 	m_Scenario.Init();
 
 	// chat, death notice, status bars and other
@@ -305,6 +295,7 @@ void CHud :: Init( void )
 	m_DeathNotice.Init();
 	m_TextMessage.Init();
 	m_MOTD.Init();
+	m_Radar.Init();
 
 	// all things that have own background and must be drawn last
 	m_ProgressBar.Init();

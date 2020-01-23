@@ -4,6 +4,7 @@
 #include "kbutton.h"
 #include "keydefs.h"
 #include "input.h"
+#include "cl_util.h"
 
 #define	PITCH	0
 #define	YAW		1
@@ -117,7 +118,7 @@ void IN_ToggleButtons( float forwardmove, float sidemove )
 
 }
 
-void IN_ClientMoveEvent( float forwardmove, float sidemove )
+void DLLEXPORT IN_ClientMoveEvent( float forwardmove, float sidemove )
 {
 	//gEngfuncs.Con_Printf("IN_MoveEvent\n");
 
@@ -126,13 +127,33 @@ void IN_ClientMoveEvent( float forwardmove, float sidemove )
 	ac_movecount++;
 }
 
-void IN_ClientLookEvent( float relyaw, float relpitch )
+void DLLEXPORT IN_ClientLookEvent( float relyaw, float relpitch )
 {
 #ifdef __ANDROID__
 	if( evdev_open ) return;
 #endif
 	rel_yaw += relyaw;
 	rel_pitch += relpitch;
+}
+
+extern "C" int DLLEXPORT IN_ClientTouchEvent( int type, int fingerID, float x, float y, float dx, float dy )
+{
+	if( g_pMenu->IsActive() )
+	{
+		g_pMenu->MouseMove( x * TrueWidth, y * TrueHeight );
+		/*switch( type )
+		{
+		case 0: // fallthrough
+			g_pMenu->Key( K_MOUSE1, true );
+			break;
+		case 1:
+			g_pMenu->Key( K_MOUSE1, false );
+			break;
+		}*/
+		return 1; // pass to menu
+	}
+
+	return 0; // pass to touch controls
 }
 
 // Rotate camera and add move values to usercmd
@@ -242,7 +263,7 @@ void DLLEXPORT IN_MouseEvent( int mstate )
 		{
 			gEngfuncs.Key_Event( K_MOUSE1 + i, 0 );
 		}
-	}	
+	}
 	
 	mouse_oldbuttonstate = mstate;
 	bMouseInUse = true;

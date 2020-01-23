@@ -40,7 +40,7 @@ cp -r ../3rdparty/extras/* pak/
 python2 makepak.py pak/ assets/extras.pak
 
 # Build
-ndk-build -j8 NDK_TOOLCHAIN_VERSION=6 _CS16CLIENT_ENABLE_OPENMP=$OMP NDK_DEBUG=$RELEASE V=$VERBOSE
+ndk-build -j8 NDK_TOOLCHAIN_VERSION=4.9 _CS16CLIENT_ENABLE_OPENMP=$OMP NDK_DEBUG=$RELEASE V=$VERBOSE
 ant $1
 
 if [[ "$1" = "release" ]]; then

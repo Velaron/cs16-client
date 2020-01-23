@@ -433,11 +433,6 @@ TEMPENTITY *EV_CS16Client_CreateSmoke( ESmoke type, Vector origin, Vector dir,
 		te->entity.curstate.scale = scale;
 		te->entity.baseline.origin = speed * dir;
 
-		if( type != SMOKE_WALLPUFF && velocity.IsNull() )
-		{
-			velocity = g_vPlayerVelocity;
-		}
-
 		if( !velocity.IsNull() )
 		{
 			velocity.x *= 0.5;

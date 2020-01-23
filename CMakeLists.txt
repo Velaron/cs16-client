@@ -58,6 +58,8 @@ if(BUILD_SERVER)
 endif()
 
 if(BUILD_MAINUI)
+	set(MAINUI_FONT_SCALE ON)
+	set(CS16CLIENT ON)
 	add_subdirectory(mainui)
 endif()
 
