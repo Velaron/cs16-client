@@ -1,0 +1,72 @@
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.temporal.ChronoUnit
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdk 33
+    ndkVersion '25.2.9519653'
+    buildToolsVersion '33.0.2'
+    namespace 'in.celest.xash3d.cs16client'
+
+    defaultConfig {
+        applicationId 'in.celest.xash3d'
+        applicationIdSuffix 'cs16client'
+        versionName '1.35'
+        versionCode getBuildNum()
+        minSdkVersion 16
+        targetSdk 33
+    }
+
+    externalNativeBuild {
+        cmake {
+            version '3.22.1'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            shrinkResources false
+            debuggable true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file('../CMakeLists.txt')
+        }
+    }
+
+    lint {
+        abortOnError false
+    }
+    
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}
+
+static def getBuildNum() {
+    LocalDateTime now = LocalDateTime.now()
+    LocalDateTime releaseDate = LocalDateTime.of(2015, Month.OCTOBER, 29, 0, 0, 0)
+    int qBuildNum = releaseDate.until(now, ChronoUnit.DAYS)
+    int minuteOfDay = now.getHour() * 60 + now.getMinute()
+    return qBuildNum * 10000 + minuteOfDay
+}

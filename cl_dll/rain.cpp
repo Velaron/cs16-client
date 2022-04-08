@@ -24,8 +24,11 @@
 #include "con_nprint.h"
 #include "triangleapi.h"
 #include "parsemsg.h"
+
+#undef fabs
 #include <new>
 
+#include "com_model.h"
 
 #define DRIPSPEED    900		// speed of raindrips (pixel per secs)
 #define SNOWSPEED    200		// speed of snowflakes

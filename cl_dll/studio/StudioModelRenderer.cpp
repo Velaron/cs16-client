@@ -319,7 +319,7 @@ mstudioanim_t *CStudioModelRenderer::StudioGetAnim(model_t *m_pSubModel, mstudio
 	pseqgroup = (mstudioseqgroup_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqgroupindex) + pseqdesc->seqgroup;
 
 	if (pseqdesc->seqgroup == 0)
-		return (mstudioanim_t *)((byte *)m_pStudioHeader + pseqgroup->data + pseqdesc->animindex);
+		return (mstudioanim_t *)((byte *)m_pStudioHeader + pseqdesc->animindex);
 
 	paSequences = (cache_user_t *)m_pSubModel->submodels;
 
@@ -1295,7 +1295,7 @@ void CStudioModelRenderer::StudioRenderFinal_Software(void)
 
 	IEngineStudio.SetupRenderer(0);
 
-	if (m_pCvarDrawEntities->value == 2)
+	/*if (m_pCvarDrawEntities->value == 2)
 	{
 		IEngineStudio.StudioDrawBones();
 	}
@@ -1303,7 +1303,7 @@ void CStudioModelRenderer::StudioRenderFinal_Software(void)
 	{
 		IEngineStudio.StudioDrawHulls();
 	}
-	else
+	else*/
 	{
 		for (i = 0; i < m_pStudioHeader->numbodyparts; i++)
 		{
@@ -1312,7 +1312,7 @@ void CStudioModelRenderer::StudioRenderFinal_Software(void)
 		}
 	}
 
-	if (m_pCvarDrawEntities->value == 4)
+	/*if (m_pCvarDrawEntities->value == 4)
 	{
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
 		IEngineStudio.StudioDrawHulls();
@@ -1320,7 +1320,7 @@ void CStudioModelRenderer::StudioRenderFinal_Software(void)
 	}
 
 	if (m_pCvarDrawEntities->value == 5)
-		IEngineStudio.StudioDrawAbsBBox();
+		IEngineStudio.StudioDrawAbsBBox();*/
 
 	IEngineStudio.RestoreRenderer();
 }
@@ -1333,7 +1333,7 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware(void)
 	rendermode = IEngineStudio.GetForceFaceFlags() ? kRenderTransAdd : m_pCurrentEntity->curstate.rendermode;
 	IEngineStudio.SetupRenderer(rendermode);
 
-	if (m_pCvarDrawEntities->value == 2)
+	/*if (m_pCvarDrawEntities->value == 2)
 	{
 		IEngineStudio.StudioDrawBones();
 	}
@@ -1341,7 +1341,7 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware(void)
 	{
 		IEngineStudio.StudioDrawHulls();
 	}
-	else
+	else*/
 	{
 		for (i = 0; i < m_pStudioHeader->numbodyparts; i++)
 		{
@@ -1356,12 +1356,12 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware(void)
 		}
 	}
 
-	if (m_pCvarDrawEntities->value == 4)
+	/*if (m_pCvarDrawEntities->value == 4)
 	{
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
 		IEngineStudio.StudioDrawHulls();
 		gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
-	}
+	}*/
 
 	IEngineStudio.RestoreRenderer();
 }

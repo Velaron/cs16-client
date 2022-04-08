@@ -440,18 +440,9 @@ void EV_CS16Client_CreateSmoke(int type, Vector origin, Vector dir, int speed, f
 	switch( type )
 	{
 	case SMOKE_WALLPUFF:
-		if( !gHUD.fastsprites->value )
-		{
-			strcpy( path, "sprites/wall_puff1.spr" );
+		strcpy( path, "sprites/wall_puff1.spr" );
 
-			path[17] += Com_RandomLong(0, 3); // randomize a bit
-		}
-		else
-		{
-			strcpy( path, "sprites/fast_wallpuff1.spr" );
-			te = gEngfuncs.pEfxAPI->R_DefaultSprite( origin,
-								gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/fast_wallpuff1.spr"), 30.0f );
-		}
+		path[17] += Com_RandomLong(0, 3); // randomize a bit
 		break;
 	case SMOKE_RIFLE:
 		strcpy( path, "sprites/rifle_smoke1.spr" );

@@ -1,0 +1,4 @@
+// CVARS FOR MENUS
+seta numericalmenu 1
+seta numericalmenu_clientonly 1
+seta checkscoreboard 1

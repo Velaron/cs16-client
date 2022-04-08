@@ -16,7 +16,9 @@
 #define	ROLL	2 
 
 #ifdef _WIN32
+#define HSPRITE WINAPI_HSPRITE
 #include <windows.h>
+#undef HSPRITE
 #else
 #ifndef PORT_H
 typedef struct point_s{

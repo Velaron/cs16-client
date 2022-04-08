@@ -89,15 +89,21 @@ int CHud :: Redraw( float flTime, int intermission )
 			ConsolePrint( "cl_lw is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
 			gEngfuncs.Cvar_SetValue( "cl_lw", 1.0f );
 		}
-		if( cl_predict && !cl_predict->value )
+		if( cl_nopred && cl_nopred->value )
 		{
-			ConsolePrint( "cl_predict is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
-			gEngfuncs.Cvar_SetValue( "cl_predict", 1.0f );
+			ConsolePrint( "cl_nopred is forced to 0. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
+			gEngfuncs.Cvar_SetValue( "cl_nopred", 0.0f );
 		}
 		if( sv_skipshield && !sv_skipshield->value )
 		{
 			ConsolePrint( "sv_skipshield is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
 			gEngfuncs.Cvar_SetValue( "sv_skipshield", 1.0f );
+		}
+		if( hud_scale && hud_scale->value < 0.0f )
+		{
+			// bug in DrawScaledCharacter
+			ConsolePrint( "hud_scale is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
+			gEngfuncs.Cvar_SetValue( "hud_scale", 1.0f );
 		}
 	}
 #endif

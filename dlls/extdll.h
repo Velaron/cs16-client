@@ -24,7 +24,7 @@
 #define DEBUG 1
 #endif
 
-#ifdef MSC_VER
+#ifdef _MSC_VER
 // Silence certain warnings
 #pragma warning(disable : 4244)		// int or float down-conversion
 #pragma warning(disable : 4305)		// int or float data truncation

@@ -133,7 +133,7 @@ static void Radar_InitBitmap( int w, int h, byte *buf )
 
 int CHudRadar::InitBuiltinTextures( void )
 {
-	texFlags_t defFlags = (texFlags_t)(TF_NOMIPMAP | TF_NOPICMIP | TF_NEAREST | TF_CLAMP | TF_HAS_ALPHA);
+	texFlags_t defFlags = (texFlags_t)(TF_NOMIPMAP /*| TF_NOPICMIP*/ | TF_NEAREST | TF_CLAMP | TF_HAS_ALPHA);
 
 	if( bTexturesInitialized )
 		return 1;
@@ -145,13 +145,13 @@ int CHudRadar::InitBuiltinTextures( void )
 		int		*texnum;
 		int		w, h;
 		void	(*init)( int w, int h, byte *buf );
-		int	texType;
+		//int	texType;
 	}
 	textures[] =
 	{
-	{ "radarT",		   (byte*)r_RadarT,      &hT,		 8, 8, Radar_InitBitmap, TEX_CUSTOM },
-	{ "radarcross",    (byte*)r_RadarCross,    &hCross,    8, 8, Radar_InitBitmap, TEX_CUSTOM },
-	{ "radarflippedT", (byte*)r_RadarFlippedT, &hFlippedT, 8, 8, Radar_InitBitmap, TEX_CUSTOM }
+	{ "radarT",		   (byte*)r_RadarT,      &hT,		 8, 8, Radar_InitBitmap/*, TEX_CUSTOM*/ },
+	{ "radarcross",    (byte*)r_RadarCross,    &hCross,    8, 8, Radar_InitBitmap/*, TEX_CUSTOM*/ },
+	{ "radarflippedT", (byte*)r_RadarFlippedT, &hFlippedT, 8, 8, Radar_InitBitmap/*, TEX_CUSTOM*/ }
 	};
 	size_t	i, num_builtin_textures = sizeof( textures ) / sizeof( textures[0] );
 
@@ -168,7 +168,7 @@ int CHudRadar::InitBuiltinTextures( void )
 			return 0;
 		}
 
-		gRenderAPI.GL_SetTextureType( *textures[i].texnum, textures[i].texType );
+		//gRenderAPI.GL_SetTextureType( *textures[i].texnum, textures[i].texType );
 	}
 
 	hDot = gRenderAPI.GL_LoadTexture( "*white", NULL, 0, 0 );

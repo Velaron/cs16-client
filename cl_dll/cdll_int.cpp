@@ -57,7 +57,7 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	gEngfuncs = *pEnginefuncs;
 
-	g_iXash = (int)CVAR_GET_FLOAT("build");
+	g_iXash = (int)CVAR_GET_FLOAT("buildnum");
 
 	Game_HookEvents();
 
@@ -358,5 +358,44 @@ int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 	g_iMobileAPIVersion = MOBILITY_API_VERSION;
 	gMobileAPI = *mobileapi;
 
+	#define TOUCH_ADDDEFAULT (*gMobileAPI.pfnTouchAddDefaultButton)
+
+	gMobileAPI.pfnTouchResetDefaultButtons();
+	unsigned char color[] = { 255, 255, 255, 150 };
+	TOUCH_ADDDEFAULT( "move", "", "_move", 0.000000, 0.444444, 0.460000, 0.995556, color, 0, 0.673353, 0 );
+	TOUCH_ADDDEFAULT( "look", "", "_look", 0.470000, 0.248889, 1.000000, 0.604444, color, 0, 0.377044, 0 );
+	TOUCH_ADDDEFAULT( "joy", "touch/gfx/joy.tga", "_joy", 0.290000, 0.187234, 0.410000, 0.400745, color, 0, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "dpad", "touch/gfx/dpad.tga", "_dpad", 0.170000, 0.187234, 0.290000, 0.400745, color, 0, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "invprev", "touch/gfx/left.tga", "invprev", 0.000000, 0.323404, 0.080000, 0.465745, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "invnext", "touch/gfx/right.tga", "invnext", 0.080000, 0.323404, 0.160000, 0.465745, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "reload", "touch/gfx/reload.tga", "+reload", 0.680000, 0.680851, 0.760000, 0.823192, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "use", "touch/gfx/use.tga", "+use", 0.700000, 0.544681, 0.780000, 0.687022, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "spraypaint", "touch/gfx/spraypaint.tga", "impulse 201", 0.700000, 0.817021, 0.780000, 0.959362, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "drop", "touch/gfx/drop.tga", "drop", 0.780000, 0.868085, 0.860000, 1.010426, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "jump", "touch/gfx/jump.tga", "+jump", 0.880000, 0.800000, 0.980000, 0.977926, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "attack", "touch/gfx/attack.tga", "+attack", 0.760000, 0.612766, 0.910000, 0.879655, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "attack2", "touch/gfx/attack2.tga", "+attack2", 0.900000, 0.578723, 1.000000, 0.756649, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "w5", "touch/gfx/w_c4.tga", "slot5", 0.760000, 0.102128, 0.840000, 0.244469, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "w1", "touch/gfx/w_rifle.tga", "slot1", 0.780000, 0.238298, 0.860000, 0.380639, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "w2", "touch/gfx/w_pistol.tga", "slot2", 0.840000, 0.136170, 0.920000, 0.278511, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "w4", "touch/gfx/w_grenade.tga", "slot4", 0.880000, 0.017021, 0.960000, 0.159362, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "w3", "touch/gfx/w_knife.tga", "slot3", 0.920000, 0.136170, 1.000000, 0.278511, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "flight", "touch/gfx/flaghtlight.tga", "impulse 100", 0.280000, 0.851064, 0.360000, 0.993405, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "light", "touch/gfx/light.tga", "toggle_light", 0.360000, 0.851064, 0.440000, 0.993405, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "buy", "touch/gfx/buy.tga", "buy", 0.440000, 0.851064, 0.520000, 0.993405, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "score", "touch/gfx/score.tga", "scoreboard", 0.520000, 0.851064, 0.600000, 0.993405, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "nightvision", "touch/gfx/nightvision.tga", "nightvision;toggle_plusminus", 0.360000, 0.714894, 0.440000, 0.857235, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "minus_nvg", "touch/gfx/minus.tga", "-nvgadjust", 0.340000, 0.629787, 0.400000, 0.736543, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "plus_nvg", "touch/gfx/plus.tga", "+nvgadjust", 0.400000, 0.629787, 0.460000, 0.736543, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "numbers", "touch_default/show_weapons.tga", "exec touch_default/numbers.cfg", 0.440000, 0.714894, 0.520000, 0.857235, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "duck", "touch/gfx/duck.tga", "+duck", 0.000000, 0.817021, 0.100000, 0.994947, color, 2, 1.000000, 512 );
+	TOUCH_ADDDEFAULT( "duck_sw", "touch/gfx/duck.tga", "crouchtoggle", 0.100000, 0.817021, 0.200000, 0.994947, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "change_team", "touch/gfx/change_team.tga", "chooseteam", 0.540000, 0.000000, 0.620000, 0.142341, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "exit", "touch/gfx/exit.tga", "cancelselect", 0.460000, 0.000000, 0.540000, 0.142341, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "touch_edit", "touch/gfx/settings.tga", "touch_enableedit", 0.380000, 0.000000, 0.460000, 0.142341, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "cmd", "touch/gfx/cmdmenu.tga", "exec touch/cmd/cmd", 0.100000, 0.248889, 0.200000, 0.426815, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "radio", "touch/gfx/radio.tga", "showvguimenu 38", 0.000000, 0.248889, 0.100000, 0.426815, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "walk", "touch/gfx/walk.tga", "+speed", 0.000000, 0.640000, 0.100000, 0.817926, color, 2, 1.000000, 0 );
+	
 	return 0;
 }

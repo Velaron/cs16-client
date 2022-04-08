@@ -916,7 +916,7 @@ public:
 	cvar_t *m_pCvarDraw;
 	cvar_t *cl_shadows;
 	cvar_t *fastsprites;
-	cvar_t *cl_predict;
+	cvar_t *cl_nopred;
 	cvar_t *cl_weapon_wallpuff;
 	cvar_t *cl_weapon_sparks;
 	cvar_t *zoom_sens_ratio;
@@ -934,6 +934,7 @@ public:
 #ifdef __ANDROID__
 	cvar_t *cl_android_force_defaults;
 #endif
+	cvar_t *hud_scale;
 
 	HSPRITE m_hGasPuff;
 

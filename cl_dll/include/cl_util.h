@@ -143,9 +143,9 @@ inline void VectorClear(float *a) { a[0]=0.0;a[1]=0.0;a[2]=0.0;}
 float VectorNormalize (float *v);
 #define VectorInverse(x) ((x)[0] = -(x)[0], (x)[1] = -(x)[1], (x)[2] = -(x)[2])
 
-extern vec3_t vec3_origin;
+extern float vec3_origin[3];
 
-#ifdef MSC_VER
+#ifdef _MSC_VER
 // disable 'possible loss of data converting float to int' warning message
 #pragma warning( disable: 4244 )
 // disable 'truncation from 'const double' to 'float' warning message

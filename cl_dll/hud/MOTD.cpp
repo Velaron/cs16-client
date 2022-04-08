@@ -27,6 +27,10 @@
 #include <stdio.h>
 #include "draw_util.h"
 
+#if _WIN32
+#define strcasestr strstr
+#endif
+
 DECLARE_MESSAGE( m_MOTD, MOTD )
 
 int CHudMOTD :: Init( void )

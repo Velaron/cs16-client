@@ -34,6 +34,9 @@
 
 #include "camera.h"
 
+#if _WIN32
+#define strncasecmp _strnicmp
+#endif
 
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 
@@ -176,6 +179,7 @@ void CHud :: Init( void )
 	CVAR_CREATE( "_cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_ah", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 
+	hud_scale    = gEngfuncs.pfnGetCvarPointer( "hud_scale" );
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
 	hud_colored  = CVAR_CREATE( "hud_colored", "0", FCVAR_ARCHIVE );
 	cl_righthand = CVAR_CREATE( "hand", "1", FCVAR_ARCHIVE );
@@ -184,7 +188,7 @@ void CHud :: Init( void )
 	cl_min_t     = CVAR_CREATE( "cl_min_t", "1", FCVAR_ARCHIVE );
 	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "2", FCVAR_ARCHIVE );
 	cl_lw        = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
-	cl_predict   = gEngfuncs.pfnGetCvarPointer( "cl_predict" );
+	cl_nopred   = gEngfuncs.pfnGetCvarPointer( "cl_nopred" );
 #ifdef __ANDROID__
 	cl_android_force_defaults  = CVAR_CREATE( "cl_android_force_defaults", "1", FCVAR_ARCHIVE );
 #endif
@@ -299,32 +303,13 @@ void CHud :: VidInit( void )
 	
 	m_hsprLogo = 0;
 
-	// assume cs16-client is launched in landscape mode
-	// must be only TrueWidth, but due to bug game may sometime rotate to portait mode
-	// calc scale depending on max side
-	float maxScale = (float)max( TrueWidth, TrueHeight ) / 640.0f;
-	
-	// REMOVE LATER
-	float currentScale = CVAR_GET_FLOAT("hud_scale");
-	float invalidScale = (float)min( TrueWidth, TrueHeight ) / 640.0f;
-	// REMOVE LATER
-	
-	if( currentScale > maxScale ||
-		( currentScale == invalidScale &&
-		  currentScale != 1.0f &&
-		  currentScale != 0.0f &&
-		  invalidScale <  1.0f ) )
-	{
-		gEngfuncs.Cvar_SetValue( "hud_scale", maxScale );
-		gEngfuncs.Con_Printf("^3Maximum scale factor reached. Reset: %f\n", maxScale );
-		GetScreenInfo( &m_scrinfo );
-	}
-
 	m_flScale = CVAR_GET_FLOAT( "hud_scale" );
 
-	// give a real values to other code. It's not anymore an actual CVar value
-	if( m_flScale == 0.0f )
+	if( m_flScale < 1.0f )
+	{
+		gEngfuncs.Cvar_SetValue( "hud_scale", 1.0f );
 		m_flScale = 1.0f;
+	}
 
 	m_iRes = 640;
 
@@ -437,6 +422,7 @@ void CHud :: VidInit( void )
 	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 		pList->p->VidInit();
 
+#if 0
 	if( firstinit && gEngfuncs.CheckParm( "-firsttime", NULL ) )
 	{
 		ConsolePrint( "firstrun\n" );
@@ -444,6 +430,7 @@ void CHud :: VidInit( void )
 		ClientCmd( "exec touch_presets/phone_ahsim" );
 		gEngfuncs.Cvar_Set( "touch_config_file", "touch_presets/phone_ahsim.cfg" );
 	}
+#endif
 
 	firstinit = false;
 }

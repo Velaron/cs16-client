@@ -20,7 +20,7 @@
 #include <stdarg.h>
 #include <assert.h>
 
-#ifdef MSC_VER
+#ifdef _MSC_VER
 #pragma warning (disable:4100)
 #pragma warning (disable:4514)
 #endif

@@ -4,7 +4,7 @@
 /*
 * Globals initialization
 */
-vec3_t vec3_origin = {0, 0, 0};
+float vec3_origin[] = {0, 0, 0};
 int nanmask = 255<<23;
 
 float anglemod(float a)
@@ -269,7 +269,7 @@ void _VectorCopy(vec_t *in, vec_t *out)
 	out[2] = in[2];
 }
 
-void _CrossProduct(const vec_t *v1, const vec_t *v2, vec_t *cross)
+void CrossProduct(const vec_t *v1, const vec_t *v2, vec_t *cross)
 {
 	cross[0] = v1[1] * v2[2] - v1[2] * v2[1];
 	cross[1] = v1[2] * v2[0] - v1[0] * v2[2];
@@ -356,9 +356,9 @@ void VectorMatrix(vec_t *forward, vec_t *right, vec_t *up)
 	tmp[1] = 0;
 	tmp[2] = 1.0f;
 
-	_CrossProduct(forward, tmp, right);
+	CrossProduct(forward, tmp, right);
 	VectorNormalize(right);
-	_CrossProduct(right, forward, up);
+	CrossProduct(right, forward, up);
 	VectorNormalize(up);
 }
 

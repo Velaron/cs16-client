@@ -34,7 +34,7 @@ typedef	int	fixed16_t;
 
 struct mplane_s;
 
-extern vec3_t vec3_origin;
+extern float vec3_origin[3];
 extern	int nanmask;
 
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
@@ -55,10 +55,10 @@ void _VectorSubtract (vec3_t veca, vec3_t vecb, vec3_t out);
 void _VectorAdd (vec3_t veca, vec3_t vecb, vec3_t out);
 void _VectorCopy (vec3_t in, vec3_t out);
 
-int VectorCompare (const vec3_t v1, const vec3_t v2);
-float Length (const vec3_t v);
-void CrossProduct (const vec3_t v1, const vec3_t v2, vec3_t cross);
-float VectorNormalize (vec3_t v);		// returns vector length
+int VectorCompare (const vec_t *v1, const vec_t *v2);
+float Length (const vec_t *v);
+void CrossProduct (const vec_t *v1, const vec_t *v2, vec_t *cross);
+float VectorNormalize (vec_t *v);		// returns vector length
 void VectorInverse (vec3_t v);
 void VectorScale (const vec3_t in, vec_t scale, vec3_t out);
 int Q_log2(int val);
@@ -77,7 +77,7 @@ typedef union DLONG {
 
 extern DLONG	dlong;
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(_WIN64)
 void __inline set_fpu_cw(void)
 {
 _asm	
@@ -120,17 +120,17 @@ void AngleVectors (const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 void AngleVectorsTranspose (const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 #define AngleIVectors	AngleVectorsTranspose
 
-void AngleMatrix (const vec3_t angles, float (*matrix)[4] );
+void AngleMatrix (const vec_t *angles, float (*matrix)[4] );
 void AngleIMatrix (const vec3_t angles, float (*matrix)[4] );
-void VectorTransform (const vec3_t in1, float in2[3][4], vec3_t out);
+void VectorTransform(const vec_t *in1, float (*in2)[4], vec_t *out);
 
-void NormalizeAngles( vec3_t angles );
+void NormalizeAngles( vec_t *angles );
 void InterpolateAngles( vec3_t start, vec3_t end, vec3_t output, float frac );
 float AngleBetweenVectors( const vec3_t v1, const vec3_t v2 );
 
 
 void VectorMatrix( vec3_t forward, vec3_t right, vec3_t up);
-void VectorAngles( const vec3_t forward, vec3_t angles );
+void VectorAngles( const vec_t *forward, vec_t *angles );
 
 int InvertMatrix( const float * m, float *out );
 

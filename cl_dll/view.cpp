@@ -1676,7 +1676,7 @@ void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 	{
 		V_CalcIntermissionRefdef ( pparams );
 	}
-	else if ( pparams->spectator || g_iUser1 )	// g_iUser true if in spectator mode
+	else if ( g_iUser1 )	// g_iUser true if in spectator mode
 	{
 		V_CalcSpectatorRefdef ( pparams );
 	}

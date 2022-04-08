@@ -119,7 +119,7 @@ int CHudSpectatorGui::VidInit()
 	m_fTextScale = ScreenWidth / 1024.0f;
 	if( m_fTextScale < 1.0f )
 		m_fTextScale = 1.0f;
-	m_hTimerTexture = gRenderAPI.GL_LoadTexture("gfx/vgui/timer.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP );
+	m_hTimerTexture = gRenderAPI.GL_LoadTexture("gfx/vgui/timer.tga", NULL, 0, TF_NEAREST /*|TF_NOPICMIP*/|TF_NOMIPMAP|TF_CLAMP );
 	return 1;
 }
 
