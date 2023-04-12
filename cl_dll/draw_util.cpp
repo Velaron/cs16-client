@@ -95,8 +95,13 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 			}
 			continue;
 		}
-
-		xpos += TextMessageDrawChar( xpos, ypos, *szIt, r, g, b, scale );
+		if ( g_iXash )
+		{
+			int c = (unsigned int)(unsigned char)*szIt;
+			xpos += gEngfuncs.pfnVGUI2DrawCharacterAdd( xpos, ypos, c, r, g, b, 0 );
+		}	
+		else
+			xpos += TextMessageDrawChar( xpos, ypos, *szIt, r, g, b, scale );
 	}
 
 	return xpos;

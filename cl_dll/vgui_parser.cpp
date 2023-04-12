@@ -39,6 +39,8 @@
 
 #include "interface.h"
 
+typedef unsigned int	uint;
+
 // for localized titles.txt strings
 typedef struct base_command_hashmap_s
 {

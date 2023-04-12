@@ -1,0 +1,209 @@
+name: Build
+on:
+  push:
+    branches:
+      - legacy
+
+jobs:
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: gradle
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+      - name: Build
+        run: ./gradlew assembleRelease
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: android
+          path: app/build/outputs/apk/release/app-release-unsigned-signed.apk
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - name: Setup Visual Studio
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+      - name: Configure project
+        run: cmake --preset "win32-release-x86"
+      - name: Run appversion.sh
+        run: regamedll/version/appversion.sh "${{ github.workspace }}/3rdparty/ReGameDLL_CS"
+        shell: bash
+        working-directory: 3rdparty/ReGameDLL_CS
+      - name: Build
+        run: cmake --build .
+        working-directory: build
+      - name: Setup Visual Studio (x64)
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Configure project (x64)
+        run: cmake --preset "win32-release-x64"
+      - name: Build (x64)
+        run: cmake --build .
+        working-directory: build
+      - name: Generate extras.pk3
+        run: Compress-Archive -Path 3rdparty/cs16client-extras/* -Destination build/extras.pk3 -CompressionLevel NoCompression
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: win32-i386
+          path: |
+            build/3rdparty/ReGameDLL_CS/regamedll/mp.dll
+            build/3rdparty/mainui_cpp/menu.dll
+            build/cl_dll/client.dll
+            build/extras.pk3
+      - name: Upload artifacts (x64)
+        uses: actions/upload-artifact@v3
+        with:
+          name: win32-amd64
+          path: |
+            build/3rdparty/ReGameDLL_CS/regamedll/mp_amd64.dll
+            build/3rdparty/mainui_cpp/menu_amd64.dll
+            build/cl_dll/client_amd64.dll
+            build/extras.pk3
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install libatomic1:i386 libgcc-s1:i386 libstdc++6:i386 gcc-multilib g++-multilib cmake ninja-build libfontconfig-dev:i386 libfontconfig-dev
+      - name: Configure project
+        run: |
+          export CC="gcc -m32"
+          export CXX="g++ -m32"
+          cmake --preset "linux-release-x86"
+      - name: Build
+        run: cmake --build .
+        working-directory: build
+      - name: Generate extras.pk3
+        run: zip -0 -r build/extras.pk3 3rdparty/cs16client-extras
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-i386
+          path: |
+            build/3rdparty/ReGameDLL_CS/regamedll/cs.so
+            build/3rdparty/mainui_cpp/menu.so
+            build/cl_dll/client.so
+            build/extras.pk3
+      - name: Clean up
+        run: rm -rf *
+        working-directory: build
+      - name: Configure project (x64)
+        run: cmake --preset "linux-release-x64"
+      - name: Build (x64)
+        run: cmake --build .
+        working-directory: build
+      - name: Generate extras.pk3
+        run: zip -0 -r build/extras.pk3 3rdparty/cs16client-extras
+      - name: Upload artifacts (x64)
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-amd64
+          path: |
+            build/3rdparty/ReGameDLL_CS/regamedll/cs_amd64.so
+            build/3rdparty/mainui_cpp/menu_amd64.so
+            build/cl_dll/client_amd64.so
+            build/extras.pk3
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [android, windows, linux]
+    steps:
+      - name: Fetch artifacts
+        uses: actions/download-artifact@v3
+      - name: Remove old release
+        uses: dev-drprasad/delete-tag-and-release@v1.0
+        with:
+          tag_name: continuous
+          delete_release: true
+          github_token: ${{ secrets.REPO_TOKEN }}
+          repo: Velaron/cs16-client
+      - name: Repackage binaries
+        run: |
+          mv android/app-release-unsigned-signed.apk cs16-client.apk
+
+          mkdir -p cstrike/dlls
+          mkdir -p cstrike/cl_dlls
+          mv win32-i386/3rdparty/ReGameDLL_CS/regamedll/mp.dll cstrike/dlls
+          mv win32-i386/3rdparty/mainui_cpp/menu.dll cstrike/cl_dlls
+          mv win32-i386/cl_dll/client.dll cstrike/cl_dlls
+          mv win32-i386/extras.pk3 cstrike
+          zip -r cs16-client_win32_i386.zip cstrike/
+          rm -r cstrike
+
+          mkdir -p cstrike/dlls
+          mkdir -p cstrike/cl_dlls
+          mv win32-amd64/3rdparty/ReGameDLL_CS/regamedll/mp_amd64.dll cstrike/dlls
+          mv win32-amd64/3rdparty/mainui_cpp/menu_amd64.dll cstrike/cl_dlls
+          mv win32-amd64/cl_dll/client_amd64.dll cstrike/cl_dlls
+          mv win32-amd64/extras.pk3 cstrike
+          zip -r cs16-client_win32_amd64.zip cstrike/
+          rm -r cstrike
+
+          mkdir -p cstrike/dlls
+          mkdir -p cstrike/cl_dlls
+          mv linux-i386/3rdparty/ReGameDLL_CS/regamedll/cs.so cstrike/dlls
+          mv linux-i386/3rdparty/mainui_cpp/menu.so cstrike/cl_dlls
+          mv linux-i386/cl_dll/client.so cstrike/cl_dlls
+          mv linux-i386/extras.pk3 cstrike
+          tar -czvf cs16-client_linux_i386.tar.gz cstrike/
+          rm -r cstrike
+
+          mkdir -p cstrike/dlls
+          mkdir -p cstrike/cl_dlls
+          mv linux-amd64/3rdparty/ReGameDLL_CS/regamedll/cs_amd64.so cstrike/dlls
+          mv linux-amd64/3rdparty/mainui_cpp/menu_amd64.so cstrike/cl_dlls
+          mv linux-amd64/cl_dll/client_amd64.so cstrike/cl_dlls
+          mv linux-amd64/extras.pk3 cstrike
+          tar -czvf cs16-client_linux_amd64.tar.gz cstrike/
+
+          sleep 60s
+      - name: Purge artifacts
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: "*"
+      - name: Upload new release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_name: Velaron/cs16-client
+          repo_token: ${{ secrets.REPO_TOKEN }}
+          file_glob: true
+          file: cs16-client*
+          tag: continuous
+          overwrite: true
+          prerelease: true
+          release_name: CS16Client development build

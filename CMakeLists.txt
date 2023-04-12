@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(cs16-client)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+
+include(LibraryNaming)
+
 option(BUILD_CLIENT "Build client library." ON)
 option(BUILD_MAINUI "Build menu library." ON)
 option(BUILD_SERVER "Build server library." ON)
@@ -20,7 +24,7 @@ endif()
 
 if(BUILD_MAINUI)
 #	set(CS16CLIENT ON)
-	set(XASH_SDK ../../)
+	# set(XASH_SDK ../../)
 	add_subdirectory(3rdparty/mainui_cpp)
 endif()
 

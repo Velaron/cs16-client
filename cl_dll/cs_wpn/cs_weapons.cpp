@@ -114,6 +114,7 @@ bool   g_bHoldingKnife;
 float  g_flPlayerSpeed;
 int    g_iPlayerFlags;
 Vector g_vPlayerVelocity;
+int    g_iWaterLevel;
 
 /*
 ======================
@@ -1241,6 +1242,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	g_iPlayerFlags    = player.pev->flags = from->client.flags;
 	g_vPlayerVelocity = player.pev->velocity;
 	g_flPlayerSpeed	  = player.pev->velocity.Length();
+	g_iWaterLevel     = player.pev->waterlevel;
 
 	//Stores all our ammo info, so the client side weapons can use them.
 	player.ammo_9mm			= from->client.ammo_nails;

@@ -54,15 +54,16 @@ int CHudSniperScope::VidInit()
 		return 0;
 	}
 
-	m_iScopeArc[0] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_nw.tga", NULL, 0, TF_NEAREST |TF_NOMIPMAP|TF_CLAMP);
-	m_iScopeArc[1] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_ne.tga", NULL, 0, TF_NEAREST |TF_NOMIPMAP|TF_CLAMP);
-	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga",    NULL, 0, TF_NEAREST |TF_NOMIPMAP|TF_CLAMP);
-	m_iScopeArc[3] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_sw.tga", NULL, 0, TF_NEAREST |TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[0] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_nw.tga", NULL, 0, TF_NEAREST|TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[1] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_ne.tga", NULL, 0, TF_NEAREST|TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga",    NULL, 0, TF_NEAREST|TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[3] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_sw.tga", NULL, 0, TF_NEAREST|TF_NOMIPMAP|TF_CLAMP);
 
 	if( !m_iScopeArc[0] || !m_iScopeArc[1] || !m_iScopeArc[2] || !m_iScopeArc[3] )
 	{
 		gRenderAPI.Host_Error( "^3Error^7: Cannot load Sniper Scope arcs. Check sprites/scope_arc*.tga files\n" );
 	}
+	
 	left = (TrueWidth - TrueHeight)/2.0;
 	right = left + TrueHeight;
 	centerx = TrueWidth/2.0;
@@ -73,9 +74,9 @@ int CHudSniperScope::VidInit()
 inline void DrawTexture( int tex, float x1, float y1, float x2, float y2 )
 {
 	gRenderAPI.GL_Bind( 0, tex );
-	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	//gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 	DrawUtils::Draw2DQuad( x1, y1, x2, y2 );
-	gEngfuncs.pTriAPI->End();
+	//gEngfuncs.pTriAPI->End();
 }
 
 int CHudSniperScope::Draw(float flTime)

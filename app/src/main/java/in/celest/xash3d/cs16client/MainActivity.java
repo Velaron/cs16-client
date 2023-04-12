@@ -35,10 +35,16 @@ public class MainActivity extends AppCompatActivity {
         try {
             getPackageManager().getPackageInfo("su.xash.engine", 0);
         } catch (PackageManager.NameNotFoundException e) {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=su.xash.engine")));
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=su.xash.engine")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            finish();
             return;
         }
 
-        mActivityResultLauncher.launch(new Intent().setComponent(new ComponentName("su.xash.engine", "su.xash.engine.XashActivity")).putExtra("gamedir", "cstrike").putExtra("gamelibdir", getApplicationInfo().nativeLibraryDir).putExtra("package", getPackageName()));
+        mActivityResultLauncher.launch(new Intent().setComponent(new ComponentName("su.xash.engine", "su.xash.engine.XashActivity"))
+//                don't set yet because it breaks getCallingPackage
+//                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                .putExtra("gamedir", "cstrike").putExtra("gamelibdir", getApplicationInfo().nativeLibraryDir)
+                .putExtra("package", getPackageName()));
+        finish();
     }
 }

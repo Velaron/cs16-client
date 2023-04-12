@@ -10,6 +10,12 @@ android {
     buildToolsVersion '33.0.2'
     namespace 'in.celest.xash3d.cs16client'
 
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
     defaultConfig {
         applicationId 'in.celest.xash3d'
         applicationIdSuffix 'cs16client'
@@ -56,6 +62,20 @@ android {
     
     buildFeatures {
         viewBinding true
+        buildConfig true
+    }
+
+
+    sourceSets {
+        main {
+            assets {
+                srcDirs += "${project.projectDir}/../3rdparty/cs16client-extras"
+            }
+        }
+    }
+
+    androidResources {
+        noCompress ''
     }
 }
 

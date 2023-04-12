@@ -236,8 +236,9 @@ CL_MuzzleFlash
 Do muzzleflash
 ==============
 */
+// TODO: Broken!
 #define MAX_MUZZLEFLASH 4
-void CL_MuzzleFlash( const cl_entity_t *entity, vec3_t pos, int type )
+void CL_MuzzleFlash( cl_entity_t *entity, vec3_t pos, int type )
 {
 	const char *muzzleflash;
 
@@ -311,17 +312,17 @@ void CL_MuzzleFlash( const cl_entity_t *entity, vec3_t pos, int type )
 		if( index == 1 )
 		{
 			te = EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 0,  scale, 7,7,7, false, g_vPlayerVelocity );
-			te->entity.angles[2] = pTemp->entity.angles[2];
+			if( te ) te->entity.angles[2] = pTemp->entity.angles[2];
 			te = EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 20, scale + 0.1, 10,10,10, false, g_vPlayerVelocity );
-			te->entity.angles[2] = pTemp->entity.angles[2];
+			if( te ) te->entity.angles[2] = pTemp->entity.angles[2];
 			te = EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 40, scale, 13,13,13, false, g_vPlayerVelocity );
-			te->entity.angles[2] = pTemp->entity.angles[2];
+			if( te ) te->entity.angles[2] = pTemp->entity.angles[2];
 		}
 		else
 		{
 			te = EV_CS16Client_CreateSmoke( SMOKE_RIFLE, smoke_origin, forward, 3, scale, 20, 20, 20, false, g_vPlayerVelocity );
 
-			te->entity.angles[2] = pTemp->entity.angles[2];
+			if( te ) te->entity.angles[2] = pTemp->entity.angles[2];
 		}
 	}
 }
@@ -334,21 +335,26 @@ The entity's studio model description indicated an event was
 fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound )
 =========================
 */
-void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity )
+void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, struct cl_entity_s *entity )
 {
+// #define CL_MuzzleFlash( x, y, z ) gEngfuncs.pEfxAPI->R_MuzzleFlash( y, z )
 	switch( event->event )
 	{
 	case 5001:
-		CL_MuzzleFlash( entity, (float *)&entity->attachment[0], atoi( event->options) );
+		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[0], atoi( event->options) );
+		// CL_MuzzleFlash( entity, (float *)&entity->attachment[0], atoi( event->options) );
 		break;
 	case 5011:
-		CL_MuzzleFlash( entity, (float *)&entity->attachment[1], atoi( event->options) );
+		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[1], atoi( event->options) );
+		// CL_MuzzleFlash( entity, (float *)&entity->attachment[1], atoi( event->options) );
 		break;
 	case 5021:
-		CL_MuzzleFlash( entity, (float *)&entity->attachment[2], atoi( event->options) );
+		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[2], atoi( event->options) );
+		// CL_MuzzleFlash( entity, (float *)&entity->attachment[2], atoi( event->options) );
 		break;
 	case 5031:
-		CL_MuzzleFlash( entity, (float *)&entity->attachment[3], atoi( event->options) );
+		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[3], atoi( event->options) );
+		// CL_MuzzleFlash( entity, (float *)&entity->attachment[3], atoi( event->options) );
 		break;
 	case 5002:
 		gEngfuncs.pEfxAPI->R_SparkEffect( (float *)&entity->attachment[0], atoi( event->options), -100, 100 );
@@ -537,6 +543,13 @@ void DLLEXPORT HUD_TempEntUpdate (
 				{
 					pTemp->entity.curstate.frame = pTemp->entity.curstate.frame - (int)(pTemp->entity.curstate.frame);
 
+					if ( pTemp->flags & 0x100000 )
+					{
+						// cs 1.6 corpse stuff
+						pTemp = pnext;
+						continue;
+					}
+
 					if ( !(pTemp->flags & FTENT_SPRANIMATELOOP) )
 					{
 						// this animating sprite isn't set to loop, so destroy it.
@@ -569,7 +582,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 				VectorCopy( pTemp->entity.angles, pTemp->entity.latched.prevangles );
 			}
 
-			if ( pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD) )
+			if ( pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD) && !( pTemp->flags & 0x200000 ))
 			{
 				vec3_t	traceNormal;
 				float	traceFraction = 1;
@@ -681,7 +694,9 @@ void DLLEXPORT HUD_TempEntUpdate (
 						{
 
 							VectorScale( pTemp->entity.baseline.origin, damp, pTemp->entity.baseline.origin );
-							VectorScale( pTemp->entity.angles, 0.9, pTemp->entity.angles );
+
+							if ( !( pTemp->flags & 0x100000 ))
+								VectorScale( pTemp->entity.angles, 0.9, pTemp->entity.angles );
 						}
 					}
 				}
@@ -704,10 +719,13 @@ void DLLEXPORT HUD_TempEntUpdate (
 				gEngfuncs.pEfxAPI->R_RocketTrail (pTemp->entity.prevstate.origin, pTemp->entity.origin, 1);
 			}
 
-			if ( pTemp->flags & FTENT_GRAVITY )
-				pTemp->entity.baseline.origin[2] += gravity;
-			else if ( pTemp->flags & FTENT_SLOWGRAVITY )
-				pTemp->entity.baseline.origin[2] += gravitySlow;
+			if ( !( pTemp->flags & 0x200000 ))
+			{
+				if ( pTemp->flags & FTENT_GRAVITY )
+					pTemp->entity.baseline.origin[2] += gravity;
+				else if ( pTemp->flags & FTENT_SLOWGRAVITY )
+					pTemp->entity.baseline.origin[2] += gravitySlow;
+			}
 
 			if ( pTemp->flags & FTENT_CLIENTCUSTOM )
 			{

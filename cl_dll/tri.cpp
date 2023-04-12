@@ -16,6 +16,32 @@
 #include "triangleapi.h"
 #include "rain.h"
 
+extern int g_iWaterLevel;
+
+FogParameters g_FogParameters;
+
+void RenderFog()
+{
+	FogParameters fog;
+
+	fog = g_FogParameters;
+
+	if( cl_fog_density )
+		fog.density = cl_fog_density->value;
+
+	if( cl_fog_r )
+		fog.color[0] = cl_fog_r->value;
+
+	if( cl_fog_g )
+		fog.color[1] = cl_fog_g->value;
+
+	if( cl_fog_b )
+		fog.color[2] = cl_fog_b->value;
+	
+	gEngfuncs.pTriAPI->FogParams( fog.density, fog.affectsSkyBox );
+	gEngfuncs.pTriAPI->Fog( fog.color, 100.0f, 2000.0f, g_iWaterLevel <= 1 ? fog.density > 0.0f : 0 );
+}
+
 /*
 =================
 HUD_DrawNormalTriangles
@@ -38,6 +64,8 @@ Render any triangles with transparent rendermode needs here
 extern bool Rain_Initialized;
 void DLLEXPORT HUD_DrawTransparentTriangles( void )
 {
+	RenderFog();
+
 	if( Rain_Initialized )
 	{
 		ProcessFXObjects();

@@ -32,6 +32,8 @@ typedef unsigned short word;
 typedef float vec_t;
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
+#include <stdint.h>
+
 #include "util_vector.h"
 
 #include "../engine/cdll_int.h"
@@ -63,7 +65,7 @@ int        DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi );
 void       DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed );
 int        DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
 void       DLLEXPORT HUD_CreateEntities( void );
-void       DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
+void       DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s *event, cl_entity_s *entity );
 void       DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
 void       DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
 void       DLLEXPORT HUD_TxferPredictionData( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd );

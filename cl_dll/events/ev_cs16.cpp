@@ -40,6 +40,7 @@
 
 #include "pm_shared.h"
 #include "com_weapons.h"
+#include "draw_util.h"
 
 extern float g_flRoundTime;
 
@@ -447,7 +448,6 @@ TEMPENTITY *EV_CS16Client_CreateSmoke( ESmoke type, Vector origin, Vector dir,
 	return te;
 }
 
-
 void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r, int g, int b, bool bCreateWallPuff, bool bCreateSparks, char cTextureType, bool isSky)
 {
 	physent_t *pe;
@@ -465,9 +465,11 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 		if( gHUD.cl_weapon_sparks->value && bCreateSparks )
 		{
 			Vector dir = pTrace->plane.normal;
+
 			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			dir.y = dir.y * dir.y * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			dir.z = dir.z * dir.z * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
+
 			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, Com_RandomLong( 5, 7 ), dir.z, -75.0f, 75.0f );
 		}
 
@@ -711,25 +713,53 @@ void EV_CS16Client_KillEveryRound( TEMPENTITY *te, float frametime, float curren
 	}
 }
 
+void RemoveBody( TEMPENTITY *te, float frametime, float current_time )
+{
+	if ( current_time >= gEngfuncs.pfnGetCvarFloat("cl_corpsestay") + te->entity.curstate.fuser2 + 5.0f )
+		te->entity.origin.z = te->entity.origin.z - 5.0f * frametime;
+}
+
+void HitBody( TEMPENTITY *ent, pmtrace_s *ptr )
+{
+	if ( ptr->plane.normal.z > 0.0 )
+    	ent->flags |= 0x200000;
+}
+
+TEMPENTITY *g_DeadPlayerModels[64];
+
 void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAnimTime, int iSequence, int iBody)
 {
 	int modelIdx = gEngfuncs.pEventAPI->EV_FindModelIndex(pModel);
 	Vector null(0, 0, 0);
-	TEMPENTITY *model = gEngfuncs.pEfxAPI->R_TempModel( vOrigin, null, vAngles,
-		gEngfuncs.pfnGetCvarFloat("cl_corpsestay"), modelIdx, 0 );
+	TEMPENTITY *model = gEngfuncs.pEfxAPI->R_TempModel( vOrigin, null, vAngles, 100.0f, modelIdx, 0 );
 
 	if( model )
 	{
-		model->flags = FTENT_COLLIDEWORLD|FTENT_FADEOUT;
-		model->fadeSpeed = 25;
+		model->flags = (FTENT_CLIENTCUSTOM|FTENT_COLLIDEALL|FTENT_SPRANIMATE|FTENT_FADEOUT|FTENT_COLLIDEWORLD|0x100000);
+		model->frameMax = 255.0f;
+		model->entity.curstate.framerate = 1.0f;
 		model->entity.curstate.animtime = flAnimTime;
-		model->entity.curstate.framerate = 1.0;
-		model->entity.curstate.frame = 0;
+		model->entity.curstate.frame = 0.0f;
+		model->entity.curstate.fuser1 = gHUD.m_flTime; + 1.0f;
 		model->entity.curstate.sequence = iSequence;
 		model->entity.curstate.body = iBody;
+		model->entity.baseline.renderamt = 255;
+		model->entity.curstate.renderamt = 255;
 		model->entity.curstate.fuser2 = gHUD.m_flTime + gEngfuncs.pfnGetCvarFloat("cl_corpsestay");
-		model->entity.curstate.fuser4 = gHUD.m_flTime;
-		model->hitcallback = NULL;
-		model->callback = EV_CS16Client_KillEveryRound;
+		model->callback = RemoveBody;
+		model->hitcallback = HitBody;
+		model->bounceFactor = 0.0f;
+		model->die = gEngfuncs.GetClientTime() + gEngfuncs.pfnGetCvarFloat("cl_corpsestay") + 9.0f;
+		//model->entity.curstate.renderfx = kRenderFxDeadPlayer;
+		//model->entity.curstate.fuser4 = gHUD.m_flTime;
+
+		for ( int i = 0; i < 64; i++ )
+		{
+			if ( !g_DeadPlayerModels[i] )
+			{
+				g_DeadPlayerModels[i] = model;
+				break;
+			}
+		}
 	}
 }

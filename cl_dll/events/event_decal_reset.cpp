@@ -31,12 +31,26 @@
 // HACKHACK: This is very unreliable way to get round time
 float g_flRoundTime = 0.0f;
 
+extern TEMPENTITY *g_DeadPlayerModels[64];
+
 void EV_DecalReset(event_args_s *args)
 {
 	int decalnum = (int)(gEngfuncs.pfnGetCvarFloat("r_decals"));
 
 	for( int i = 0; i < decalnum; i++ )
 		gEngfuncs.pEfxAPI->R_DecalRemoveAll( i );
-
+	
 	g_flRoundTime = gEngfuncs.GetClientTime();
+	
+	if ( g_DeadPlayerModels )
+	{
+		for ( int i = 0; i < 64; i++ )
+		{
+			if ( g_DeadPlayerModels[i] )
+			{
+				g_DeadPlayerModels[i]->die = 0.0f;
+				g_DeadPlayerModels[i] = NULL;
+			}
+		}
+	}
 }

@@ -48,7 +48,7 @@ typedef int	 ( *HUD_ADDENTITY_FUNC ) ( int type, struct cl_entity_s *ent, const 
 typedef void ( *HUD_CREATEENTITIES_FUNC ) ( void );
 typedef void ( *HUD_DRAWNORMALTRIS_FUNC ) ( void );
 typedef void ( *HUD_DRAWTRANSTRIS_FUNC ) ( void );
-typedef void ( *HUD_STUDIOEVENT_FUNC ) ( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
+typedef void ( *HUD_STUDIOEVENT_FUNC ) ( const struct mstudioevent_s *event, struct cl_entity_s *entity );
 typedef void ( *HUD_POSTRUNCMD_FUNC ) ( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed );
 typedef void ( *HUD_SHUTDOWN_FUNC ) ( void );
 typedef void ( *HUD_TXFERLOCALOVERRIDES_FUNC )( struct entity_state_s *state, const struct clientdata_s *client );
@@ -144,7 +144,7 @@ typedef void (*DST_HUD_ADDENTITY_FUNC ) ( int *, struct cl_entity_s **, const ch
 typedef void (*DST_HUD_CREATEENTITIES_FUNC ) ( void );
 typedef void (*DST_HUD_DRAWNORMALTRIS_FUNC ) ( void );
 typedef void (*DST_HUD_DRAWTRANSTRIS_FUNC ) ( void );
-typedef void (*DST_HUD_STUDIOEVENT_FUNC ) ( const struct mstudioevent_s **, const struct cl_entity_s ** );
+typedef void (*DST_HUD_STUDIOEVENT_FUNC ) ( const struct mstudioevent_s **, struct cl_entity_s ** );
 typedef void (*DST_HUD_POSTRUNCMD_FUNC ) ( struct local_state_s **, struct local_state_s **, struct usercmd_s **, int *, double *, unsigned int * );
 typedef void (*DST_HUD_SHUTDOWN_FUNC ) ( void );
 typedef void (*DST_HUD_TXFERLOCALOVERRIDES_FUNC )( struct entity_state_s **, const struct clientdata_s ** );

@@ -78,11 +78,11 @@ int CHudRadio::MsgFunc_ReloadSound( const char *pszName, int iSize, void *pbuf )
 	int vol = reader.ReadByte( );
 	if ( reader.ReadByte( ) )
 	{
-		gEngfuncs.pfnPlaySoundByName( "weapon/generic_reload.wav", vol / 255.0f );
+		gEngfuncs.pfnPlaySoundByName( "weapons/generic_reload.wav", vol / 255.0f );
 	}
 	else
 	{
-		gEngfuncs.pfnPlaySoundByName( "weapon/generic_shot_reload.wav", vol / 255.0f );
+		gEngfuncs.pfnPlaySoundByName( "weapons/generic_shot_reload.wav", vol / 255.0f );
 	}
 	return 1;
 }

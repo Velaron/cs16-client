@@ -18,7 +18,7 @@
 	#define POSIX 1
 #endif
 
-#if defined(__x86_64__) || defined(_WIN64)
+#if defined(__x86_64__) || defined(_WIN64) || defined(__aarch64__)
 #define X64BITS
 #endif
 

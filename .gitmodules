@@ -1,15 +1,9 @@
 [submodule "3rdparty/yapb"]
 	path = 3rdparty/yapb
-	url = https://git.mentality.rip/Velaron/yapb
+	url = https://github.com/Velaron/yapb
 [submodule "3rdparty/mainui_cpp"]
 	path = 3rdparty/mainui_cpp
-	url = https://git.mentality.rip/Velaron/mainui_cpp
+	url = https://github.com/Velaron/mainui_cpp
 [submodule "3rdparty/ReGameDLL_CS"]
 	path = 3rdparty/ReGameDLL_CS
-	url = https://git.mentality.rip/Velaron/regamedll
-[submodule "3rdparty/metamod-p"]
-	path = 3rdparty/metamod-p
-	url = https://github.com/Velaron/metamod-p
-[submodule "3rdparty/amxmodx"]
-	path = 3rdparty/amxmodx
-	url = https://github.com/Velaron/amxmodx
+	url = https://github.com/Velaron/ReGameDLL_CS

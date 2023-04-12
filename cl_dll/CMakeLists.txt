@@ -9,12 +9,12 @@ file(GLOB CS_WPN_SRC "cs_wpn/*.cpp")
 file(GLOB CS_WPNSH_SRC "../dlls/wpn_shared/*.cpp")
 file(GLOB CS_HUD_SRC "hud/*.cpp")
 file(GLOB CS_STUDIO_SRC "studio/*.cpp")
+file(GLOB CS_INPUT_SRC "input/*.cpp")
 file(GLOB CS_PM_SRC "../pm_shared/*.cpp")
 
 list(REMOVE_ITEM CS_CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/ev_hldm.cpp")
-list(REMOVE_ITEM CS_CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/input_sdl.cpp")
+list(REMOVE_ITEM CS_INPUT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/input/input_sdl.cpp")
 list(REMOVE_ITEM CS_CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/inputw32.cpp")
-list(REMOVE_ITEM CS_WPN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/cs_wpn/com_weapons.cpp")
 list(REMOVE_ITEM CS_WPN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/cs_wpn/cs_baseentity.cpp")
 list(APPEND CS_CLIENT_SRC ../common/interface.cpp)
 
@@ -24,6 +24,7 @@ list(APPEND CS_CLIENT_SRC ${CS_WPNSH_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_HUD_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_STUDIO_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_PM_SRC})
+list(APPEND CS_CLIENT_SRC ${CS_INPUT_SRC})
 
 include_directories(
 	include/
@@ -52,10 +53,12 @@ else()
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
 endif()
 
-add_library (${CLIENT_LIB} MODULE ${CS_CLIENT_SRC})
+add_library(${CLIENT_LIB} MODULE ${CS_CLIENT_SRC})
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND WIN32)
-	set_target_properties(${CLIENT_LIB} PROPERTIES OUTPUT_NAME "client_amd64")
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Android")
+	set_target_properties(${CLIENT_LIB} PROPERTIES
+		OUTPUT_NAME ${CLIENT_LIB}
+		PREFIX "")
 endif()
 
 install(TARGETS ${CLIENT_LIB}
@@ -65,7 +68,7 @@ install(TARGETS ${CLIENT_LIB}
 		WORLD_READ WORLD_EXECUTE)
 
 # Install PDB file on Windows
-if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(MSVC)
 	install(FILES $<TARGET_PDB_FILE:${CLIENT_LIB}>
 		DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/" OPTIONAL)
 endif()

@@ -3,17 +3,28 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:forceQueryable="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher">
+        android:roundIcon="@mipmap/ic_launcher"
+        tools:targetApi="r">
+
+        <meta-data
+            android:name="su.xash.engine.gamedir"
+            android:value="cstrike" />
+
         <activity
             android:name=".MainActivity"
-            android:theme="@style/Theme.AppCompat"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="su.xash.engine.MOD" />
             </intent-filter>
         </activity>
     </application>
