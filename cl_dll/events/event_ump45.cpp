@@ -26,24 +26,16 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum ump45_e
-{
-	UMP45_IDLE1,
-	UMP45_RELOAD,
-	UMP45_DRAW,
-	UMP45_SHOOT1,
-	UMP45_SHOOT2,
-	UMP45_SHOOT3
-};
 
 static const char *SOUNDS_NAME = "weapons/ump45-1.wav";
 
 void EV_FireUMP45(event_args_s *args)
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+	Vector vecSrc, vecAiming;
 	int    idx = args->entindex;
 	Vector origin( args->origin );
 	Vector angles(
@@ -68,6 +60,16 @@ void EV_FireUMP45(event_args_s *args)
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 34.0, -10.0, 11.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( SMOKE_BLACK, ent->attachment[0], forward, 3, 0.2, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else

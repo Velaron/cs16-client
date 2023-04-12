@@ -26,16 +26,8 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum mp5n_e
-{
-	MP5N_IDLE = 0,
-	MP5N_RELOAD,
-	MP5N_DRAW,
-	MP5N_SHOOT1,
-	MP5N_SHOOT2,
-	MP5N_SHOOT3
-};
 
 static const char *SOUNDS_NAME[] =
 {
@@ -45,9 +37,9 @@ static const char *SOUNDS_NAME[] =
 
 void EV_FireMP5( event_args_t *args )
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+	Vector vecSrc, vecAiming;
 	int    idx = args->entindex;
 	Vector origin( args->origin );
 	Vector angles(
@@ -72,6 +64,16 @@ void EV_FireMP5( event_args_t *args )
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -10.0, 11.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( SMOKE_BLACK, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else

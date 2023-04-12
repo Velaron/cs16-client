@@ -18,28 +18,23 @@
 #include "player.h"
 #include "weapons.h"
 
-enum hegrenade_e
-{
-	HEGRENADE_IDLE,
-	HEGRENADE_PULLPIN,
-	HEGRENADE_THROW,
-	HEGRENADE_DRAW
-};
-
 LINK_ENTITY_TO_CLASS(weapon_hegrenade, CHEGrenade)
 
 void CHEGrenade::Spawn(void)
 {
 	Precache();
+
 	m_iId = WEAPON_HEGRENADE;
-	SET_MODEL(ENT(pev), "models/w_hegrenade.mdl");
+	SET_MODEL(edict(), "models/w_hegrenade.mdl");
 
 	pev->dmg = 4;
+
 	m_iDefaultAmmo = HEGRENADE_DEFAULT_GIVE;
 	m_flStartThrow = 0;
-	m_flReleaseThrow = -1;
+	m_flReleaseThrow = -1.0f;
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
 
+	// get ready to fall down.
 	FallInit();
 }
 
@@ -60,27 +55,29 @@ int CHEGrenade::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "HEGrenade";
-	p->iMaxAmmo1 = HEGRENADE_MAX_CARRY;
+
+	p->iMaxAmmo1 = MAX_AMMO_HEGRENADE;
+	p->iMaxClip = WEAPON_NOCLIP;
+
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
-	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 3;
 	p->iPosition = 1;
 	p->iId = m_iId = WEAPON_HEGRENADE;
 	p->iWeight = HEGRENADE_WEIGHT;
 	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
 
-	return 1;
-}
+	return 1;}
 
 BOOL CHEGrenade::Deploy(void)
 {
-	m_flReleaseThrow = -1;
-	m_fMaxSpeed = 250;
+	m_flReleaseThrow = -1.0f;
+	m_fMaxSpeed = HEGRENADE_MAX_SPEED;
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
+
 	m_pPlayer->m_bShieldDrawn = false;
 
-	if (m_pPlayer->HasShield() != false)
+	if (m_pPlayer->HasShield())
 		return DefaultDeploy("models/shield/v_shield_hegrenade.mdl", "models/shield/p_shield_hegrenade.mdl", HEGRENADE_DRAW, "shieldgren", UseDecrement() != FALSE);
 	else
 		return DefaultDeploy("models/v_hegrenade.mdl", "models/p_hegrenade.mdl", HEGRENADE_DRAW, "grenade", UseDecrement() != FALSE);
@@ -93,7 +90,7 @@ BOOL CHEGrenade::CanHolster(void)
 
 void CHEGrenade::Holster(int skiplocal)
 {
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
+	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5f;
 
 	if (!m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
 	{
@@ -102,75 +99,83 @@ void CHEGrenade::Holster(int skiplocal)
 	}
 
 	m_flStartThrow = 0;
-	m_flReleaseThrow = -1;
+	m_flReleaseThrow = -1.0f;
 }
 
 void CHEGrenade::PrimaryAttack(void)
 {
 	if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
+	{
 		return;
+	}
 
 	if (!m_flStartThrow && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
 	{
-		m_flStartThrow = gpGlobals->time;
 		m_flReleaseThrow = 0;
+		m_flStartThrow = gpGlobals->time;
+
 		SendWeaponAnim(HEGRENADE_PULLPIN, UseDecrement() != FALSE);
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5f;
 	}
 }
 
 void CHEGrenade::SetPlayerShieldAnim(void)
 {
-	if (m_pPlayer->HasShield() == true)
-	{
-		if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-			strcpy(m_pPlayer->m_szAnimExtention, "shield");
-		else
-			strcpy(m_pPlayer->m_szAnimExtention, "shieldgren");
-	}
+	if (!m_pPlayer->HasShield())
+		return;
+
+	if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
+		strcpy(m_pPlayer->m_szAnimExtention, "shield");
+	else
+		strcpy(m_pPlayer->m_szAnimExtention, "shieldgren");
 }
 
 void CHEGrenade::ResetPlayerShieldAnim(void)
 {
-	if (m_pPlayer->HasShield() == true)
+	if (!m_pPlayer->HasShield())
+		return;
+
+	if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
 	{
-		if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-			strcpy(m_pPlayer->m_szAnimExtention, "shieldgren");
+		strcpy(m_pPlayer->m_szAnimExtention, "shieldgren");
 	}
 }
 
-bool CHEGrenade::ShieldSecondaryFire(int up_anim, int down_anim)
+bool CHEGrenade::ShieldSecondaryFire(int iUpAnim, int iDownAnim)
 {
-	if (m_pPlayer->HasShield() == false)
+	if (!m_pPlayer->HasShield() || m_flStartThrow > 0)
+	{
 		return false;
-
-	if (m_flStartThrow > 0)
-		return false;
+	}
 
 	if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
 	{
 		m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
-		SendWeaponAnim(down_anim, UseDecrement() != FALSE);
+		SendWeaponAnim(iDownAnim, UseDecrement() != FALSE);
 		strcpy(m_pPlayer->m_szAnimExtention, "shieldgren");
-		m_fMaxSpeed = 250;
+
+		m_fMaxSpeed = HEGRENADE_MAX_SPEED;
 		m_pPlayer->m_bShieldDrawn = false;
 	}
 	else
 	{
 		m_iWeaponState |= WPNSTATE_SHIELD_DRAWN;
-		SendWeaponAnim(up_anim, UseDecrement() != FALSE);
+		SendWeaponAnim(iUpAnim, UseDecrement() != FALSE);
 		strcpy(m_pPlayer->m_szAnimExtention, "shielded");
-		m_fMaxSpeed = 180;
+
+		m_fMaxSpeed = HEGRENADE_MAX_SPEED_SHIELD;
 		m_pPlayer->m_bShieldDrawn = true;
 	}
 
 #ifndef CLIENT_DLL
-	m_pPlayer->UpdateShieldCrosshair((m_iWeaponState & WPNSTATE_SHIELD_DRAWN) == 0);
-	m_pPlayer->ResetMaxSpeed();
+	m_pPlayer->UpdateShieldCrosshair((m_iWeaponState & WPNSTATE_SHIELD_DRAWN) != WPNSTATE_SHIELD_DRAWN);
 #endif
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.4;
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.4;
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.6;
+	m_pPlayer->ResetMaxSpeed();
+
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.4f;
+	m_flNextPrimaryAttack = GetNextAttackDelay(0.4);
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.6f;
+
 	return true;
 }
 
@@ -181,7 +186,7 @@ void CHEGrenade::SecondaryAttack(void)
 
 void CHEGrenade::WeaponIdle(void)
 {
-	if (!m_flReleaseThrow && m_flStartThrow)
+	if (m_flReleaseThrow == 0 && m_flStartThrow != 0.0f)
 		m_flReleaseThrow = gpGlobals->time;
 
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
@@ -189,9 +194,8 @@ void CHEGrenade::WeaponIdle(void)
 
 	if (m_flStartThrow)
 	{
-#ifndef CLIENT_DLL
 		m_pPlayer->Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
-#endif
+
 		Vector angThrow = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 
 		if (angThrow.x < 0)
@@ -199,64 +203,76 @@ void CHEGrenade::WeaponIdle(void)
 		else
 			angThrow.x = -10 + angThrow.x * ((90 + 10) / 90.0);
 
-		float flVel = (90 - angThrow.x) * 6;
+		float flVel = (90.0f - angThrow.x) * 6.0f;
 
-		if (flVel > 750)
-			flVel = 750;
+		if (flVel > 750.0f)
+			flVel = 750.0f;
 
 		UTIL_MakeVectors(angThrow);
+
 		Vector vecSrc = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16;
 		Vector vecThrow = gpGlobals->v_forward * flVel + m_pPlayer->pev->velocity;
-		float time = 1.5;
-		CGrenade::ShootTimed2(m_pPlayer->pev, vecSrc, vecThrow, time, m_pPlayer->m_iTeam, m_usCreateExplosion);
+
+		CGrenade::ShootTimed2(m_pPlayer->pev, vecSrc, vecThrow, 1.5, m_pPlayer->m_iTeam, m_usCreateExplosion);
 
 		SendWeaponAnim(HEGRENADE_THROW, UseDecrement() != FALSE);
 		SetPlayerShieldAnim();
 
 #ifndef CLIENT_DLL
+		// player "shoot" animation
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 #endif
 		m_flStartThrow = 0;
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.75;
-		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.75f;
 
-		if (!m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
-			m_flTimeWeaponIdle = m_flNextSecondaryAttack = m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5;
+		if (--m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+		{
+			// just threw last grenade
+			// set attack times in the future, and weapon idle in the future so we can see the whole throw
+			// animation, weapon idle will automatically retire the weapon for us.
+			// ensure that the animation can finish playing
+			m_flTimeWeaponIdle = m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
+		}
 
 		ResetPlayerShieldAnim();
-		return;
 	}
 	else if (m_flReleaseThrow > 0)
 	{
+		// we've finished the throw, restart.
 		m_flStartThrow = 0;
 
 		if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
 		{
 			SendWeaponAnim(HEGRENADE_DRAW, UseDecrement() != FALSE);
-			m_flReleaseThrow = -1;
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + RANDOM_FLOAT(10, 15);
 		}
 		else
-			RetireWeapon();
-
-		return;
-	}
-
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
-	{
-		if (m_pPlayer->HasShield() != false)
 		{
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0;
-
-			if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-				SendWeaponAnim(SHIELDREN_IDLE, UseDecrement() != FALSE);
-
+			RetireWeapon();
 			return;
 		}
 
-		SendWeaponAnim(HEGRENADE_IDLE, UseDecrement() != FALSE);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + RANDOM_FLOAT(10, 15);
+		m_flReleaseThrow = -1.0f;
+	}
+	else if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+	{
+		if (m_pPlayer->HasShield())
+		{
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+
+			if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
+			{
+				SendWeaponAnim(SHIELDREN_IDLE, UseDecrement() != FALSE);
+			}
+		}
+		else
+		{
+			SendWeaponAnim(HEGRENADE_IDLE, UseDecrement() != FALSE);
+
+			// how long till we do this again.
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + RANDOM_FLOAT(10, 15);
+		}
 	}
 }
 

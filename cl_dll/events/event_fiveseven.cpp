@@ -26,25 +26,17 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum fiveseven_e
-{
-	FIVESEVEN_IDLE,
-	FIVESEVEN_SHOOT1,
-	FIVESEVEN_SHOOT2,
-	FIVESEVEN_SHOOT_EMPTY,
-	FIVESEVEN_RELOAD,
-	FIVESEVEN_DRAW
-};
 
 static const char *SOUNDS_NAME = "weapons/fiveseven-1.wav";
 
 
 void EV_Fire57(event_args_t *args)
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+	Vector vecSrc, vecAiming;
 
 	int idx = args->entindex;
 	Vector origin( args->origin );
@@ -78,6 +70,24 @@ void EV_Fire57(event_args_t *args)
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, 14.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				Vector smoke_origin = ent->attachment[0];
+
+				smoke_origin = smoke_origin - forward * 3;
+
+				float scale = Com_RandomFloat( 0.1, 0.25 );
+
+				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 0,  scale, 7,7,7, false, velocity );
+				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 20, scale + 0.1, 10,10,10, false, velocity );
+				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 40, scale, 13,13,13, false, velocity );
+			}
 		}
 	}
 	else

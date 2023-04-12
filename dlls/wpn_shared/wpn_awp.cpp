@@ -18,16 +18,6 @@
 #include "player.h"
 #include "weapons.h"
 
-enum awp_e
-{
-	AWP_IDLE,
-	AWP_SHOOT1,
-	AWP_SHOOT2,
-	AWP_SHOOT3,
-	AWP_RELOAD,
-	AWP_DRAW
-};
-
 LINK_ENTITY_TO_CLASS(weapon_awp, CAWP)
 
 void CAWP::Spawn(void)
@@ -35,6 +25,7 @@ void CAWP::Spawn(void)
 	pev->classname = MAKE_STRING("weapon_awp");
 
 	Precache();
+
 	m_iId = WEAPON_AWP;
 	SET_MODEL(ENT(pev), "models/w_awp.mdl");
 
@@ -56,7 +47,8 @@ void CAWP::Precache(void)
 	PRECACHE_SOUND("weapons/awp_clipin.wav");
 	PRECACHE_SOUND("weapons/awp_clipout.wav");
 
-	m_iShellId = m_iShell = PRECACHE_MODEL("models/rshell_big.mdl");
+	m_iShell = PRECACHE_MODEL("models/rshell_big.mdl");
+	m_iShellId = m_iShell;
 	m_usFireAWP = PRECACHE_EVENT(1, "events/awp.sc");
 }
 
@@ -64,7 +56,7 @@ int CAWP::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "338Magnum";
-	p->iMaxAmmo1 = _338MAGNUM_MAX_CARRY;
+	p->iMaxAmmo1 = MAX_AMMO_338MAGNUM;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = AWP_MAX_CLIP;
@@ -81,8 +73,10 @@ BOOL CAWP::Deploy(void)
 {
 	if (DefaultDeploy("models/v_awp.mdl", "models/p_awp.mdl", AWP_DRAW, "rifle", UseDecrement() != FALSE))
 	{
-		m_flNextPrimaryAttack = m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.45;
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1;
+		m_pPlayer->m_flNextAttack = GetNextAttackDelay(1.45);
+		m_flNextPrimaryAttack = m_pPlayer->m_flNextAttack;
+		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1.0f;
+
 		return TRUE;
 	}
 
@@ -93,81 +87,122 @@ void CAWP::SecondaryAttack(void)
 {
 	switch (m_pPlayer->m_iFOV)
 	{
-		case 90: m_pPlayer->m_iFOV = m_pPlayer->pev->fov = 40; break;
-		case 40: m_pPlayer->m_iFOV = m_pPlayer->pev->fov = 10; break;
-		default: m_pPlayer->m_iFOV = m_pPlayer->pev->fov = 90; break;
+	case 90: m_pPlayer->m_iFOV = m_pPlayer->pev->fov = 40; break;
+	case 40: m_pPlayer->m_iFOV = m_pPlayer->pev->fov = 10; break;
+	default: m_pPlayer->m_iFOV = m_pPlayer->pev->fov = 90; break;
 	}
 
+#ifndef CLIENT_DLL
+	if (TheBots != NULL)
+	{
+		TheBots->OnEvent(EVENT_WEAPON_ZOOMED, m_pPlayer);
+	}
+#endif
+
 	m_pPlayer->ResetMaxSpeed();
-	EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/zoom.wav", 0.2, 2.4);
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "weapons/zoom.wav", 0.2, 2.4);
+
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3;
 }
 
 void CAWP::PrimaryAttack(void)
 {
-	if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
 		AWPFire(0.85, 1.45, FALSE);
+	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 140)
+	{
 		AWPFire(0.25, 1.45, FALSE);
+	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 10)
+	{
 		AWPFire(0.1, 1.45, FALSE);
-	else if (FBitSet(m_pPlayer->pev->flags, FL_DUCKING))
+	}
+	else if (m_pPlayer->pev->flags & FL_DUCKING)
+	{
 		AWPFire(0.0, 1.45, FALSE);
+	}
 	else
+	{
 		AWPFire(0.001, 1.45, FALSE);
+	}
 }
 
 void CAWP::AWPFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 {
-	if (m_pPlayer->pev->fov != 90)
+	Vector vecAiming, vecSrc, vecDir;
+	int flag;
+
+	if (m_pPlayer->pev->fov != DEFAULT_FOV)
 	{
 		m_pPlayer->m_bResumeZoom = true;
 		m_pPlayer->m_iLastZoom = m_pPlayer->m_iFOV;
-		m_pPlayer->m_iFOV = m_pPlayer->pev->fov = 90;
+
+		// reset a fov
+		m_pPlayer->m_iFOV = DEFAULT_FOV;
+		m_pPlayer->pev->fov = DEFAULT_FOV;
 	}
-	else // not zoomed, so bullets diverts more
-		flSpread += 0.08;
+	// If we are not zoomed in, the bullet diverts more.
+	else
+	{
+		flSpread += 0.08f;
+	}
 
 	if (m_iClip <= 0)
 	{
 		if (m_fFireOnEmpty)
 		{
 			PlayEmptySound();
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2;
+			m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
 		}
+
+#ifndef CLIENT_DLL
+		if (TheBots != NULL)
+		{
+			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
+		}
+#endif
 
 		return;
 	}
 
-	m_iClip--;
+	--m_iClip;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 #ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 #endif
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	m_pPlayer->m_flEjectBrass = gpGlobals->time + 0.55;
+	m_pPlayer->m_flEjectBrass = gpGlobals->time + 0.55f;
 	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
-	Vector vecDir = FireBullets3(m_pPlayer->GetGunPosition(), gpGlobals->v_forward, flSpread, 8192, 3, BULLET_PLAYER_338MAG, 115, 0.99, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
+	vecSrc = m_pPlayer->GetGunPosition();
+	vecAiming = gpGlobals->v_forward;
 
-	int flags;
+	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 8192, 3, BULLET_PLAYER_338MAG, AWP_DAMAGE, AWP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+
 #ifdef CLIENT_WEAPONS
-	flags = FEV_NOTHOST;
+	flag = FEV_NOTHOST;
 #else
-	flags = 0;
+	flag = 0;
 #endif
 
-	PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireAWP, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.x * 100), FALSE, FALSE);
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
+	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireAWP, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
+		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.x * 100), FALSE, FALSE);
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
 
 #ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	{
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+	}
 #endif
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
-	m_pPlayer->pev->punchangle.x -= 2;
+
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
+	m_pPlayer->pev->punchangle.x -= 2.0f;
 }
 
 void CAWP::Reload(void)
@@ -175,14 +210,16 @@ void CAWP::Reload(void)
 	if (m_pPlayer->ammo_338mag <= 0)
 		return;
 
-	if (DefaultReload(AWP_MAX_CLIP, AWP_RELOAD, 2.5))
+	if (DefaultReload(iMaxClip(), AWP_RELOAD, AWP_RELOAD_TIME))
 	{
 #ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 #endif
-		if (m_pPlayer->pev->fov != 90)
+		if (m_pPlayer->pev->fov != DEFAULT_FOV)
 		{
-			m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 10;
+			m_pPlayer->m_iFOV = 10;
+			m_pPlayer->pev->fov = 10;
+
 			SecondaryAttack();
 		}
 	}
@@ -193,20 +230,18 @@ void CAWP::WeaponIdle(void)
 	ResetEmptySound();
 	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
-		return;
-
-	if (m_iClip)
+	if (m_flTimeWeaponIdle <= UTIL_WeaponTimeBase() && m_iClip)
 	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0f;
 		SendWeaponAnim(AWP_IDLE, UseDecrement() != FALSE);
 	}
 }
 
 float CAWP::GetMaxSpeed(void)
 {
-	if (m_pPlayer->m_iFOV == 90)
-		return 210;
+	if (m_pPlayer->m_iFOV == DEFAULT_FOV)
+		return AWP_MAX_SPEED;
 
-	return 150;
+	// Slower speed when zoomed in.
+	return AWP_MAX_SPEED_ZOOM;
 }

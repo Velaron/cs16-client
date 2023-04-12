@@ -26,16 +26,8 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum deagle_e
-{
-	DEAGLE_IDLE1 = 0,
-	DEAGLE_SHOOT1,
-	DEAGLE_SHOOT2,
-	DEAGLE_SHOOT_EMPTY,
-	DEAGLE_RELOAD,
-	DEAGLE_DRAW
-};
 
 static const char *SOUNDS_NAME[] =
 {
@@ -45,18 +37,18 @@ static const char *SOUNDS_NAME[] =
 
 void EV_FireDEAGLE( event_args_t *args )
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
 	vec3_t vecSrc;
 
 	int idx = args->entindex;
 	Vector origin( args->origin );
-	Vector velocity( args->velocity );
 	Vector angles(
 		args->iparam1 / 100.0f + args->angles[0],
 		args->iparam2 / 100.0f + args->angles[1],
 		args->angles[2]
 	);
+	Vector velocity( args->velocity );
 	Vector forward, right, up;
 	AngleVectors( angles, forward, right, up );
 
@@ -79,6 +71,24 @@ void EV_FireDEAGLE( event_args_t *args )
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -11.0, 16.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				Vector smoke_origin = ent->attachment[0];
+
+				smoke_origin = smoke_origin - forward * 3;
+
+				float scale = Com_RandomFloat( 0.2, 0.3 );
+
+				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 0,  scale, 7,7,7, false, velocity );
+				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 20, scale + 0.1, 10,10,10, false, velocity );
+				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 40, scale, 13,13,13, false, velocity );
+			}
 		}
 	}
 	else

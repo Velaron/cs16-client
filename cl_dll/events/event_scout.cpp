@@ -40,7 +40,7 @@ static const char *SOUNDS_NAME = "weapons/scout_fire-1.wav";
 
 void EV_FireScout(event_args_s *args)
 {
-	vec3_t vecSrc, vecAiming;
+	Vector vecSrc, vecAiming;
 
 	int    idx = args->entindex;
 	Vector origin( args->origin );
@@ -49,6 +49,7 @@ void EV_FireScout(event_args_s *args)
 		args->iparam2 / 100.0f + args->angles[1],
 		args->angles[2]
 		);
+	Vector velocity( args->velocity );
 	Vector forward, right, up;
 
 	AngleVectors( angles, forward, right, up );
@@ -58,6 +59,16 @@ void EV_FireScout(event_args_s *args)
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation( Com_RandomLong(SCOUT_SHOOT, SCOUT_SHOOT2), 2 );
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( SMOKE_BLACK, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
+			}
+		}
 	}
 
 	PLAY_EVENT_SOUND( SOUNDS_NAME );

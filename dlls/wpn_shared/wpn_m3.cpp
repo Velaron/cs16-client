@@ -18,18 +18,6 @@
 #include "player.h"
 #include "weapons.h"
 
-enum m3_e
-{
-	M3_IDLE,
-	M3_FIRE1,
-	M3_FIRE2,
-	M3_RELOAD,
-	M3_PUMP,
-	M3_START_RELOAD,
-	M3_DRAW,
-	M3_HOLSTER
-};
-
 LINK_ENTITY_TO_CLASS(weapon_m3, CM3)
 
 void CM3::Spawn(void)
@@ -37,14 +25,16 @@ void CM3::Spawn(void)
 	pev->classname = MAKE_STRING("weapon_m3");
 
 	Precache();
+
 	m_iId = WEAPON_M3;
-	SET_MODEL(ENT(pev), "models/w_m3.mdl");
+	SET_MODEL(edict(), "models/w_m3.mdl");
+
 	m_iDefaultAmmo = M3_DEFAULT_GIVE;
 
 	FallInit();
 }
 
-void CM3::Precache(void)
+void CM3::Precache()
 {
 	PRECACHE_MODEL("models/v_m3.mdl");
 	PRECACHE_MODEL("models/w_m3.mdl");
@@ -64,7 +54,7 @@ int CM3::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "buckshot";
-	p->iMaxAmmo1 = BUCKSHOT_MAX_CARRY;
+	p->iMaxAmmo1 = MAX_AMMO_BUCKSHOT;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = M3_MAX_CLIP;
@@ -77,17 +67,21 @@ int CM3::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-BOOL CM3::Deploy(void)
+BOOL CM3::Deploy()
 {
 	return DefaultDeploy("models/v_m3.mdl", "models/p_m3.mdl", M3_DRAW, "shotgun", UseDecrement() != FALSE);
 }
 
-void CM3::PrimaryAttack(void)
+void CM3::PrimaryAttack()
 {
+	Vector vecAiming, vecSrc, vecDir;
+	int flag;
+
+	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15;
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
 		return;
 	}
 
@@ -95,53 +89,67 @@ void CM3::PrimaryAttack(void)
 	{
 		Reload();
 
-		if (m_iClip == 0)
+		if (!m_iClip)
+		{
 			PlayEmptySound();
+		}
 
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.0;
+#ifndef CLIENT_DLL
+		if (TheBots != NULL)
+		{
+			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
+		}
+#endif
+
+		m_flNextPrimaryAttack = GetNextAttackDelay(1);
 		return;
 	}
 
 	m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
+	--m_iClip;
 
-	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 #ifndef CLIENT_DLL
+	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 #endif
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+	vecSrc = m_pPlayer->GetGunPosition();
+	vecAiming = gpGlobals->v_forward;
+
 #ifndef CLIENT_DLL
-	m_pPlayer->FireBullets(9, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, Vector(0.0675, 0.0675, 0), 3000, BULLET_PLAYER_BUCKSHOT, 0);
+	m_pPlayer->FireBullets(9, vecSrc, vecAiming, M3_CONE_VECTOR, 3000, BULLET_PLAYER_BUCKSHOT, 0);
 #endif
 
-	int flags;
 #ifdef CLIENT_WEAPONS
-	flags = FEV_NOTHOST;
+	flag = FEV_NOTHOST;
 #else
-	flags = 0;
+	flag = 0;
 #endif
 
-	PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireM3, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0, 0, FALSE, FALSE);
-
-	if (m_iClip)
-		m_flPumpTime = UTIL_WeaponTimeBase() + 0.5;
+	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireM3, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0, 0, FALSE, FALSE);
 
 #ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	{
+		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+	}
 #endif
-	if (m_iClip)
-		m_flPumpTime = UTIL_WeaponTimeBase() + 0.5;
 
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.875;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.875;
+	if (m_iClip != 0)
+		m_flPumpTime = UTIL_WeaponTimeBase() + 0.5f;
 
-	if (m_iClip)
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5;
+	m_flNextPrimaryAttack = GetNextAttackDelay(0.875);
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.875f;
+
+	if (m_iClip != 0)
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5f;
 	else
-		m_flTimeWeaponIdle = 0.875;
+		m_flTimeWeaponIdle = 0.875f;
 
 	m_fInSpecialReload = 0;
 
@@ -150,18 +158,20 @@ void CM3::PrimaryAttack(void)
 	else
 		m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + 1, 8, 11);
 
-	m_pPlayer->m_flEjectBrass = gpGlobals->time + 0.45;
+	m_pPlayer->m_flEjectBrass = gpGlobals->time + 0.45f;
 }
 
-void CM3::Reload(void)
+void CM3::Reload()
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == M3_MAX_CLIP)
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == iMaxClip())
 		return;
 
+	// don't reload until recoil is done
 	if (m_flNextPrimaryAttack > UTIL_WeaponTimeBase())
 		return;
 
-	if (!m_fInSpecialReload)
+	// check to see if we're ready to reload
+	if (m_fInSpecialReload == 0)
 	{
 #ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
@@ -169,38 +179,45 @@ void CM3::Reload(void)
 		SendWeaponAnim(M3_START_RELOAD, UseDecrement() != FALSE);
 
 		m_fInSpecialReload = 1;
-		m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.55;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.55;
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.55;
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.55;
+		m_flNextSecondaryAttack = m_flTimeWeaponIdle = m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.55f;
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.55);
 	}
 	else if (m_fInSpecialReload == 1)
 	{
 		if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 			return;
 
+		// was waiting for gun to move to side
 		m_fInSpecialReload = 2;
-		SendWeaponAnim(M3_RELOAD, UseDecrement() != FALSE);
+		SendWeaponAnim(M3_RELOAD, UseDecrement());
 
-		m_flNextReload = UTIL_WeaponTimeBase() + 0.45;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.45;
+		m_flTimeWeaponIdle = m_flNextReload = UTIL_WeaponTimeBase() + 0.45f;
 	}
 	else
 	{
-		m_iClip++;
-		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+		++m_iClip;
+
+#ifdef REGAMEDLL_ADD
+		if (refill_bpammo_weapons.value < 3.0f)
+#endif
+		{
+			--m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType];
+			--m_pPlayer->ammo_buckshot;
+		}
+
 		m_fInSpecialReload = 1;
-		m_pPlayer->ammo_buckshot--;
 	}
 }
 
-void CM3::WeaponIdle(void)
+void CM3::WeaponIdle()
 {
 	ResetEmptySound();
 	m_pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
 
 	if (m_flPumpTime && m_flPumpTime < UTIL_WeaponTimeBase())
+	{
 		m_flPumpTime = 0;
+	}
 
 	if (m_flTimeWeaponIdle < UTIL_WeaponTimeBase())
 	{
@@ -210,19 +227,22 @@ void CM3::WeaponIdle(void)
 		}
 		else if (m_fInSpecialReload != 0)
 		{
-			if (m_iClip != M3_MAX_CLIP && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+			if (m_iClip != iMaxClip() && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
 			{
 				Reload();
 			}
 			else
 			{
+				// reload debounce has timed out
 				SendWeaponAnim(M3_PUMP, UseDecrement() != FALSE);
 
 				m_fInSpecialReload = 0;
-				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5;
+				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5f;
 			}
 		}
 		else
+		{
 			SendWeaponAnim(M3_IDLE, UseDecrement() != FALSE);
+		}
 	}
 }

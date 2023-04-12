@@ -26,22 +26,15 @@
 *
 */
 #include "events.h"
-enum p90_e
-{
-	P90_IDLE1,
-	P90_RELOAD,
-	P90_DRAW,
-	P90_SHOOT1,
-	P90_SHOOT2,
-	P90_SHOOT3
-};
+#include "wpn_shared.h"
+
 
 static const char *SOUNDS_NAME = "weapons/p90-1.wav";
 
 void EV_FireP90(event_args_s *args)
 {
 	vec3_t ShellVelocity, ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector vecSrc, vecAiming;
 	int    idx = args->entindex;
 	Vector origin( args->origin );
 	Vector angles(
@@ -66,6 +59,16 @@ void EV_FireP90(event_args_s *args)
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -16.0, 22.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( SMOKE_RIFLE, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else

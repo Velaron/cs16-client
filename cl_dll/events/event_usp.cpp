@@ -26,39 +26,7 @@
 *
 */
 #include "events.h"
-
-enum usp_e
-{
-	USP_IDLE,
-	USP_SHOOT1,
-	USP_SHOOT2,
-	USP_SHOOT3,
-	USP_SHOOT_EMPTY,
-	USP_RELOAD,
-	USP_DRAW,
-	USP_ATTACH_SILENCER,
-	USP_UNSIL_IDLE,
-	USP_UNSIL_SHOOT1,
-	USP_UNSIL_SHOOT2,
-	USP_UNSIL_SHOOT3,
-	USP_UNSIL_SHOOT_EMPTY,
-	USP_UNSIL_RELOAD,
-	USP_UNSIL_DRAW,
-	USP_DETACH_SILENCER
-};
-
-enum usp_shield_e
-{
-	USP_SHIELD_IDLE,
-	USP_SHIELD_SHOOT1,
-	USP_SHIELD_SHOOT2,
-	USP_SHIELD_SHOOT_EMPTY,
-	USP_SHIELD_RELOAD,
-	USP_SHIELD_DRAW,
-	USP_SHIELD_UP_IDLE,
-	USP_SHIELD_UP,
-	USP_SHIELD_DOWN
-};
+#include "wpn_shared.h"
 
 static const char *SOUNDS_NAME[] =
 {
@@ -68,9 +36,9 @@ static const char *SOUNDS_NAME[] =
 };
 void EV_FireUSP( event_args_t *args )
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+	Vector vecSrc, vecAiming;
 
 	bool silencer_on = !args->bparam2;
 	bool empty		 = !args->bparam1;
@@ -132,11 +100,9 @@ void EV_FireUSP( event_args_t *args )
 
 				smoke_origin = smoke_origin - forward * 3;
 
-				float scale = Com_RandomFloat( 0.1, 0.25 );
+				float scale = Com_RandomFloat( 0.2, 0.35 );
 
-				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 0,  scale, 7,7,7, false, velocity );
 				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 20, scale + 0.1, 10,10,10, false, velocity );
-				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 40, scale, 13,13,13, false, velocity );
 			}
 		}
 	}

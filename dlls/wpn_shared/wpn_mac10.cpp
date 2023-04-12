@@ -18,16 +18,6 @@
 #include "player.h"
 #include "weapons.h"
 
-enum mac10_e
-{
-	MAC10_IDLE1,
-	MAC10_RELOAD,
-	MAC10_DRAW,
-	MAC10_SHOOT1,
-	MAC10_SHOOT2,
-	MAC10_SHOOT3
-};
-
 LINK_ENTITY_TO_CLASS(weapon_mac10, CMAC10)
 
 void CMAC10::Spawn(void)
@@ -35,17 +25,18 @@ void CMAC10::Spawn(void)
 	pev->classname = MAKE_STRING("weapon_mac10");
 
 	Precache();
+
 	m_iId = WEAPON_MAC10;
-	SET_MODEL(ENT(pev), "models/w_mac10.mdl");
+	SET_MODEL(edict(), "models/w_mac10.mdl");
 
 	m_iDefaultAmmo = MAC10_DEFAULT_GIVE;
-	m_flAccuracy = 0.15;
+	m_flAccuracy = 0.15f;
 	m_bDelayFire = false;
 
 	FallInit();
 }
 
-void CMAC10::Precache(void)
+void CMAC10::Precache()
 {
 	PRECACHE_MODEL("models/v_mac10.mdl");
 	PRECACHE_MODEL("models/w_mac10.mdl");
@@ -63,7 +54,7 @@ int CMAC10::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "45acp";
-	p->iMaxAmmo1 = _45ACP_MAX_CARRY;
+	p->iMaxAmmo1 = MAX_AMMO_45ACP;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = MAC10_MAX_CLIP;
@@ -76,88 +67,118 @@ int CMAC10::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-BOOL CMAC10::Deploy(void)
+BOOL CMAC10::Deploy()
 {
-	m_flAccuracy = 0.15;
+	m_flAccuracy = 0.15f;
 	iShellOn = 1;
 	m_bDelayFire = false;
 
 	return DefaultDeploy("models/v_mac10.mdl", "models/p_mac10.mdl", MAC10_DRAW, "onehanded", UseDecrement() != FALSE);
 }
 
-void CMAC10::PrimaryAttack(void)
+void CMAC10::PrimaryAttack()
 {
-	if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
-		MAC10Fire((0.375) * m_flAccuracy, 0.07, FALSE);
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
+		MAC10Fire(0.375 * m_flAccuracy, 0.07, FALSE);
+	}
 	else
-		MAC10Fire((0.03) * m_flAccuracy, 0.07, FALSE);
+	{
+		MAC10Fire(0.03 * m_flAccuracy, 0.07, FALSE);
+	}
 }
 
 void CMAC10::MAC10Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 {
-	m_bDelayFire = true;
-	m_iShotsFired++;
-	m_flAccuracy = ((m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200.0) + 0.6;
+	Vector vecAiming, vecSrc, vecDir;
+	int flag;
 
-	if (m_flAccuracy > 1.65)
-		m_flAccuracy = 1.65;
+	m_bDelayFire = true;
+	++m_iShotsFired;
+
+	m_flAccuracy = ((m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200) + 0.6f;
+
+	if (m_flAccuracy > 1.65f)
+		m_flAccuracy = 1.65f;
 
 	if (m_iClip <= 0)
 	{
 		if (m_fFireOnEmpty)
 		{
 			PlayEmptySound();
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2;
+			m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
 		}
+
+#ifndef CLIENT_DLL
+		if (TheBots != NULL)
+		{
+			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
+		}
+#endif
 
 		return;
 	}
 
-	m_iClip--;
+	--m_iClip;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 #ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 #endif
-
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, gpGlobals->v_forward, flSpread, 8192, 1, BULLET_PLAYER_45ACP, 29, 0.82, m_pPlayer->pev, FALSE, m_pPlayer->random_seed);
+	vecSrc = m_pPlayer->GetGunPosition();
+	vecAiming = gpGlobals->v_forward;
 
-	int flags;
+	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 8192, 1, BULLET_PLAYER_45ACP,
+		MAC10_DAMAGE, MAC10_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+
 #ifdef CLIENT_WEAPONS
-	flags = FEV_NOTHOST;
+	flag = FEV_NOTHOST;
 #else
-	flags = 0;
+	flag = 0;
 #endif
 
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireMAC10, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
-#ifndef CLIENT_DLL
+	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireMAC10, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
+		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
+
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	{
+#ifndef CLIENT_DLL
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 #endif
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
+	}
 
-	if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
+
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
 		KickBack(1.3, 0.55, 0.4, 0.05, 4.75, 3.75, 5);
+	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 0)
+	{
 		KickBack(0.9, 0.45, 0.25, 0.035, 3.5, 2.75, 7);
-	else if (FBitSet(m_pPlayer->pev->flags, FL_DUCKING))
+	}
+	else if (m_pPlayer->pev->flags & FL_DUCKING)
+	{
 		KickBack(0.75, 0.4, 0.175, 0.03, 2.75, 2.5, 10);
+	}
 	else
+	{
 		KickBack(0.775, 0.425, 0.2, 0.03, 3.0, 2.75, 9);
+	}
 }
 
-void CMAC10::Reload(void)
+void CMAC10::Reload()
 {
 	if (m_pPlayer->ammo_45acp <= 0)
 		return;
 
-	if (DefaultReload(MAC10_MAX_CLIP, MAC10_RELOAD, 3.15))
+	if (DefaultReload(iMaxClip(), MAC10_RELOAD, MAC10_RELOAD_TIME))
 	{
 #ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
@@ -167,14 +188,16 @@ void CMAC10::Reload(void)
 	}
 }
 
-void CMAC10::WeaponIdle(void)
+void CMAC10::WeaponIdle()
 {
 	ResetEmptySound();
 	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
 
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+	{
 		return;
+	}
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 	SendWeaponAnim(MAC10_IDLE1, UseDecrement() != FALSE);
 }

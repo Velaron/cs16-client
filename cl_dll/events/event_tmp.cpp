@@ -26,16 +26,8 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum tmp_e
-{
-	TMP_IDLE1,
-	TMP_RELOAD,
-	TMP_DRAW,
-	TMP_SHOOT1,
-	TMP_SHOOT2,
-	TMP_SHOOT3
-};
 
 static const char *SOUNDS_NAME[] =
 {
@@ -44,9 +36,9 @@ static const char *SOUNDS_NAME[] =
 
 void EV_FireTMP(event_args_s *args)
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+	Vector vecSrc, vecAiming;
 	int    idx = args->entindex;
 	Vector origin( args->origin );
 	Vector angles(
@@ -71,6 +63,16 @@ void EV_FireTMP(event_args_s *args)
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -6.0, 11.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( SMOKE_BLACK, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else

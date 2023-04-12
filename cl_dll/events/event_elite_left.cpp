@@ -26,54 +26,64 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum elite_e
-{
-	ELITE_IDLE,
-	ELITE_IDLE_LEFTEMPTY,
-	ELITE_SHOOTLEFT1,
-	ELITE_SHOOTLEFT2,
-	ELITE_SHOOTLEFT3,
-	ELITE_SHOOTLEFT4,
-	ELITE_SHOOTLEFT5,
-	ELITE_SHOOTLEFTLAST,
-	ELITE_SHOOTRIGHT1,
-	ELITE_SHOOTRIGHT2,
-	ELITE_SHOOTRIGHT3,
-	ELITE_SHOOTRIGHT4,
-	ELITE_SHOOTRIGHT5,
-	ELITE_SHOOTRIGHTLAST,
-	ELITE_RELOAD,
-	ELITE_DRAW
-};
 
 static const char *SOUNDS_NAME = "weapons/elite_fire.wav";
 
-void EV_FireElite( event_args_s *args, int sequence )
+// false is left
+// true is right
+void EV_FireElite( event_args_s *args, bool isRight )
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+	Vector vecSrc, vecAiming;
 
 	int    idx = args->entindex;
 	Vector origin( args->origin );
 	Vector angles( args->angles );
 	Vector velocity( args->velocity );
 	Vector forward, right, up;
+	int		sequence;
+	float flTimeDiff = args->fparam1;
+	int iBulletsLeft = args->iparam2;
 	AngleVectors( angles, forward, right, up );
 
 	if ( EV_IsLocal( idx ) )
 	{
 		++g_iShotsFired;
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(sequence, 2);
-		if( sequence >= ELITE_SHOOTRIGHT1 )
+
+		if( !iBulletsLeft ) sequence = ELITE_SHOOTLEFTLAST;
+		else if( flTimeDiff >= 0.5 ) sequence = ELITE_SHOOTLEFT5;
+		else if( flTimeDiff >= 0.4 ) sequence = ELITE_SHOOTLEFT4;
+		else if( flTimeDiff >= 0.3 ) sequence = ELITE_SHOOTLEFT3;
+		else if( flTimeDiff >= 0.2 ) sequence = ELITE_SHOOTLEFT2;
+		else sequence = ELITE_SHOOTLEFT1;
+
+		if( isRight )
 		{
+			sequence += (ELITE_SHOOTRIGHT1 - ELITE_SHOOTLEFT1);
+
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -11.0, -16.0, 0);
 		}
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -11.0, 16.0, 0);
+		}
+
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(sequence, 2);
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				int i = isRight ? 1 : 0;
+
+				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, ent->attachment[i], forward, 3, 0.3, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else
@@ -88,8 +98,18 @@ void EV_FireElite( event_args_s *args, int sequence )
 	VectorCopy( forward, vecAiming );
 	Vector vSpread;
 	
-	vSpread.x = args->fparam1;
-	vSpread.y = args->fparam2;
+	vSpread.x = args->fparam2;
+	vSpread.y = args->iparam1 / 100.0f;
+
+	if( isRight )
+	{
+		vecSrc = vecSrc + right * 5;
+	}
+	else
+	{
+		vecSrc = vecSrc - right * 5;
+	}
+
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		1, vecSrc, vecAiming,
@@ -99,10 +119,10 @@ void EV_FireElite( event_args_s *args, int sequence )
 
 void EV_FireEliteLeft(event_args_s *args)
 {
-	EV_FireElite( args, Com_RandomLong( ELITE_SHOOTLEFT1, ELITE_SHOOTLEFT4 ));
+	EV_FireElite( args, false );
 }
 
 void EV_FireEliteRight( event_args_s *args )
 {
-	EV_FireElite( args, Com_RandomLong( ELITE_SHOOTRIGHT1, ELITE_SHOOTRIGHT4 ));
+	EV_FireElite( args, true );
 }

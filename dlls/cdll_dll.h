@@ -20,6 +20,8 @@
 #define MAX_ITEM_TYPES 6
 #define MAX_ITEMS 4
 
+#define DEFAULT_FOV			90		// the default field of view
+
 #define HIDEHUD_WEAPONS (1<<0)
 #define HIDEHUD_FLASHLIGHT (1<<1)
 #define HIDEHUD_ALL (1<<2)

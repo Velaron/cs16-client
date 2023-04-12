@@ -26,23 +26,15 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum mac10_e
-{
-	MAC10_IDLE1,
-	MAC10_RELOAD,
-	MAC10_DRAW,
-	MAC10_SHOOT1,
-	MAC10_SHOOT2,
-	MAC10_SHOOT3
-};
 
 static const char *SOUNDS_NAME = "weapons/mac10-1.wav";
 
 void EV_FireMAC10(event_args_s *args)
 {
 	vec3_t ShellVelocity, ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector vecSrc, vecAiming;
 	int    idx = args->entindex;
 	Vector origin( args->origin );
 	Vector angles(
@@ -67,6 +59,16 @@ void EV_FireMAC10(event_args_s *args)
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -9.0, 11.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( SMOKE_RIFLE, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else

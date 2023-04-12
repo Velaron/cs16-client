@@ -26,38 +26,9 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
 bool g_bGlockBurstMode = false;
-
-enum glock18_e
-{
-	GLOCK18_IDLE1 = 0,
-	GLOCK18_IDLE2,
-	GLOCK18_IDLE3,
-	GLOCK18_SHOOT1,
-	GLOCK18_SHOOT2,
-	GLOCK18_SHOOT3,
-	GLOCK18_SHOOT_EMPTY,
-	GLOCK18_RELOAD,
-	GLOCK18_DRAW,
-	GLOCK18_HOLSTER,
-	GLOCK18_ADD_SILENCER,
-	GLOCK18_DRAW2,
-	GLOCK18_RELOAD2
-};
-
-enum glock18_shield_e
-{
-	GLOCK18_SHIELD_IDLE1,
-	GLOCK18_SHIELD_SHOOT,
-	GLOCK18_SHIELD_SHOOT2,
-	GLOCK18_SHIELD_SHOOT_EMPTY,
-	GLOCK18_SHIELD_RELOAD,
-	GLOCK18_SHIELD_DRAW,
-	GLOCK18_SHIELD_IDLE,
-	GLOCK18_SHIELD_UP,
-	GLOCK18_SHIELD_DOWN
-};
 
 static const char *SOUNDS_NAME[] =
 {
@@ -66,9 +37,9 @@ static const char *SOUNDS_NAME[] =
 
 void EV_Fireglock18( event_args_t *args )
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+	Vector vecSrc, vecAiming;
 
 	int    idx = args->entindex;
 	Vector origin( args->origin );
@@ -92,7 +63,7 @@ void EV_Fireglock18( event_args_t *args )
 			if( g_bHoldingShield )
 				seq = GLOCK18_SHIELD_SHOOT;
 			else
-				seq = (g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE) != 0 || g_bGlockBurstMode? GLOCK18_SHOOT1: GLOCK18_SHOOT3;
+				seq = (g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE) != 0 || g_bGlockBurstMode? GLOCK18_SHOOT: GLOCK18_SHOOT3;
 		}
 		else
 		{
@@ -109,6 +80,24 @@ void EV_Fireglock18( event_args_t *args )
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, 14.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				Vector smoke_origin = ent->attachment[0];
+
+				smoke_origin = smoke_origin - forward * 3;
+
+				float scale = Com_RandomFloat( 0.15, 0.3 );
+
+				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 0,  scale, 7,7,7, false, velocity );
+				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 20, scale + 0.1, 10,10,10, false, velocity );
+				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 40, scale, 13,13,13, false, velocity );
+			}
 		}
 	}
 	else

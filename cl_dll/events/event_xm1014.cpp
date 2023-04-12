@@ -26,25 +26,16 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum xm1014_e
-{
-	XM1014_IDLE,
-	XM1014_FIRE1,
-	XM1014_FIRE2,
-	XM1014_RELOAD,
-	XM1014_PUMP,
-	XM1014_START_RELOAD,
-	XM1014_DRAW
-};
 
 static const char *SOUNDS_NAME = "weapons/xm1014-1.wav";
 
 void EV_FireXM1014(event_args_s *args)
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+	Vector vecSrc, vecAiming;
 	int    idx = args->entindex;
 	Vector origin( args->origin );
 	Vector angles(
@@ -69,6 +60,16 @@ void EV_FireXM1014(event_args_s *args)
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 22.0, -9.0, 11.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( SMOKE_BLACK, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else

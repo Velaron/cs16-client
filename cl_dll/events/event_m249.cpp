@@ -26,15 +26,8 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum m249_e
-{
-	M249_IDLE1,
-	M249_SHOOT1,
-	M249_SHOOT2,
-	M249_RELOAD,
-	M249_DRAW
-};
 
 static const char *SOUNDS_NAME[] =
 {
@@ -44,7 +37,7 @@ static const char *SOUNDS_NAME[] =
 void EV_FireM249(event_args_s *args)
 {
 	vec3_t ShellVelocity, ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector vecSrc, vecAiming;
 
 	int    idx = args->entindex;
 	Vector origin( args->origin );
@@ -69,6 +62,16 @@ void EV_FireM249(event_args_s *args)
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -10.0, 13.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( SMOKE_RIFLE, ent->attachment[0], forward, 3, 0.4, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else

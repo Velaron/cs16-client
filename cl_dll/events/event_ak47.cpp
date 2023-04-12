@@ -26,16 +26,7 @@
 *
 */
 #include "events.h"
-
-enum ak47_e
-{
-	AK47_IDLE1 = 0,
-	AK47_RELOAD,
-	AK47_DRAW,
-	AK47_SHOOT1,
-	AK47_SHOOT2,
-	AK47_SHOOT3
-};
+#include "wpn_shared.h"
 
 static const char *SOUNDS_NAME[] =
 {
@@ -46,7 +37,7 @@ static const char *SOUNDS_NAME[] =
 void EV_FireAK47( event_args_t *args )
 {
 	vec3_t ShellVelocity, ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector vecSrc, vecAiming;
 
 	int idx = args->entindex;
 	Vector origin( args->origin );

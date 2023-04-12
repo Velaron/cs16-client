@@ -39,6 +39,7 @@
 #include <assert.h>
 
 #include "pm_shared.h"
+#include "com_weapons.h"
 
 extern float g_flRoundTime;
 
@@ -432,53 +433,74 @@ void EV_HugWalls(TEMPENTITY *te, pmtrace_s *ptr)
 	te->entity.baseline.origin.z = v2.x * len * 1.5;
 }
 
-void EV_CS16Client_CreateSmoke(int type, Vector origin, Vector dir,
+struct
+{
+	int count;
+	const char *files[4];
+} g_SmokeSprites[] =
+{
+	{
+		4,
+		{
+			"sprites/wall_puff1.spr",
+			"sprites/wall_puff2.spr",
+			"sprites/wall_puff3.spr",
+			"sprites/wall_puff4.spr"
+		}
+	},
+	{
+		3,
+		{
+			"sprites/rifle_smoke1.spr",
+			"sprites/rifle_smoke2.spr",
+			"sprites/rifle_smoke3.spr"
+		}
+	},
+	{
+		2,
+		{
+			"sprites/pistol_smoke1.spr",
+			"sprites/pistol_smoke2.spr"
+		}
+	},
+	{
+		4,
+		{
+			"sprites/black_smoke1.spr",
+			"sprites/black_smoke2.spr",
+			"sprites/black_smoke3.spr",
+			"sprites/black_smoke4.spr"
+		}
+	}
+};
+
+void EV_CS16Client_CreateSmoke(unsigned int type, Vector origin, Vector dir,
 	int speed, float scale, int r, int g, int b , bool wind, Vector velocity, int framerate , int teflags )
 {
-	TEMPENTITY *te = NULL;
-	void ( *callback )( struct tempent_s *ent, float frametime, float currenttime ) = NULL;
-	char path[64];
+	TEMPENTITY *te;
+	const char *path;
 
-	switch( type )
+	assert( type <= SMOKE_BLACK );
+
+	if( type == SMOKE_WALLPUFF && gHUD.fastsprites->value )
 	{
-	case SMOKE_WALLPUFF:
-		strcpy( path, "sprites/wall_puff1.spr" );
-
-		path[17] += Com_RandomLong(0, 3); // randomize a bit
-		break;
-	case SMOKE_RIFLE:
-		strcpy( path, "sprites/rifle_smoke1.spr" );
-		path[19] += Com_RandomLong(0, 2); // randomize a bit
-
-
-		break;
-	case SMOKE_PISTOL:
-		strcpy( path, "sprites/pistol_smoke1.spr" );
-		path[20] += Com_RandomLong(0, 1);  // randomize a bit
-
-
-		break;
-	case SMOKE_BLACK:
-		strcpy( path, "sprites/black_smoke1.spr" );
-		path[19] += Com_RandomLong(0, 3); // randomize a bit
-
-
-		break;
-	default:
-		assert(("Unknown smoketype!"));
+		path = "sprites/fast_wallpuff1.spr";
+		framerate = 30;
 	}
-
-	if( wind )
-		callback = EV_WallPuff_Wind;
 	else
-		callback = EV_SmokeRise;
-
+	{
+		int rand = Com_RandomLong( 0, g_SmokeSprites[type].count - 1 );
+		path = g_SmokeSprites[type].files[rand];
+	}
 
 	te = gEngfuncs.pEfxAPI->R_DefaultSprite( origin, gEngfuncs.pEventAPI->EV_FindModelIndex( path ), framerate );
 
 	if( te )
 	{
-		te->callback = callback;
+		if( wind )
+			te->callback = EV_WallPuff_Wind;
+		else
+			te->callback = EV_SmokeRise;
 		te->hitcallback = EV_HugWalls;
 		te->flags |= teflags | FTENT_CLIENTCUSTOM;
 		te->entity.curstate.rendermode = kRenderTransAdd;
@@ -488,6 +510,11 @@ void EV_CS16Client_CreateSmoke(int type, Vector origin, Vector dir,
 		te->entity.curstate.renderamt = Com_RandomLong( 100, 180 );
 		te->entity.curstate.scale = scale;
 		te->entity.baseline.origin = speed * dir;
+
+		if( type != SMOKE_WALLPUFF && velocity.IsNull() )
+		{
+			velocity = g_vPlayerVelocity;
+		}
 
 		if( !velocity.IsNull() )
 		{
@@ -520,41 +547,12 @@ void EV_HLDM_DecalGunshot(pmtrace_t *pTrace, int iBulletType, float scale, int r
 			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			dir.y = dir.y * dir.y * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
 			dir.z = dir.z * dir.z * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
-			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, Com_RandomLong( 5, 10 ), dir.z, -75.0f, 75.0f );
+			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, Com_RandomLong( 5, 7 ), dir.z, -75.0f, 75.0f );
 		}
 
 		// create wallpuff
 		if( gHUD.cl_weapon_wallpuff && gHUD.cl_weapon_wallpuff->value && bCreateWallPuff )
 		{
-			/*TEMPENTITY *te = NULL;
-			if( gHUD.fastsprites && !gHUD.fastsprites->value )
-			{
-				char path[] = "sprites/wall_puff1.spr";
-
-				path[17] += Com_RandomLong(0, 3);
-				te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos,
-									gEngfuncs.pEventAPI->EV_FindModelIndex(path), 30.0f );
-			}
-			else
-			{
-				te = gEngfuncs.pEfxAPI->R_DefaultSprite( pTrace->endpos,
-									gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/fast_wallpuff1.spr"), 30.0f );
-			}
-
-			if( te )
-			{
-				te->callback = EV_WallPuff_Wind;
-				te->hitcallback = EV_HugWalls;
-				te->flags |= FTENT_COLLIDEALL | FTENT_CLIENTCUSTOM;
-				te->entity.curstate.rendermode = kRenderTransAdd;
-				te->entity.curstate.rendercolor.r = r;
-				te->entity.curstate.rendercolor.g = g;
-				te->entity.curstate.rendercolor.b = b;
-				te->entity.curstate.renderamt = Com_RandomLong( 100, 180 );
-				te->entity.curstate.scale = 0.5;
-				te->entity.baseline.origin = (25 + Com_RandomLong( 0, 4 ) ) * pTrace->plane.normal;
-			}*/
-
 			EV_CS16Client_CreateSmoke( SMOKE_WALLPUFF, pTrace->endpos, pTrace->plane.normal, 25, 0.5, r, g, b, true );
 		}
 	}
@@ -791,38 +789,45 @@ void EV_CS16Client_KillEveryRound( TEMPENTITY *te, float frametime, float curren
 void RemoveBody(TEMPENTITY *te, float frametime, float current_time)
 {
 	// go underground...
-	/*if ( current_time >= 2 * te->entity.curstate.fuser2 + 5.0 )
-		te->entity.origin.z -= 5.0 * frametime;*/
+	if( current_time >= te->entity.curstate.fuser2 )
+	{
+		// I think it's VERY scary when you playing and see parts of corpse
+		// on the ceiling(ceiling is thin)
+#if 0
+		te->flags = FTENT_NONE;
+		te->entity.origin.z -= 5.0 * frametime;
+#else
+		te->entity.curstate.rendermode = kRenderTransAlpha;
+		te->entity.curstate.renderamt -= ceil(frametime * 100);
+#endif
+	}
+	EV_CS16Client_KillEveryRound( te, frametime, current_time );
+
 }
 
 void HitBody(TEMPENTITY *ent, pmtrace_s *ptr)
 {
-	/*if ( ptr->plane.normal.z > 0.0 )
-		ent->flags |= FTENT_NONE;*/
+	/*if( ptr->plane.normal.z > 0.0 )
+		ent->flags = FTENT_NONE;*/
 }
 
 
-void CreateCorpse(Vector *p_vOrigin, Vector *p_vAngles, const char *pModel, float flAnimTime, int iSequence, int iBody)
+void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAnimTime, int iSequence, int iBody)
 {
 	int modelIdx = gEngfuncs.pEventAPI->EV_FindModelIndex(pModel);
-	vec3_t null(0, 0, 0);
-	TEMPENTITY *model = gEngfuncs.pEfxAPI->R_TempModel( (float*)p_vOrigin,
-														null,
-														(float*)p_vAngles,
-														gEngfuncs.pfnGetCvarFloat("cl_corpsestay"),
-														modelIdx,
-														0 );
+	Vector null(0, 0, 0);
+	TEMPENTITY *model = gEngfuncs.pEfxAPI->R_TempModel( vOrigin, null, vAngles,
+		gEngfuncs.pfnGetCvarFloat("cl_corpsestay"), modelIdx, 0 );
 
 	if(model)
 	{
-		//model->frameMax = -1;
+		model->flags = FTENT_COLLIDEWORLD;
 		model->entity.curstate.animtime = flAnimTime;
 		model->entity.curstate.framerate = 1.0;
 		model->entity.curstate.frame = 0;
 		model->entity.curstate.sequence = iSequence;
 		model->entity.curstate.body = iBody;
-		model->entity.curstate.fuser1 = gHUD.m_flTime + 1.0;
-		model->entity.curstate.fuser2 = gEngfuncs.pfnGetCvarFloat("cl_corpsestay") + gHUD.m_flTime;
+		model->entity.curstate.fuser2 = gHUD.m_flTime + gEngfuncs.pfnGetCvarFloat("cl_corpsestay");
 		model->hitcallback = HitBody;
 		model->callback = RemoveBody;
 	}

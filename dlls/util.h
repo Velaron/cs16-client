@@ -170,6 +170,7 @@ inline BOOL FClassnameIs(edict_t *pent, const char *szClassname) { return FStrEq
 inline BOOL FClassnameIs(entvars_t *pev, const char *szClassname) { return FStrEq(STRING(pev->classname), szClassname); }
 
 class CBaseEntity;
+class CBasePlayer;
 
 extern void UTIL_SetSize(entvars_t *pev, const Vector &vecMin, const Vector &vecMax);
 extern float UTIL_VecToYaw(const Vector &vec);
@@ -187,7 +188,7 @@ inline CBaseEntity *UTIL_FindEntityByClassname(CBaseEntity *, const char* ) { re
 #endif
 extern CBaseEntity *UTIL_FindEntityByTargetname(CBaseEntity *pStartEntity, const char *szName);
 extern CBaseEntity *UTIL_FindEntityGeneric(const char *szName, Vector &vecSrc, float flRadius);
-extern CBaseEntity *UTIL_PlayerByIndex(int playerIndex);
+extern CBasePlayer *UTIL_PlayerByIndex(int playerIndex);
 
 #define UTIL_EntitiesInPVS(pent) (*g_engfuncs.pfnEntitiesInPVS)(pent)
 

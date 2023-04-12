@@ -26,24 +26,8 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum m4a1_e
-{
-	M4A1_IDLE1 = 0,
-	M4A1_SHOOT1,
-	M4A1_SHOOT2,
-	M4A1_SHOOT3,
-	M4A1_RELOAD,
-	M4A1_DRAW,
-	M4A1_ADD_SILENCER,
-	M4A1_IDLE_UNSIL,
-	M4A1_SHOOT1_UNSIL,
-	M4A1_SHOOT2_UNSIL,
-	M4A1_SHOOT3_UNSIL,
-	M4A1_RELOAD_UNSIL,
-	M4A1_DRAW_UNSIL,
-	M4A1_DETACH_SILENCER
-};
 
 static const char *SOUNDS_NAME[] =
 {
@@ -52,11 +36,12 @@ static const char *SOUNDS_NAME[] =
 	"weapons/m4a1_unsil-2.wav"
 };
 
+// bparam1: 1 if silenced, 0 if unsilenced
 void EV_FireM4A1( event_args_t *args )
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+	Vector vecSrc, vecAiming;
 	int    sequence, idx = args->entindex;
 	Vector origin( args->origin );
 	Vector angles(
@@ -66,6 +51,7 @@ void EV_FireM4A1( event_args_t *args )
 		);
 	Vector velocity( args->velocity );
 	Vector forward, right, up;
+	int smokeType;
 
 	AngleVectors( angles, forward, right, up );
 
@@ -76,10 +62,12 @@ void EV_FireM4A1( event_args_t *args )
 		if( args->bparam1 )
 		{
 			sequence = Com_RandomLong( M4A1_SHOOT1, M4A1_SHOOT3 );
+			smokeType = SMOKE_BLACK;
 		}
 		else
 		{
-			sequence = Com_RandomLong( M4A1_SHOOT1_UNSIL, M4A1_SHOOT3_UNSIL );
+			sequence = Com_RandomLong( M4A1_UNSIL_SHOOT1, M4A1_UNSIL_SHOOT3 );
+			smokeType = SMOKE_RIFLE;
 		}
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(sequence, 2);
 		if( !gHUD.cl_righthand->value )
@@ -89,6 +77,16 @@ void EV_FireM4A1( event_args_t *args )
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, 10.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( smokeType, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else

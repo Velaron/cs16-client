@@ -26,22 +26,15 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum g3sg1_e
-{
-	G3SG1_IDLE,
-	G3SG1_SHOOT,
-	G3SG1_SHOOT2,
-	G3SG1_RELOAD,
-	G3SG1_DRAW
-};
 
 static const char *SOUNDS_NAME = "weapons/g3sg1-1.wav";
 
 void EV_FireG3SG1(event_args_s *args)
 {
 	vec3_t ShellVelocity, ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector vecSrc, vecAiming;
 
 	int idx = args->entindex;
 	Vector origin( args->origin );
@@ -66,6 +59,16 @@ void EV_FireG3SG1(event_args_s *args)
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 17.0, -8.0, 10.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( SMOKE_RIFLE, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else

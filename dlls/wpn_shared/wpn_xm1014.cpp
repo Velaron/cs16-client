@@ -18,31 +18,22 @@
 #include "player.h"
 #include "weapons.h"
 
-enum xm1014_e
-{
-	XM1014_IDLE,
-	XM1014_FIRE1,
-	XM1014_FIRE2,
-	XM1014_RELOAD,
-	XM1014_PUMP,
-	XM1014_START_RELOAD,
-	XM1014_DRAW
-};
-
 LINK_ENTITY_TO_CLASS(weapon_xm1014, CXM1014)
 
 void CXM1014::Spawn(void)
 {
 	Precache();
+
 	m_iId = WEAPON_XM1014;
-	SET_MODEL(ENT(pev), "models/w_xm1014.mdl");
+	SET_MODEL(edict(), "models/w_xm1014.mdl");
 
 	m_iDefaultAmmo = XM1014_DEFAULT_GIVE;
 
+	// get ready to fall
 	FallInit();
 }
 
-void CXM1014::Precache(void)
+void CXM1014::Precache()
 {
 	PRECACHE_MODEL("models/v_xm1014.mdl");
 	PRECACHE_MODEL("models/w_xm1014.mdl");
@@ -60,7 +51,7 @@ int CXM1014::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "buckshot";
-	p->iMaxAmmo1 = BUCKSHOT_MAX_CARRY;
+	p->iMaxAmmo1 = MAX_AMMO_BUCKSHOT;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = XM1014_MAX_CLIP;
@@ -73,17 +64,21 @@ int CXM1014::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-BOOL CXM1014::Deploy(void)
+BOOL CXM1014::Deploy()
 {
 	return DefaultDeploy("models/v_xm1014.mdl", "models/p_xm1014.mdl", XM1014_DRAW, "m249", UseDecrement() != FALSE);
 }
 
-void CXM1014::PrimaryAttack(void)
+void CXM1014::PrimaryAttack()
 {
+	Vector vecAiming, vecSrc, vecDir;
+	int flag;
+
+	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15;
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
 		return;
 	}
 
@@ -91,52 +86,67 @@ void CXM1014::PrimaryAttack(void)
 	{
 		Reload();
 
-		if (m_iClip == 0)
+		if (!m_iClip)
+		{
 			PlayEmptySound();
+		}
 
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.0;
+#ifndef CLIENT_DLL
+		if (TheBots != NULL)
+		{
+			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
+		}
+#endif
+
+		m_flNextPrimaryAttack = GetNextAttackDelay(1);
 		return;
 	}
 
 	m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
-
 	m_iClip--;
+
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+	// player "shoot" animation
 #ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 #endif
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+	vecSrc = m_pPlayer->GetGunPosition();
+	vecAiming = gpGlobals->v_forward;
+
 #ifndef CLIENT_DLL
-	m_pPlayer->FireBullets(6, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, Vector(0.0725, 0.0725, 0.0), 3048, BULLET_PLAYER_BUCKSHOT, 0);
+	m_pPlayer->FireBullets(6, vecSrc, vecAiming, XM1014_CONE_VECTOR, 3048, BULLET_PLAYER_BUCKSHOT, 0);
 #endif
-	int flags;
+
 #ifdef CLIENT_WEAPONS
-	flags = FEV_NOTHOST;
+	flag = FEV_NOTHOST;
 #else
-	flags = 0;
+	flag = 0;
 #endif
 
-	PLAYBACK_EVENT_FULL(flags, ENT(m_pPlayer->pev), m_usFireXM1014, 0, (float *)&g_vecZero, (float *)&g_vecZero, m_vVecAiming.x, m_vVecAiming.y, 7, m_vVecAiming.x * 100, m_iClip != 0, FALSE);
-
-	if (m_iClip)
-		m_flPumpTime = UTIL_WeaponTimeBase() + 0.125;
+	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireXM1014, 0, (float *)&g_vecZero, (float *)&g_vecZero, m_vVecAiming.x, m_vVecAiming.y, 7,
+		int(m_vVecAiming.x * 100), m_iClip == 0, FALSE);
 
 #ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	{
+		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+	}
 #endif
-	if (m_iClip)
-		m_flPumpTime = UTIL_WeaponTimeBase() + 0.125;
+	if (m_iClip != 0)
+		m_flPumpTime = UTIL_WeaponTimeBase() + 0.125f;
 
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.25;
+	m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.25f;
 
-	if (m_iClip)
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.25;
+	if (m_iClip != 0)
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.25f;
 	else
-		m_flTimeWeaponIdle = 0.75;
+		m_flTimeWeaponIdle = 0.75f;
 
 	m_fInSpecialReload = 0;
 
@@ -146,15 +156,17 @@ void CXM1014::PrimaryAttack(void)
 		m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + 1, 7, 10);
 }
 
-void CXM1014::Reload(void)
+void CXM1014::Reload()
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == XM1014_MAX_CLIP)
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == iMaxClip())
 		return;
 
+	// don't reload until recoil is done
 	if (m_flNextPrimaryAttack > UTIL_WeaponTimeBase())
 		return;
 
-	if (!m_fInSpecialReload)
+	// check to see if we're ready to reload
+	if (m_fInSpecialReload == 0)
 	{
 #ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
@@ -162,44 +174,51 @@ void CXM1014::Reload(void)
 		SendWeaponAnim(XM1014_START_RELOAD, UseDecrement() != FALSE);
 
 		m_fInSpecialReload = 1;
-		m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.55;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.55;
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.55;
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.55;
+		m_flNextSecondaryAttack = m_flTimeWeaponIdle = m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.55f;
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.55);
 	}
 	else if (m_fInSpecialReload == 1)
 	{
 		if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 			return;
 
+		// was waiting for gun to move to side
 		m_fInSpecialReload = 2;
 
 		if (RANDOM_LONG(0, 1))
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/reload1.wav", VOL_NORM, ATTN_NORM, 0, 85 + RANDOM_LONG(0, 31));
+			EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_ITEM, "weapons/reload1.wav", VOL_NORM, ATTN_NORM, 0, 85 + RANDOM_LONG(0, 31));
 		else
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/reload3.wav", VOL_NORM, ATTN_NORM, 0, 85 + RANDOM_LONG(0, 31));
+			EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_ITEM, "weapons/reload3.wav", VOL_NORM, ATTN_NORM, 0, 85 + RANDOM_LONG(0, 31));
 
 		SendWeaponAnim(XM1014_RELOAD, UseDecrement());
 
-		m_flNextReload = UTIL_WeaponTimeBase() + 0.3;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.3;
+		m_flTimeWeaponIdle = m_flNextReload = UTIL_WeaponTimeBase() + 0.3f;
 	}
 	else
 	{
-		m_iClip++;
-		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+		++m_iClip;
+
+#ifdef REGAMEDLL_ADD
+		if (refill_bpammo_weapons.value < 3.0f)
+#endif
+		{
+			--m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType];
+			--m_pPlayer->ammo_buckshot;
+		}
+
 		m_fInSpecialReload = 1;
-		m_pPlayer->ammo_buckshot--;
 	}
 }
 
-void CXM1014::WeaponIdle(void)
+void CXM1014::WeaponIdle()
 {
 	ResetEmptySound();
 	m_pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
 
 	if (m_flPumpTime && m_flPumpTime < UTIL_WeaponTimeBase())
+	{
 		m_flPumpTime = 0;
+	}
 
 	if (m_flTimeWeaponIdle < UTIL_WeaponTimeBase())
 	{
@@ -209,19 +228,22 @@ void CXM1014::WeaponIdle(void)
 		}
 		else if (m_fInSpecialReload != 0)
 		{
-			if (m_iClip != XM1014_MAX_CLIP && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+			if (m_iClip != iMaxClip() && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
 			{
 				Reload();
 			}
 			else
 			{
+				// reload debounce has timed out
 				SendWeaponAnim(XM1014_PUMP, UseDecrement() != FALSE);
 
 				m_fInSpecialReload = 0;
-				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5;
+				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5f;
 			}
 		}
 		else
+		{
 			SendWeaponAnim(XM1014_IDLE, UseDecrement() != FALSE);
+		}
 	}
 }

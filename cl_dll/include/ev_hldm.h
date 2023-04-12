@@ -48,5 +48,5 @@ void EV_HLDM_FireBullets(int idx,
 						 float *vecSrc, float *vecDirShooting, float *vecSpread,
 						 float flDistance, int iBulletType, int iPenetration);
 void EV_CS16Client_KillEveryRound( struct tempent_s *te, float frametime, float currenttime );
-void EV_CS16Client_CreateSmoke(int type, Vector origin, Vector dir, int speed, float scale, int r, int g, int b , bool wind, Vector velocity = Vector(0, 0, 0), int framerate = 35, int teflags = FTENT_COLLIDEALL );
+void EV_CS16Client_CreateSmoke(unsigned int type, Vector origin, Vector dir, int speed, float scale, int r, int g, int b , bool wind, Vector velocity = Vector(0, 0, 0), int framerate = 35, int teflags = FTENT_COLLIDEALL );
 #endif // EV_HLDMH

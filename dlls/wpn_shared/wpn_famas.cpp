@@ -18,16 +18,6 @@
 #include "player.h"
 #include "weapons.h"
 
-enum famas_e
-{
-	FAMAS_IDLE1,
-	FAMAS_RELOAD,
-	FAMAS_DRAW,
-	FAMAS_SHOOT1,
-	FAMAS_SHOOT2,
-	FAMAS_SHOOT3
-};
-
 LINK_ENTITY_TO_CLASS(weapon_famas, CFamas)
 
 void CFamas::Spawn(void)
@@ -35,6 +25,7 @@ void CFamas::Spawn(void)
 	pev->classname = MAKE_STRING("weapon_famas");
 
 	Precache();
+
 	m_iId = WEAPON_FAMAS;
 	SET_MODEL(ENT(pev), "models/w_famas.mdl");
 
@@ -67,7 +58,7 @@ int CFamas::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "556Nato";
-	p->iMaxAmmo1 = _556NATO_MAX_CARRY;
+	p->iMaxAmmo1 = MAX_AMMO_556NATO;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = FAMAS_MAX_CLIP;
@@ -85,7 +76,8 @@ BOOL CFamas::Deploy(void)
 	m_iShotsFired = 0;
 	m_iFamasShotsFired = 0;
 	m_flFamasShoot = 0;
-	m_flAccuracy = 0.2;
+	m_flAccuracy = 0.2f;
+
 	iShellOn = 1;
 
 	return DefaultDeploy("models/v_famas.mdl", "models/p_famas.mdl", FAMAS_DRAW, "carbine", UseDecrement() != FALSE);
@@ -104,7 +96,7 @@ void CFamas::SecondaryAttack(void)
 		m_iWeaponState |= WPNSTATE_FAMAS_BURST_MODE;
 	}
 
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
 }
 
 void CFamas::PrimaryAttack(void)
@@ -112,91 +104,126 @@ void CFamas::PrimaryAttack(void)
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15;
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
 		return;
 	}
 
-	BOOL bBurstMode = FBitSet(m_iWeaponState, WPNSTATE_FAMAS_BURST_MODE) ? TRUE : FALSE;
+	bool bFireBurst = (m_iWeaponState & WPNSTATE_FAMAS_BURST_MODE) == WPNSTATE_FAMAS_BURST_MODE;
 
-	if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
-		FamasFire(0.030 + (0.3) * m_flAccuracy, 0.0825, FALSE, bBurstMode);
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
+		FamasFire(0.030 + 0.3 * m_flAccuracy, 0.0825, FALSE, bFireBurst);
+	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 140)
-		FamasFire(0.030 + (0.07) * m_flAccuracy, 0.0825, FALSE, bBurstMode);
+	{
+		FamasFire(0.030 + 0.07 * m_flAccuracy, 0.0825, FALSE, bFireBurst);
+	}
 	else
-		FamasFire((0.02) * m_flAccuracy, 0.0825, FALSE, bBurstMode);
+	{
+		FamasFire(0.02 * m_flAccuracy, 0.0825, FALSE, bFireBurst);
+	}
 }
 
 void CFamas::FamasFire(float flSpread, float flCycleTime, BOOL fUseAutoAim, BOOL bFireBurst)
 {
-	if (bFireBurst != FALSE)
+	Vector vecAiming, vecSrc, vecDir;
+	int flag;
+
+	if (bFireBurst)
 	{
 		m_iFamasShotsFired = 0;
-		flCycleTime = 0.55;
+		flCycleTime = 0.55f;
 	}
 	else
-		flSpread += 0.01;
+	{
+		flSpread += 0.01f;
+	}
 
 	m_bDelayFire = true;
-	m_iShotsFired++;
-	m_flAccuracy = ((float)(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 215.0) + 0.3;
+	++m_iShotsFired;
 
-	if (m_flAccuracy > 1)
-		m_flAccuracy = 1;
+	m_flAccuracy = (m_iShotsFired * m_iShotsFired * m_iShotsFired / 215) + 0.3f;
+
+	if (m_flAccuracy > 1.0f)
+		m_flAccuracy = 1.0f;
 
 	if (m_iClip <= 0)
 	{
 		if (m_fFireOnEmpty)
 		{
 			PlayEmptySound();
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2;
+			m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
 		}
+
+#ifndef CLIENT_DLL
+		if (TheBots != NULL)
+		{
+			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
+		}
+#endif
 
 		return;
 	}
 
-	m_iClip--;
+	--m_iClip;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 #ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 #endif
-	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, gpGlobals->v_forward, flSpread, 8192, 2, BULLET_PLAYER_556MM, bFireBurst ? 34 : 30, 0.96, m_pPlayer->pev, FALSE, m_pPlayer->random_seed);
+	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
+	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
-	int flags;
+	vecSrc = m_pPlayer->GetGunPosition();
+	vecAiming = gpGlobals->v_forward;
+
+	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 8192, 2, BULLET_PLAYER_556MM,
+		bFireBurst ? FAMAS_DAMAGE_BURST : FAMAS_DAMAGE, FAMAS_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+
 #ifdef CLIENT_WEAPONS
-	flags = FEV_NOTHOST;
+	flag = FEV_NOTHOST;
 #else
-	flags = 0;
+	flag = 0;
 #endif
 
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireFamas, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 10000000), (int)(m_pPlayer->pev->punchangle.y * 10000000), m_iClip != 0, FALSE);
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
+	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireFamas, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
+		int(m_pPlayer->pev->punchangle.x * 10000000), int(m_pPlayer->pev->punchangle.y * 10000000), FALSE, FALSE);
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
 
 #ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	{
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+	}
 #endif
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.1;
+
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.1f;
 
 	if (m_pPlayer->pev->velocity.Length2D() > 0)
-		KickBack(1, 0.45, 0.275, 0.05, 4, 2.5, 7);
-	else if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
-		KickBack(1.25, 0.45, 0.22, 0.18, 5.5, 4, 5);
-	else if (FBitSet(m_pPlayer->pev->flags, FL_DUCKING))
-		KickBack(0.575, 0.325, 0.2, 0.011, 3.25, 2, 8);
-	else
-		KickBack(0.625, 0.375, 0.25, 0.0125, 3.5, 2.25, 8);
-
-	if (bFireBurst != FALSE)
 	{
+		KickBack(1.0, 0.45, 0.275, 0.05, 4.0, 2.5, 7);
+	}
+	else if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
+		KickBack(1.25, 0.45, 0.22, 0.18, 5.5, 4.0, 5);
+	}
+	else if (m_pPlayer->pev->flags & FL_DUCKING)
+	{
+		KickBack(0.575, 0.325, 0.2, 0.011, 3.25, 2.0, 8);
+	}
+	else
+	{
+		KickBack(0.625, 0.375, 0.25, 0.0125, 3.5, 2.25, 8);
+	}
+
+	if (bFireBurst)
+	{
+		++m_iFamasShotsFired;
 		m_fBurstSpread = flSpread;
-		m_iFamasShotsFired++;
-		m_flFamasShoot = gpGlobals->time + 0.05;
+		m_flFamasShoot = gpGlobals->time + 0.05f;
 	}
 }
 
@@ -205,13 +232,15 @@ void CFamas::Reload(void)
 	if (m_pPlayer->ammo_556nato <= 0)
 		return;
 
-	if (DefaultReload(FAMAS_MAX_CLIP, FAMAS_RELOAD, 3.3))
+	if (DefaultReload(iMaxClip(), FAMAS_RELOAD, FAMAS_RELOAD_TIME))
 	{
 #ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 #endif
-		if (m_pPlayer->m_iFOV != 90)
+		if (m_pPlayer->m_iFOV != DEFAULT_FOV)
+		{
 			SecondaryAttack();
+		}
 
 		m_flAccuracy = 0;
 		m_iShotsFired = 0;
@@ -224,9 +253,9 @@ void CFamas::WeaponIdle(void)
 	ResetEmptySound();
 	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
-		return;
-
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
-	SendWeaponAnim(FAMAS_IDLE1, UseDecrement() != FALSE);
+	if (m_flTimeWeaponIdle <= UTIL_WeaponTimeBase())
+	{
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+		SendWeaponAnim(FAMAS_IDLE1, UseDecrement() != FALSE);
+	}
 }

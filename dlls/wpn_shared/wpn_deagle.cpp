@@ -18,16 +18,6 @@
 #include "player.h"
 #include "weapons.h"
 
-enum deagle_e
-{
-	DEAGLE_IDLE1,
-	DEAGLE_SHOOT1,
-	DEAGLE_SHOOT2,
-	DEAGLE_SHOOT_EMPTY,
-	DEAGLE_RELOAD,
-	DEAGLE_DRAW
-};
-
 LINK_ENTITY_TO_CLASS(weapon_deagle, CDEAGLE)
 
 void CDEAGLE::Spawn(void)
@@ -35,13 +25,14 @@ void CDEAGLE::Spawn(void)
 	pev->classname = MAKE_STRING("weapon_deagle");
 
 	Precache();
+
 	m_iId = WEAPON_DEAGLE;
-	SET_MODEL(ENT(pev), "models/w_deagle.mdl");
+	SET_MODEL(edict(), "models/w_deagle.mdl");
 
 	m_iDefaultAmmo = DEAGLE_DEFAULT_GIVE;
-	m_flAccuracy = 0.9;
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
-	m_fMaxSpeed = 250;
+	m_fMaxSpeed = DEAGLE_MAX_SPEED;
+	m_flAccuracy = 0.9f;
 
 	FallInit();
 }
@@ -66,7 +57,7 @@ int CDEAGLE::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "50AE";
-	p->iMaxAmmo1 = _50AE_MAX_CARRY;
+	p->iMaxAmmo1 = MAX_AMMO_50AE;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = DEAGLE_MAX_CLIP;
@@ -81,12 +72,12 @@ int CDEAGLE::GetItemInfo(ItemInfo *p)
 
 BOOL CDEAGLE::Deploy(void)
 {
-	m_flAccuracy = 0.9;
+	m_flAccuracy = 0.9f;
+	m_fMaxSpeed = DEAGLE_MAX_SPEED;
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
 	m_pPlayer->m_bShieldDrawn = false;
-	m_fMaxSpeed = 250;
 
-	if (m_pPlayer->HasShield() != false)
+	if (m_pPlayer->HasShield())
 		return DefaultDeploy("models/shield/v_shield_deagle.mdl", "models/shield/p_shield_deagle.mdl", DEAGLE_DRAW, "shieldgun", UseDecrement() != FALSE);
 	else
 		return DefaultDeploy("models/v_deagle.mdl", "models/p_deagle.mdl", DEAGLE_DRAW, "onehanded", UseDecrement() != FALSE);
@@ -94,14 +85,22 @@ BOOL CDEAGLE::Deploy(void)
 
 void CDEAGLE::PrimaryAttack(void)
 {
-	if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
-		DEAGLEFire((1.5) * (1 - m_flAccuracy), 0.3, FALSE);
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
+		DEAGLEFire(1.5 * (1 - m_flAccuracy), 0.3, FALSE);
+	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 0)
-		DEAGLEFire((0.25) * (1 - m_flAccuracy), 0.3, FALSE);
-	else if (FBitSet(m_pPlayer->pev->flags, FL_DUCKING))
-		DEAGLEFire((0.115) * (1 - m_flAccuracy), 0.3, FALSE);
+	{
+		DEAGLEFire(0.25 * (1 - m_flAccuracy), 0.3, FALSE);
+	}
+	else if (m_pPlayer->pev->flags & FL_DUCKING)
+	{
+		DEAGLEFire(0.115 * (1 - m_flAccuracy), 0.3, FALSE);
+	}
 	else
-		DEAGLEFire((0.13) * (1 - m_flAccuracy), 0.3, FALSE);
+	{
+		DEAGLEFire(0.13 * (1 - m_flAccuracy), 0.3, FALSE);
+	}
 }
 
 void CDEAGLE::SecondaryAttack(void)
@@ -111,20 +110,28 @@ void CDEAGLE::SecondaryAttack(void)
 
 void CDEAGLE::DEAGLEFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 {
-	flCycleTime -= 0.075;
-	m_iShotsFired++;
+	Vector vecAiming, vecSrc, vecDir;
+	int flag;
 
-	if (m_iShotsFired > 1)
-		return;
+	flCycleTime -= 0.075f;
 
-	if (m_flLastFire)
+	if (++m_iShotsFired > 1)
 	{
-		m_flAccuracy -= (0.4 - (gpGlobals->time - m_flLastFire)) * 0.35;
+		return;
+	}
 
-		if (m_flAccuracy > 0.9)
-			m_flAccuracy = 0.9;
-		else if (m_flAccuracy < 0.55)
-			m_flAccuracy = 0.55;
+	if (m_flLastFire != 0.0)
+	{
+		m_flAccuracy -= (0.4f - (gpGlobals->time - m_flLastFire)) * 0.35f;
+
+		if (m_flAccuracy > 0.9f)
+		{
+			m_flAccuracy = 0.9f;
+		}
+		else if (m_flAccuracy < 0.55f)
+		{
+			m_flAccuracy = 0.55f;
+		}
 	}
 
 	m_flLastFire = gpGlobals->time;
@@ -134,42 +141,55 @@ void CDEAGLE::DEAGLEFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 		if (m_fFireOnEmpty)
 		{
 			PlayEmptySound();
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2;
+			m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
 		}
+
+#ifndef CLIENT_DLL
+		if (TheBots != NULL)
+		{
+			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
+		}
+#endif
 
 		return;
 	}
 
-	m_iClip--;
+	--m_iClip;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	SetPlayerShieldAnim();
+
 #ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 #endif
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
-	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
+	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, gpGlobals->v_forward, flSpread, 4096, 2, BULLET_PLAYER_50AE, 54, 0.81, m_pPlayer->pev, TRUE, m_pPlayer->random_seed);
+	vecSrc = m_pPlayer->GetGunPosition();
+	vecAiming = gpGlobals->v_forward;
 
-	int flags;
+	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 4096, 2, BULLET_PLAYER_50AE, DEAGLE_DAMAGE, DEAGLE_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+
 #ifdef CLIENT_WEAPONS
-	flags = FEV_NOTHOST;
+	flag = FEV_NOTHOST;
 #else
-	flags = 0;
+	flag = 0;
 #endif
 
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireDeagle, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), m_iClip != 0, FALSE);
+	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireDeagle, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
+		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_iClip == 0, FALSE);
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
 
 #ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+	{
+		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, FALSE);
+	}
 #endif
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.8;
+
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.8f;
 	m_pPlayer->pev->punchangle.x -= 2;
 	ResetPlayerShieldAnim();
 }
@@ -179,12 +199,12 @@ void CDEAGLE::Reload(void)
 	if (m_pPlayer->ammo_50ae <= 0)
 		return;
 
-	if (DefaultReload(DEAGLE_MAX_CLIP, DEAGLE_RELOAD, 2.2))
+	if (DefaultReload(iMaxClip(), DEAGLE_RELOAD, DEAGLE_RELOAD_TIME))
 	{
 #ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 #endif
-		m_flAccuracy = 0.9;
+		m_flAccuracy = 0.9f;
 	}
 }
 
@@ -193,11 +213,13 @@ void CDEAGLE::WeaponIdle(void)
 	ResetEmptySound();
 	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
-		return;
+	if (m_flTimeWeaponIdle <= UTIL_WeaponTimeBase())
+	{
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
-
-	if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-		SendWeaponAnim(SHIELDGUN_DRAWN_IDLE, UseDecrement() != FALSE);
+		if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
+		{
+			SendWeaponAnim(SHIELDGUN_DRAWN_IDLE, UseDecrement() != FALSE);
+		}
+	}
 }

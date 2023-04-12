@@ -680,6 +680,12 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 	}
 }
 
+float CBasePlayerWeapon::GetNextAttackDelay(float delay)
+{
+	float flNextAttack = UTIL_WeaponTimeBase() + delay;
+	return flNextAttack;
+}
+
 /*
 =====================
 CBasePlayer::SelectLastItem
@@ -816,7 +822,7 @@ char UTIL_TextureHit(TraceResult *ptr, Vector vecSrc, Vector vecEnd)
 	return chTextureType;
 }
 
-CBaseEntity *UTIL_PlayerByIndex(int playerIndex)
+CBasePlayer *UTIL_PlayerByIndex(int playerIndex)
 {
 #if 0
 	CBaseEntity *pPlayer = NULL;
@@ -833,6 +839,12 @@ CBaseEntity *UTIL_PlayerByIndex(int playerIndex)
 #else
 	return &player;
 #endif
+}
+
+void Broadcast( const char *msg, int pitch ); // hud/radio
+void CBasePlayer::Radio(const char *msg_id, const char *msg_verbose, int pitch, bool showIcon)
+{
+	Broadcast( msg_id, pitch );
 }
 
 void UTIL_MakeVectors( const Vector &vec )

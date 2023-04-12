@@ -18,16 +18,6 @@
 #include "player.h"
 #include "weapons.h"
 
-enum ak47_e
-{
-	AK47_IDLE1,
-	AK47_RELOAD,
-	AK47_DRAW,
-	AK47_SHOOT1,
-	AK47_SHOOT2,
-	AK47_SHOOT3
-};
-
 LINK_ENTITY_TO_CLASS(weapon_ak47, CAK47)
 
 void CAK47::Spawn(void)
@@ -35,11 +25,12 @@ void CAK47::Spawn(void)
 	pev->classname = MAKE_STRING("weapon_ak47");
 
 	Precache();
+
 	m_iId = WEAPON_AK47;
-	SET_MODEL(ENT(pev), "models/w_ak47.mdl");
+	SET_MODEL(edict(), "models/w_ak47.mdl");
 
 	m_iDefaultAmmo = AK47_DEFAULT_GIVE;
-	m_flAccuracy = 0.2;
+	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 
 	FallInit();
@@ -64,7 +55,7 @@ int CAK47::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "762Nato";
-	p->iMaxAmmo1 = _762NATO_MAX_CARRY;
+	p->iMaxAmmo1 = MAX_AMMO_762NATO;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = AK47_MAX_CLIP;
@@ -79,7 +70,7 @@ int CAK47::GetItemInfo(ItemInfo *p)
 
 BOOL CAK47::Deploy(void)
 {
-	m_flAccuracy = 0.2;
+	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 	iShellOn = 1;
 
@@ -88,70 +79,104 @@ BOOL CAK47::Deploy(void)
 
 void CAK47::PrimaryAttack(void)
 {
-	if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
-		AK47Fire(0.04 + (0.4) * m_flAccuracy, 0.0955, FALSE);
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
+		AK47Fire(0.04 + (0.4 * m_flAccuracy), 0.0955, FALSE);
+	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 140)
-		AK47Fire(0.04 + (0.07) * m_flAccuracy, 0.0955, FALSE);
+	{
+		AK47Fire(0.04 + (0.07 * m_flAccuracy), 0.0955, FALSE);
+	}
 	else
-		AK47Fire((0.0275), 0.0955, FALSE);
+	{
+		AK47Fire(0.0275 * m_flAccuracy, 0.0955, FALSE);
+	}
 }
 
 void CAK47::AK47Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 {
-	m_bDelayFire = true;
-	m_iShotsFired++;
-	m_flAccuracy = ((float)(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200.0) + 0.35;
+	Vector vecAiming, vecSrc, vecDir;
+	int flag;
 
-	if (m_flAccuracy > 1.25)
-		m_flAccuracy = 1.25;
+	m_bDelayFire = true;
+	++m_iShotsFired;
+
+	m_flAccuracy = ((m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200) + 0.35f;
+
+	if (m_flAccuracy > 1.25f)
+		m_flAccuracy = 1.25f;
 
 	if (m_iClip <= 0)
 	{
 		if (m_fFireOnEmpty)
 		{
 			PlayEmptySound();
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2;
+			m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
 		}
+
+#ifndef CLIENT_DLL
+		if (TheBots != NULL)
+		{
+			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
+		}
+#endif
 
 		return;
 	}
 
-	m_iClip--;
+	--m_iClip;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 #ifndef CLIENT_DLL
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 #endif
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, gpGlobals->v_forward, flSpread, 8192, 2, BULLET_PLAYER_762MM, 36, 0.98, m_pPlayer->pev, FALSE, m_pPlayer->random_seed);
 
-	int flags;
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+	vecSrc = m_pPlayer->GetGunPosition();
+	vecAiming = gpGlobals->v_forward;
+
+	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 8192, 2, BULLET_PLAYER_762MM,
+		AK47_DAMAGE, AK47_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+
 #ifdef CLIENT_WEAPONS
-	flags = FEV_NOTHOST;
+	flag = FEV_NOTHOST;
 #else
-	flags = 0;
+	flag = 0;
 #endif
 
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFireAK47, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), (int)(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
+	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireAK47, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
+		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
 
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
 
 #ifndef CLIENT_DLL
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	{
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+	}
 #endif
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.9;
+
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.9f;
 
 	if (m_pPlayer->pev->velocity.Length2D() > 0)
+	{
 		KickBack(1.5, 0.45, 0.225, 0.05, 6.5, 2.5, 7);
-	else if (!FBitSet(m_pPlayer->pev->flags, FL_ONGROUND))
+	}
+	else if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
 		KickBack(2.0, 1.0, 0.5, 0.35, 9.0, 6.0, 5);
-	else if (FBitSet(m_pPlayer->pev->flags, FL_DUCKING))
+	}
+	else if (m_pPlayer->pev->flags & FL_DUCKING)
+	{
 		KickBack(0.9, 0.35, 0.15, 0.025, 5.5, 1.5, 9);
+	}
 	else
+	{
 		KickBack(1.0, 0.375, 0.175, 0.0375, 5.75, 1.75, 8);
+	}
 }
 
 void CAK47::Reload(void)
@@ -159,12 +184,12 @@ void CAK47::Reload(void)
 	if (m_pPlayer->ammo_762nato <= 0)
 		return;
 
-	if (DefaultReload(AK47_MAX_CLIP, AK47_RELOAD, 2.45))
+	if (DefaultReload(iMaxClip(), AK47_RELOAD, AK47_RELOAD_TIME))
 	{
 #ifndef CLIENT_DLL
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 #endif
-		m_flAccuracy = 0.2;
+		m_flAccuracy = 0.2f;
 		m_iShotsFired = 0;
 		m_bDelayFire = false;
 	}
@@ -175,9 +200,9 @@ void CAK47::WeaponIdle(void)
 	ResetEmptySound();
 	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
-		return;
-
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20;
-	SendWeaponAnim(AK47_IDLE1, UseDecrement() != FALSE);
+	if (m_flTimeWeaponIdle <= UTIL_WeaponTimeBase())
+	{
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+		SendWeaponAnim(AK47_IDLE1, UseDecrement() != FALSE);
+	}
 }

@@ -26,16 +26,8 @@
 *
 */
 #include "events.h"
+#include "wpn_shared.h"
 
-enum famas_e
-{
-	FAMAS_IDLE = 0,
-	FAMAS_RELOAD,
-	FAMAS_DRAW,
-	FAMAS_SHOOT1,
-	FAMAS_SHOOT2,
-	FAMAS_SHOOT3
-};
 
 static const char *SOUNDS_NAME[] =
 {
@@ -44,9 +36,9 @@ static const char *SOUNDS_NAME[] =
 
 void EV_FireFAMAS( event_args_t *args )
 {
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	vec3_t vecSrc, vecAiming;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+	Vector vecSrc, vecAiming;
 
 	int idx = args->entindex;
 	Vector origin( args->origin );
@@ -72,6 +64,16 @@ void EV_FireFAMAS( event_args_t *args )
 		else
 		{
 			EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 17.0, -8.0, 14.0, 0);
+		}
+
+		if( gHUD.cl_gunsmoke->value )
+		{
+			cl_entity_t *ent = gEngfuncs.GetViewModel();
+
+			if( ent )
+			{
+				EV_CS16Client_CreateSmoke( SMOKE_RIFLE, ent->attachment[0], forward, 3, 0.3, 20, 20, 20, false, velocity );
+			}
 		}
 	}
 	else
