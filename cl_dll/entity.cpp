@@ -19,6 +19,11 @@
 #include "studio_event.h" // def. of mstudioevent_t
 #include "r_efx.h"
 #include "event_api.h"
+#include "com_model.h"
+#include "view.h"
+#include "eventscripts.h"
+#include "com_weapons.h"
+#include "ev_hldm.h"
 
 extern vec3_t v_origin;
 
@@ -225,6 +230,103 @@ void DLLEXPORT HUD_CreateEntities( void )
 }
 
 /*
+==============
+CL_MuzzleFlash
+
+Do muzzleflash
+==============
+*/
+#define MAX_MUZZLEFLASH 4
+void CL_MuzzleFlash( const cl_entity_t *entity, vec3_t pos, int type )
+{
+	const char *muzzleflash;
+
+	TEMPENTITY	*pTemp;
+	int		index, frameCount;
+	float		scale;
+
+	extern int g_weaponselect_frames;
+	if( g_weaponselect_frames )
+		return;
+
+	index = bound( 0, type % 5, MAX_MUZZLEFLASH - 1 );
+	scale = (type / 10) * 0.1f;
+	if( scale == 0.0f ) scale = 0.5f;
+
+	switch( index )
+	{
+	case 0:
+		muzzleflash = "sprites/muzzleflash1.spr";
+		break;
+	case 1:
+		muzzleflash = "sprites/muzzleflash2.spr";
+		break;
+	case 2:
+		muzzleflash = "sprites/muzzleflash3.spr";
+		break;
+	case 3:
+		muzzleflash = "sprites/muzzleflash.spr";
+		break;
+	}
+
+	model_t *model = gEngfuncs.CL_LoadModel( muzzleflash, 0 );
+	if( !model ) return;
+
+	frameCount = model->numframes;
+
+	// must set position for right culling on render
+	pTemp = gEngfuncs.pEfxAPI->CL_TempEntAllocHigh( pos, model );
+	if( !pTemp ) return;
+	pTemp->entity.curstate.rendermode = kRenderTransAdd;
+	pTemp->entity.curstate.renderamt = 255;
+	pTemp->entity.curstate.framerate = 10;
+	pTemp->entity.curstate.renderfx = 0;
+	pTemp->die = gEngfuncs.GetClientTime() + gHUD.m_flTimeDelta * 1.5f; // die at next frame
+	pTemp->entity.curstate.frame = Com_RandomLong( 0, frameCount - 1 );
+	pTemp->flags |= FTENT_SPRANIMATE|FTENT_SPRANIMATELOOP;
+	pTemp->frameMax = frameCount - 1;
+
+	if( index == 0 )
+	{
+		// Rifle flash
+		pTemp->entity.curstate.scale = scale * Com_RandomFloat( 0.5f, 0.6f );
+		pTemp->entity.angles[2] = 90 * Com_RandomLong( 0, 3 );
+	}
+	else
+	{
+		pTemp->entity.curstate.scale = scale;
+		pTemp->entity.angles[2] = Com_RandomLong( 0, 359 );
+	}
+
+	if( /*gHUD.cl_gunsmoke->value && */EV_IsLocal( entity->index ))
+	{
+		Vector smoke_origin = pos;
+		Vector forward;
+
+		AngleVectors( v_angles, forward, NULL, NULL );
+
+		float scale = pTemp->entity.curstate.scale;
+
+		TEMPENTITY *te;
+		if( index == 1 )
+		{
+			te = EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 0,  scale, 7,7,7, false, g_vPlayerVelocity );
+			te->entity.angles[2] = pTemp->entity.angles[2];
+			te = EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 20, scale + 0.1, 10,10,10, false, g_vPlayerVelocity );
+			te->entity.angles[2] = pTemp->entity.angles[2];
+			te = EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 40, scale, 13,13,13, false, g_vPlayerVelocity );
+			te->entity.angles[2] = pTemp->entity.angles[2];
+		}
+		else
+		{
+			te = EV_CS16Client_CreateSmoke( SMOKE_RIFLE, smoke_origin, forward, 3, scale, 20, 20, 20, false, g_vPlayerVelocity );
+
+			te->entity.angles[2] = pTemp->entity.angles[2];
+		}
+	}
+}
+
+/*
 =========================
 HUD_StudioEvent
 
@@ -237,16 +339,16 @@ void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct
 	switch( event->event )
 	{
 	case 5001:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[0], atoi( event->options) );
+		CL_MuzzleFlash( entity, (float *)&entity->attachment[0], atoi( event->options) );
 		break;
 	case 5011:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[1], atoi( event->options) );
+		CL_MuzzleFlash( entity, (float *)&entity->attachment[1], atoi( event->options) );
 		break;
 	case 5021:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[2], atoi( event->options) );
+		CL_MuzzleFlash( entity, (float *)&entity->attachment[2], atoi( event->options) );
 		break;
 	case 5031:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[3], atoi( event->options) );
+		CL_MuzzleFlash( entity, (float *)&entity->attachment[3], atoi( event->options) );
 		break;
 	case 5002:
 		gEngfuncs.pEfxAPI->R_SparkEffect( (float *)&entity->attachment[0], atoi( event->options), -100, 100 );

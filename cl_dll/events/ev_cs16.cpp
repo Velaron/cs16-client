@@ -401,7 +401,7 @@ struct
 	}
 };
 
-void EV_CS16Client_CreateSmoke( ESmoke type, Vector origin, Vector dir,
+TEMPENTITY *EV_CS16Client_CreateSmoke( ESmoke type, Vector origin, Vector dir,
 	int speed, float scale, int r, int g, int b , bool wind, Vector velocity, int framerate , int teflags )
 {
 	TEMPENTITY *te;
@@ -409,16 +409,8 @@ void EV_CS16Client_CreateSmoke( ESmoke type, Vector origin, Vector dir,
 
 	assert( type <= SMOKE_BLACK );
 
-	if( type == SMOKE_WALLPUFF && gHUD.fastsprites->value )
-	{
-		path = "sprites/fast_wallpuff1.spr";
-		framerate = 30;
-	}
-	else
-	{
-		int rand = Com_RandomLong( 0, g_SmokeSprites[type].count - 1 );
-		path = g_SmokeSprites[type].files[rand];
-	}
+	int rand = Com_RandomLong( 0, g_SmokeSprites[type].count - 1 );
+	path = g_SmokeSprites[type].files[rand];
 
 	te = gEngfuncs.pEfxAPI->R_DefaultSprite( origin, gEngfuncs.pEventAPI->EV_FindModelIndex( path ), framerate );
 
@@ -451,6 +443,8 @@ void EV_CS16Client_CreateSmoke( ESmoke type, Vector origin, Vector dir,
 			te->entity.baseline.origin = te->entity.baseline.origin + velocity;
 		}
 	}
+
+	return te;
 }
 
 

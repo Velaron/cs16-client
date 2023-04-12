@@ -47,6 +47,7 @@ client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes
 WeaponsResource gWR;
 
 int g_weaponselect = 0;
+int g_weaponselect_frames = 0;
 int g_iShotsFired;
 
 void WeaponsResource :: LoadAllWeaponSprites( void )
@@ -378,6 +379,7 @@ void CHudAmmo::Think(void)
 		{
 			ServerCmd(gpActiveSel->szName);
 			g_weaponselect = gpActiveSel->iId;
+			g_weaponselect_frames = 3;
 		}
 
 		gpLastSel = gpActiveSel;

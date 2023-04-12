@@ -40,6 +40,10 @@ void CHud::Think(void)
 {
 	int newfov;
 
+	extern int g_weaponselect_frames;
+	if( g_weaponselect_frames )
+		g_weaponselect_frames--;
+
 	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 	{
 		if( pList->p->m_iFlags & HUD_THINK )
