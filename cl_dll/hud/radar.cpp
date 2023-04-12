@@ -331,8 +331,8 @@ int CHudRadar::Draw(float flTime)
 		if( !FlashTime( flTime, &g_PlayerExtraInfo[i]) )
 			continue;
 
-		// player with C4 must be red
-		if( g_PlayerExtraInfo[i].has_c4 )
+		// player with C4 or VIP must be red
+		if( g_PlayerExtraInfo[i].has_c4 || g_PlayerExtraInfo[i].vip )
 		{
 			DrawUtils::UnpackRGB( r, g, b, RGB_REDISH );
 		}
