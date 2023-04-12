@@ -284,6 +284,8 @@ int CHudAmmo::Init(void)
 	m_pClCrosshairSize = (convar_t*)CVAR_CREATE( "cl_crosshair_size", "auto", FCVAR_ARCHIVE );
 	m_pClDynamicCrosshair = CVAR_CREATE("cl_dynamiccrosshair", "1", FCVAR_ARCHIVE);
 
+	m_hStaticSpr = 0;
+
 	m_iFlags = HUD_DRAW | HUD_THINK; //!!!
 	m_R = 50;
 	m_G = 250;
@@ -1007,12 +1009,19 @@ int CHudAmmo::Draw(float flTime)
 	// place it here, so pretty dynamic crosshair will work even in spectator!
 	if( gHUD.m_iFOV > 40 )
 	{
+		HideCrosshair(); // hide static
+
 		// draw a dynamic crosshair
 		DrawCrosshair();
 	}
 	else
 	{
-		DrawSpriteCrosshair();
+		if( m_pWeapon )
+		{
+			SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
+
+			DrawSpriteCrosshair();
+		}
 	}
 
 	if ( (gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL )) )
@@ -1116,6 +1125,9 @@ int CHudAmmo::Draw(float flTime)
 void CHudAmmo::DrawSpriteCrosshair()
 {
 	int x, y;
+
+	if( !m_hStaticSpr )
+		return;
 
 	gEngfuncs.pfnSPR_Set( m_hStaticSpr, m_staticRgba.r, m_staticRgba.g, m_staticRgba.b );
 
@@ -1712,12 +1724,10 @@ void CHudAmmo::SetCrosshair(HSPRITE hSpr, wrect_t rect, int r, int g, int b)
 	m_staticRgba.g = g;
 	m_staticRgba.b = b;
 	m_staticRgba.a = 255;
-
-	m_bStaticCrosshair = true;
 }
 
 void CHudAmmo::HideCrosshair()
 {
-	m_bStaticCrosshair = false;
+	m_hStaticSpr = 0;
 }
 

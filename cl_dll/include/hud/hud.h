@@ -194,7 +194,6 @@ private:
 	bool m_bAdditive;
 	bool m_bObserverCrosshair ;
 	bool m_bDrawCrosshair;
-	bool m_bStaticCrosshair;
 	int m_iAmmoLastCheck;
 
 	convar_t *m_pClCrosshairColor;
