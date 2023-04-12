@@ -31,7 +31,6 @@ typedef struct client_textmessage_s
 	const char *pMessage;
 } client_textmessage_t;
 
-
 //--------------------------------------------------------------------------
 // sequenceDefaultBits_e
 //	

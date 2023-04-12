@@ -70,7 +70,7 @@ struct
 	HSPRITE hsprRipple;
 } Rain;
 
-static bool initialized = false;
+bool Rain_Initialized = false;
 
 enum
 {
@@ -495,11 +495,11 @@ void InitRain( void )
 	Rain.hsprSnow = SPR_Load("sprites/effects/snowflake.spr");
 	Rain.hsprRipple = SPR_Load("sprites/effects/ripple.spr");
 
-	if( !initialized )
+	if( !Rain_Initialized )
 	{
 		HOOK_MESSAGE( ReceiveW );
 
-		initialized = true;
+		Rain_Initialized = Rain.hsprRain && Rain.hsprSnow && Rain.hsprRipple;
 	}
 }
 
@@ -622,6 +622,10 @@ DrawFXObjects
 */
 void DrawFXObjects( void )
 {
+
+	if( !FirstChainFX.p_Next )
+		return;
+
 	const model_s *pTexture = gEngfuncs.GetSpritePointer( Rain.hsprRipple );
 	gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pTexture, 0 );
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );

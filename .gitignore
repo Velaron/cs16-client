@@ -63,3 +63,4 @@ local.properties
 .gradle
 .settings
 release/
+*.tasks

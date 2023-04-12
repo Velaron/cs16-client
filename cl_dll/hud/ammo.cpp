@@ -442,7 +442,8 @@ void CHudAmmo::Think(void)
 				}
 				else
 				{
-					gWR.DropWeapon( p );
+					if( gHUD.GetGameType() != GAME_CZERODS )
+						gWR.DropWeapon( p );
 				}
 			}
 		}
@@ -596,6 +597,11 @@ int CHudAmmo::MsgFunc_WeapPickup( const char *pszName, int iSize, void *pbuf )
 
 	// Add the weapon to the history
 	gHR.AddToHistory( HISTSLOT_WEAP, iIndex );
+
+	if( gHUD.GetGameType() == GAME_CZERODS )
+	{
+		gWR.PickupWeapon( iIndex );
+	}
 
 	return 1;
 }

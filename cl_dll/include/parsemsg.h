@@ -183,7 +183,7 @@ inline float BufferReader::ReadHiResAngle( void )
 #ifdef _DEBUG
 BufferReader::~BufferReader()
 {
-	if( m_iRead < m_iSize )
+	if( m_iRead < m_iSize - 1 )
 		gEngfuncs.Con_DPrintf( "BufferReader(%s): destroyed before reaching end. Expected %i, read %i\n", m_szMsgName, m_iSize, m_iRead );
 }
 #endif

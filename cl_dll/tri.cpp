@@ -35,10 +35,14 @@ HUD_DrawTransparentTriangles
 Render any triangles with transparent rendermode needs here
 =================
 */
+extern bool Rain_Initialized;
 void DLLEXPORT HUD_DrawTransparentTriangles( void )
 {
-	ProcessFXObjects();
-	ProcessRain();
-	DrawRain();
-	DrawFXObjects();
+	if( Rain_Initialized )
+	{
+		ProcessFXObjects();
+		ProcessRain();
+		DrawRain();
+		DrawFXObjects();
+	}
 }

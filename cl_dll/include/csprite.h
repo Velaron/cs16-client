@@ -45,6 +45,7 @@ public:
 	inline CClientSprite()
 	{
 		spr = 0;
+		index = 0;
 		rect.bottom = rect.left = rect.right = rect.top = 0;
 	}
 

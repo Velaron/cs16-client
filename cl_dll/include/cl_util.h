@@ -198,3 +198,9 @@ inline void GetTeamColor( int &r, int &g, int &b, int teamIndex )
 #define RAD2DEG( x )	((float)(x) * (float)(180.f / M_PI))
 #define DEG2RAD( x )	((float)(x) * (float)(M_PI / 180.f))
 
+enum
+{
+	GAME_CSTRIKE = 0, // 1.6
+	GAME_CZERO = 1,   // czero
+	GAME_CZERODS = 2  // ritual czero
+};

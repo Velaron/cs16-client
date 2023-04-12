@@ -64,23 +64,37 @@ char *CHudTextMessage::LocaliseTextString( const char *msg, char *dst_buffer, in
 			client_textmessage_t *clmsg = TextMessageGet( word_buf );
 			if ( !clmsg || !(clmsg->pMessage) )
 			{
-				src = word_start;
-				*dst = *src;
-				dst++, src++;
-				continue;
+				// look also in vgui2 translations
+				const char *str = Localize( word_buf );
+				if( str )
+				{
+					strncpy(dst, str, buffer_size);
+					buffer_size = 0;
+					continue;
+				}
+				else
+				{
+					src = word_start;
+					*dst = *src;
+					dst++, src++;
+					continue;
+				}
 			}
 
 			if(clmsg->pMessage[0] == '#')
 			{
 				strncpy(dst, Localize(clmsg->pMessage+1), buffer_size);
+				buffer_size = 0;
 			}
-
-			// copy string into message over the msg name
-			for ( char *wsrc = (char*)clmsg->pMessage; *wsrc != 0; wsrc++, dst++ )
+			else
 			{
-				*dst = *wsrc;
+				// copy string into message over the msg name
+				for ( char *wsrc = (char*)clmsg->pMessage; *wsrc != 0; wsrc++, dst++ )
+				{
+					*dst = *wsrc;
+				}
+				*dst = 0;
 			}
-			*dst = 0;
 		}
 		else
 		{

@@ -121,8 +121,9 @@ public:
 		else
 		{
 			int _width;
+			int _height;
 
-			gEngfuncs.pfnDrawConsoleStringLen( szIt, &_width, NULL );
+			gEngfuncs.pfnDrawConsoleStringLen( szIt, &_width, &_height );
 			return _width;
 		}
 	}

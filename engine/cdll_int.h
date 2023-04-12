@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1999, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -27,7 +27,10 @@ extern "C" {
 #endif
 
 #include "const.h"
-
+#include "steam/steamtypes.h"
+#include "ref_params.h"
+#include "r_efx.h"
+#include "studio_event.h"
 
 // this file is included by both the engine and the client-dll,
 // so make sure engine declarations aren't done twice
@@ -56,6 +59,7 @@ typedef struct client_data_s
 	// fields that can be changed by the cldll
 	vec3_t viewangles;
 	int		iWeaponBits;
+//	int		iAccessoryBits;
 	float	fov;	// field of view
 } client_data_t;
 
@@ -68,22 +72,7 @@ typedef struct client_sprite_s
 	wrect_t rc;
 } client_sprite_t;
 
-#ifndef CLIENT_TEXTMESAGE_S
-typedef struct client_textmessage_s
-{
-	int		effect;
-	byte	r1, g1, b1, a1;		// 2 colors for effects
-	byte	r2, g2, b2, a2;
-	float	x;
-	float	y;
-	float	fadein;
-	float	fadeout;
-	float	holdtime;
-	float	fxtime;
-	const char *pName;
-	const char *pMessage;
-} client_textmessage_t;
-#endif
+
 
 typedef struct hud_player_info_s
 {
@@ -91,7 +80,6 @@ typedef struct hud_player_info_s
 	short ping;
 	byte thisplayer;  // TRUE if this is the calling player
 
-  // stuff that's unused at the moment,  but should be done
 	byte spectator;
 	byte packetloss;
 
@@ -99,205 +87,32 @@ typedef struct hud_player_info_s
 	short topcolor;
 	short bottomcolor;
 
+	uint64 m_nSteamID;
 } hud_player_info_t;
 
 
-typedef struct cl_enginefuncs_s
+
+typedef struct module_s
 {
-	// sprite handlers
-	HSPRITE						( *pfnSPR_Load )			( const char *szPicName );
-	int							( *pfnSPR_Frames )			( HSPRITE hPic );
-	int							( *pfnSPR_Height )			( HSPRITE hPic, int frame );
-	int							( *pfnSPR_Width )			( HSPRITE hPic, int frame );
-	void						( *pfnSPR_Set )				( HSPRITE hPic, int r, int g, int b );
-	void						( *pfnSPR_Draw )			( int frame, int x, int y, const wrect_t *prc );
-	void						( *pfnSPR_DrawHoles )		( int frame, int x, int y, const wrect_t *prc );
-	void						( *pfnSPR_DrawAdditive )	( int frame, int x, int y, const wrect_t *prc );
-	void						( *pfnSPR_EnableScissor )	( int x, int y, int width, int height );
-	void						( *pfnSPR_DisableScissor )	( void );
-	client_sprite_t				*( *pfnSPR_GetList )			( const char *psz, int *piCount );
-
-	// screen handlers
-	void						( *pfnFillRGBA )			( int x, int y, int width, int height, int r, int g, int b, int a );
-	int							( *pfnGetScreenInfo ) 		( SCREENINFO *pscrinfo );
-	void						( *pfnSetCrosshair )		( HSPRITE hspr, wrect_t rc, int r, int g, int b );
-
-	// cvar handlers
-	struct cvar_s				*( *pfnRegisterVariable )	( const char *szName, const char *szValue, int flags );
-	float						( *pfnGetCvarFloat )		( const char *szName );
-	char*						( *pfnGetCvarString )		( const char *szName );
-
-	// command handlers
-	int							( *pfnAddCommand )			( const char *cmd_name, void (*function)(void) );
-	int							( *pfnHookUserMsg )			( const char *szMsgName, pfnUserMsgHook pfn );
-	int							( *pfnServerCmd )			( const char *szCmdString );
-	int							( *pfnClientCmd )			( const char *szCmdString );
-
-	void						( *pfnGetPlayerInfo )		( int ent_num, hud_player_info_t *pinfo );
-
-	// sound handlers
-	void						( *pfnPlaySoundByName )		( const char *szSound, float volume );
-	void						( *pfnPlaySoundByIndex )	( int iSound, float volume );
-
-	// vector helpers
-	void						( *pfnAngleVectors )		( const float * vecAngles, float * forward, float * right, float * up );
-
-	// text message system
-	client_textmessage_t		*( *pfnTextMessageGet )		( const char *pName );
-	int							( *pfnDrawCharacter )		( int x, int y, int number, int r, int g, int b );
-	int							( *pfnDrawConsoleString )	( int x, int y, const char *string );
-	void						( *pfnDrawSetTextColor )	( float r, float g, float b );
-	void						( *pfnDrawConsoleStringLen )(  const char *string, int *length, int *height );
-
-	void						( *pfnConsolePrint )		( const char *string );
-	void						( *pfnCenterPrint )			( const char *string );
+	unsigned char				ucMD5Hash[16];	// hash over code
+	qboolean					fLoaded;		// true if successfully loaded
+} module_t;
 
 
-// Added for user input processing
-	int							( *GetWindowCenterX )		( void );
-	int							( *GetWindowCenterY )		( void );
-	void						( *GetViewAngles )			( float * );
-	void						( *SetViewAngles )			( float * );
-	int							( *GetMaxClients )			( void );
-	void						( *Cvar_SetValue )			( const char *cvar, float value );
 
-	int       					(*Cmd_Argc)					(void);	
-	char						*( *Cmd_Argv )				( int arg );
-	void						( *Con_Printf )				( const char *fmt, ... );
-	void						( *Con_DPrintf )			( const char *fmt, ... );
-	void						( *Con_NPrintf )			( int pos, char *fmt, ... );
-	void						( *Con_NXPrintf )			( struct con_nprint_s *info, const char *fmt, ... );
-
-	const char					*( *PhysInfo_ValueForKey )	( const char *key );
-	const char					*( *ServerInfo_ValueForKey )( const char *key );
-	float						( *GetClientMaxspeed )		( void );
-	int							( *CheckParm )				( const char *parm, char **ppnext );
-	void						( *Key_Event )				( int key, int down );
-	void						( *GetMousePosition )		( int *mx, int *my );
-	int							( *IsNoClipping )			( void );
-
-	struct cl_entity_s			*( *GetLocalPlayer )		( void );
-	struct cl_entity_s			*( *GetViewModel )			( void );
-	struct cl_entity_s			*( *GetEntityByIndex )		( int idx );
-
-	float						( *GetClientTime )			( void );
-	void						( *V_CalcShake )			( void );
-	void						( *V_ApplyShake )			( float *origin, float *angles, float factor );
-
-	int							( *PM_PointContents )		( float *point, int *truecontents );
-	int							( *PM_WaterEntity )			( float *p );
-	struct pmtrace_s			*( *PM_TraceLine )			( float *start, float *end, int flags, int usehull, int ignore_pe );
-
-	struct model_s				*( *CL_LoadModel )			( const char *modelname, int *index );
-	int							( *CL_CreateVisibleEntity )	( int type, struct cl_entity_s *ent );
-
-	const struct model_s *		( *GetSpritePointer )		( HSPRITE hSprite );
-	void						( *pfnPlaySoundByNameAtLocation )	( char *szSound, float volume, float *origin );
-
-	unsigned short				( *pfnPrecacheEvent )		( int type, const char* psz );
-	void						( *pfnPlaybackEvent )		( int flags, const struct edict_s *pInvoker, unsigned short eventindex, float delay, float *origin, float *angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2 );
-	void						( *pfnWeaponAnim )			( int iAnim, int body );
-	float						( *pfnRandomFloat )			( float flLow, float flHigh );
-	long						( *pfnRandomLong )			( long lLow, long lHigh );
-	void						( *pfnHookEvent )			( const char *name, void ( *pfnEvent )( struct event_args_s *args ) );
-	int							(*Con_IsVisible)			();
-	const char					*( *pfnGetGameDirectory )	( void );
-	struct cvar_s				*( *pfnGetCvarPointer )		( const char *szName );
-	const char					*( *Key_LookupBinding )		( const char *pBinding );
-	const char					*( *pfnGetLevelName )		( void );
-	void						( *pfnGetScreenFade )		( struct screenfade_s *fade );
-	void						( *pfnSetScreenFade )		( struct screenfade_s *fade );
-	void                        *( *VGui_GetPanel )         ( );
-	void                         ( *VGui_ViewportPaintBackground ) (int extents[4]);
-
-	byte*						(*COM_LoadFile)				( const char *path, int usehunk, int *pLength );
-	char*						(*COM_ParseFile)			( char *data, char *token );
-	void						(*COM_FreeFile)				( void *buffer );
+	
 		
-	struct triangleapi_s		*pTriAPI;
-	struct efx_api_s			*pEfxAPI;
-	struct event_api_s			*pEventAPI;
-	struct demo_api_s			*pDemoAPI;
-	struct net_api_s			*pNetAPI;
-	struct IVoiceTweak_s		*pVoiceTweak;
-
-	// returns 1 if the client is a spectator only (connected to a proxy), 0 otherwise or 2 if in dev_overview mode
-	int							( *IsSpectateOnly ) ( void );
-	struct model_s				*( *LoadMapSprite )			( const char *filename );
-
-	// file search functions
-	void						( *COM_AddAppDirectoryToSearchPath ) ( const char *pszBaseDir, const char *appName );
-	int							( *COM_ExpandFilename)				 ( const char *fileName, char *nameOutBuffer, int nameOutBufferSize );
-
-	// User info
-	// playerNum is in the range (1, MaxClients)
-	// returns NULL if player doesn't exit
-	// returns "" if no value is set
-	const char					*( *PlayerInfo_ValueForKey )( int playerNum, const char *key );
-	void						( *PlayerInfo_SetValueForKey )( const char *key, const char *value );
-
-	// Gets a unique ID for the specified player. This is the same even if you see the player on a different server.
-	// iPlayer is an entity index, so client 0 would use iPlayer=1.
-	// Returns false if there is no player on the server in the specified slot.
-	qboolean					(*GetPlayerUniqueID)(int iPlayer, char playerID[16]);
-
-	// TrackerID access
-	int							(*GetTrackerIDForPlayer)(int playerSlot);
-	int							(*GetPlayerForTrackerID)(int trackerID);
-
-	// Same as pfnServerCmd, but the message goes in the unreliable stream so it can't clog the net stream
-	// (but it might not get there).
-	int							( *pfnServerCmdUnreliable )( char *szCmdString );
-
-	void						( *pfnGetMousePos )( struct tagPOINT *ppt );
-	void						( *pfnSetMousePos )( int x, int y );
-	void						( *pfnSetMouseEnable )( qboolean fEnable );
-
-
-	// undocumented interface starts here
-	struct cvar_s*	(*pfnGetFirstCvarPtr)( void );
-	void*		(*pfnGetFirstCmdFunctionHandle)( void );
-	void*		(*pfnGetNextCmdFunctionHandle)( void *cmdhandle );
-	const char*	(*pfnGetCmdFunctionName)( void *cmdhandle );
-	float		(*pfnGetClientOldTime)( void );
-	float		(*pfnGetGravity)( void );
-	struct model_s*	(*pfnGetModelByIndex)( int index );
-	void		(*pfnSetFilterMode)( int mode ); // same as gl_texsort in original Quake
-	void		(*pfnSetFilterColor)( float red, float green, float blue );
-	void		(*pfnSetFilterBrightness)( float brightness );
-	void		*(*pfnSequenceGet)( const char *fileName, const char *entryName );
-	void		(*pfnSPR_DrawGeneric)( int frame, int x, int y, const wrect_t *prc, int blendsrc, int blenddst, int width, int height );
-	void		*(*pfnSequencePickSentence)( const char *groupName, int pickMethod, int *entryPicked );
-	int		(*pfnDrawString)( int x, int y, const char *str, int r, int g, int b );
-	int		(*pfnDrawStringReverse)( int x, int y, const char *str, int r, int g, int b );
-	const char	*(*LocalPlayerInfo_ValueForKey)( const char* key );
-	int		(*pfnVGUI2DrawCharacter)( int x, int y, int ch, unsigned int font );
-	int		(*pfnVGUI2DrawCharacterAdditive)( int x, int y, int ch, int r, int g, int b, unsigned int font );
-	unsigned int	(*pfnGetApproxWavePlayLen)( const char *filename );
-	void*		(*GetCareerGameUI)( void );	// g-cont. !!!! potential crash-point!
-	void		(*Cvar_Set)( const char *name, const char *value );
-	int		(*pfnIsPlayingCareerMatch)( void );
-	void		(*pfnPlaySoundVoiceByName)( const char *szSound, float volume, int pitch );
-	void		(*pfnPrimeMusicStream)( const char *filename, int looping );
-	double		(*pfnSys_FloatTime)( void );
-
-	// decay funcs
-	void		(*pfnProcessTutorMessageDecayBuffer)( int *buffer, int buflen );
-	void		(*pfnConstructTutorMessageDecayBuffer)( int *buffer, int buflen );
-	void		(*pfnResetTutorMessageDecayData)( void );
-
-	void		(*pfnPlaySoundByNameAtPitch)( char *szSound, float volume, int pitch );
-	void		(*pfnFillRGBABlend)( int x, int y, int width, int height, int r, int g, int b, int a );
-	int		(*pfnGetAppID)( void );
-	void	*(*pfnGetAliases)( void );
-	void		(*pfnVguiWrap2_GetMouseDelta)( int *x, int *y );
-} cl_enginefunc_t;
 
 #ifndef IN_BUTTONS_H
 #include "in_buttons.h"
 #endif
 
 #define CLDLL_INTERFACE_VERSION		7
+
+extern void LoadSecurityModuleFromDisk(char * pszDllName);
+extern void LoadSecurityModuleFromMemory( unsigned char * pCode, int nSize );
+extern void CloseSecurityModule();
+
 
 extern void ClientDLL_Init( void ); // from cdll_int.c
 extern void ClientDLL_Shutdown( void );
@@ -343,10 +158,310 @@ extern void ClientDLL_TempEntUpdate( double ft, double ct, double grav, struct t
 extern struct cl_entity_s *ClientDLL_GetUserEntity( int index );
 extern void ClientDLL_VoiceStatus(int entindex, qboolean bTalking);
 extern void ClientDLL_DirectorMessage( int iSize, void *pbuf );
+extern void ClientDLL_ChatInputPosition( int *x, int *y );
 
+//#include "server.h" // server_static_t define for apiproxy
+#include "APIProxy.h"
+
+extern cldll_func_t	cl_funcs;
+extern cl_enginefunc_t cl_engsrcProxies;
+extern cl_enginefunc_dst_t g_engdstAddrs;
+
+// Module exports
+extern modfuncs_t g_modfuncs;
+extern module_t	g_module;
+
+// Macros for exported engine funcs
+#define RecEngSPR_Load(a)					(g_engdstAddrs.pfnSPR_Load(&a))
+#define RecEngSPR_Frames(a)					(g_engdstAddrs.pfnSPR_Frames(&a))
+#define RecEngSPR_Height(a, b)				(g_engdstAddrs.pfnSPR_Height(&a, &b))
+#define RecEngSPR_Width(a, b)				(g_engdstAddrs.pfnSPR_Width(&a, &b))
+#define RecEngSPR_Set(a, b, c, d)			(g_engdstAddrs.pfnSPR_Set(&a, &b, &c, &d))
+#define RecEngSPR_Draw(a, b, c, d)			(g_engdstAddrs.pfnSPR_Draw(&a, &b, &c, &d))
+#define RecEngSPR_DrawHoles(a, b, c, d)		(g_engdstAddrs.pfnSPR_DrawHoles(&a, &b, &c, &d))
+#define RecEngSPR_DrawAdditive(a, b, c, d)	(g_engdstAddrs.pfnSPR_DrawAdditive(&a, &b, &c, &d))
+#define RecEngSPR_EnableScissor(a, b, c, d)	(g_engdstAddrs.pfnSPR_EnableScissor(&a, &b, &c, &d))
+#define RecEngSPR_DisableScissor()			(g_engdstAddrs.pfnSPR_DisableScissor())
+#define RecEngSPR_GetList(a, b)				(g_engdstAddrs.pfnSPR_GetList(&a, &b))
+#define RecEngDraw_FillRGBA(a, b, c, d, e, f, g, h)		(g_engdstAddrs.pfnFillRGBA(&a, &b, &c, &d, &e, &f, &g, &h))
+#define RecEnghudGetScreenInfo(a)			(g_engdstAddrs.pfnGetScreenInfo(&a))
+#define RecEngSetCrosshair(a, b, c, d, e)	(g_engdstAddrs.pfnSetCrosshair(&a, &b, &c, &d, &e))
+#define RecEnghudRegisterVariable(a, b, c)	(g_engdstAddrs.pfnRegisterVariable(&a, &b, &c))
+#define RecEnghudGetCvarFloat(a)			(g_engdstAddrs.pfnGetCvarFloat(&a))
+#define RecEnghudGetCvarString(a)			(g_engdstAddrs.pfnGetCvarString(&a))
+#define RecEnghudAddCommand(a, b)			(g_engdstAddrs.pfnAddCommand(&a, &b))
+#define RecEnghudHookUserMsg(a, b)			(g_engdstAddrs.pfnHookUserMsg(&a, &b))
+#define RecEnghudServerCmd(a)				(g_engdstAddrs.pfnServerCmd(&a))
+#define RecEnghudClientCmd(a)				(g_engdstAddrs.pfnClientCmd(&a))
+#define RecEngPrimeMusicStream(a, b)	(g_engdstAddrs.pfnPrimeMusicStream(&a, &b))
+#define RecEnghudGetPlayerInfo(a, b)		(g_engdstAddrs.pfnGetPlayerInfo(&a, &b))
+#define RecEnghudPlaySoundByName(a, b)		(g_engdstAddrs.pfnPlaySoundByName(&a, &b))
+#define RecEnghudPlaySoundByNameAtPitch(a, b, c)	(g_engdstAddrs.pfnPlaySoundByNameAtPitch(&a, &b, &c))
+#define RecEnghudPlaySoundVoiceByName(a, b)	(g_engdstAddrs.pfnPlaySoundVoiceByName(&a, &b))
+#define RecEnghudPlaySoundByIndex(a, b)		(g_engdstAddrs.pfnPlaySoundByIndex(&a, &b))
+#define RecEngAngleVectors(a, b, c, d)		(g_engdstAddrs.pfnAngleVectors(&a, &b, &c, &d))
+#define RecEngTextMessageGet(a)				(g_engdstAddrs.pfnTextMessageGet(&a))
+#define RecEngTextMessageDrawCharacter(a, b, c, d, e, f)	(g_engdstAddrs.pfnDrawCharacter(&a, &b, &c, &d, &e, &f))
+#define RecEngDrawConsoleString(a, b, c)	(g_engdstAddrs.pfnDrawConsoleString(&a, &b, &c))
+#define RecEngDrawSetTextColor(a, b, c)		(g_engdstAddrs.pfnDrawSetTextColor(&a, &b, &c))
+#define RecEnghudDrawConsoleStringLen(a, b, c)	(g_engdstAddrs.pfnDrawConsoleStringLen(&a, &b, &c))
+#define RecEnghudConsolePrint(a)			(g_engdstAddrs.pfnConsolePrint(&a))
+#define RecEnghudCenterPrint(a)				(g_engdstAddrs.pfnCenterPrint(&a))
+#define RecEnghudCenterX()					(g_engdstAddrs.GetWindowCenterX())
+#define RecEnghudCenterY()					(g_engdstAddrs.GetWindowCenterY())
+#define RecEnghudGetViewAngles(a)			(g_engdstAddrs.GetViewAngles(&a))
+#define RecEnghudSetViewAngles(a)			(g_engdstAddrs.SetViewAngles(&a))
+#define RecEnghudGetMaxClients()			(g_engdstAddrs.GetMaxClients())
+#define RecEngCvar_SetValue(a, b)			(g_engdstAddrs.Cvar_SetValue(&a, &b))
+#define RecEngCmd_Argc()					(g_engdstAddrs.Cmd_Argc())
+#define RecEngCmd_Argv(a)					(g_engdstAddrs.Cmd_Argv(&a))
+#define RecEngCon_Printf(a)					(g_engdstAddrs.Con_Printf(&a))
+#define RecEngCon_DPrintf(a)				(g_engdstAddrs.Con_DPrintf(&a))
+#define RecEngCon_NPrintf(a, b)				(g_engdstAddrs.Con_NPrintf(&a, &b))
+#define RecEngCon_NXPrintf(a, b)			(g_engdstAddrs.Con_NXPrintf(&a, &b))
+#define RecEnghudPhysInfo_ValueForKey(a)	(g_engdstAddrs.PhysInfo_ValueForKey(&a))
+#define RecEnghudServerInfo_ValueForKey(a)	(g_engdstAddrs.ServerInfo_ValueForKey(&a))
+#define RecEnghudGetClientMaxspeed()		(g_engdstAddrs.GetClientMaxspeed())
+#define RecEnghudCheckParm(a, b)			(g_engdstAddrs.CheckParm(&a, &b))
+#define RecEngKey_Event(a, b)				(g_engdstAddrs.Key_Event(&a, &b))
+#define RecEnghudGetMousePosition(a, b)		(g_engdstAddrs.GetMousePosition(&a, &b))
+#define RecEnghudIsNoClipping()				(g_engdstAddrs.IsNoClipping())
+#define RecEnghudGetLocalPlayer()			(g_engdstAddrs.GetLocalPlayer())
+#define RecEnghudGetViewModel()				(g_engdstAddrs.GetViewModel())
+#define RecEnghudGetEntityByIndex(a)		(g_engdstAddrs.GetEntityByIndex(&a))
+#define RecEnghudGetClientTime()			(g_engdstAddrs.GetClientTime())
+#define RecEngV_CalcShake()					(g_engdstAddrs.V_CalcShake())
+#define RecEngV_ApplyShake(a, b, c)			(g_engdstAddrs.V_ApplyShake(&a, &b, &c))
+#define RecEngPM_PointContents(a, b)		(g_engdstAddrs.PM_PointContents(&a, &b))
+#define RecEngPM_WaterEntity(a)				(g_engdstAddrs.PM_WaterEntity(&a))
+#define RecEngPM_TraceLine(a, b, c, d, e)	(g_engdstAddrs.PM_TraceLine(&a, &b, &c, &d, &e))
+#define RecEngCL_LoadModel(a, b)			(g_engdstAddrs.CL_LoadModel(&a, &b))
+#define RecEngCL_CreateVisibleEntity(a, b)	(g_engdstAddrs.CL_CreateVisibleEntity(&a, &b))
+#define RecEnghudGetSpritePointer(a)		(g_engdstAddrs.GetSpritePointer(&a))
+#define RecEnghudPlaySoundByNameAtLocation(a, b, c)		(g_engdstAddrs.pfnPlaySoundByNameAtLocation(&a, &b, &c))
+#define RecEnghudPrecacheEvent(a, b)		(g_engdstAddrs.pfnPrecacheEvent(&a, &b))
+#define RecEnghudPlaybackEvent(a, b, c, d, e, f, g, h, i, j, k, l)	(g_engdstAddrs.pfnPlaybackEvent(&a, &b, &c, &d, &e, &f, &g, &h, &i, &j, &k, &l))
+#define RecEnghudWeaponAnim(a, b)			(g_engdstAddrs.pfnWeaponAnim(&a, &b))
+#define RecEngRandomFloat(a, b)				(g_engdstAddrs.pfnRandomFloat(&a, &b))
+#define RecEngRandomLong(a, b)				(g_engdstAddrs.pfnRandomLong(&a, &b))
+#define RecEngCL_HookEvent(a, b)			(g_engdstAddrs.pfnHookEvent(&a, &b))
+#define RecEngCon_IsVisible()				(g_engdstAddrs.Con_IsVisible())
+#define RecEnghudGetGameDir()				(g_engdstAddrs.pfnGetGameDirectory())
+#define RecEngCvar_FindVar(a)				(g_engdstAddrs.pfnGetCvarPointer(&a))
+#define RecEngKey_NameForBinding(a)			(g_engdstAddrs.Key_LookupBinding(&a))
+#define RecEnghudGetLevelName()				(g_engdstAddrs.pfnGetLevelName())
+#define RecEnghudGetScreenFade(a)			(g_engdstAddrs.pfnGetScreenFade(&a))
+#define RecEnghudSetScreenFade(a)			(g_engdstAddrs.pfnSetScreenFade(&a))
+#define RecEngVGuiWrap_GetPanel()			(g_engdstAddrs.VGui_GetPanel())
+#define RecEngVGui_ViewportPaintBackground(a)	(g_engdstAddrs.VGui_ViewportPaintBackground(&a))
+#define RecEngCOM_LoadFile(a, b, c)			(g_engdstAddrs.COM_LoadFile(&a, &b, &c))
+#define RecEngCOM_ParseFile(a, b)			(g_engdstAddrs.COM_ParseFile(&a, &b))
+#define RecEngCOM_FreeFile(a)				(g_engdstAddrs.COM_FreeFile(&a))
+#define RecEngCL_IsSpectateOnly()			(g_engdstAddrs.IsSpectateOnly())
+#define RecEngR_LoadMapSprite(a)			(g_engdstAddrs.LoadMapSprite(&a))
+#define RecEngCOM_AddAppDirectoryToSearchPath(a, b)		(g_engdstAddrs.COM_AddAppDirectoryToSearchPath(&a, &b))
+#define RecEngClientDLL_ExpandFileName(a, b, c)		(g_engdstAddrs.COM_ExpandFilename(&a, &b, &c))
+#define RecEngPlayerInfo_ValueForKey(a, b)	(g_engdstAddrs.PlayerInfo_ValueForKey(&a, &b))
+#define RecEngPlayerInfo_SetValueForKey(a, b)		(g_engdstAddrs.PlayerInfo_SetValueForKey(&a, &b))
+#define RecEngGetPlayerUniqueID(a, b)		(g_engdstAddrs.GetPlayerUniqueID(&a, &b))
+#define RecEngGetTrackerIDForPlayer(a)		(g_engdstAddrs.GetTrackerIDForPlayer(&a))
+#define RecEngGetPlayerForTrackerID(a)		(g_engdstAddrs.GetPlayerForTrackerID(&a))
+#define RecEnghudServerCmdUnreliable(a)		(g_engdstAddrs.pfnServerCmdUnreliable(&a))
+#define RecEngGetMousePos(a)				(g_engdstAddrs.pfnGetMousePos(&a))
+#define RecEngSetMousePos(a, b)				(g_engdstAddrs.pfnSetMousePos(&a, &b))
+#define RecEngSetMouseEnable(a)				(g_engdstAddrs.pfnSetMouseEnable(&a))
+#define RecEngSetFilterMode(a)				(g_engdstAddrs.pfnSetFilterMode(&a))
+#define RecEngSetFilterColor(a,b,c)			(g_engdstAddrs.pfnSetFilterColor(&a,&b,&c))
+#define RecEngSetFilterBrightness(a)		(g_engdstAddrs.pfnSetFilterBrightness(&a))
+#define RecEngSequenceGet(a,b)				(g_engdstAddrs.pfnSequenceGet(&a,&b))
+#define RecEngSPR_DrawGeneric(a,b,c,d,e,f,g,h)	(g_engdstAddrs.pfnSPR_DrawGeneric(&a, &b, &c, &d, &e, &f, &g, &h))
+#define RecEngSequencePickSentence(a,b,c)	(g_engdstAddrs.pfnSequencePickSentence(&a, &b, &c))
+#define RecEngLocalPlayerInfo_ValueForKey(a)	(g_engdstAddrs.LocalPlayerInfo_ValueForKey(&a))
+#define RecEngProcessTutorMessageDecayBuffer(a, b)		(g_engdstAddrs.pfnProcessTutorMessageDecayBuffer(&a, &b))
+#define RecEngConstructTutorMessageDecayBuffer(a, b)	(g_engdstAddrs.pfnConstructTutorMessageDecayBuffer(&a, &b))
+#define RecEngResetTutorMessageDecayBuffer()		(g_engdstAddrs.pfnResetTutorMessageDecayBuffer())
+#define RecEngDraw_FillRGBABlend(a, b, c, d, e, f, g, h)		(g_engdstAddrs.pfnFillRGBABlend(&a, &b, &c, &d, &e, &f, &g, &h))
+
+// Dummy destination function for use when there's no security module
+extern void NullDst(void);
+
+// Use this to init an engdst structure to point to NullDst
+#define k_engdstNull \
+{ \
+	(pfnEngDst_pfnSPR_Load_t)						NullDst, \
+	(pfnEngDst_pfnSPR_Frames_t)						NullDst, \
+	(pfnEngDst_pfnSPR_Height_t)						NullDst, \
+	(pfnEngDst_pfnSPR_Width_t)						NullDst, \
+	(pfnEngDst_pfnSPR_Set_t)						NullDst, \
+	(pfnEngDst_pfnSPR_Draw_t)						NullDst, \
+	(pfnEngDst_pfnSPR_DrawHoles_t)					NullDst, \
+	(pfnEngDst_pfnSPR_DrawAdditive_t)				NullDst, \
+	(pfnEngDst_pfnSPR_EnableScissor_t)				NullDst, \
+	(pfnEngDst_pfnSPR_DisableScissor_t)				NullDst, \
+	(pfnEngDst_pfnSPR_GetList_t)					NullDst, \
+	(pfnEngDst_pfnFillRGBA_t)						NullDst, \
+	(pfnEngDst_pfnGetScreenInfo_t)					NullDst, \
+	(pfnEngDst_pfnSetCrosshair_t)					NullDst, \
+	(pfnEngDst_pfnRegisterVariable_t)				NullDst, \
+	(pfnEngDst_pfnGetCvarFloat_t)					NullDst, \
+	(pfnEngDst_pfnGetCvarString_t)					NullDst, \
+	(pfnEngDst_pfnAddCommand_t)						NullDst, \
+	(pfnEngDst_pfnHookUserMsg_t)					NullDst, \
+	(pfnEngDst_pfnServerCmd_t)						NullDst, \
+	(pfnEngDst_pfnClientCmd_t)						NullDst, \
+	(pfnEngDst_pfnGetPlayerInfo_t)					NullDst, \
+	(pfnEngDst_pfnPlaySoundByName_t)				NullDst, \
+	(pfnEngDst_pfnPlaySoundByIndex_t)				NullDst, \
+	(pfnEngDst_pfnAngleVectors_t)					NullDst, \
+	(pfnEngDst_pfnTextMessageGet_t)					NullDst, \
+	(pfnEngDst_pfnDrawCharacter_t)					NullDst, \
+	(pfnEngDst_pfnDrawConsoleString_t)				NullDst, \
+	(pfnEngDst_pfnDrawSetTextColor_t)				NullDst, \
+	(pfnEngDst_pfnDrawConsoleStringLen_t)			NullDst, \
+	(pfnEngDst_pfnConsolePrint_t)					NullDst, \
+	(pfnEngDst_pfnCenterPrint_t)					NullDst, \
+	(pfnEngDst_GetWindowCenterX_t)					NullDst, \
+	(pfnEngDst_GetWindowCenterY_t)					NullDst, \
+	(pfnEngDst_GetViewAngles_t)						NullDst, \
+	(pfnEngDst_SetViewAngles_t)						NullDst, \
+	(pfnEngDst_GetMaxClients_t)						NullDst, \
+	(pfnEngDst_Cvar_SetValue_t)						NullDst, \
+	(pfnEngDst_Cmd_Argc_t)							NullDst, \
+	(pfnEngDst_Cmd_Argv_t)							NullDst, \
+	(pfnEngDst_Con_Printf_t)						NullDst, \
+	(pfnEngDst_Con_DPrintf_t)						NullDst, \
+	(pfnEngDst_Con_NPrintf_t)						NullDst, \
+	(pfnEngDst_Con_NXPrintf_t)						NullDst, \
+	(pfnEngDst_PhysInfo_ValueForKey_t)				NullDst, \
+	(pfnEngDst_ServerInfo_ValueForKey_t)			NullDst, \
+	(pfnEngDst_GetClientMaxspeed_t)					NullDst, \
+	(pfnEngDst_CheckParm_t)							NullDst, \
+	(pfnEngDst_Key_Event_t)							NullDst, \
+	(pfnEngDst_GetMousePosition_t)					NullDst, \
+	(pfnEngDst_IsNoClipping_t)						NullDst, \
+	(pfnEngDst_GetLocalPlayer_t)					NullDst, \
+	(pfnEngDst_GetViewModel_t)						NullDst, \
+	(pfnEngDst_GetEntityByIndex_t)					NullDst, \
+	(pfnEngDst_GetClientTime_t)						NullDst, \
+	(pfnEngDst_V_CalcShake_t)						NullDst, \
+	(pfnEngDst_V_ApplyShake_t)						NullDst, \
+	(pfnEngDst_PM_PointContents_t)					NullDst, \
+	(pfnEngDst_PM_WaterEntity_t)					NullDst, \
+	(pfnEngDst_PM_TraceLine_t)						NullDst, \
+	(pfnEngDst_CL_LoadModel_t)						NullDst, \
+	(pfnEngDst_CL_CreateVisibleEntity_t)			NullDst, \
+	(pfnEngDst_GetSpritePointer_t)					NullDst, \
+	(pfnEngDst_pfnPlaySoundByNameAtLocation_t)		NullDst, \
+	(pfnEngDst_pfnPrecacheEvent_t)					NullDst, \
+	(pfnEngDst_pfnPlaybackEvent_t)					NullDst, \
+	(pfnEngDst_pfnWeaponAnim_t)						NullDst, \
+	(pfnEngDst_pfnRandomFloat_t)					NullDst, \
+	(pfnEngDst_pfnRandomLong_t)						NullDst, \
+	(pfnEngDst_pfnHookEvent_t)						NullDst, \
+	(pfnEngDst_Con_IsVisible_t)						NullDst, \
+	(pfnEngDst_pfnGetGameDirectory_t)				NullDst, \
+	(pfnEngDst_pfnGetCvarPointer_t)					NullDst, \
+	(pfnEngDst_Key_LookupBinding_t)					NullDst, \
+	(pfnEngDst_pfnGetLevelName_t)					NullDst, \
+	(pfnEngDst_pfnGetScreenFade_t)					NullDst, \
+	(pfnEngDst_pfnSetScreenFade_t)					NullDst, \
+	(pfnEngDst_VGui_GetPanel_t)						NullDst, \
+	(pfnEngDst_VGui_ViewportPaintBackground_t)		NullDst, \
+	(pfnEngDst_COM_LoadFile_t)						NullDst, \
+	(pfnEngDst_COM_ParseFile_t)						NullDst, \
+	(pfnEngDst_COM_FreeFile_t)						NullDst, \
+	NULL, \
+	NULL, \
+	NULL, \
+	NULL, \
+	NULL, \
+	NULL, \
+	(pfnEngDst_IsSpectateOnly_t)					NullDst, \
+	(pfnEngDst_LoadMapSprite_t)						NullDst, \
+	(pfnEngDst_COM_AddAppDirectoryToSearchPath_t)	NullDst, \
+	(pfnEngDst_COM_ExpandFilename_t)				NullDst, \
+	(pfnEngDst_PlayerInfo_ValueForKey_t)			NullDst, \
+	(pfnEngDst_PlayerInfo_SetValueForKey_t)			NullDst, \
+	(pfnEngDst_GetPlayerUniqueID_t)					NullDst, \
+	(pfnEngDst_GetTrackerIDForPlayer_t)				NullDst, \
+	(pfnEngDst_GetPlayerForTrackerID_t)				NullDst, \
+	(pfnEngDst_pfnServerCmdUnreliable_t)			NullDst, \
+	(pfnEngDst_GetMousePos_t)						NullDst, \
+	(pfnEngDst_SetMousePos_t)						NullDst, \
+	(pfnEngDst_SetMouseEnable_t)					NullDst, \
+	(pfnEngDst_pfnSetFilterMode_t)					NullDst, \
+	(pfnEngDst_pfnSetFilterColor_t)					NullDst, \
+	(pfnEngDst_pfnSetFilterBrightness_t)			NullDst, \
+	(pfnEngDst_pfnSequenceGet_t)					NullDst, \
+	(pfnEngDst_pfnSPR_DrawGeneric_t)				NullDst, \
+	(pfnEngDst_pfnSequencePickSentence_t)			NullDst, \
+	(pfnEngDst_pfnDrawString_t)						NullDst, \
+	(pfnEngDst_pfnDrawStringReverse_t)				NullDst, \
+	(pfnEngDst_LocalPlayerInfo_ValueForKey_t)		NullDst, \
+	(pfnEngDst_pfnVGUI2DrawCharacter_t)			NullDst, \
+	(pfnEngDst_pfnVGUI2DrawCharacterAdd_t)	NullDst, \
+	(pfnEngDst_pfnPlaySoundVoiceByName_t)		NullDst, \
+	(pfnEngDst_pfnPrimeMusicStream_t)				NullDst, \
+	(pfnEngDst_pfnProcessTutorMessageDecayBuffer_t)	NullDst, \
+	(pfnEngDst_pfnConstructTutorMessageDecayBuffer_t)	NullDst, \
+	(pfnEngDst_pfnResetTutorMessageDecayData_t) NullDst, \
+	(pfnEngDst_pfnPlaySoundByNameAtPitch_t)			NullDst, \
+	(pfnEngDst_pfnFillRGBABlend_t)						NullDst, \
+	(pfnEngDst_pfnGetAppID_t)						NullDst, \
+	(pfnEngDst_pfnGetAliases_t)						NullDst, \
+	(pfnEngDst_pfnVguiWrap2_GetMouseDelta_t)		NullDst, \
+};
+
+// Use this to init a cldll_func_dst structure to point to NullDst
+#define k_cldstNull \
+{ \
+	(DST_INITIALIZE_FUNC)				NullDst, \
+	(DST_HUD_INIT_FUNC)					NullDst, \
+	(DST_HUD_VIDINIT_FUNC)				NullDst, \
+	(DST_HUD_REDRAW_FUNC)				NullDst, \
+	(DST_HUD_UPDATECLIENTDATA_FUNC)		NullDst, \
+	(DST_HUD_RESET_FUNC)				NullDst, \
+	(DST_HUD_CLIENTMOVE_FUNC)			NullDst, \
+	(DST_HUD_CLIENTMOVEINIT_FUNC)		NullDst, \
+	(DST_HUD_TEXTURETYPE_FUNC)			NullDst, \
+	(DST_HUD_IN_ACTIVATEMOUSE_FUNC)		NullDst, \
+	(DST_HUD_IN_DEACTIVATEMOUSE_FUNC)	NullDst, \
+	(DST_HUD_IN_MOUSEEVENT_FUNC)		NullDst, \
+	(DST_HUD_IN_CLEARSTATES_FUNC)		NullDst, \
+	(DST_HUD_IN_ACCUMULATE_FUNC)		NullDst, \
+	(DST_HUD_CL_CREATEMOVE_FUNC)		NullDst, \
+	(DST_HUD_CL_ISTHIRDPERSON_FUNC)		NullDst, \
+	(DST_HUD_CL_GETCAMERAOFFSETS_FUNC)	NullDst, \
+	(DST_HUD_KB_FIND_FUNC)				NullDst, \
+	(DST_HUD_CAMTHINK_FUNC)				NullDst, \
+	(DST_HUD_CALCREF_FUNC)				NullDst, \
+	(DST_HUD_ADDENTITY_FUNC)			NullDst, \
+	(DST_HUD_CREATEENTITIES_FUNC)		NullDst, \
+	(DST_HUD_DRAWNORMALTRIS_FUNC)		NullDst, \
+	(DST_HUD_DRAWTRANSTRIS_FUNC)		NullDst, \
+	(DST_HUD_STUDIOEVENT_FUNC)			NullDst, \
+	(DST_HUD_POSTRUNCMD_FUNC)			NullDst, \
+	(DST_HUD_SHUTDOWN_FUNC)				NullDst, \
+	(DST_HUD_TXFERLOCALOVERRIDES_FUNC)	NullDst, \
+	(DST_HUD_PROCESSPLAYERSTATE_FUNC)	NullDst, \
+	(DST_HUD_TXFERPREDICTIONDATA_FUNC)	NullDst, \
+	(DST_HUD_DEMOREAD_FUNC)				NullDst, \
+	(DST_HUD_CONNECTIONLESS_FUNC)		NullDst, \
+	(DST_HUD_GETHULLBOUNDS_FUNC)		NullDst, \
+	(DST_HUD_FRAME_FUNC)				NullDst, \
+	(DST_HUD_KEY_EVENT_FUNC)			NullDst, \
+	(DST_HUD_TEMPENTUPDATE_FUNC)		NullDst, \
+	(DST_HUD_GETUSERENTITY_FUNC)		NullDst, \
+	(DST_HUD_VOICESTATUS_FUNC)			NullDst, \
+	(DST_HUD_DIRECTORMESSAGE_FUNC)		NullDst, \
+	(DST_HUD_STUDIO_INTERFACE_FUNC)		NullDst, \
+	(DST_HUD_CHATINPUTPOSITION_FUNC)	NullDst, \
+	(DST_HUD_GETPLAYERTEAM)				NullDst, \
+}
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif // CDLL_INT_H
+	

@@ -570,9 +570,6 @@ int CHudRadar::MsgFunc_Location(const char *pszName, int iSize, void *pbuf)
 {
 	BufferReader reader( pszName, pbuf, iSize );
 
-	if( gHUD.IsCZero() )
-		return 1;
-
 	int player = reader.ReadByte();
 	if( player <= MAX_PLAYERS )
 	{

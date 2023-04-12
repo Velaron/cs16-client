@@ -899,9 +899,9 @@ public:
 		return m_scrinfo.iCharHeight;
 	}
 
-	inline bool IsCZero( )
+	inline int GetGameType( )
 	{
-		return m_bIsCZero;
+		return m_iGameType;
 	}
 
 
@@ -1000,6 +1000,8 @@ public:
 	int m_WhiteTex;
 
 private:
+	void SetGameType();
+
 	HUDLIST	*m_pHudList;
 	HSPRITE	m_hsprLogo;
 	int	m_iLogo;
@@ -1011,7 +1013,7 @@ private:
 	int	m_iForceCamera;
 	int m_iForceChaseCam;
 	int m_iFadeToBlack;
-	bool m_bIsCZero;
+	int m_iGameType;
 
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
 	// freed in ~CHud()
