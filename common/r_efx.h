@@ -86,7 +86,6 @@ color24 gTracerColors[] =
 #define FTENT_SPARKSHOWER		0x00020000
 #define FTENT_NOMODEL			0x00040000 // Doesn't have a model, never try to draw ( it just triggers other things )
 #define FTENT_CLIENTCUSTOM		0x00080000 // Must specify callback.  Callback function is responsible for killing tempent and updating fields ( unless other flags specify how to do things )
-#define FTENT_IGNOREGRAVITY		0x00200000 // CS1.6
 
 typedef struct tempent_s	TEMPENTITY;
 typedef struct tempent_s
