@@ -270,8 +270,6 @@ int DrawUtils::DrawHudNumber2( int x, int y, int iNumber, int r, int g, int b )
 
 void DrawUtils::Draw2DQuad( float x1, float y1, float x2, float y2 )
 {
-	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-
 	gEngfuncs.pTriAPI->TexCoord2f( 0, 0 );
 	gEngfuncs.pTriAPI->Vertex3f( x1, y1, 0 );
 
@@ -283,8 +281,6 @@ void DrawUtils::Draw2DQuad( float x1, float y1, float x2, float y2 )
 
 	gEngfuncs.pTriAPI->TexCoord2f( 1, 0 );
 	gEngfuncs.pTriAPI->Vertex3f( x2, y1, 0 );
-
-	gEngfuncs.pTriAPI->End( );
 }
 
 int DrawUtils::HudStringLen( const char *szIt, float scale )

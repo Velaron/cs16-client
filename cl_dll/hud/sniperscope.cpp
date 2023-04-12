@@ -68,6 +68,14 @@ int CHudSniperScope::VidInit()
 	return 1;
 }
 
+inline void DrawTexture( int tex, float x1, float y1, float x2, float y2 )
+{
+	gRenderAPI.GL_Bind( 0, tex );
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	DrawUtils::Draw2DQuad( x1, y1, x2, y2 );
+	gEngfuncs.pTriAPI->End();
+}
+
 int CHudSniperScope::Draw(float flTime)
 {
 	if(gHUD.m_iFOV > 40)
@@ -79,26 +87,18 @@ int CHudSniperScope::Draw(float flTime)
 
 	gRenderAPI.GL_SelectTexture(0);
 
-	gRenderAPI.GL_Bind(0, m_iScopeArc[0]);
-	DrawUtils::Draw2DQuad(left, 0, centerx, centery);
+	DrawTexture( m_iScopeArc[0], left, 0, centerx, centery );
+	DrawTexture( m_iScopeArc[1], centerx, 0, right, centery );
+	DrawTexture( m_iScopeArc[2], centerx, centery, right, TrueHeight );
+	DrawTexture( m_iScopeArc[3], left, centery, centerx, TrueHeight );
 
-	gRenderAPI.GL_Bind(0, m_iScopeArc[1]);
-	DrawUtils::Draw2DQuad(centerx, 0, right, centery);
-
-	gRenderAPI.GL_Bind(0, m_iScopeArc[2]);
-	DrawUtils::Draw2DQuad(centerx, centery, right, TrueHeight);
-
-	gRenderAPI.GL_Bind(0, m_iScopeArc[3]);
-	DrawUtils::Draw2DQuad(left, centery, centerx, TrueHeight);
-
-	FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
-	FillRGBABlend( (ScreenWidth - ScreenHeight) / 2 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
-
-	FillRGBABlend(0,                  ScreenHeight/2, ScreenWidth/2 - 20, 1,  0, 0, 0, 255);
-	FillRGBABlend(ScreenWidth/2 + 20, ScreenHeight/2, ScreenWidth       , 1,  0, 0, 0, 255);
-
-	FillRGBABlend(ScreenWidth/2, 0                  , 1, ScreenHeight/2 - 20, 0, 0, 0, 255);
-	FillRGBABlend(ScreenWidth/2, ScreenHeight/2 + 20, 1, ScreenHeight       , 0, 0, 0, 255);
+	gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+		DrawUtils::Draw2DQuad( 0, 0, left + 2, TrueHeight );
+		DrawUtils::Draw2DQuad( right, 0, right + ( TrueWidth - right ), TrueHeight );
+		DrawUtils::Draw2DQuad( left, centery - 1, right, centery + 1 );
+		DrawUtils::Draw2DQuad( centerx - 1, 0, centerx + 1, TrueHeight );
+	gEngfuncs.pTriAPI->End();
 
 	return 0;
 }

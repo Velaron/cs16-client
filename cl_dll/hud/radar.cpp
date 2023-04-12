@@ -314,7 +314,6 @@ int CHudRadar::Draw(float flTime)
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 		gEngfuncs.pTriAPI->Brightness( 1 );
-		gRenderAPI.GL_SelectTexture( 0 );
 	}
 
 	for(int i = 0; i < 33; i++)
@@ -401,11 +400,13 @@ void CHudRadar::DrawPlayerLocation()
 inline void CHudRadar::DrawColoredTexture( int x, int y, int size, byte r, byte g, byte b, byte a, int texHandle )
 {
 	gRenderAPI.GL_Bind( 0, texHandle );
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 	gEngfuncs.pTriAPI->Color4ub( r, g, b, a );
 	DrawUtils::Draw2DQuad( (iMaxRadius + x - size * 2) * gHUD.m_flScale,
 						   (iMaxRadius + y - size * 2) * gHUD.m_flScale,
 						   (iMaxRadius + x + size * 2) * gHUD.m_flScale,
 						   (iMaxRadius + y + size * 2) * gHUD.m_flScale);
+	gEngfuncs.pTriAPI->End();
 }
 
 
