@@ -54,7 +54,7 @@ void EV_Fire57(event_args_t *args)
 	{
 		++g_iShotsFired;
 		EV_MuzzleFlash();
-		if( args->bparam1 )
+		if( !args->bparam1 )
 		{
 			gEngfuncs.pEventAPI->EV_WeaponAnimation(Com_RandomLong(FIVESEVEN_SHOOT1, FIVESEVEN_SHOOT2), 2);
 		}

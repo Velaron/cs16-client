@@ -29,6 +29,7 @@
 
 #include <math.h>
 
+// HACKHACK: This is very unreliable way to get round time
 float g_flRoundTime = 0.0f;
 
 void EV_DecalReset(event_args_s *args)

@@ -58,12 +58,17 @@ void EV_Fireglock18( event_args_t *args )
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		int seq;
-		if( args->bparam1 )
+		bool isBurst = (g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE) != 0 || g_bGlockBurstMode;
+		if( !args->bparam1 )
 		{
 			if( g_bHoldingShield )
-				seq = GLOCK18_SHIELD_SHOOT;
+			{
+				seq = Com_RandomLong(GLOCK18_SHIELD_SHOOT, GLOCK18_SHIELD_SHOOT2);
+			}
 			else
-				seq = (g_iWeaponFlags & WPNSTATE_GLOCK18_BURST_MODE) != 0 || g_bGlockBurstMode? GLOCK18_SHOOT: GLOCK18_SHOOT3;
+			{
+				seq = isBurst? GLOCK18_SHOOT : GLOCK18_SHOOT3;
+			}
 		}
 		else
 		{

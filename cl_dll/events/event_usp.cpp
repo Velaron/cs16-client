@@ -41,7 +41,7 @@ void EV_FireUSP( event_args_t *args )
 	Vector vecSrc, vecAiming;
 
 	bool silencer_on = !args->bparam2;
-	bool empty		 = !args->bparam1;
+	bool empty		 = args->bparam1;
 	int    idx = args->entindex;
 	Vector origin( args->origin );
 	Vector angles(

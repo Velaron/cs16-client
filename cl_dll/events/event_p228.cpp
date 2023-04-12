@@ -53,7 +53,7 @@ void EV_FireP228(event_args_s *args)
 		++g_iShotsFired;
 		EV_MuzzleFlash();
 		int seq;
-		if( args->bparam1 )
+		if( !args->bparam1 )
 		{
 			if( g_bHoldingShield )
 				seq = Com_RandomLong(P228_SHIELD_SHOOT1, P228_SHIELD_SHOOT2);
