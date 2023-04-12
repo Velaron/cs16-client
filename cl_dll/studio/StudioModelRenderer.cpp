@@ -51,6 +51,7 @@ void CStudioModelRenderer::Init(void)
 	m_pCvarHiModels = IEngineStudio.GetCvar("cl_himodels");
 	m_pCvarDeveloper = IEngineStudio.GetCvar("developer");
 	m_pCvarDrawEntities = IEngineStudio.GetCvar("r_drawentities");
+	m_pCvarShadows = CVAR_CREATE("cl_shadows", "1", FCVAR_ARCHIVE );
 
 	m_pChromeSprite = IEngineStudio.GetChromeSprite();
 
@@ -746,8 +747,13 @@ void CStudioModelRenderer::StudioSetupBones(void)
 					bonematrix[1][2] = -bonematrix[1][2];
 					bonematrix[1][3] = -bonematrix[1][3];
 
-					if( gHUD.hand_xash && gHUD.hand_xash->value != 0.0f )
-						IEngineStudio.StudioSetCullState( 1 ); // set backface culling
+					// hand cvar is forced to 0
+					//if( gHUD.hand_xash && gHUD.hand_xash->value != 0.0f )
+					IEngineStudio.StudioSetCullState( 1 ); // set backface culling
+				}
+				else
+				{
+					IEngineStudio.StudioSetCullState( 0 );
 				}
 
 				ConcatTransforms((*m_protationmatrix), bonematrix, (*m_pbonetransform)[i]);
@@ -1332,6 +1338,8 @@ void CStudioModelRenderer::StudioRenderFinal_Software(void)
 	IEngineStudio.RestoreRenderer();
 }
 
+int twice;
+
 void CStudioModelRenderer::StudioRenderFinal_Hardware(void)
 {
 	int i;
@@ -1369,6 +1377,39 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware(void)
 		IEngineStudio.StudioDrawHulls();
 		gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
 	}*/
+
+	//if (m_pCvarDrawEntities->value == 5)
+	//	IEngineStudio.StudioDrawAbsBBox();
+
+#if 1
+	if( m_pCvarDrawEntities->value == 8 && !m_pCurrentEntity->curstate.iuser4 )
+	{
+		Vector interpOrigin = m_pCurrentEntity->origin;
+
+		m_pCurrentEntity->origin = m_pCurrentEntity->curstate.origin;
+
+		m_pCurrentEntity->curstate.iuser4 = true;
+
+		if( m_pCurrentEntity->player )
+		{
+			StudioDrawPlayer( STUDIO_RENDER, m_pplayer );
+		}
+		else
+		{
+			StudioDrawModel( STUDIO_RENDER );
+		}
+
+		//m_pPlayerInfo = NULL;
+
+		gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
+		IEngineStudio.StudioDrawHulls();
+		gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
+
+		m_pCurrentEntity->origin = interpOrigin;
+	}
+#endif
+
+	//m_pCurrentEntity->syncbase = false;
 
 	IEngineStudio.RestoreRenderer();
 }

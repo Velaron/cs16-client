@@ -213,8 +213,6 @@ void __CmdFunc_MouseSucksClose( void ) { evdev_open = false; }
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
-	gEngfuncs.Con_DPrintf( "%s\n", __PRETTY_FUNCTION__ );
-
 	SetGameType(); // call it first, so we will know gamedir at very early stage
 
 	HOOK_COMMAND( "special", InputCommandSpecial );
@@ -365,8 +363,6 @@ void CHud :: VidInit( void )
 	static bool firstinit = true;
 	m_scrinfo.iSize = sizeof( m_scrinfo );
 	GetScreenInfo( &m_scrinfo );
-
-	gEngfuncs.Con_DPrintf( "%s\n", __PRETTY_FUNCTION__ );
 
 	m_truescrinfo.iWidth = CVAR_GET_FLOAT("width");
 	m_truescrinfo.iHeight = CVAR_GET_FLOAT("height");
@@ -525,8 +521,6 @@ void CHud :: VidInit( void )
 
 void CHud::Shutdown( void )
 {
-	gEngfuncs.Con_DPrintf( "%s\n", __PRETTY_FUNCTION__ );
-
 	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 	{
 		pList->p->Shutdown();

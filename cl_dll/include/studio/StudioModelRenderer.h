@@ -66,6 +66,7 @@ public:
 	cvar_t *m_pCvarHiModels;
 	cvar_t *m_pCvarDeveloper;
 	cvar_t *m_pCvarDrawEntities;
+	cvar_t *m_pCvarShadows;
 	cl_entity_t *m_pCurrentEntity;
 	model_t *m_pRenderModel;
 	player_info_t *m_pPlayerInfo;
@@ -92,6 +93,7 @@ public:
 	float (*m_paliastransform)[3][4];
 	float (*m_pbonetransform)[MAXSTUDIOBONES][3][4];
 	float (*m_plighttransform)[MAXSTUDIOBONES][3][4];
+	entity_state_t *m_pplayer;
 };
 
 #endif
