@@ -21,6 +21,9 @@
 #if !defined (GAMESTUDIOMODELRENDERER_H)
 #define GAMESTUDIOMODELRENDERER_H
 
+#include "studio.h"
+#include "StudioModelRenderer.h"
+
 enum BoneIndex
 {
 	BONE_HEAD,

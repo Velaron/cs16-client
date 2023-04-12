@@ -234,7 +234,6 @@ fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound
 */
 void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity )
 {
-	cl_entity_t *player;	// Get the local player's index
 	switch( event->event )
 	{
 	case 5001:

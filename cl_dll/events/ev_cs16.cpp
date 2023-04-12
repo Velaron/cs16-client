@@ -43,7 +43,7 @@
 
 extern float g_flRoundTime;
 
-char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vecEnd, int iBulletType, bool& isSky )
+char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, const Vector &vecSrc, const Vector &vecEnd, int iBulletType, bool& isSky )
 {
 	// hit the world, try to play sound based on texture material type
 	char chTextureType = CHAR_TEX_CONCRETE;
@@ -627,7 +627,7 @@ void EV_HLDM_FireBullets(int idx,
 
 		while (iShotPenetration != 0)
 		{
-			if( gEngfuncs.PM_PointContents( vecShortSrc, NULL ) == CONTENTS_SOLID )
+			if( gEngfuncs.PM_PointContents( vecShotSrc, NULL ) == CONTENTS_SOLID )
 				break;
 
 			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
@@ -717,32 +717,6 @@ void EV_CS16Client_KillEveryRound( TEMPENTITY *te, float frametime, float curren
 	}
 }
 
-void RemoveBody(TEMPENTITY *te, float frametime, float current_time)
-{
-	// go underground...
-	if( current_time >= te->entity.curstate.fuser2 )
-	{
-		// I think it's VERY scary when you playing and see parts of corpse
-		// on the ceiling(ceiling is thin)
-#if 0
-		te->flags = FTENT_NONE;
-		te->entity.origin.z -= 5.0 * frametime;
-#else
-		te->entity.curstate.rendermode = kRenderTransAlpha;
-		te->entity.curstate.renderamt -= ceil(frametime * 100);
-#endif
-	}
-	EV_CS16Client_KillEveryRound( te, frametime, current_time );
-
-}
-
-void HitBody(TEMPENTITY *ent, pmtrace_s *ptr)
-{
-	/*if( ptr->plane.normal.z > 0.0 )
-		ent->flags = FTENT_NONE;*/
-}
-
-
 void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAnimTime, int iSequence, int iBody)
 {
 	int modelIdx = gEngfuncs.pEventAPI->EV_FindModelIndex(pModel);
@@ -750,7 +724,7 @@ void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAn
 	TEMPENTITY *model = gEngfuncs.pEfxAPI->R_TempModel( vOrigin, null, vAngles,
 		gEngfuncs.pfnGetCvarFloat("cl_corpsestay"), modelIdx, 0 );
 
-	if(model)
+	if( model )
 	{
 		model->flags = FTENT_COLLIDEWORLD;
 		model->entity.curstate.animtime = flAnimTime;
@@ -759,7 +733,24 @@ void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAn
 		model->entity.curstate.sequence = iSequence;
 		model->entity.curstate.body = iBody;
 		model->entity.curstate.fuser2 = gHUD.m_flTime + gEngfuncs.pfnGetCvarFloat("cl_corpsestay");
-		model->hitcallback = HitBody;
-		model->callback = RemoveBody;
+		model->entity.curstate.fuser4 = gHUD.m_flTime;
+		model->hitcallback = NULL;
+		model->callback = []( TEMPENTITY *te, float frametime, float current_time ) -> void
+		{
+			// go underground...
+			if( current_time >= te->entity.curstate.fuser2 )
+			{
+				// I think it's VERY scary when you playing and see parts of corpse
+				// on the ceiling(ceiling is thin)
+			#if 0
+					te->flags = FTENT_NONE;
+					te->entity.origin.z -= 5.0 * frametime;
+			#else
+					te->entity.curstate.rendermode = kRenderTransAlpha;
+					te->entity.curstate.renderamt -= ceil(frametime * 100);
+			#endif
+			}
+			EV_CS16Client_KillEveryRound( te, frametime, current_time );
+		};
 	}
 }

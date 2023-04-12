@@ -19,6 +19,9 @@
 #ifndef STUDIOMODELRENDERER_H
 #define STUDIOMODELRENDERER_H
 
+#include "studio.h"
+#include "com_model.h"
+
 class CStudioModelRenderer
 {
 public:

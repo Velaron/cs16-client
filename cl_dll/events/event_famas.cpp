@@ -91,6 +91,7 @@ void EV_FireFAMAS( event_args_t *args )
 	
 	vSpread.x = args->fparam1;
 	vSpread.y = args->fparam2;
+
 	EV_HLDM_FireBullets( idx,
 		forward, right,	up,
 		1, vecSrc, vecAiming,

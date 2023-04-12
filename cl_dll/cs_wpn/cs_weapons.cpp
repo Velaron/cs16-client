@@ -884,7 +884,7 @@ void HUD_InitClientWeapons( void )
 	g_engfuncs.pfnRandomLong		= gEngfuncs.pfnRandomLong;
 
 	// Allocate a slot for the local player
-	HUD_PrepEntity( &player		, NULL );
+	HUD_PrepEntity( &player	);
 
 	// Allocate slot(s) for each weapon that we are going to be predicting
 	if( gHUD.GetGameType() != GAME_CZERODS )

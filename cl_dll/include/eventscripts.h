@@ -15,7 +15,7 @@
 #include "r_efx.h"
 
 // defaults for clientinfo messages
-#define	DEFAULT_VIEWHEIGHT	28
+#define	DEFAULT_VIEWHEIGHT	17
 #define VEC_DUCK_VIEW 12
 
 #define FTENT_FADEOUT			0x00000080
@@ -66,7 +66,7 @@
 #define IS_FIRSTPERSON_SPEC ( g_iUser1 == OBS_IN_EYE || (g_iUser1 && (gHUD.m_Spectator.m_pip->value == INSET_IN_EYE)) )
 
 // Some of these are HL/TFC specific?
-void EV_GetGunPosition( struct event_args_s *args, float *pos, float *origin );
+void EV_GetGunPosition( struct event_args_s *args, Vector &pos, const Vector &origin );
 void EV_GetDefaultShellInfo( struct event_args_s *args, float *origin, float *velocity, float *ShellVelocity, float *ShellOrigin, float *forward, float *right, float *up, float forwardScale, float upScale, float rightScale, bool bReverseDirection = false );
 void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAnimTime, int iSequence, int iBody);
 

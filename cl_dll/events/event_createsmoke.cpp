@@ -31,17 +31,6 @@
 
 #define SMOKE_CLOUDS 20
 
-void EV_Smoke_FadeOut( struct tempent_s *te, float frametime, float currenttime )
-{
-	if( te->entity.curstate.renderamt > 0 && currenttime >= te->entity.curstate.fuser3 )
-	{
-		te->entity.curstate.renderamt = 255.0f - (currenttime - te->entity.curstate.fuser3) * te->entity.baseline.renderamt ;
-		if( te->entity.curstate.renderamt < 0 ) te->entity.curstate.renderamt = 0;
-	}
-	EV_CS16Client_KillEveryRound( te, frametime, currenttime );
-}
-
-
 void EV_CreateSmoke(event_args_s *args)
 {
 	TEMPENTITY *pTemp;
@@ -68,9 +57,17 @@ void EV_CreateSmoke(event_args_s *args)
 				pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
 				pTemp->flags &= ~(FTENT_NOMODEL);
 				pTemp->die = gEngfuncs.GetClientTime() + 30.0f;
-				pTemp->callback = EV_Smoke_FadeOut;
+				pTemp->callback = [](struct tempent_s *te, float frametime, float currenttime) -> void
+				{
+					if( te->entity.curstate.renderamt > 0 && currenttime >= te->entity.curstate.fuser3 )
+					{
+						te->entity.curstate.renderamt = 255.0f - (currenttime - te->entity.curstate.fuser3) * te->entity.baseline.renderamt ;
+						if( te->entity.curstate.renderamt < 0 ) te->entity.curstate.renderamt = 0;
+					}
+					EV_CS16Client_KillEveryRound( te, frametime, currenttime );
+				};
 
-				//!!! Setup model !!!
+				// !!! Setup model !!!
 				pTemp->entity.model = (struct model_s*)pGasModel;
 				pTemp->frameMax = max( 0, pGasModel->numframes - 1 );
 

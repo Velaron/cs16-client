@@ -54,10 +54,10 @@ int CHudSniperScope::VidInit()
 		return 0;
 	}
 
-	m_iScopeArc[0] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_nw.tga", NULL, 0, TF_NEAREST /*|TF_NOPICMIP*/|TF_NOMIPMAP|TF_CLAMP);
-	m_iScopeArc[1] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_ne.tga", NULL, 0, TF_NEAREST /*|TF_NOPICMIP*/|TF_NOMIPMAP|TF_CLAMP);
-	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga",    NULL, 0, TF_NEAREST /*|TF_NOPICMIP*/|TF_NOMIPMAP|TF_CLAMP);
-	m_iScopeArc[3] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_sw.tga", NULL, 0, TF_NEAREST /*|TF_NOPICMIP*/|TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[0] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_nw.tga", NULL, 0, TF_NEAREST |TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[1] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_ne.tga", NULL, 0, TF_NEAREST |TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[2] = gRenderAPI.GL_LoadTexture("sprites/scope_arc.tga",    NULL, 0, TF_NEAREST |TF_NOMIPMAP|TF_CLAMP);
+	m_iScopeArc[3] = gRenderAPI.GL_LoadTexture("sprites/scope_arc_sw.tga", NULL, 0, TF_NEAREST |TF_NOMIPMAP|TF_CLAMP);
 
 	if( !m_iScopeArc[0] || !m_iScopeArc[1] || !m_iScopeArc[2] || !m_iScopeArc[3] )
 	{

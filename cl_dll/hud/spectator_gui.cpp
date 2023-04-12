@@ -98,7 +98,7 @@ int CHudSpectatorGui::VidInit()
 		return 0;
 	}
 
-	m_hTimerTexture = gRenderAPI.GL_LoadTexture("gfx/vgui/timer.tga", NULL, 0, TF_NEAREST /*|TF_NOPICMIP*/|TF_NOMIPMAP|TF_CLAMP );
+	m_hTimerTexture = gRenderAPI.GL_LoadTexture("gfx/vgui/timer.tga", NULL, 0, TF_NEAREST |TF_NOMIPMAP|TF_CLAMP );
 	return 1;
 }
 
