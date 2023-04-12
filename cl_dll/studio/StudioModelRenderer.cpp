@@ -52,7 +52,9 @@ void CStudioModelRenderer::Init(void)
 	m_pCvarDeveloper = IEngineStudio.GetCvar("developer");
 	m_pCvarDrawEntities = IEngineStudio.GetCvar("r_drawentities");
 	m_pCvarShadows = CVAR_CREATE("cl_shadows", "1", FCVAR_ARCHIVE );
-
+#ifndef NDEBUG
+	m_pCvarDebug = CVAR_CREATE( "r_smr_debug", "0", 0 );
+#endif
 	m_pChromeSprite = IEngineStudio.GetChromeSprite();
 
 	IEngineStudio.GetModelCounters(&m_pStudioModelCount, &m_pModelsDrawn);
@@ -740,7 +742,9 @@ void CStudioModelRenderer::StudioSetupBones(void)
 		{
 			if (IEngineStudio.IsHardware())
 			{
-				if( bIsViewModel && (( gHUD.cl_righthand->value != 0.0f ) ^ (g_bHoldingKnife || g_bHoldingShield)) )
+				bool invert = (g_bHoldingKnife || g_bHoldingShield) && gHUD.GetGameType() == GAME_CSTRIKE;
+
+				if( bIsViewModel && (( gHUD.cl_righthand->value != 0.0f ) ^ invert ) )
 				{
 					bonematrix[1][0] = -bonematrix[1][0];
 					bonematrix[1][1] = -bonematrix[1][1];

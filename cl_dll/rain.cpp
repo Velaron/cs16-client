@@ -532,6 +532,9 @@ void DrawRain( void )
 	if( Rain.weatherMode == 0 ) // draw rain
 	{
 		const model_s *pTexture = gEngfuncs.GetSpritePointer( Rain.hsprRain );
+		if( !pTexture )
+			return;
+
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pTexture, 0 );
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
@@ -570,6 +573,9 @@ void DrawRain( void )
 	else	// draw snow
 	{
 		const model_s *pTexture = gEngfuncs.GetSpritePointer( Rain.hsprSnow );
+		if( !pTexture )
+			return;
+
 		float visibleHeight = Rain.globalHeight - SNOWFADEDIST;
 		vec3_t normal;
 		float  matrix[3][4];

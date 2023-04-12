@@ -65,7 +65,6 @@
 extern int g_iPShell;
 extern int g_iRShell;
 extern int g_iShotgunShell;
-extern int g_iBlackSmoke;
 
 extern "C"
 {

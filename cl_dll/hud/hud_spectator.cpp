@@ -97,55 +97,76 @@ void SpectatorMenu( void )
 		gEngfuncs.Con_Printf( "usage:  spec_menu <0|1>\n" );
 		return;
 	}
-	gEngfuncs.Cvar_Set( "spec_menu_internal", gEngfuncs.Cmd_Argv(1) );
-}
+	const char *name = "spec_menu_internal";
+	char *arg = gEngfuncs.Cmd_Argv(1);
 
-void ToggleScores( void )
-{
-
+	if( arg[0] == 't' && arg[1] == '\0' )
+		gEngfuncs.Cvar_SetValue( name, !gEngfuncs.pfnGetCvarFloat(name) );
+	else
+		gEngfuncs.Cvar_Set( name, gEngfuncs.Cmd_Argv(1) );
 }
 
 void SpecDrawNames( void )
 {
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
-		gEngfuncs.Con_Printf( "usage:  spec_draw_names <0|1>\n" );
+		gEngfuncs.Con_Printf( "usage:  spec_drawnames <0|1>\n" );
 		return;
 	}
-	gEngfuncs.Cvar_Set( "spec_draw_names_internal", gEngfuncs.Cmd_Argv(1) );
-}
+	const char *name = "spec_drawnames_internal";
+	char *arg = gEngfuncs.Cmd_Argv(1);
+
+	if( arg[0] == 't' && arg[1] == '\0' )
+		gEngfuncs.Cvar_SetValue( name, !gEngfuncs.pfnGetCvarFloat(name) );
+	else
+		gEngfuncs.Cvar_Set( name, gEngfuncs.Cmd_Argv(1) );}
 
 void SpecDrawCone( void )
 {
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
-		gEngfuncs.Con_Printf( "usage:  spec_draw_cone <0|1>\n" );
+		gEngfuncs.Con_Printf( "usage:  spec_drawcone <0|1>\n" );
 		return;
 	}
 
-	gEngfuncs.Cvar_Set( "spec_draw_cone_internal", gEngfuncs.Cmd_Argv(1) );
+	const char *name = "spec_drawcone_internal";
+	char *arg = gEngfuncs.Cmd_Argv(1);
+	if( arg[0] == 't' && arg[1] == '\0' )
+		gEngfuncs.Cvar_SetValue( name, !gEngfuncs.pfnGetCvarFloat(name) );
+	else
+		gEngfuncs.Cvar_Set( name, gEngfuncs.Cmd_Argv(1) );
 }
-
 void SpecDrawStatus( void )
 {
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
-		gEngfuncs.Con_Printf( "usage:  spec_draw_status <0|1>\n" );
+		gEngfuncs.Con_Printf( "usage:  spec_drawstatus <0|1>\n" );
 		return;
 	}
 
-	gEngfuncs.Cvar_Set( "spec_draw_status_internal", gEngfuncs.Cmd_Argv(1) );
+	const char *name = "spec_drawstatus_internal";
+	char *arg = gEngfuncs.Cmd_Argv(1);
+	if( arg[0] == 't' && arg[1] == '\0' )
+		gEngfuncs.Cvar_SetValue( name, !gEngfuncs.pfnGetCvarFloat(name) );
+	else
+		gEngfuncs.Cvar_Set( name, gEngfuncs.Cmd_Argv(1) );
 }
 
 void SpecAutoDirector( void )
 {
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
-		gEngfuncs.Con_Printf( "usage:  spec_auto_director <0|1>\n" );
+		gEngfuncs.Con_Printf( "usage:  spec_autodirector <0|1>\n" );
 		return;
 	}
 
-	gEngfuncs.Cvar_Set( "spec_auto_director_internal", gEngfuncs.Cmd_Argv(1) );
+	const char *name = "spec_autodirector_internal";
+	char *arg = gEngfuncs.Cmd_Argv(1);
+
+	if( arg[0] == 't' && arg[1] == '\0' )
+		gEngfuncs.Cvar_SetValue( name, !gEngfuncs.pfnGetCvarFloat(name) );
+	else
+		gEngfuncs.Cvar_Set( name, gEngfuncs.Cmd_Argv(1) );
 }
 
 void SpecPip( void )
@@ -156,7 +177,13 @@ void SpecPip( void )
 		return;
 	}
 
-	gEngfuncs.Cvar_Set( "spec_pip_internal", gEngfuncs.Cmd_Argv(1) );
+	const char *name = "spec_pip_internal";
+	char *arg = gEngfuncs.Cmd_Argv(1);
+
+	if( arg[0] == 't' && arg[1] == '\0' )
+		gEngfuncs.Cvar_SetValue( name, !gEngfuncs.pfnGetCvarFloat(name) );
+	else
+		gEngfuncs.Cvar_Set( name, gEngfuncs.Cmd_Argv(1) );
 }
 
 //-----------------------------------------------------------------------------
@@ -181,7 +208,6 @@ int CHudSpectator::Init()
 	gEngfuncs.pfnAddCommand ("spec_decal", SpectatorSpray );
 	gEngfuncs.pfnAddCommand ("spec_help", SpectatorHelp );
 	gEngfuncs.pfnAddCommand ("spec_menu", SpectatorMenu );
-	gEngfuncs.pfnAddCommand ("togglescores", ToggleScores );
 	gEngfuncs.pfnAddCommand ("spec_drawnames", SpecDrawNames );
 	gEngfuncs.pfnAddCommand ("spec_drawcone", SpecDrawCone );
 	gEngfuncs.pfnAddCommand ("spec_drawstatus", SpecDrawStatus );
@@ -189,14 +215,13 @@ int CHudSpectator::Init()
 	gEngfuncs.pfnAddCommand ("spec_pip", SpecPip );
 
 	m_drawnames		= gEngfuncs.pfnRegisterVariable("spec_drawnames_internal","1",0);
-	m_specmode      = gEngfuncs.pfnRegisterVariable("spec_mode_internal","1",0);
 	m_drawcone		= gEngfuncs.pfnRegisterVariable("spec_drawcone_internal","1",0);
 	m_drawstatus	= gEngfuncs.pfnRegisterVariable("spec_drawstatus_internal","1",0);
 	m_autoDirector	= gEngfuncs.pfnRegisterVariable("spec_autodirector_internal","1",0);
 	m_pip			= gEngfuncs.pfnRegisterVariable("spec_pip_internal","1",0);
 	m_lastAutoDirector = 0.0f;
 	
-	if ( !m_drawnames || !m_drawcone || !m_drawstatus || !m_autoDirector || !m_pip || !m_specmode )
+	if ( !m_drawnames || !m_drawcone || !m_drawstatus || !m_autoDirector || !m_pip )
 	{
 		gEngfuncs.Con_Printf("ERROR! Couldn't register all spectator variables.\n");
 		return 0;
@@ -667,7 +692,6 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 	case DRC_CMD_STUFFTEXT:
 		ClientCmd( reader.ReadString() );
 		break;
-
 	default			:	gEngfuncs.Con_DPrintf("CHudSpectator::DirectorMessage: unknown command %i.\n", cmd );
 	}
 }
@@ -931,6 +955,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 			break;
 		}
 
+#if 0
 		if ( (g_iUser1 == OBS_IN_EYE) || (g_iUser1 == OBS_ROAMING) )
 		{
 			m_crosshairRect.left	 = 24;
@@ -945,6 +970,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 			memset( &m_crosshairRect,0,sizeof(m_crosshairRect) );
 			SetCrosshair( 0, m_crosshairRect, 0, 0, 0 );
 		}
+#endif
 
 		char string[128];
 		sprintf(string, "#Spec_Mode%d", g_iUser1 );
@@ -1619,6 +1645,7 @@ void CHudSpectator::CheckSettings()
 		}
 	}
 
+#if 0
 	// HL/TFC has no oberserver corsshair, so set it client side
 	if ( (g_iUser1 == OBS_IN_EYE) || (g_iUser1 == OBS_ROAMING) )
 	{
@@ -1634,7 +1661,7 @@ void CHudSpectator::CheckSettings()
 		memset( &m_crosshairRect,0,sizeof(m_crosshairRect) );
 		SetCrosshair( 0, m_crosshairRect, 0, 0, 0 );
 	}
-
+#endif
 
 
 	// if we are a real player on server don't allow inset window

@@ -133,10 +133,10 @@ void PM_ReduceTimers();
 qboolean PM_ShouldDoSpectMode();
 void PM_PlayerMove(qboolean server);
 void PM_CreateStuckTable();
-void PM_Move(struct playermove_s *ppmove, int server);
+void PM_Move(playermove_t *ppmove, int server);
 int PM_GetVisEntInfo(int ent);
 int PM_GetPhysEntInfo(int ent);
-void PM_Init(struct playermove_s *ppmove);
+void PM_Init(playermove_t *ppmove);
 
 extern playermove_t *pmove;
 

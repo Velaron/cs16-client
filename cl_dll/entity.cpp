@@ -36,7 +36,7 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *mode
 	{
 	case ET_NORMAL:
 	case ET_PLAYER:
-		if(ent->player && iOnTrain[ent->index])
+		if( ent->player && iOnTrain[ent->index] )
 		{
 			VectorCopy(ent->curstate.origin, ent->origin);
 			VectorCopy(ent->curstate.angles, ent->angles);

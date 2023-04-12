@@ -51,7 +51,7 @@ void EV_FireM4A1( event_args_t *args )
 		);
 	Vector velocity( args->velocity );
 	Vector forward, right, up;
-	int smokeType;
+	ESmoke smokeType;
 
 	AngleVectors( angles, forward, right, up );
 

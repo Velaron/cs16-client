@@ -609,6 +609,8 @@ public:
 	void MessageScanNextChar( void );
 	void Reset( void );
 
+	client_textmessage_t *AllocMessage( const char *text = NULL, client_textmessage_t *copyFrom = NULL );
+
 private:
 	client_textmessage_t		*m_pMessages[maxHUDMessages];
 	float						m_startTime[maxHUDMessages];
@@ -910,7 +912,7 @@ public:
 				return i;
 		}
 
-		gEngfuncs.Con_Printf( "GetSpriteIndex: %s sprite not found", SpriteName );
+		gEngfuncs.Con_Printf( "GetSpriteIndex: %s sprite not found\n", SpriteName );
 		return -1; // invalid sprite
 	}
 

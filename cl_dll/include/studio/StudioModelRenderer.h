@@ -53,7 +53,7 @@ public:
 	virtual void StudioEstimateGait(entity_state_t *pplayer);
 	virtual void StudioProcessGait(entity_state_t *pplayer);
 	virtual void StudioSetShadowSprite(int idx);
-	virtual void StudioDrawShadow(Vector origin, float scale);
+	void StudioDrawShadow(Vector origin, float scale);
 
 
 public:
@@ -67,6 +67,7 @@ public:
 	cvar_t *m_pCvarDeveloper;
 	cvar_t *m_pCvarDrawEntities;
 	cvar_t *m_pCvarShadows;
+	cvar_t *m_pCvarDebug;
 	cl_entity_t *m_pCurrentEntity;
 	model_t *m_pRenderModel;
 	player_info_t *m_pPlayerInfo;

@@ -58,13 +58,19 @@ void EV_CreateSmoke(event_args_s *args)
 			org.y += Com_RandomFloat(-100.0f, 100.0f);
 			org.z += 30; 
 
-			pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( org, (model_s*)pGasModel );
+			pTemp = gEngfuncs.pEfxAPI->CL_TempEntAllocNoModel( org );
 			if( pTemp )
 			{
 				// don't die when animation is ended
 				pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
+				pTemp->flags &= ~(FTENT_NOMODEL);
 				pTemp->die = gEngfuncs.GetClientTime() + 30.0f;
 				pTemp->callback = EV_Smoke_FadeOut;
+
+				//!!! Setup model !!!
+				pTemp->entity.model = (struct model_s*)pGasModel;
+				pTemp->frameMax = max( 0, pGasModel->numframes - 1 );
+
 				pTemp->entity.curstate.fuser3 = gEngfuncs.GetClientTime() + 15.0f; // start fading after 15 sec
 				pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime(); // entity creation time
 
@@ -84,22 +90,11 @@ void EV_CreateSmoke(event_args_s *args)
 	}
 	else // second and other
 	{
-		pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite( args->origin, g_iBlackSmoke, 6.0f );
+		int g = gEngfuncs.pfnRandomLong(155, 175);
 
-		if( pTemp )
-		{
-			pTemp->flags |= (FTENT_CLIENTCUSTOM | FTENT_COLLIDEWORLD);
-			pTemp->callback = EV_CS16Client_KillEveryRound;
-			pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime();
+		Vector dir( args->fparam1, args->fparam2, 0.0f );
+		Vector vel( 0.0f, 0.0f, 0.0f );
 
-			pTemp->entity.curstate.rendermode = kRenderTransTexture;
-			pTemp->entity.curstate.renderfx = kRenderFxNone;
-			pTemp->entity.curstate.rendercolor.r = Com_RandomLong(210, 230);
-			pTemp->entity.curstate.rendercolor.g = Com_RandomLong(210, 230);
-			pTemp->entity.curstate.rendercolor.b = Com_RandomLong(210, 230);
-			pTemp->entity.curstate.renderamt = Com_RandomLong(180, 200);
-
-			pTemp->entity.baseline.origin[0] = Com_RandomLong(10, 30);
-		}
+		EV_CS16Client_CreateSmoke( SMOKE_BLACK, args->origin, dir, args->iparam1 / 100, 1.0f, g, g, g, true, vel, 25 );
 	}
 }

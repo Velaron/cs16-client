@@ -49,6 +49,9 @@ version.
 
 int CHudSpectatorGui::Init()
 {
+	if( !g_iXash )
+		return 1;
+
 	HOOK_MESSAGE( gHUD.m_SpectatorGui, SpecHealth );
 	HOOK_MESSAGE( gHUD.m_SpectatorGui, SpecHealth2 );
 
@@ -384,11 +387,11 @@ void CHudSpectatorGui::UserCmd_ToggleSpectatorMenuOptions()
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 3.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_settings", "*white", "_spec_toggle_menu_options_settings",
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 4.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_pip", "*white", "toggle spec_pip_internal; _spec_toggle_menu_options",
+		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_pip", "*white", "spec_pip t; _spec_toggle_menu_options",
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 5.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_ad", "*white", "toggle spec_autodirector_internal; _spec_toggle_menu_options",
+		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_ad", "*white", "spec_autodirector t; _spec_toggle_menu_options",
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 6.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_showscores", "*white", "scoreboard; _spec_toggle_menu_options",
+		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_showscores", "*white", "_spec_toggle_menu_options; scoreboard",
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 0.5f, 7.5f ), color, 0, 1.0f, 0 );
 	}
 	else
@@ -411,11 +414,11 @@ void CHudSpectatorGui::UserCmd_ToggleSpectatorMenuOptionsSettings()
 		m_menuFlags |= MENU_OPTIONS_SETTINGS;
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_chat_msgs", "*white", "messagemode; _spec_toggle_menu_options_settings",
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 4.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_set_status", "*white", "toggle spec_drawstatus_internal; _spec_toggle_menu_options_settings",
+		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_set_status", "*white", "spec_drawstatus t; _spec_toggle_menu_options_settings",
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 5.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_draw_cones", "*white", "toggle spec_drawcone_internal; _spec_toggle_menu_options_settings",
+		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_draw_cones", "*white", "spec_drawcone t; _spec_toggle_menu_options_settings",
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 6.5f ), color, 0, 1.0f, 0 );
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_draw_names", "*white", "toggle spec_drawnames_internal; _spec_toggle_menu_options_settings",
+		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_draw_names", "*white", "spec_drawnames t; _spec_toggle_menu_options_settings",
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 7.5f ), color, 0, 1.0f, 0 );
 	}
 	else

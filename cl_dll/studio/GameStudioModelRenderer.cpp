@@ -37,6 +37,7 @@
 #include "StudioModelRenderer.h"
 #include "GameStudioModelRenderer.h"
 #include "pm_defs.h"
+#include "camera.h"
 
 #define ANIM_WALK_SEQUENCE 3
 #define ANIM_JUMP_SEQUENCE 6
@@ -1086,21 +1087,71 @@ void R_StudioInit(void)
 
 int R_StudioDrawPlayer(int flags, entity_state_t *pplayer)
 {
-#if 0
-	if( g_StudioRenderer.m_pCvarDrawEntities->value >= 8 )
+#ifndef NDEBUG
+	if( g_StudioRenderer.m_pCvarDebug->value >= 8 )
 	{
 			cl_entity_t *pCurrentEntity = IEngineStudio.GetCurrentEntity();
+			int ret = 0;
 
 			if( pCurrentEntity )
 			{
-					Vector saveOrigin = pCurrentEntity->origin;
-					pCurrentEntity->origin = pCurrentEntity->curstate.origin;
-					g_StudioRenderer.m_pCvarDrawEntities->value = g_StudioRenderer.m_pCvarDrawEntities->value - 8;
-					g_StudioRenderer.StudioDrawPlayer( flags, pplayer );
-					g_StudioRenderer.m_pCvarDrawEntities->value = 8 + g_StudioRenderer.m_pCvarDrawEntities->value;
-					pCurrentEntity->origin = saveOrigin;
+					cvar_t *drawEntites = g_StudioRenderer.m_pCvarDrawEntities;
+					g_StudioRenderer.m_pCvarDebug->value -= 8;
+					g_StudioRenderer.m_pCvarDrawEntities = g_StudioRenderer.m_pCvarDebug;
+
+					// first draw interpolated
+					ret = g_StudioRenderer.StudioDrawPlayer( flags, pplayer );
+
+					// then draw non-interpolated
+					/*{
+						Vector saveOrigin = pCurrentEntity->origin;
+						int savefx = pCurrentEntity->curstate.renderfx;
+						int saveamt = pCurrentEntity->curstate.renderamt;
+						color24 savecolor = pCurrentEntity->curstate.rendercolor;
+
+						pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
+						pCurrentEntity->curstate.rendercolor.r = 0;
+						pCurrentEntity->curstate.rendercolor.g = 0;
+						pCurrentEntity->curstate.rendercolor.b = 255;
+						pCurrentEntity->curstate.renderamt = 255;
+						pCurrentEntity->origin = pCurrentEntity->curstate.origin;
+
+						g_StudioRenderer.StudioDrawPlayer( flags, pplayer );
+						pCurrentEntity->origin = saveOrigin;
+						pCurrentEntity->curstate.renderfx = savefx;
+						pCurrentEntity->curstate.renderamt   = saveamt;
+						pCurrentEntity->curstate.rendercolor = savecolor;
+					}
+
+					// then draw non-interpolated
+					{
+						Vector saveOrigin = pCurrentEntity->origin;
+						int savefx = pCurrentEntity->curstate.renderfx;
+						int saveamt = pCurrentEntity->curstate.renderamt;
+						color24 savecolor = pCurrentEntity->curstate.rendercolor;
+
+						pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
+						pCurrentEntity->curstate.rendercolor.r = 255;
+						pCurrentEntity->curstate.rendercolor.g = 0;
+						pCurrentEntity->curstate.rendercolor.b = 0;
+						pCurrentEntity->curstate.renderamt = 255;
+						pCurrentEntity->origin = pCurrentEntity->prevstate.origin;
+
+						g_StudioRenderer.StudioDrawPlayer( flags, pplayer );
+						pCurrentEntity->origin = saveOrigin;
+						pCurrentEntity->curstate.renderfx    = savefx;
+						pCurrentEntity->curstate.renderamt   = saveamt;
+						pCurrentEntity->curstate.rendercolor = savecolor;
+					}*/
+
+
+					g_StudioRenderer.m_pCvarDrawEntities = drawEntites;
+					g_StudioRenderer.m_pCvarDebug->value += 8;
 			}
+
+			return ret;
 	}
+	else
 #endif
 	return g_StudioRenderer.StudioDrawPlayer(flags, pplayer);
 }

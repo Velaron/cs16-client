@@ -96,7 +96,6 @@ public:
 	float				m_mapZoom;		// zoom the user currently uses
 	vec3_t				m_mapOrigin;	// origin where user rotates around
 	cvar_t *			m_drawnames;
-	cvar_t *            m_specmode;
 	cvar_t *			m_drawcone;
 	cvar_t *			m_drawstatus;
 	cvar_t *			m_autoDirector;

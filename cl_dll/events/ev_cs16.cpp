@@ -43,64 +43,6 @@
 
 extern float g_flRoundTime;
 
-// play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
-// original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
-// returns volume of strike instrument (crowbar) to play
-void EV_HLDM_NewExplode( float x, float y, float z, float ScaleExplode1 )
-{
-
-	int  iNewExplode = gEngfuncs.pEventAPI->EV_FindModelIndex ("sprites/dexplo.spr");
-	TEMPENTITY *pTemp = gEngfuncs.pEfxAPI->R_TempSprite( Vector( x, y, z + 5 ),
-														 Vector( 0, 0, 0 ),
-														 ScaleExplode1, iNewExplode, kRenderTransAdd, kRenderFxNone, 1.0, 0.5, FTENT_SPRANIMATE | FTENT_FADEOUT | FTENT_COLLIDEKILL );
-
-	if(pTemp)
-	{
-		pTemp->fadeSpeed = 90.0;
-		pTemp->entity.curstate.framerate = 37.0;
-		pTemp->entity.curstate.renderamt = 155;
-		pTemp->entity.curstate.rendercolor.r = 255;
-		pTemp->entity.curstate.rendercolor.g = 255;
-		pTemp->entity.curstate.rendercolor.b = 255;
-	}
-
-	iNewExplode = gEngfuncs.pEventAPI->EV_FindModelIndex ("sprites/fexplo.spr");
-	pTemp = gEngfuncs.pEfxAPI->R_TempSprite( Vector( x, y, z + 10),
-											 Vector( 0, 0, 0 ),
-											 ScaleExplode1, iNewExplode, kRenderTransAdd, kRenderFxNone, 1.0, 0.5, FTENT_SPRANIMATE | FTENT_FADEOUT | FTENT_COLLIDEKILL );
-
-	if(pTemp)
-	{
-		pTemp->fadeSpeed = 90.0;
-		pTemp->entity.curstate.framerate = 35.0;
-		pTemp->entity.curstate.renderamt = 150;
-		pTemp->entity.curstate.rendercolor.r = 255;
-		pTemp->entity.curstate.rendercolor.g = 255;
-		pTemp->entity.curstate.rendercolor.b = 255;
-		pTemp->entity.angles = Vector( 90, 0, 0 );
-	}
-
-	for( int i = 1; i <= 10; i++ )
-	{
-		int  iSmokeSprite = gEngfuncs.pEventAPI->EV_FindModelIndex ("sprites/smoke.spr");
-		TEMPENTITY *pTemp = gEngfuncs.pEfxAPI->R_TempSprite( Vector( x, y, z ),
-															 Vector( (int)Com_RandomLong( -100, 100 ), (int)Com_RandomLong( -100, 100 ), (int)Com_RandomLong( -100, 100 ) ),
-															 5, iSmokeSprite, kRenderTransAlpha, kRenderFxNone, 1.0, 0.5, FTENT_FADEOUT | FTENT_PERSIST );
-
-		if(pTemp)
-		{
-			pTemp->fadeSpeed = 0.6;
-			pTemp->entity.curstate.framerate = 1;
-			pTemp->entity.curstate.renderamt = 255;
-			int Color = Com_RandomLong( 0, 140 );
-			pTemp->entity.curstate.rendercolor.r = Color;
-			pTemp->entity.curstate.rendercolor.g = Color;
-			pTemp->entity.curstate.rendercolor.b = Color;
-		}
-	}
-
-}
-
 char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vecEnd, int iBulletType, bool& isSky )
 {
 	// hit the world, try to play sound based on texture material type
@@ -371,15 +313,8 @@ void EV_WallPuff_Wind( struct tempent_s *te, float frametime, float currenttime 
 		if ( yWindMagnitude > 5.0 )
 			yWindMagnitude = 5.0;
 
-		if( xWindDirection )
-			te->entity.baseline.origin.x += xWindMagnitude;
-		else
-			te->entity.baseline.origin.x -= xWindMagnitude;
-
-		if( yWindDirection )
-			te->entity.baseline.origin.y += yWindMagnitude;
-		else
-			te->entity.baseline.origin.y -= yWindMagnitude;
+		te->entity.baseline.origin.x += xWindMagnitude * ( xWindDirection ? 1 : -1 );
+		te->entity.baseline.origin.y += yWindMagnitude * ( yWindDirection ? 1 : -1 );
 
 		if ( !Com_RandomLong(0, 10) && yWindMagnitude > 3.0 )
 		{
@@ -408,29 +343,21 @@ void EV_SmokeRise( struct tempent_s *te, float frametime, float currenttime )
 
 void EV_HugWalls(TEMPENTITY *te, pmtrace_s *ptr)
 {
-	Vector norm = te->entity.baseline.origin.Normalize();
 	float len = te->entity.baseline.origin.Length();
+	Vector norm;
 
-	Vector v =
-	{
-		ptr->plane.normal.y * norm.x - norm.y * ptr->plane.normal.x,
-		ptr->plane.normal.x * norm.z - norm.x * ptr->plane.normal.z,
-		ptr->plane.normal.z * norm.y - norm.z * ptr->plane.normal.y
-	};
-	Vector v2 =
-	{
-		ptr->plane.normal.y * v.z - v.y * ptr->plane.normal.x,
-		ptr->plane.normal.x * v.x - v.z * ptr->plane.normal.z,
-		ptr->plane.normal.z * v.y - v.x * ptr->plane.normal.y
-	};
+	if( len == 0.0f )
+		norm.x = norm.y = norm.z = 0.0f;
+	else
+		norm = te->entity.baseline.origin / len;
 
-	if( len <= 2000.0f )
-		len *= 1.5;
-	else len = 3000.0f;
+	Vector v2 = CrossProduct( ptr->plane.normal, CrossProduct( ptr->plane.normal, norm ) );
 
-	te->entity.baseline.origin.x = v2.z * len * 1.5;
-	te->entity.baseline.origin.y = v2.y * len * 1.5;
-	te->entity.baseline.origin.z = v2.x * len * 1.5;
+	len = min( len * 1.5, 3000.0f );
+
+	te->entity.baseline.origin.x = v2.z * len;
+	te->entity.baseline.origin.y = v2.y * len;
+	te->entity.baseline.origin.z = v2.x * len;
 }
 
 struct
@@ -474,7 +401,7 @@ struct
 	}
 };
 
-void EV_CS16Client_CreateSmoke(unsigned int type, Vector origin, Vector dir,
+void EV_CS16Client_CreateSmoke( ESmoke type, Vector origin, Vector dir,
 	int speed, float scale, int r, int g, int b , bool wind, Vector velocity, int framerate , int teflags )
 {
 	TEMPENTITY *te;

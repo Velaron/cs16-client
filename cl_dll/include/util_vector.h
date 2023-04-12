@@ -96,14 +96,17 @@ public:
 		return Vector(x * flLen, y * flLen, z * flLen);
 	}
 
+	inline Vector NormalizeLength( float &len ) const
+	{
+		len = Length();
+		if( len == 0.0f ) return Vector( 0, 0, 1 );
+
+		return Vector( x / len, y / len, z / len );
+	}
+
 	inline Vector2D Make2D ( void ) const
 	{
-		Vector2D	Vec2;
-
-		Vec2.x = x;
-		Vec2.y = y;
-
-		return Vec2;
+		return Vector2D( x, y );
 	}
 	inline float Length2D(void) const					{ return (float)sqrt(x*x + y*y); }
 	inline bool IsNull(void) const { return !x && !y && !z; }
