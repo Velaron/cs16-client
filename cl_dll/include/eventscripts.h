@@ -68,7 +68,7 @@
 // Some of these are HL/TFC specific?
 void EV_GetGunPosition( struct event_args_s *args, float *pos, float *origin );
 void EV_GetDefaultShellInfo( struct event_args_s *args, float *origin, float *velocity, float *ShellVelocity, float *ShellOrigin, float *forward, float *right, float *up, float forwardScale, float upScale, float rightScale, bool bReverseDirection = false );
-void CreateCorpse(Vector *p_vOrigin, Vector *p_vAngles, const char *pModel, float flAnimTime, int iSequence, int iBody);
+void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAnimTime, int iSequence, int iBody);
 
 
 // Very simple and little functions that can be inlined
@@ -82,9 +82,6 @@ Flag weapon/view model for muzzle flash
 */
 inline void EV_MuzzleFlash( void )
 {
-	if( gHUD.cl_lw->value )
-		return;
-
 	// Add muzzle flash to current weapon model
 	cl_entity_t *ent = gEngfuncs.GetViewModel();
 	if ( !ent )
