@@ -43,6 +43,8 @@ public:
 	float ReadCoord( void );
 	float ReadAngle( void );
 	float ReadHiResAngle( void );
+	Vector ReadCoordVector( void );
+
 private:
 	const char *m_szMsgName;
 	uint8_t *m_pBuf;
@@ -168,6 +170,16 @@ inline float BufferReader::ReadFloat( void )
 inline float BufferReader::ReadCoord( void )
 {
 	return ReadShort() * 0.125f;
+}
+
+inline Vector BufferReader::ReadCoordVector( void )
+{
+	Vector v;
+	v.x = ReadCoord();
+	v.y = ReadCoord();
+	v.z = ReadCoord();
+
+	return v;
 }
 
 inline float BufferReader::ReadAngle( void )

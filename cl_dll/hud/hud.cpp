@@ -213,6 +213,8 @@ void __CmdFunc_MouseSucksClose( void ) { evdev_open = false; }
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
+	gEngfuncs.Con_DPrintf( "%s\n", __PRETTY_FUNCTION__ );
+
 	SetGameType(); // call it first, so we will know gamedir at very early stage
 
 	HOOK_COMMAND( "special", InputCommandSpecial );
@@ -253,14 +255,6 @@ void CHud :: Init( void )
 	cl_minmodels = CVAR_CREATE( "cl_minmodels", "0", FCVAR_ARCHIVE );
 	cl_min_t     = CVAR_CREATE( "cl_min_t", "1", FCVAR_ARCHIVE );
 	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "2", FCVAR_ARCHIVE );
-	cl_lw        = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
-	cl_nopred   = gEngfuncs.pfnGetCvarPointer( "cl_nopred" );
-	hand_xash    = gEngfuncs.pfnGetCvarPointer( "hand" );
-	viewsize     = gEngfuncs.pfnGetCvarPointer( "viewsize" );
-#ifdef __ANDROID__
-	cl_android_force_defaults  = CVAR_CREATE( "cl_android_force_defaults", "1", FCVAR_ARCHIVE );
-#endif
-	cl_shadows   = CVAR_CREATE( "cl_shadows", "1", FCVAR_ARCHIVE );
 	default_fov  = CVAR_CREATE( "default_fov", "90", 0 );
 	m_pCvarDraw  = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	fastsprites  = CVAR_CREATE( "fastsprites", "0", FCVAR_ARCHIVE );
@@ -268,11 +262,15 @@ void CHud :: Init( void )
 	cl_weapon_sparks = CVAR_CREATE( "cl_weapon_sparks", "1", FCVAR_ARCHIVE );
 	cl_weapon_wallpuff = CVAR_CREATE( "cl_weapon_wallpuff", "1", FCVAR_ARCHIVE );
 	zoom_sens_ratio = CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
-	sv_skipshield = gEngfuncs.pfnGetCvarPointer( "sv_skipshield" );
+
+	m_cvarChecker.Init();
+	m_cvarChecker.AddToCheckList( "cl_lw", 1.0f );
+	m_cvarChecker.AddToCheckList( "cl_predict", 1.0f );
+	m_cvarChecker.AddToCheckList( "sv_skipshield", 1.0f );
+	m_cvarChecker.AddToCheckList( "hand", 0.0f );
+	m_cvarChecker.AddToCheckList( "viewsize", 140.0f );
 
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
-
-
 
 	m_iLogo = 0;
 	m_iFOV = 0;
@@ -368,6 +366,8 @@ void CHud :: VidInit( void )
 	m_scrinfo.iSize = sizeof( m_scrinfo );
 	GetScreenInfo( &m_scrinfo );
 
+	gEngfuncs.Con_DPrintf( "%s\n", __PRETTY_FUNCTION__ );
+
 	m_truescrinfo.iWidth = CVAR_GET_FLOAT("width");
 	m_truescrinfo.iHeight = CVAR_GET_FLOAT("height");
 
@@ -378,6 +378,36 @@ void CHud :: VidInit( void )
 	
 	m_hsprLogo = 0;
 
+#if 0
+	// assume cs16-client is launched in landscape mode
+	// must be only TrueWidth, but due to bug game may sometime rotate to portait mode
+	// calc scale depending on max side
+	float maxScale = (float)max( TrueWidth, TrueHeight ) / 640.0f;
+
+	// REMOVE LATER
+	float currentScale = CVAR_GET_FLOAT("hud_scale");
+	float invalidScale = (float)min( TrueWidth, TrueHeight ) / 640.0f;
+	// REMOVE LATER
+
+	if( currentScale > maxScale ||
+		( currentScale == invalidScale &&
+		  currentScale != 1.0f &&
+		  currentScale != 0.0f &&
+		  invalidScale <  1.0f ) )
+	{
+		gEngfuncs.Cvar_SetValue( "hud_scale", maxScale );
+		gEngfuncs.Con_Printf("^3Maximum scale factor reached. Reset: %f\n", maxScale );
+		GetScreenInfo( &m_scrinfo );
+	}
+
+	m_flScale = CVAR_GET_FLOAT( "hud_scale" );
+
+	if( m_flScale < 1.0f )
+	{
+		gEngfuncs.Cvar_SetValue( "hud_scale", 1.0f );
+		m_flScale = 1.0f;
+#else
+
 	m_flScale = CVAR_GET_FLOAT( "hud_scale" );
 
 	if( m_flScale < 1.0f )
@@ -385,6 +415,8 @@ void CHud :: VidInit( void )
 		gEngfuncs.Cvar_SetValue( "hud_scale", 1.0f );
 		m_flScale = 1.0f;
 	}
+
+#endif
 
 	m_iRes = 640;
 
@@ -475,31 +507,6 @@ void CHud :: VidInit( void )
 
 	m_hGasPuff = SPR_Load("sprites/gas_puff_01.spr");
 
-
-	/*m_Ammo.VidInit();
-	m_Health.VidInit();
-	m_Spectator.VidInit();
-	m_Geiger.VidInit();
-	m_Train.VidInit();
-	m_Battery.VidInit();
-	m_Flash.VidInit();
-	m_Message.VidInit();
-	m_StatusBar.VidInit();
-	m_DeathNotice.VidInit();
-	m_SayText.VidInit();
-	m_Menu.VidInit();
-	m_AmmoSecondary.VidInit();
-	m_TextMessage.VidInit();
-	m_StatusIcons.VidInit();
-	m_Scoreboard.VidInit();
-	m_MOTD.VidInit();
-	m_Timer.VidInit();
-	m_Money.VidInit();
-	m_ProgressBar.VidInit();
-	m_SniperScope.VidInit();
-	m_Radar.VidInit();
-	m_SpectatorGui.VidInit();*/
-
 	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 		pList->p->VidInit();
 
@@ -518,6 +525,8 @@ void CHud :: VidInit( void )
 
 void CHud::Shutdown( void )
 {
+	gEngfuncs.Con_DPrintf( "%s\n", __PRETTY_FUNCTION__ );
+
 	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
 	{
 		pList->p->Shutdown();

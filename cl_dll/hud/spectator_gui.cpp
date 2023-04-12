@@ -75,8 +75,6 @@ DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuSpectateOptions )
 // free chase camera
 // locked chase camera
 
-float CHudSpectatorGui::m_fTextScale = 1.0f;
-
 void __CmdFunc_FindNextPlayerReverse( void )
 {
 	gHUD.m_Spectator.FindNextPlayer(true);
@@ -102,7 +100,6 @@ int CHudSpectatorGui::Init()
 	gHUD.AddHudElem(this);
 	m_iFlags = HUD_DRAW;
 	m_menuFlags = 0;
-	m_fTextScale = 1.0f;
 	m_hTimerTexture = 0;
 	return 1;
 }
@@ -116,9 +113,6 @@ int CHudSpectatorGui::VidInit()
 		return 0;
 	}
 
-	m_fTextScale = ScreenWidth / 1024.0f;
-	if( m_fTextScale < 1.0f )
-		m_fTextScale = 1.0f;
 	m_hTimerTexture = gRenderAPI.GL_LoadTexture("gfx/vgui/timer.tga", NULL, 0, TF_NEAREST /*|TF_NOPICMIP*/|TF_NOMIPMAP|TF_CLAMP );
 	return 1;
 }
@@ -131,8 +125,8 @@ void CHudSpectatorGui::Shutdown()
 inline void DrawButtonWithText( int x1, int y1, int wide, int tall, const char *sz, int r, int g, int b )
 {
 	DrawUtils::DrawRectangle(x1, y1, wide, tall);
-	DrawUtils::DrawHudString(x1 + INT_XPOS(0.5), y1 + tall*0.5 - gHUD.GetCharHeight() * CHudSpectatorGui::m_fTextScale * 0.5, x1 + wide, sz,
-							 r, g, b, CHudSpectatorGui::m_fTextScale );
+	DrawUtils::DrawHudString(x1 + INT_XPOS(0.5), y1 + tall*0.5 - gHUD.GetCharHeight() * 0.5, x1 + wide, sz,
+							 r, g, b );
 }
 
 int CHudSpectatorGui::Draw( float flTime )
@@ -146,10 +140,6 @@ int CHudSpectatorGui::Draw( float flTime )
 		}
 		return 1;
 	}
-
-	// check for scoreboard. We will don't draw it, because screen space econodmy
-	/*if( gHUD.m_Scoreboard.m_bForceDraw || !(!gHUD.m_Scoreboard.m_bShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission ))
-		return 1;*/
 
 	// function name says it
 	CalcAllNeededData( );
@@ -170,7 +160,7 @@ int CHudSpectatorGui::Draw( float flTime )
 	FillRGBABlend( INT_XPOS(12.5), INT_YPOS(2) * 0.25, 1, INT_YPOS(2) * 0.5, r, g, b, 255 );
 
 	{ // mapname. extradata
-		DrawUtils::DrawHudString( INT_XPOS(12.5) + 10, INT_YPOS(2) * 0.25, ScreenWidth, label.m_szMap, r, g, b, m_fTextScale );
+		DrawUtils::DrawHudString( INT_XPOS(12.5) + 10, INT_YPOS(2) * 0.25, ScreenWidth, label.m_szMap, r, g, b );
 
 		if( !m_bBombPlanted ) // timer remaining
 		{
@@ -179,25 +169,27 @@ int CHudSpectatorGui::Draw( float flTime )
 				gRenderAPI.GL_SelectTexture( 0 );
 				gRenderAPI.GL_Bind(0, m_hTimerTexture);
 				gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+				gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 				DrawUtils::Draw2DQuad( (INT_XPOS(12.5) + 10) * gHUD.m_flScale,
 									   (INT_YPOS(2) * 0.5) * gHUD.m_flScale,
-									   (INT_XPOS(12.5) + 10 + gHUD.GetCharHeight() * m_fTextScale) * gHUD.m_flScale,
-									   (INT_YPOS(2) * 0.5 + gHUD.GetCharHeight() * m_fTextScale) * gHUD.m_flScale );
+									   (INT_XPOS(12.5) + 10 + gHUD.GetCharHeight() ) * gHUD.m_flScale,
+									   (INT_YPOS(2) * 0.5 + gHUD.GetCharHeight() ) * gHUD.m_flScale );
+				gEngfuncs.pTriAPI->End();
 			}
-			DrawUtils::DrawHudString( INT_XPOS(12.5) + gHUD.GetCharHeight() * 1.5 * m_fTextScale + gHUD.GetCharWidth('M') * m_fTextScale, INT_YPOS(2) * 0.5, ScreenWidth,
-									  label.m_szTimer, r, g, b, m_fTextScale );
+			DrawUtils::DrawHudString( INT_XPOS(12.5) + gHUD.GetCharHeight() * 1.5 + gHUD.GetCharWidth('M') , INT_YPOS(2) * 0.5, ScreenWidth,
+									  label.m_szTimer, r, g, b );
 		}
 	}
 
 
 	{ // draw team here
-		int iLen = DrawUtils::HudStringLen("Counter-Terrorists:", m_fTextScale );
+		int iLen = DrawUtils::HudStringLen("Counter-Terrorists:" );
 
-		DrawUtils::DrawHudString( INT_XPOS(12.5) - iLen - 50 , INT_YPOS(2) * 0.25, INT_XPOS(12.5) - 50, "Counter-Terrorists:", r, g, b, m_fTextScale );
-		DrawUtils::DrawHudString( INT_XPOS(12.5) - iLen - 50, INT_YPOS(2) * 0.5, INT_XPOS(12.5) - 50, "Terrorists:", r, g, b, m_fTextScale );
+		DrawUtils::DrawHudString( INT_XPOS(12.5) - iLen - 50 , INT_YPOS(2) * 0.25, INT_XPOS(12.5) - 50, "Counter-Terrorists:", r, g, b );
+		DrawUtils::DrawHudString( INT_XPOS(12.5) - iLen - 50, INT_YPOS(2) * 0.5, INT_XPOS(12.5) - 50, "Terrorists:", r, g, b );
 		// count
-		DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.25, INT_XPOS(12.5) - 50, label.m_iCounterTerrorists, r, g, b, m_fTextScale );
-		DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.5,  INT_XPOS(12.5) - 50, label.m_iTerrorists,        r, g, b, m_fTextScale );
+		DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.25, INT_XPOS(12.5) - 50, label.m_iCounterTerrorists, r, g, b );
+		DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.5,  INT_XPOS(12.5) - 50, label.m_iTerrorists,        r, g, b );
 	}
 
 	if( m_menuFlags & ROOT_MENU )
@@ -241,10 +233,10 @@ int CHudSpectatorGui::Draw( float flTime )
 
 	//if( !label.m_szNameAndHealth[0] )
 	//{
-		int iLen = DrawUtils::HudStringLen( label.m_szNameAndHealth, m_fTextScale );
+		int iLen = DrawUtils::HudStringLen( label.m_szNameAndHealth );
 		GetTeamColor( r, g, b, g_PlayerExtraInfo[ g_iUser2 ].teamnumber );
-		DrawUtils::DrawHudString( ScreenWidth * 0.5 - iLen * 0.5, INT_YPOS(9) - gHUD.GetCharHeight() * 0.5 * m_fTextScale, ScreenWidth,
-								  label.m_szNameAndHealth, r, g, b, m_fTextScale );
+		DrawUtils::DrawHudString( ScreenWidth * 0.5 - iLen * 0.5, INT_YPOS(9) - gHUD.GetCharHeight() * 0.5 , ScreenWidth,
+								  label.m_szNameAndHealth, r, g, b );
 	//}
 
 	return 1;

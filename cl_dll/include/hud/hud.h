@@ -35,6 +35,7 @@
 
 #include "csprite.h"
 #include "cvardef.h"
+#include "cvar_checker.h"
 
 #define MIN_ALPHA	 100	
 #define	HUDELEM_ACTIVE	1
@@ -55,6 +56,10 @@ enum
 	MAX_HOSTAGES = 24,
 };
 
+#define PLAYERMODEL_PLAYER	0
+#define PLAYERMODEL_LEET	1
+#define PLAYERMODEL_GIGN	2
+#define PLAYERMODEL_VIP		3
 extern const char *sPlayerModelFiles[];
 extern wrect_t nullrc;
 
@@ -814,7 +819,6 @@ public:
 
 	bool m_bBombPlanted;
 	int m_iPlayerLastPointedAt;
-	static float m_fTextScale;
 
 private:	
 	// szMapName is 64 bytes only. Removing "maps/" and ".bsp" gived me this result
@@ -842,12 +846,10 @@ private:
 //-----------------------------------------------------
 //
 
-
-
 class CHud
 {
 public:
-	CHud() : m_pHudList(NULL), m_iSpriteCount(0)  {}
+	CHud() : m_pHudList(NULL), m_iSpriteCount(0), m_iRes(640)  {}
 	~CHud();			// destructor, frees allocated memory // thanks, Captain Obvious
 
 	void Init( void );
@@ -904,6 +906,11 @@ public:
 		return m_iGameType;
 	}
 
+	inline int GetSpriteRes()
+	{
+		return m_iRes;
+	}
+
 
 	float   m_flTime;      // the current client time
 	float   m_fOldTime;    // the time at which the HUD was last redrawn
@@ -915,27 +922,20 @@ public:
 	int		m_iHideHUDDisplay;
 	int		m_iFOV;
 	int		m_Teamplay;
-	int		m_iRes;
 	cvar_t *m_pCvarDraw;
-	cvar_t *cl_shadows;
 	cvar_t *fastsprites;
 	cvar_t *cl_nopred;
 	cvar_t *cl_weapon_wallpuff;
 	cvar_t *cl_weapon_sparks;
-	cvar_t *zoom_sens_ratio;
 	cvar_t *cl_lw;
 	cvar_t *cl_righthand;
-	cvar_t *hand_xash;
-	cvar_t *viewsize;
 	cvar_t *cl_weather;
 	cvar_t *cl_minmodels;
 	cvar_t *cl_min_t;
 	cvar_t *cl_min_ct;
 	cvar_t *cl_gunsmoke;
-	cvar_t *default_fov;
 	cvar_t *hud_textmode;
 	cvar_t *hud_colored;
-	cvar_t *sv_skipshield;
 #ifdef __ANDROID__
 	cvar_t *cl_android_force_defaults;
 #endif
@@ -1014,12 +1014,19 @@ private:
 	int m_iForceChaseCam;
 	int m_iFadeToBlack;
 	int m_iGameType;
+	int	m_iRes;
 
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
 	// freed in ~CHud()
 	HSPRITE *m_rghSprites;	/*[HUD_SPRITE_COUNT]*/			// the sprites loaded from hud.txt
 	wrect_t *m_rgrcRects;	/*[HUD_SPRITE_COUNT]*/
 	char *m_rgszSpriteNames; /*[HUD_SPRITE_COUNT][MAX_SPRITE_NAME_LENGTH]*/
+
+	cvar_t *hud_draw;
+	cvar_t *default_fov;
+	cvar_t *zoom_sens_ratio;
+
+	CCVarChecker m_cvarChecker;
 };
 
 extern CHud gHUD;

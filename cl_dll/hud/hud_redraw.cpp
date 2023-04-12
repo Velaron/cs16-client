@@ -81,42 +81,8 @@ int CHud :: Redraw( float flTime, int intermission )
 	m_flTimeDelta = (double)m_flTime - m_fOldTime;
 	static int m_flShotTime = 0;
 
-#ifdef __ANDROID__
-	if( cl_android_force_defaults && cl_android_force_defaults->value )
-	{
-		if( cl_lw && !cl_lw->value )
-		{
-			ConsolePrint( "cl_lw is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
-			gEngfuncs.Cvar_SetValue( "cl_lw", 1.0f );
-		}
-		if( cl_nopred && cl_nopred->value )
-		{
-			ConsolePrint( "cl_nopred is forced to 0. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
-			gEngfuncs.Cvar_SetValue( "cl_nopred", 0.0f );
-		}
-		if( sv_skipshield && !sv_skipshield->value )
-		{
-			ConsolePrint( "sv_skipshield is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
-			gEngfuncs.Cvar_SetValue( "sv_skipshield", 1.0f );
-		}
-		if( hud_scale && hud_scale->value < 0.0f )
-		{
-			// bug in DrawScaledCharacter
-			ConsolePrint( "hud_scale is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
-			gEngfuncs.Cvar_SetValue( "hud_scale", 1.0f );
-		}
-		if( hand_xash && hand_xash->value )
-		{
-			ConsolePrint( "hand is forced to 0. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
-			gEngfuncs.Cvar_SetValue( "hand", 0.0f );
-		}
-		if( viewsize && viewsize->value < 120 )
-		{
-			ConsolePrint( "viewsize is forced to 120. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
-			gEngfuncs.Cvar_SetValue( "sv_skipshield", 120.0f );
-	}
-#endif
-	
+	m_cvarChecker.Run( flTime );
+
 	// Clock was reset, reset delta
 	if ( m_flTimeDelta < 0 )
 		m_flTimeDelta = 0;
