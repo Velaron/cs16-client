@@ -47,13 +47,11 @@ static float flScrollTime = 0;  // the time at which the lines next scroll up
 static int Y_START = 0;
 static int line_height = 0;
 
-DECLARE_MESSAGE( m_SayText, SayText )
-
 int CHudSayText :: Init( void )
 {
 	gHUD.AddHudElem( this );
 
-	HOOK_MESSAGE( SayText );
+	HOOK_MESSAGE( gHUD.m_SayText, SayText );
 
 	InitHUDData();
 
@@ -165,85 +163,187 @@ enum
 	CHAT_ALL,
 	CHAT_ALLDEAD,
 	CHAT_ALLSPEC,
-	CHAT_NAME_CHANGE
+	CHAT_NAME_CHANGE,
+	CHAT_T_LOC,
+	CHAT_CT_LOC,
+	CHAT_LAST,
 };
 
-struct CSimpleMap
+struct
 {
 	const char key[32];
 	const char value[64];
-};
-
-CSimpleMap sayTextFmt[] =
+	int numArgs;
+	bool allowDead;
+	bool replaceFirstArgToName;
+} sayTextFmt[] =
 {
-{"#Cstrike_Chat_CT",	"\x02(Counter-Terrorist) %s :  %s"},
-{"#Cstrike_Chat_T", "\x02(Terrorist) %s :  %s"},
-{"#Cstrike_Chat_CT_Dead", "\x02*DEAD*(Counter-Terrorist) %s :  %s"},
-{"#Cstrike_Chat_T_Dead", "\x02*DEAD*(Terrorist) %s :  %s"},
-{"#Cstrike_Chat_Spec", "\x02(Spectator) %s :  %s"},
-{"#Cstrike_Chat_All", "\x02%s :  %s"},
-{"#Cstrike_Chat_AllDead", "\x02*DEAD* %s:  %s"},
-{"#Cstrike_Chat_AllSpec", "\x02*SPEC* %s:  %s"},
-{"#Cstrike_Name_Change", "\x02* %s changed name to %s"},
+	{
+		"#Cstrike_Chat_CT",
+		"\x02(Counter-Terrorist) %s :  %s",
+		2, true, true
+	},
+	{
+		"#Cstrike_Chat_T",
+		"\x02(Terrorist) %s :  %s",
+		2, true, true
+	},
+	{
+		"#Cstrike_Chat_CT_Dead",
+		"\x02*DEAD*(Counter-Terrorist) %s :  %s",
+		2, false, true
+	},
+	{
+		"#Cstrike_Chat_T_Dead",
+		"\x02*DEAD*(Terrorist) %s :  %s",
+		2, false, true
+	},
+	{
+		"#Cstrike_Chat_Spec",
+		"\x02(Spectator) %s :  %s",
+		2, false, true,
+	},
+	{
+		"#Cstrike_Chat_All",
+		"\x02%s :  %s",
+		2, true, true
+	},
+	{
+		"#Cstrike_Chat_AllDead",
+		"\x02*DEAD* %s:  %s",
+		2, false, true
+	},
+	{
+		"#Cstrike_Chat_AllSpec",
+		"\x02*SPEC* %s:  %s",
+		2, false, true
+	},
+	{
+		"#Cstrike_Name_Change",
+		"\x02* %s changed name to %s",
+		2, true, false
+	},
+	{
+		"#Cstrike_Chat_T_Loc",
+		"\x02*(Terrorist) %s @ %s : %s",
+		3, true, true
+	},
+	{
+		"#Cstrike_Chat_CT_Loc",
+		"\x02*(Counter-Terrorist) %s @ %s : %s",
+		3, true, true
+	}
 };
 
 int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 {
 	BufferReader reader( pszName, pbuf, iSize );
-	char szBuf[3][512] = { 0 };
+	int i = CHAT_LAST, client_index, argc, numArgs;		// the client who spoke the message
+	char *arg, *fmt, *argv[3] = {};
+	const char *fmt_tran;
+	bool allowDead, replaceFirstArgToName;
+	int len;
 
-	int client_index = reader.ReadByte();		// the client who spoke the message
-	strncpy( szBuf[0], reader.ReadString(), sizeof(szBuf[0]));
-	strncpy( szBuf[1], reader.ReadString(), sizeof(szBuf[1]));
-	strncpy( szBuf[2], reader.ReadString(), sizeof(szBuf[2]));
+	client_index = reader.ReadByte();
 
-	szBuf[0][511] = szBuf[1][511] = szBuf[2][511] = 0;
+	// find all arguments
+	arg = reader.ReadString();
+	len = strlen( arg );
+	fmt = new char[len+1];
+	strcpy(fmt, arg);
 
-	const char *fmt =  "\x02%s";
-	int i = 0;
-	for( i = CHAT_CT; i < CHAT_NAME_CHANGE; i++ )
+	for( argc = 0; argc < 3; argc++ )
 	{
-		if( !strncmp( szBuf[0], sayTextFmt[i].key, sizeof( szBuf[0] ) ) )
-		{
-			fmt = sayTextFmt[i].value;
+		arg = reader.ReadString();
+		if( !arg[0] && !reader.Valid() )
 			break;
+
+		len = strlen( arg );
+		argv[argc] = new char[len+1];
+		strncpy( argv[argc], arg, len );
+		argv[argc][len] = 0;
+	}
+
+	// see if argv[0] is translatable
+	if( fmt[0] == '#' )
+	{
+		for( i = CHAT_CT; i < CHAT_LAST; i++ )
+		{
+			if( !strcmp( fmt, sayTextFmt[i].key ) )
+			{
+				fmt_tran = (char*)sayTextFmt[i].value;
+				allowDead = sayTextFmt[i].allowDead;
+				numArgs = sayTextFmt[i].numArgs;
+
+				// VALVEWHY: Second argument may be null string, but not on name changing.
+				replaceFirstArgToName = sayTextFmt[i].replaceFirstArgToName;
+				break;
+			}
 		}
 	}
 
+	// no translations
+	if( i == CHAT_LAST )
+	{
+		fmt_tran = fmt;
+		numArgs = argc;
+		allowDead = true;
+		replaceFirstArgToName = false;
+	}
 
-#if 1
 	// If text is sent from dead player or spectator
 	// don't draw it, until local player isn't specator or dead.
-	switch( i )
+	if( !allowDead && !CL_IsDead() && !g_iUser1 )
 	{
-	case CHAT_CT_DEAD:
-	case CHAT_T_DEAD:
-	case CHAT_ALLDEAD:
-	case CHAT_ALLSPEC:
-	case CHAT_SPEC:
-		if( !CL_IsDead() && !g_iUser1 )
-			return 1;
-	}
-#endif
+		delete[] fmt;
 
-	char dst[256];
-	if( i == CHAT_NAME_CHANGE )
-	{
-		snprintf( dst, sizeof( dst ), fmt, szBuf[1], szBuf[2]);
+		for( int i = 0; i < 3; i++ )
+			if( argv[i] ) delete argv[i];
+
+		return 1;
 	}
-	else if( szBuf[1][0] == '\0' && szBuf[2][0] == '\0' )
-	{
-		snprintf( dst, sizeof( dst ), fmt, szBuf[0] );
-	}
-	else
+
+	if( replaceFirstArgToName )
 	{
 		GetPlayerInfo( client_index, &g_PlayerInfoList[client_index] );
-		const char *pName = g_PlayerInfoList[client_index].name;
-		snprintf( dst, sizeof( dst ), fmt, pName, szBuf[2]);
+		delete[] argv[0];
+
+		argv[0] = g_PlayerInfoList[client_index].name;
 	}
 
-	SayTextPrint( dst, strlen(dst),  client_index );
+	char dst[1024];
+
+	switch( numArgs )
+	{
+	case 3:
+		snprintf( dst, sizeof( dst ), fmt_tran, argv[0], argv[1], argv[2] );
+		break;
+	case 2:
+		snprintf( dst, sizeof( dst ), fmt_tran, argv[0], argv[1] );
+		break;
+	case 1:
+		snprintf( dst, sizeof( dst ), fmt_tran, argv[0] );
+		break;
+	case 0:
+		strncpy( dst, fmt_tran, sizeof( dst ) );
+		dst[sizeof(dst)-1] = 0;
+		break;
+	}
+
+	SayTextPrint( dst, strlen(dst), client_index );
 	
+	delete[] fmt;
+
+	for( int i = 0; i < argc; i++ )
+	{
+		// skip second argument if it was replaced by name
+		if( i == 0 && replaceFirstArgToName )
+			continue;
+
+		if( argv[i] )
+			delete[] argv[i];
+	}
+
 	return 1;
 }
 

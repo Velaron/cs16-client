@@ -497,7 +497,7 @@ void InitRain( void )
 
 	if( !Rain_Initialized )
 	{
-		HOOK_MESSAGE( ReceiveW );
+		HOOK_MESSAGE_FUNC( "ReceiveW", __MsgFunc_ReceiveW );
 
 		Rain_Initialized = Rain.hsprRain && Rain.hsprSnow && Rain.hsprRipple;
 	}

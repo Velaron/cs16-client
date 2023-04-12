@@ -31,6 +31,12 @@ public:
 	inline ~BufferReader( void );
 #endif
 
+	void Flush( void );
+	bool Bad( void ) { return m_bBad; }
+	bool Eof( void ) { return m_iRead >= m_iSize - 1; }
+
+	bool Valid( void ) { return !Bad() && !Eof(); }
+
 	template<typename T> T Read( void );
 
 	int8_t ReadChar( void );
@@ -52,6 +58,11 @@ private:
 	size_t   m_iRead;
 	bool     m_bBad;
 };
+
+inline void BufferReader::Flush( void )
+{
+	m_iRead = m_iSize - 1;
+}
 
 template<typename T>
 inline T BufferReader::Read( void )
@@ -199,25 +210,3 @@ BufferReader::~BufferReader()
 		gEngfuncs.Con_DPrintf( "BufferReader(%s): destroyed before reaching end. Expected %i, read %i\n", m_szMsgName, m_iSize, m_iRead );
 }
 #endif
-
-/*
-void BEGIN_READ( void *buf, int size );
-int READ_CHAR( void );
-int READ_BYTE( void );
-int READ_SHORT( void );
-int READ_WORD( void );
-int READ_LONG( void );
-float READ_FLOAT( void );
-char* READ_STRING( void );
-float READ_COORD( void );
-float READ_ANGLE( void );
-float READ_HIRESANGLE( void );
-*/
-
-
-
-
-
-
-
-
