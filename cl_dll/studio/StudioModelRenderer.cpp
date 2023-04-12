@@ -1381,36 +1381,6 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware(void)
 	//if (m_pCvarDrawEntities->value == 5)
 	//	IEngineStudio.StudioDrawAbsBBox();
 
-#if 1
-	if( m_pCvarDrawEntities->value == 8 && !m_pCurrentEntity->curstate.iuser4 )
-	{
-		Vector interpOrigin = m_pCurrentEntity->origin;
-
-		m_pCurrentEntity->origin = m_pCurrentEntity->curstate.origin;
-
-		m_pCurrentEntity->curstate.iuser4 = true;
-
-		if( m_pCurrentEntity->player )
-		{
-			StudioDrawPlayer( STUDIO_RENDER, m_pplayer );
-		}
-		else
-		{
-			StudioDrawModel( STUDIO_RENDER );
-		}
-
-		//m_pPlayerInfo = NULL;
-
-		gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
-		IEngineStudio.StudioDrawHulls();
-		gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
-
-		m_pCurrentEntity->origin = interpOrigin;
-	}
-#endif
-
-	//m_pCurrentEntity->syncbase = false;
-
 	IEngineStudio.RestoreRenderer();
 }
 

@@ -1086,6 +1086,22 @@ void R_StudioInit(void)
 
 int R_StudioDrawPlayer(int flags, entity_state_t *pplayer)
 {
+#if 0
+	if( g_StudioRenderer.m_pCvarDrawEntities->value >= 8 )
+	{
+			cl_entity_t *pCurrentEntity = IEngineStudio.GetCurrentEntity();
+
+			if( pCurrentEntity )
+			{
+					Vector saveOrigin = pCurrentEntity->origin;
+					pCurrentEntity->origin = pCurrentEntity->curstate.origin;
+					g_StudioRenderer.m_pCvarDrawEntities->value = g_StudioRenderer.m_pCvarDrawEntities->value - 8;
+					g_StudioRenderer.StudioDrawPlayer( flags, pplayer );
+					g_StudioRenderer.m_pCvarDrawEntities->value = 8 + g_StudioRenderer.m_pCvarDrawEntities->value;
+					pCurrentEntity->origin = saveOrigin;
+			}
+	}
+#endif
 	return g_StudioRenderer.StudioDrawPlayer(flags, pplayer);
 }
 
