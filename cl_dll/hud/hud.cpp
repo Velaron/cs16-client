@@ -243,11 +243,10 @@ void CHud :: Init( void )
 	zoom_sens_ratio = CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
 
 	m_cvarChecker.Init();
-	m_cvarChecker.AddToCheckList( "cl_lw", 1.0f );
+	m_cvarChecker.AddToCheckList( "cl_lw", GetGameType() == GAME_CZERODS ? 0.0f : 1.0f );
 	m_cvarChecker.AddToCheckList( "cl_lc", 1.0f );
 	m_cvarChecker.AddToCheckList( "cl_nopred", 0.0f );
-	// TODO: Fix
-	// m_cvarChecker.AddToCheckList( "sv_skipshield", 1.0f );
+	m_cvarChecker.AddToCheckList( "sv_skipshield", 1.0f );
 	m_cvarChecker.AddToCheckList( "viewsize", 140.0f );
 
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo

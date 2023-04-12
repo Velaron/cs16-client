@@ -86,7 +86,9 @@ void SpectatorHelp(void)
 
 	if ( text )
 	{
-		CenterPrint( text );
+		int len = DrawUtils::ConsoleStringLen( text );
+
+		DrawUtils::DrawConsoleString( (ScreenWidth - len) / 2, ScreenHeight / 3, text );
 	}
 }
 
@@ -459,7 +461,6 @@ int CHudSpectator::Draw(float flTime)
 	if ( !g_iUser1  )
 		return 0;
 
-
 	if ( m_lastAutoDirector != m_autoDirector->value )
 	{
 		m_lastAutoDirector = m_autoDirector->value;
@@ -513,7 +514,6 @@ int CHudSpectator::Draw(float flTime)
 	// make sure we have player info
 	//gViewPort->GetAllPlayersInfo();
 	gHUD.m_Scoreboard.GetAllPlayersInfo();
-
 
 	// loop through all the players and draw additional infos to their sprites on the map
 	for (int i = 0; i < MAX_PLAYERS; i++)
@@ -1166,6 +1166,54 @@ void CHudSpectator::LoadMapSprites()
 		m_MapSprite = NULL; // the standard "unknown map" sprite will be used instead
 }
 
+// 1 = s, 2 = t, 3 = 2048
+static const int st_to_vec[6][3] =
+{
+{  3, -1,  2 },
+{ -3,  1,  2 },
+{  1,  3,  2 },
+{ -1, -3,  2 },
+{ -2, -1,  3 },  // 0 degrees yaw, look straight up
+{  2, -1, -3 }   // look straight down
+};
+
+void MakeSkyVec( float s, float t, int axis )
+{
+	int	j, k, farclip;
+	vec3_t	v, b;
+
+	farclip = 4096;
+
+	b[0] = s * (farclip >> 1);
+	b[1] = t * (farclip >> 1);
+	b[2] = (farclip >> 1);
+
+	for( j = 0; j < 3; j++ )
+	{
+		k = st_to_vec[axis][j];
+		v[j] = (k < 0) ? -b[-k-1] : b[k-1];
+		// v[j] += RI.cullorigin[j];
+	}
+
+	// avoid bilerp seam
+	s = (s + 1.0f) * 0.5f;
+	t = (t + 1.0f) * 0.5f;
+
+	if( s < 1.0f / 512.0f )
+		s = 1.0f / 512.0f;
+	else if( s > 511.0f / 512.0f )
+		s = 511.0f / 512.0f;
+	if( t < 1.0f / 512.0f )
+		t = 1.0f / 512.0f;
+	else if( t > 511.0f / 512.0f )
+		t = 511.0f / 512.0f;
+
+	t = 1.0f - t;
+
+	gEngfuncs.pTriAPI->TexCoord2f( s, t );
+	gEngfuncs.pTriAPI->Vertex3fv( v );
+}
+
 void CHudSpectator::DrawOverviewLayer()
 {
 	float screenaspect, xs, ys, xStep, yStep, x,y,z;
@@ -1185,8 +1233,7 @@ void CHudSpectator::DrawOverviewLayer()
 		yTiles = 6;
 	}
 
-
-	screenaspect = 4.0f/3.0f;
+	screenaspect = ScreenWidth/ScreenHeight;
 
 
 	xs = m_OverviewData.origin[0];
@@ -1195,8 +1242,31 @@ void CHudSpectator::DrawOverviewLayer()
 	z *= m_OverviewData.layersHeights[0]; // gOverviewData.z_min - 32;
 
 	// i = r_overviewTexture + ( layer*OVERVIEW_X_TILES*OVERVIEW_Y_TILES );
-	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
+	gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+	gEngfuncs.pTriAPI->Color4f( 0, 0, 0, 1.0f );
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+
+	float		skyMins[2][6];
+	float		skyMaxs[2][6];
+
+	for( i = 0; i < 6; i++ )
+	{
+		// GL_Bind( XASH_TEXTURE0, tr.skyboxTextures[r_skyTexOrder[i]] );
+
+		skyMins[0][i] = skyMins[1][i] = -1.0f;
+		skyMaxs[0][i] = skyMaxs[1][i] = 1.0f;
+
+		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+		MakeSkyVec( skyMins[0][i], skyMins[1][i], i );
+		MakeSkyVec( skyMins[0][i], skyMaxs[1][i], i );
+		MakeSkyVec( skyMaxs[0][i], skyMaxs[1][i], i );
+		MakeSkyVec( skyMaxs[0][i], skyMins[1][i], i );
+		gEngfuncs.pTriAPI->End();
+	}
+
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
+	gEngfuncs.pTriAPI->CullFace( TRI_NONE );	
 	gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, 1.0 );
 	frame = 0;	
 

@@ -31,6 +31,7 @@
 #define NUM_DMG_TYPES		12
 // instant damage
 
+#ifndef DMG_CRUSH
 #define DMG_GENERIC			0			// generic damage was done
 #define DMG_CRUSH			(1 << 0)	// crushed by falling or moving object
 #define DMG_BULLET			(1 << 1)	// shot
@@ -65,6 +66,7 @@
 #define DMG_SLOWFREEZE		(1 << 22)	// in a subzero freezer
 #define DMG_MORTAR			(1 << 23)	// Hit by air raid (done to distinguish grenade from mortar)
 
+#endif
 //TF ADDITIONS
 #define DMG_IGNITE			(1 << 24)	// Players hit by this begin to burn
 #define DMG_RADIUS_MAX		(1 << 25)	// Radius damage with this flag doesn't decrease over distance

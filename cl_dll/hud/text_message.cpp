@@ -229,13 +229,13 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	{
 		snprintf( psz, MAX_TEXTMSG_STRING, msg_text, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
 
-		/*ConvertCRtoNL( psz );
+		ConvertCRtoNL( psz );
 
 		int len = DrawUtils::ConsoleStringLen( psz );
 
-		DrawUtils::DrawConsoleString( (ScreenWidth - len) / 2, ScreenHeight / 3, psz );*/
+		DrawUtils::DrawConsoleString( (ScreenWidth - len) / 2, ScreenHeight / 3, psz );
 
-		CenterPrint( ConvertCRtoNL( psz ) );
+		// CenterPrint( ConvertCRtoNL( psz ) );
 		break;
 	}
 	case HUD_PRINTNOTIFY:

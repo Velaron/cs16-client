@@ -57,6 +57,7 @@ class CHudSpectator : public CHudBase
 {
 public:
 	void Reset();
+
 	int  ToggleInset(bool allowOff);
 	void CheckSettings();
 	void InitHUDData( void );

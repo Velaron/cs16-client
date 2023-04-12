@@ -16,6 +16,9 @@
 // A subset of the extdll.h in the project HL Entity DLL
 //
 #pragma once
+#ifndef VECTOR_H
+#define VECTOR_H
+
 // Misc C-runtime library headers
 #include "stdio.h"
 #include "stdlib.h"
@@ -119,3 +122,4 @@ inline float DotProduct(const Vector& a, const Vector& b) { return(a.x*b.x+a.y*b
 inline Vector CrossProduct(const Vector& a, const Vector& b) { return Vector( a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x ); }
 
 #define vec3_t Vector
+#endif // VECTOR_H

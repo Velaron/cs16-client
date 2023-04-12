@@ -124,7 +124,7 @@ inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( 
 
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(_WIN32)
 #define fabs(x)	   ((x) > 0 ? (x) : 0 - (x))
 #endif
 #define DotProduct(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])

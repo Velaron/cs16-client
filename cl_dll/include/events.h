@@ -99,6 +99,24 @@ DECLARE_EVENT(FireUSP);
 DECLARE_EVENT(Vehicle);
 DECLARE_EVENT(FireXM1014);
 DECLARE_EVENT(TrainPitchAdjust);
+
+// CZERODS START
+DECLARE_EVENT( FireM60 );
+DECLARE_EVENT( FireCamera );
+DECLARE_EVENT( FireFiberOpticCamera );
+DECLARE_EVENT( FireShieldGun );
+DECLARE_EVENT( HolsterBlowtorch );
+DECLARE_EVENT( IdleBlowtorch );
+DECLARE_EVENT( FireBlowtorch );
+DECLARE_EVENT( FireLaws );
+DECLARE_EVENT( FireBriefcase );
+DECLARE_EVENT( FireMedkit );
+DECLARE_EVENT( FireSyringe );
+DECLARE_EVENT( FireRadio );
+DECLARE_EVENT( FireZipline );
+DECLARE_EVENT( CreateGlass );
+DECLARE_EVENT( GrenadeExplosion );
+// CZERODS END
 }
 
 void Game_HookEvents( void );

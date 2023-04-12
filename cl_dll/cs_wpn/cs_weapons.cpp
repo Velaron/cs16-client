@@ -15,6 +15,11 @@
 
 #include "port.h"
 
+#include "wrect.h"
+#include "cl_dll.h"
+#include "cl_util.h"
+#include "hud.h"
+
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -536,7 +541,7 @@ Vector CBaseEntity::FireBullets3 ( Vector vecSrc, Vector vecDirShooting, float f
 		while (z > 1);
 	}
 
-	return Vector(x * flSpread, y * flSpread, 0);
+	return Vector(x * flSpread, y * flSpread, 0.0f);
 }
 /*
 =====================
@@ -911,35 +916,38 @@ void HUD_InitClientWeapons( void )
 	HUD_PrepEntity( &player		, NULL );
 
 	// Allocate slot(s) for each weapon that we are going to be predicting
-	HUD_PrepEntity( &g_P228, &player);
-	HUD_PrepEntity( &g_SCOUT, &player);
-	HUD_PrepEntity( &g_HEGrenade, &player);
-	HUD_PrepEntity( &g_XM1014, &player);
-	HUD_PrepEntity( &g_C4, &player);
-	HUD_PrepEntity( &g_MAC10, &player);
-	HUD_PrepEntity( &g_AUG, &player);
-	HUD_PrepEntity( &g_SmokeGrenade, &player);
-	HUD_PrepEntity( &g_ELITE, &player);
-	HUD_PrepEntity( &g_FiveSeven, &player);
-	HUD_PrepEntity( &g_UMP45, &player);
-	HUD_PrepEntity( &g_SG550, &player);
-	HUD_PrepEntity( &g_Galil, &player);
-	HUD_PrepEntity( &g_Famas, &player);
-	HUD_PrepEntity( &g_USP, &player);
-	HUD_PrepEntity( &g_GLOCK18, &player);
-	HUD_PrepEntity( &g_AWP, &player);
-	HUD_PrepEntity( &g_MP5N, &player);
-	HUD_PrepEntity( &g_M249, &player);
-	HUD_PrepEntity( &g_M4A1, &player);
-	HUD_PrepEntity( &g_M3, &player );
-	HUD_PrepEntity( &g_TMP, &player);
-	HUD_PrepEntity( &g_G3SG1, &player);
-	HUD_PrepEntity( &g_Flashbang, &player);
-	HUD_PrepEntity( &g_DEAGLE, &player);
-	HUD_PrepEntity( &g_SG552, &player);
-	HUD_PrepEntity( &g_AK47, &player);
-	HUD_PrepEntity( &g_Knife, &player);
-	HUD_PrepEntity( &g_P90, &player );
+	if( gHUD.GetGameType() != GAME_CZERODS )
+	{
+		HUD_PrepEntity( &g_P228, &player);
+		HUD_PrepEntity( &g_SCOUT, &player);
+		HUD_PrepEntity( &g_HEGrenade, &player);
+		HUD_PrepEntity( &g_XM1014, &player);
+		HUD_PrepEntity( &g_C4, &player);
+		HUD_PrepEntity( &g_MAC10, &player);
+		HUD_PrepEntity( &g_AUG, &player);
+		HUD_PrepEntity( &g_SmokeGrenade, &player);
+		HUD_PrepEntity( &g_ELITE, &player);
+		HUD_PrepEntity( &g_FiveSeven, &player);
+		HUD_PrepEntity( &g_UMP45, &player);
+		HUD_PrepEntity( &g_SG550, &player);
+		HUD_PrepEntity( &g_Galil, &player);
+		HUD_PrepEntity( &g_Famas, &player);
+		HUD_PrepEntity( &g_USP, &player);
+		HUD_PrepEntity( &g_GLOCK18, &player);
+		HUD_PrepEntity( &g_AWP, &player);
+		HUD_PrepEntity( &g_MP5N, &player);
+		HUD_PrepEntity( &g_M249, &player);
+		HUD_PrepEntity( &g_M4A1, &player);
+		HUD_PrepEntity( &g_M3, &player );
+		HUD_PrepEntity( &g_TMP, &player);
+		HUD_PrepEntity( &g_G3SG1, &player);
+		HUD_PrepEntity( &g_Flashbang, &player);
+		HUD_PrepEntity( &g_DEAGLE, &player);
+		HUD_PrepEntity( &g_SG552, &player);
+		HUD_PrepEntity( &g_AK47, &player);
+		HUD_PrepEntity( &g_Knife, &player);
+		HUD_PrepEntity( &g_P90, &player );
+	}
 }
 
 

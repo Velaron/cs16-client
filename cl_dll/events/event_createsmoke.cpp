@@ -54,8 +54,11 @@ void EV_CreateSmoke(event_args_s *args)
 		{
 			// randomize smoke cloud position
 			Vector org = args->origin;
-			org.x += Com_RandomFloat(-100.0f, 100.0f);
-			org.y += Com_RandomFloat(-100.0f, 100.0f);
+			if( i != 0 )
+			{
+				org.x += Com_RandomFloat(-100.0f, 100.0f);
+				org.y += Com_RandomFloat(-100.0f, 100.0f);
+			}
 			org.z += 30; 
 
 			pTemp = gEngfuncs.pEfxAPI->CL_TempEntAllocNoModel( org );
@@ -85,6 +88,11 @@ void EV_CreateSmoke(event_args_s *args)
 				pTemp->entity.baseline.origin.x = Com_RandomLong(-5, 5);
 				pTemp->entity.baseline.origin.y = Com_RandomLong(-5, 5);
 				pTemp->entity.baseline.renderamt = 18;
+
+				if( i == 0 )
+				{
+					gHUD.m_Spectator.AddOverviewEntityToList( gHUD.m_hGasPuff, &pTemp->entity, 14.0f );
+				}
 			}
 		}
 	}

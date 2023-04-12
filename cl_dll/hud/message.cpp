@@ -448,6 +448,11 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 			}
 			else
 			{
+				if( pName[0] == '#' )
+				{
+					pName = Localize( pName + 1 );
+				}
+
 				// If we couldnt find it in the titles.txt, just create it
 				message = AllocMessage( pName );
 

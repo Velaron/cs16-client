@@ -61,4 +61,23 @@ void Game_HookEvents( void )
 	HOOK_EVENT( usp, FireUSP );
 	HOOK_EVENT( vehicle, Vehicle );
 	HOOK_EVENT( xm1014, FireXM1014 );
+
+	if( !stricmp( gEngfuncs.pfnGetGameDirectory(), "czeror" ) )
+	{
+		HOOK_EVENT( m60, FireM60 );
+		HOOK_EVENT( camera, FireCamera );
+		HOOK_EVENT( fiberopticcamera, FireFiberOpticCamera );
+		HOOK_EVENT( shieldgun, FireShieldGun );
+		HOOK_EVENT( blowtorchholster, HolsterBlowtorch );
+		HOOK_EVENT( blowtorchidle, IdleBlowtorch );
+		HOOK_EVENT( blowtorch, FireBlowtorch );
+		HOOK_EVENT( laws, FireLaws );
+		HOOK_EVENT( briefcase, FireBriefcase );
+		HOOK_EVENT( medkit, FireMedkit );
+		HOOK_EVENT( syringe, FireSyringe );
+		HOOK_EVENT( radio, FireRadio );
+		HOOK_EVENT( zipline, FireZipline );
+		HOOK_EVENT( create_glass, CreateGlass );
+		HOOK_EVENT( explosion, GrenadeExplosion );
+	}
 }
