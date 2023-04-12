@@ -120,8 +120,7 @@ public:
 
 protected:
 	// Can't copy this unless we explicitly do it!
-	CUtlVector( CUtlVector const& vec ) { assert(0); 
-	}
+	CUtlVector( CUtlVector const& vec ) { assert(0); }
 
 	// Grows the vector
 	void GrowVector( int num = 1 );

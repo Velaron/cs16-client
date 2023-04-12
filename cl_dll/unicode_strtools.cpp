@@ -155,7 +155,7 @@ int Q_UnicodeConvertT(const T_IN *pIn, T_OUT *pOut, int nOutBytes, EStringConver
 				}
 				else if (ePolicy & STRINGCONVERT_FAIL)
 				{
-					pOut[0] = 0; //FIXME: pOut is always null there
+					// pOut[0] = 0; //FIXME: pOut is always null there
 					//TODO: V522 Dereferencing of the null pointer 'pOut' might take place.
 
 					return 0;

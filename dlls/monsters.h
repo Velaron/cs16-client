@@ -70,7 +70,7 @@ BOOL FBoxVisible(entvars_t *pevLooker, entvars_t *pevTarget, Vector &vecTargetOr
 class CGib : public CBaseEntity
 {
 public:
-	void Spawn(const char *szGibModel);
+	void Spawn(const char *szGibModel); // -V762
 	int ObjectCaps(void) { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DONT_SAVE; }
 
 public:

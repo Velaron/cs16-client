@@ -316,15 +316,14 @@ void CC4::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, f
 
 	if (pPlayer)
 	{
+		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/c4_plant.wav", VOL_NORM, ATTN_NORM);
+#ifndef CLIENT_WEAPONS
 		edict_t *target = pPlayer->m_pentCurBombTarget;
 		pPlayer->m_pentCurBombTarget = NULL;
 
-#ifndef CLIENT_WEAPONS
 		if (pev->speed != 0 && g_pGameRules)
 			g_pGameRules->m_iC4Timer = (int)pev->speed;
-#endif
 
-		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/c4_plant.wav", VOL_NORM, ATTN_NORM);
 		CGrenade::ShootSatchelCharge(m_pPlayer->pev, m_pPlayer->pev->origin, Vector(0, 0, 0));
 		CGrenade *pGrenade = NULL;
 
@@ -340,5 +339,6 @@ void CC4::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, f
 
 		pPlayer->m_pentCurBombTarget = target;
 		SUB_Remove();
+#endif
 	}
 }

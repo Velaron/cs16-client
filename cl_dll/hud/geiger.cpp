@@ -65,9 +65,8 @@ int CHudGeiger::MsgFunc_Geiger(const char *pszName,  int iSize, void *pbuf)
 
 int CHudGeiger::Draw (float flTime)
 {
-	int pct = 0;
-	float flvol = 0.0f;
-	int i = 0;
+	int pct, i;
+	float flvol;
 	
 	if (m_iGeigerRange < 1000 && m_iGeigerRange > 0)
 	{
@@ -75,66 +74,67 @@ int CHudGeiger::Draw (float flTime)
 		if (m_iGeigerRange > 800)
 		{
 			pct = 0;			//Con_Printf ( "range > 800\n");
+			i = 0;
 		}
 		else if (m_iGeigerRange > 600)
 		{
 			pct = 2;
-			flvol = 0.4;		//Con_Printf ( "range > 600\n");
+			//flvol = 0.4;		//Con_Printf ( "range > 600\n");
 			i = 2;
 		}
 		else if (m_iGeigerRange > 500)
 		{
 			pct = 4;
-			flvol = 0.5;		//Con_Printf ( "range > 500\n");
+			//flvol = 0.5;		//Con_Printf ( "range > 500\n");
 			i = 2;
 		}
 		else if (m_iGeigerRange > 400)
 		{
 			pct = 8;
-			flvol = 0.6;		//Con_Printf ( "range > 400\n");
+			//flvol = 0.6;		//Con_Printf ( "range > 400\n");
 			i = 3;
 		}
 		else if (m_iGeigerRange > 300)
 		{
 			pct = 8;
-			flvol = 0.7;		//Con_Printf ( "range > 300\n");
+			//flvol = 0.7;		//Con_Printf ( "range > 300\n");
 			i = 3;
 		}
 		else if (m_iGeigerRange > 200)
 		{
 			pct = 28;
-			flvol = 0.78;		//Con_Printf ( "range > 200\n");
+			//flvol = 0.78;		//Con_Printf ( "range > 200\n");
 			i = 3;
 		}
 		else if (m_iGeigerRange > 150)
 		{
 			pct = 40;
-			flvol = 0.80;		//Con_Printf ( "range > 150\n");
+			//flvol = 0.80;		//Con_Printf ( "range > 150\n");
 			i = 3;
 		}
 		else if (m_iGeigerRange > 100)
 		{
 			pct = 60;
-			flvol = 0.85;		//Con_Printf ( "range > 100\n");
+			//flvol = 0.85;		//Con_Printf ( "range > 100\n");
 			i = 3;
 		}
 		else if (m_iGeigerRange > 75)
 		{
 			pct = 80;
-			flvol = 0.9;		//Con_Printf ( "range > 75\n");
+			//flvol = 0.9;		//Con_Printf ( "range > 75\n");
 			//gflGeigerDelay = cl.time + GEIGERDELAY * 0.75;
 			i = 3;
 		}
 		else if (m_iGeigerRange > 50)
 		{
 			pct = 90;
-			flvol = 0.95;		//Con_Printf ( "range > 50\n");
+			//flvol = 0.95;		//Con_Printf ( "range > 50\n");
 			i = 2;
 		}
 		else
 		{
 			pct = 95;
-			flvol = 1.0;		//Con_Printf ( "range < 50\n");
+			//flvol = 1.0;		//Con_Printf ( "range < 50\n");
 			i = 2;
 		}
 

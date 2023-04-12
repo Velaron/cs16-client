@@ -102,13 +102,11 @@ int CHudBattery::Draw( float flTime )
 
 		if( m_fFade <= 0 )
 		{
-			a = 128;
 			m_fFade = 0;
 		}
 
 		// Fade the health number back to dim
 		a = MIN_ALPHA +  (m_fFade / FADE_TIME) * 128;
-
 	}
 	else
 	{

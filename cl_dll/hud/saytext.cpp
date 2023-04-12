@@ -82,7 +82,7 @@ int CHudSayText :: VidInit( void )
 int ScrollTextUp( void )
 {
 	g_szLineBuffer[MAX_LINES][0] = 0;
-	memmove( g_szLineBuffer[0], g_szLineBuffer[1], sizeof(g_szLineBuffer) - sizeof(g_szLineBuffer[0]) ); // overwrite the first line
+	memmove( g_szLineBuffer[0], g_szLineBuffer[1], sizeof(g_szLineBuffer) - sizeof(g_szLineBuffer[0]) ); // overwrite the first line // -V512
 	memmove( &g_pflNameColors[0], &g_pflNameColors[1], sizeof(g_pflNameColors) - sizeof(g_pflNameColors[0]) );
 	memmove( &g_iNameLengths[0], &g_iNameLengths[1], sizeof(g_iNameLengths) - sizeof(g_iNameLengths[0]) );
 	g_szLineBuffer[MAX_LINES-1][0] = 0;
@@ -134,7 +134,7 @@ int CHudSayText :: Draw( float flTime )
 
 				// draw the first x characters in the player color
 				strncpy( buf, g_szLineBuffer[i], min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+32) );
-				buf[ min(g_iNameLengths[i]-1, MAX_PLAYER_NAME_LENGTH+31) ] = 0;
+				buf[ min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+31) ] = 0;
 				DrawUtils::SetConsoleTextColor( g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2] );
 				int x = DrawUtils::DrawConsoleString( LINE_START, y, buf );
 
@@ -203,7 +203,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	int i = 0;
 	for( i = CHAT_CT; i < CHAT_NAME_CHANGE; i++ )
 	{
-		if( !strncmp( szBuf[0], sayTextFmt[i].key, sizeof( szBuf ) ) )
+		if( !strncmp( szBuf[0], sayTextFmt[i].key, sizeof( szBuf[0] ) ) )
 		{
 			fmt = sayTextFmt[i].value;
 			break;

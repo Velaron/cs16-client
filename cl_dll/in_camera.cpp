@@ -284,7 +284,7 @@ void DLLEXPORT CAM_Think( void )
 		{
 			if(dist<c_maxdistance->value)
 			{
-			    dist +=CAM_DIST_DELTA * ((cam_mouse.y-gEngfuncs.GetWindowCenterY())/2);
+				dist +=CAM_DIST_DELTA * ((cam_mouse.y-gEngfuncs.GetWindowCenterY())/2.0);
 			}
 			if (dist>c_maxdistance->value)
 			{
@@ -295,7 +295,7 @@ void DLLEXPORT CAM_Think( void )
 		{
 			if (dist>c_mindistance->value)
 			{
-			   dist -= (CAM_DIST_DELTA)*((gEngfuncs.GetWindowCenterY()-cam_mouse.y)/2);
+			   dist -= (CAM_DIST_DELTA)*((gEngfuncs.GetWindowCenterY()-cam_mouse.y)/2.0);
 			}
 			if (dist<c_mindistance->value)
 			{
@@ -393,7 +393,8 @@ void CAM_ToFirstPerson(void)
 
 void CAM_ToggleSnapto( void )
 { 
-	cam_snapto->value = !cam_snapto->value;
+	gEngfuncs.Cvar_SetValue( "cam_snapto", cam_snapto->value ? 0.0 : 1.0 );
+	//cam_snapto->value = !cam_snapto->value;
 }
 
 void CAM_Init( void )

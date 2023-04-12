@@ -32,6 +32,7 @@ version.
 #include "draw_util.h"
 #include "triangleapi.h"
 #include <string.h>
+#include <ctype.h>
 
 float DrawUtils::color[3];
 
@@ -299,7 +300,7 @@ int DrawUtils::HudStringLen( const char *szIt, float scale )
 			continue;
 		}
 
-		if( IsColorString( szIt ) ) // suck down, unreadable nicknames. Check even if hud_colored is off
+		if( szIt[0] == '^' && isdigit( szIt[1] ) ) // suck down, unreadable nicknames. Check even if hud_colored is off
 		{
 			szIt++;
 			continue;

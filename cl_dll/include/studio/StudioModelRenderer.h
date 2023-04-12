@@ -31,12 +31,12 @@ public:
 	virtual int StudioDrawPlayer(int flags, struct entity_state_s *pplayer);
 
 public:
-	virtual mstudioanim_t *StudioGetAnim(model_t *m_pSubModel, mstudioseqdesc_t *pseqdesc);
+	virtual mstudioanim_t *StudioGetAnim(model_t *pSubModel, mstudioseqdesc_t *pseqdesc);
 	virtual void StudioSetUpTransform(int trivial_accept);
 	virtual void StudioSetupBones(void);
 	virtual void StudioCalcAttachments(void);
 	virtual void StudioSaveBones(void);
-	virtual void StudioMergeBones(model_t *m_pSubModel);
+	virtual void StudioMergeBones(model_t *pSubModel);
 	virtual float StudioEstimateInterpolant(void);
 	virtual float StudioEstimateFrame(mstudioseqdesc_t *pseqdesc);
 	virtual void StudioFxTransform(cl_entity_t *ent, float transform[3][4]);

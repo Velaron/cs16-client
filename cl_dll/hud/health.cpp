@@ -117,17 +117,17 @@ int CHudHealth::VidInit(void)
 {
 	m_hSprite = LoadSprite(PAIN_NAME);
 
-	m_vAttackPos[ATK_FRONT].x = ScreenWidth  / 2 - SPR_Width ( m_hSprite, 0 ) / 2;
-	m_vAttackPos[ATK_FRONT].y = ScreenHeight / 2 - SPR_Height( m_hSprite, 0 ) * 3;
+	m_vAttackPos[ATK_FRONT].x = ScreenWidth  / 2.0 - SPR_Width ( m_hSprite, 0 ) / 2.0;
+	m_vAttackPos[ATK_FRONT].y = ScreenHeight / 2.0 - SPR_Height( m_hSprite, 0 ) * 3;
 
-	m_vAttackPos[ATK_RIGHT].x = ScreenWidth  / 2 + SPR_Width ( m_hSprite, 1 ) * 2;
-	m_vAttackPos[ATK_RIGHT].y = ScreenHeight / 2 - SPR_Height( m_hSprite, 1 ) / 2;
+	m_vAttackPos[ATK_RIGHT].x = ScreenWidth  / 2.0 + SPR_Width ( m_hSprite, 1 ) * 2;
+	m_vAttackPos[ATK_RIGHT].y = ScreenHeight / 2.0 - SPR_Height( m_hSprite, 1 ) / 2.0;
 
-	m_vAttackPos[ATK_REAR ].x = ScreenWidth  / 2 - SPR_Width ( m_hSprite, 2 ) / 2;
-	m_vAttackPos[ATK_REAR ].y = ScreenHeight / 2 + SPR_Height( m_hSprite, 2 ) * 2;
+	m_vAttackPos[ATK_REAR ].x = ScreenWidth  / 2.0 - SPR_Width ( m_hSprite, 2 ) / 2.0;
+	m_vAttackPos[ATK_REAR ].y = ScreenHeight / 2.0 + SPR_Height( m_hSprite, 2 ) * 2;
 
-	m_vAttackPos[ATK_LEFT ].x = ScreenWidth  / 2 - SPR_Width ( m_hSprite, 3 ) * 3;
-	m_vAttackPos[ATK_LEFT ].y = ScreenHeight / 2 - SPR_Height( m_hSprite, 3 ) / 2;
+	m_vAttackPos[ATK_LEFT ].x = ScreenWidth  / 2.0 - SPR_Width ( m_hSprite, 3 ) * 3;
+	m_vAttackPos[ATK_LEFT ].y = ScreenHeight / 2.0 - SPR_Height( m_hSprite, 3 ) / 2.0;
 
 
 	m_HUD_dmg_bio = gHUD.GetSpriteIndex( "dmg_bio" ) + 1;

@@ -61,10 +61,10 @@ int CHudSniperScope::VidInit()
 	{
 		gRenderAPI.Host_Error( "^3Error^7: Cannot load Sniper Scope arcs. Check sprites/scope_arc*.tga files\n" );
 	}
-	left = (TrueWidth - TrueHeight)/2;
+	left = (TrueWidth - TrueHeight)/2.0;
 	right = left + TrueHeight;
-	centerx = TrueWidth/2;
-	centery = TrueHeight/2;
+	centerx = TrueWidth/2.0;
+	centery = TrueHeight/2.0;
 	return 1;
 }
 

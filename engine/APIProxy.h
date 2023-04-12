@@ -228,7 +228,7 @@ typedef void						(*pfnEngSrc_pfnSPR_DrawHoles_t )		( int frame, int x, int y, c
 typedef void						(*pfnEngSrc_pfnSPR_DrawAdditive_t )	( int frame, int x, int y, const struct rect_s *prc );
 typedef void						(*pfnEngSrc_pfnSPR_EnableScissor_t )	( int x, int y, int width, int height );
 typedef void						(*pfnEngSrc_pfnSPR_DisableScissor_t )	( void );
-typedef struct client_sprite_s	*	(*pfnEngSrc_pfnSPR_GetList_t )			( char *psz, int *piCount );
+typedef struct client_sprite_s	*	(*pfnEngSrc_pfnSPR_GetList_t )			( const char *psz, int *piCount );
 typedef void						(*pfnEngSrc_pfnFillRGBA_t )			( int x, int y, int width, int height, int r, int g, int b, int a );
 typedef int							(*pfnEngSrc_pfnGetScreenInfo_t ) 		( struct SCREENINFO_s *pscrinfo );
 typedef void						(*pfnEngSrc_pfnSetCrosshair_t )		( HSPRITE hspr, wrect_t rc, int r, int g, int b );
@@ -263,8 +263,8 @@ typedef int       					(*pfnEngSrc_Cmd_Argc_t)					(void);
 typedef char *						(*pfnEngSrc_Cmd_Argv_t )				( int arg );
 typedef void						(*pfnEngSrc_Con_Printf_t )				( const char *fmt, ... );
 typedef void						(*pfnEngSrc_Con_DPrintf_t )			( const char *fmt, ... );
-typedef void						(*pfnEngSrc_Con_NPrintf_t )			( int pos, char *fmt, ... );
-typedef void						(*pfnEngSrc_Con_NXPrintf_t )			( struct con_nprint_s *info, char *fmt, ... );
+typedef void						(*pfnEngSrc_Con_NPrintf_t )			( int pos, const char *fmt, ... );
+typedef void						(*pfnEngSrc_Con_NXPrintf_t )			( struct con_nprint_s *info, const char *fmt, ... );
 typedef const char *				(*pfnEngSrc_PhysInfo_ValueForKey_t )	( const char *key );
 typedef const char *				(*pfnEngSrc_ServerInfo_ValueForKey_t )( const char *key );
 typedef float						(*pfnEngSrc_GetClientMaxspeed_t )		( void );
@@ -290,7 +290,7 @@ typedef void						(*pfnEngSrc_pfnPlaybackEvent_t )		( int flags, const struct ed
 typedef void						(*pfnEngSrc_pfnWeaponAnim_t )			( int iAnim, int body );
 typedef float						(*pfnEngSrc_pfnRandomFloat_t )			( float flLow, float flHigh );
 typedef int32						(*pfnEngSrc_pfnRandomLong_t )			( int32 lLow, int32 lHigh );
-typedef void						(*pfnEngSrc_pfnHookEvent_t )			( char *name, void ( *pfnEvent )( struct event_args_s *args ) );
+typedef void						(*pfnEngSrc_pfnHookEvent_t )			( const char *name, void ( *pfnEvent )( struct event_args_s *args ) );
 typedef int							(*pfnEngSrc_Con_IsVisible_t)			();
 typedef const char *				(*pfnEngSrc_pfnGetGameDirectory_t )	( void );
 typedef struct cvar_s *				(*pfnEngSrc_pfnGetCvarPointer_t )		( const char *szName );
@@ -300,7 +300,7 @@ typedef void						(*pfnEngSrc_pfnGetScreenFade_t )		( struct screenfade_s *fade 
 typedef void						(*pfnEngSrc_pfnSetScreenFade_t )		( struct screenfade_s *fade );
 typedef void *						(*pfnEngSrc_VGui_GetPanel_t )         ( );
 typedef void                        (*pfnEngSrc_VGui_ViewportPaintBackground_t ) (int extents[4]);
-typedef byte*						(*pfnEngSrc_COM_LoadFile_t )				( char *path, int usehunk, int *pLength );
+typedef byte*						(*pfnEngSrc_COM_LoadFile_t )				( const char *path, int usehunk, int *pLength );
 typedef char*						(*pfnEngSrc_COM_ParseFile_t )			( char *data, char *token );
 typedef void						(*pfnEngSrc_COM_FreeFile_t)				( void *buffer );
 typedef struct triangleapi_s *		pTriAPI;
@@ -343,7 +343,7 @@ typedef int							(*pfnEngSrc_pfnVGUI2DrawCharacter_t )		( int x, int y, int ch,
 typedef int							(*pfnEngSrc_pfnVGUI2DrawCharacterAdd_t )	( int x, int y, int ch, int r, int g, int b, unsigned int font);
 typedef unsigned int		(*pfnEngSrc_COM_GetApproxWavePlayLength ) ( const char * filename);
 typedef void *						(*pfnEngSrc_pfnGetCareerUI_t)();
-typedef void						(*pfnEngSrc_Cvar_Set_t )			( char *cvar, char *value );
+typedef void						(*pfnEngSrc_Cvar_Set_t )			( const char *cvar, const char *value );
 typedef int							(*pfnEngSrc_pfnIsPlayingCareerMatch_t)();
 typedef double						(*pfnEngSrc_GetAbsoluteTime_t) ( void );
 typedef void						(*pfnEngSrc_pfnProcessTutorMessageDecayBuffer_t)(int *buffer, int bufferLength);

@@ -489,6 +489,12 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 					// is this message already in the list
 					if ( !strcmp( message->pMessage, m_pMessages[j]->pMessage ) )
 					{
+						if( !strcmp( message->pName, "Custom" ) )
+						{
+							delete[] message->pName;
+							delete[] message->pMessage;
+						}
+						delete message;
 						return;
 					}
 

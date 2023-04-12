@@ -125,12 +125,13 @@ void EV_FireUSP( event_args_t *args )
 		if( gHUD.cl_gunsmoke->value )
 		{
 			cl_entity_t *ent = gEngfuncs.GetViewModel();
-			Vector smoke_origin = ent->attachment[0];
-
-			smoke_origin = smoke_origin - forward * 3;
 
 			if( ent )
 			{
+				Vector smoke_origin = ent->attachment[0];
+
+				smoke_origin = smoke_origin - forward * 3;
+
 				float scale = Com_RandomFloat( 0.1, 0.25 );
 
 				EV_CS16Client_CreateSmoke( SMOKE_PISTOL, smoke_origin, forward, 0,  scale, 7,7,7, false, velocity );

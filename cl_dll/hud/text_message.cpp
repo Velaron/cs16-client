@@ -216,8 +216,10 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 				char *first = &msg_text[i + 2];
 				char *second = &msg_text[i + 3];
 
+				size_t len = strlen( second );
+
 				memmove( first, second, strlen( second ));
-				first[strlen(first)] = '\0';
+				first[len] = '\0'; // one character has been removed and string moved, set null terminator
 			}
 		}
 	}
@@ -256,7 +258,6 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 		break;
 
 	case HUD_PRINTRADIO:
-		// For some reason, HUD_PRINTRADIO always have "1" in msg_text
 		psz[0] = 2;
 		snprintf( psz + 1, MAX_TEXTMSG_STRING-1, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
 

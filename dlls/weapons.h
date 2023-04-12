@@ -769,7 +769,7 @@ public:
 
 public:
 	BOOL IsEmpty(void);
-	int GiveAmmo(int iCount, char *szName, int iMax, int *pIndex = NULL);
+	int GiveAmmo(int iCount, char *szName, int iMax, int *pIndex = NULL); // -V762
 	void EXPORT Kill(void);
 	BOOL HasWeapon(CBasePlayerItem *pCheckItem);
 	BOOL PackWeapon(CBasePlayerItem *pWeapon);

@@ -201,6 +201,8 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 
 int CHudStatusBar :: Draw( float fTime )
 {
+	bool empty = true;
+
 	if ( m_bReparseString )
 	{
 		for ( int i = 0; i < MAX_STATUSBAR_LINES; i++ )
@@ -222,6 +224,10 @@ int CHudStatusBar :: Draw( float fTime )
 	// Draw the status bar lines
 	for ( int i = 0; i < MAX_STATUSBAR_LINES; i++ )
 	{
+		if( !m_szStatusBar[i][0] )
+			continue;
+		else empty = false;
+
 		int TextHeight, TextWidth;
 		DrawUtils::ConsoleStringSize( m_szStatusBar[i], &TextWidth, &TextHeight );
 
@@ -239,6 +245,11 @@ int CHudStatusBar :: Draw( float fTime )
 		if ( m_pflNameColors[i] )
 			DrawUtils::SetConsoleTextColor( m_pflNameColors[i][0], m_pflNameColors[i][1], m_pflNameColors[i][2] );
 		DrawUtils::DrawConsoleString( x, y, m_szStatusBar[i] );
+	}
+
+	if( empty )
+	{
+		m_iFlags &= ~HUD_DRAW;
 	}
 
 	return 1;
@@ -268,10 +279,7 @@ int CHudStatusBar :: MsgFunc_StatusText( const char *pszName, int iSize, void *p
 	strncpy( m_szStatusText[line], reader.ReadString(), MAX_STATUSTEXT_LENGTH );
 	m_szStatusText[line][MAX_STATUSTEXT_LENGTH-1] = 0;  // ensure it's null terminated ( strncpy() won't null terminate if read string too long)
 
-	if ( m_szStatusText[0] == 0 )
-		m_iFlags &= ~HUD_DRAW;
-	else
-		m_iFlags |= HUD_DRAW;  // we have status text, so turn on the status bar
+	m_iFlags |= HUD_DRAW;  // we have status text, so turn on the status bar
 
 	m_bReparseString = TRUE;
 
@@ -291,6 +299,7 @@ int CHudStatusBar :: MsgFunc_StatusValue( const char *pszName, int iSize, void *
 		return 1; // index out of range
 
 	m_iStatusValues[index] = reader.ReadShort();
+	m_iFlags |= HUD_DRAW;  // we have status text, so turn on the status bar
 
 	m_bReparseString = TRUE;
 	

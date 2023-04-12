@@ -144,7 +144,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	pWeapon->hAmmo = 0;
 	pWeapon->hAmmo2 = 0;
 
-	sprintf(sz, "sprites/%s.txt", pWeapon->szName);
+	snprintf(sz, sizeof(sz), "sprites/%s.txt", pWeapon->szName);
 	client_sprite_t *pList = SPR_GetList(sz, &i);
 
 	if (!pList)
@@ -155,7 +155,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList( pList, "crosshair", iRes, i );
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hCrosshair = SPR_Load(sz);
 		pWeapon->rcCrosshair = p->rc;
 	}
@@ -165,7 +165,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "autoaim", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hAutoaim = SPR_Load(sz);
 		pWeapon->rcAutoaim = p->rc;
 	}
@@ -175,7 +175,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList( pList, "zoom", iRes, i );
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hZoomedCrosshair = SPR_Load(sz);
 		pWeapon->rcZoomedCrosshair = p->rc;
 	}
@@ -188,7 +188,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "zoom_autoaim", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hZoomedAutoaim = SPR_Load(sz);
 		pWeapon->rcZoomedAutoaim = p->rc;
 	}
@@ -201,7 +201,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "weapon", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hInactive = SPR_Load(sz);
 		pWeapon->rcInactive = p->rc;
 
@@ -213,7 +213,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "weapon_s", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hActive = SPR_Load(sz);
 		pWeapon->rcActive = p->rc;
 	}
@@ -223,7 +223,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "ammo", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hAmmo = SPR_Load(sz);
 		pWeapon->rcAmmo = p->rc;
 
@@ -235,7 +235,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "ammo2", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hAmmo2 = SPR_Load(sz);
 		pWeapon->rcAmmo2 = p->rc;
 
@@ -1032,6 +1032,7 @@ void CHudAmmo::UserCmd_Autobuy()
 	char *pfile = afile;
 	char token[1024];
 	char szCmd[1024];
+	int remaining = 1023;
 
 	if( !pfile )
 	{
@@ -1039,13 +1040,16 @@ void CHudAmmo::UserCmd_Autobuy()
 		return;
 	}
 
-	strncpy(szCmd, "cl_setautobuy", sizeof(szCmd));
+	strcpy(szCmd, "cl_setautobuy");
+	remaining -= sizeof( "cl_setautobuy" );
 
 	while((pfile = gEngfuncs.COM_ParseFile( pfile, token )))
 	{
 		// append space first
-		strncat(szCmd, " ", 1024);
-		strncat(szCmd, token, 1024);
+		strncat(szCmd, " ", remaining);
+		strncat(szCmd, token, remaining - 1);
+
+		remaining -= strlen( token ) - 1;
 	}
 
 	gEngfuncs.pfnServerCmd( szCmd );
@@ -1059,6 +1063,7 @@ void CHudAmmo::UserCmd_Rebuy()
 	char token[1024];
 	char szCmd[1024];
 	int lastCh;
+	int remaining = 1023;
 
 	if( !pfile )
 	{
@@ -1067,19 +1072,23 @@ void CHudAmmo::UserCmd_Rebuy()
 	}
 
 	// start with \"
-	strncpy(szCmd, "cl_setrebuy \"", sizeof(szCmd));
+	strcpy(szCmd, "cl_setrebuy \"" );
+	remaining -= sizeof( "cl_setrebuy \"" );
 
 	while((pfile = gEngfuncs.COM_ParseFile( pfile, token )))
 	{
-		strncat(szCmd, token, 1024 );
+		strncat(szCmd, token, remaining );
+		remaining -= strlen( token );
+
 		// append space after token
-		strncat(szCmd, " ", 1024);
+		strncat(szCmd, " ", remaining );
+		remaining--;
 	}
 	// replace last space with ", before terminator
 	lastCh = strlen(szCmd);
-	szCmd[lastCh - 1] = '\"';
+	szCmd[lastCh] = '\"';
 
-	gEngfuncs.pfnServerCmd(szCmd);
+	gEngfuncs.pfnServerCmd( szCmd );
 	gEngfuncs.COM_FreeFile( afile );
 }
 
