@@ -75,7 +75,7 @@ int CHudMoney::Draw(float flTime)
 	}
 	float interpolate = ( 5 - m_fFade ) / 5;
 
-	int iDollarWidth = m_hDollar.rect.right - m_hDollar.rect.left;
+	int iDollarWidth = m_hDollar.rect.Width();
 
 	int x = ScreenWidth - iDollarWidth * 7;
 	int y = MONEY_YPOS;
@@ -96,7 +96,7 @@ int CHudMoney::Draw(float flTime)
 		if( m_iDelta != 0 )
 		{
 			int iDeltaR, iDeltaG, iDeltaB;
-			int iDollarHeight = m_hDollar.rect.bottom - m_hDollar.rect.top;
+			int iDollarHeight = m_hDollar.rect.Height();
 			int iDeltaAlpha = 255 - interpolate * (255);
 
 			DrawUtils::UnpackRGB  (iDeltaR, iDeltaG, iDeltaB, m_iDelta < 0 ? RGB_REDISH : RGB_GREENISH);

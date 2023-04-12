@@ -11,7 +11,22 @@
 
 typedef struct rect_s
 {
-	int				left, right, top, bottom;
+	int	left;
+	int right;
+	int top;
+	int bottom;
+
+#ifdef __cplusplus
+	int Width()
+	{
+		return right - left;
+	}
+
+	int Height()
+	{
+		return bottom - top;
+	}
+#endif
 } wrect_t;
 
 #endif

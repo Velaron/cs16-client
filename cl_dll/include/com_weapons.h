@@ -12,7 +12,7 @@
 
 
 #include "hud_iface.h"
-
+#include "weapontype.h"
 #define PLAYER_CAN_SHOOT (1 << 0)
 #define PLAYER_FREEZE_TIME_OVER ( 1 << 1 )
 #define PLAYER_IN_BOMB_ZONE (1 << 2)
@@ -25,22 +25,11 @@
 #define ACCURACY_MULTIPLY_BY_14 (1 << 3) // accuracy multiply to 1.4
 #define ACCURACY_MULTIPLY_BY_14_2 (1 << 4) // accuracy multiply to 1.4
 
-#ifndef WPNSTATE_USP_SILENCED
-#define WPNSTATE_USP_SILENCED (1<<0)
-#define WPNSTATE_GLOCK18_BURST_MODE (1<<1)
-#define WPNSTATE_M4A1_SILENCED (1<<2)
-#define WPNSTATE_ELITE_LEFT (1<<3)
-#define WPNSTATE_FAMAS_BURST_MODE (1<<4)
-#define WPNSTATE_SHIELD_DRAWN (1<<5)
-#endif
-
-
 extern "C"
 {
 	void _DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed );
 }
 
-void			COM_Log( char *pszFile, char *fmt, ...);
 bool			CL_IsDead();
 
 float			UTIL_SharedRandomFloat( unsigned int seed, float low, float high );

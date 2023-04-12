@@ -83,7 +83,7 @@ int CHudTimer::Draw( float fTime )
 
 	DrawUtils::ScaleColors( r, g, b, MIN_ALPHA );
     
-    int iWatchWidth = gHUD.GetSpriteRect(m_HUD_timer).right - gHUD.GetSpriteRect(m_HUD_timer).left;
+	int iWatchWidth = gHUD.GetSpriteRect(m_HUD_timer).Width();
     
 	int x = ScreenWidth/2;
 	int y = ScreenHeight - 1.5 * gHUD.m_iFontHeight ;

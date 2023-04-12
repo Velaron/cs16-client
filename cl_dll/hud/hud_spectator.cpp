@@ -955,23 +955,6 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 			break;
 		}
 
-#if 0
-		if ( (g_iUser1 == OBS_IN_EYE) || (g_iUser1 == OBS_ROAMING) )
-		{
-			m_crosshairRect.left	 = 24;
-			m_crosshairRect.top	 = 0;
-			m_crosshairRect.right	 = 48;
-			m_crosshairRect.bottom = 24;
-
-			SetCrosshair( m_hCrosshair, m_crosshairRect, 255, 255, 255 );
-		}
-		else
-		{
-			memset( &m_crosshairRect,0,sizeof(m_crosshairRect) );
-			SetCrosshair( 0, m_crosshairRect, 0, 0, 0 );
-		}
-#endif
-
 		char string[128];
 		sprintf(string, "#Spec_Mode%d", g_iUser1 );
 		sprintf(string, "%c%s", HUD_PRINTCENTER, CHudTextMessage::BufferedLocaliseTextString( string ));
@@ -1242,7 +1225,7 @@ void CHudSpectator::DrawOverviewLayer()
 	z *= m_OverviewData.layersHeights[0]; // gOverviewData.z_min - 32;
 
 	// i = r_overviewTexture + ( layer*OVERVIEW_X_TILES*OVERVIEW_Y_TILES );
-	gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
+	/*gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 	gEngfuncs.pTriAPI->Color4f( 0, 0, 0, 1.0f );
 	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
@@ -1263,7 +1246,7 @@ void CHudSpectator::DrawOverviewLayer()
 		MakeSkyVec( skyMaxs[0][i], skyMaxs[1][i], i );
 		MakeSkyVec( skyMaxs[0][i], skyMins[1][i], i );
 		gEngfuncs.pTriAPI->End();
-	}
+	}*/
 
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
 	gEngfuncs.pTriAPI->CullFace( TRI_NONE );	
@@ -1714,25 +1697,6 @@ void CHudSpectator::CheckSettings()
 			gEngfuncs.pfnServerCmd(chatcmd);
 		}
 	}
-
-#if 0
-	// HL/TFC has no oberserver corsshair, so set it client side
-	if ( (g_iUser1 == OBS_IN_EYE) || (g_iUser1 == OBS_ROAMING) )
-	{
-		m_crosshairRect.left	 = 24;
-		m_crosshairRect.top	 = 0;
-		m_crosshairRect.right	 = 48;
-		m_crosshairRect.bottom = 24;
-
-		SetCrosshair( m_hCrosshair, m_crosshairRect, 255, 255, 255 );
-	}
-	else
-	{
-		memset( &m_crosshairRect,0,sizeof(m_crosshairRect) );
-		SetCrosshair( 0, m_crosshairRect, 0, 0, 0 );
-	}
-#endif
-
 
 	// if we are a real player on server don't allow inset window
 	// in First Person mode since this is our restricted forcecamera mode 2

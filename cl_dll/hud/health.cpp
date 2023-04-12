@@ -126,8 +126,8 @@ int CHudHealth::VidInit(void)
 	m_HUD_dmg_bio = gHUD.GetSpriteIndex( "dmg_bio" ) + 1;
 	m_HUD_cross = gHUD.GetSpriteIndex( "cross" );
 
-	giDmgHeight = gHUD.GetSpriteRect(m_HUD_dmg_bio).right - gHUD.GetSpriteRect(m_HUD_dmg_bio).left;
-	giDmgWidth = gHUD.GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD.GetSpriteRect(m_HUD_dmg_bio).top;
+	giDmgHeight = gHUD.GetSpriteRect(m_HUD_dmg_bio).Width();
+	giDmgWidth = gHUD.GetSpriteRect(m_HUD_dmg_bio).Height();
 
 	return 1;
 }
@@ -273,8 +273,8 @@ void CHudHealth::DrawHealthBar( float flTime )
 	// Only draw health if we have the suit.
 	if (gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)))
 	{
-		HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
-		int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).right - gHUD.GetSpriteRect(m_HUD_cross).left;
+		HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).Width();
+		int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).Width();
 
 		y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 		x = CrossWidth /2;

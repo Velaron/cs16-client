@@ -106,9 +106,9 @@ int CHudDeathNotice :: Draw( float flTime )
 			}
 
 			int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
-			x = ScreenWidth - DrawUtils::ConsoleStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
+			x = ScreenWidth - DrawUtils::ConsoleStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).Width());
 			if( rgDeathNoticeList[i].iHeadShotId )
-				x -= gHUD.GetSpriteRect(m_HUD_d_headshot).right - gHUD.GetSpriteRect(m_HUD_d_headshot).left;
+				x -= gHUD.GetSpriteRect(m_HUD_d_headshot).Width();
 
 			if ( !rgDeathNoticeList[i].bSuicide )
 			{
@@ -130,13 +130,13 @@ int CHudDeathNotice :: Draw( float flTime )
 			SPR_Set( gHUD.GetSprite(id), r, g, b );
 			SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect(id) );
 
-			x += (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
+			x += (gHUD.GetSpriteRect(id).Width());
 
 			if( rgDeathNoticeList[i].iHeadShotId)
 			{
 				SPR_Set( gHUD.GetSprite(m_HUD_d_headshot), r, g, b );
 				SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect(m_HUD_d_headshot));
-				x += (gHUD.GetSpriteRect(m_HUD_d_headshot).right - gHUD.GetSpriteRect(m_HUD_d_headshot).left);
+				x += (gHUD.GetSpriteRect(m_HUD_d_headshot).Width());
 			}
 
 			// Draw victims name (if it was a player that was killed)

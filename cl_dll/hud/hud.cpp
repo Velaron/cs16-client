@@ -481,8 +481,8 @@ void CHud :: VidInit( void )
 		m_WhiteTex = gRenderAPI.GL_LoadTexture( "*white", NULL, 0, 0 );
 	}
 
-	m_iFontWidth  = GetSpriteRect(m_HUD_number_0).right  - GetSpriteRect(m_HUD_number_0).left;
-	m_iFontHeight = GetSpriteRect(m_HUD_number_0).bottom - GetSpriteRect(m_HUD_number_0).top;
+	m_iFontWidth  = GetSpriteRect(m_HUD_number_0).Width();
+	m_iFontHeight = GetSpriteRect(m_HUD_number_0).Height();
 
 	m_hGasPuff = SPR_Load("sprites/gas_puff_01.spr");
 

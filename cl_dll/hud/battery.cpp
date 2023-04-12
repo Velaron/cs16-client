@@ -44,16 +44,12 @@ int CHudBattery::VidInit( void )
 	m_hEmpty[VestHelm].SetSpriteByName("suithelmet_empty");
 	m_hFull[VestHelm].SetSpriteByName("suithelmet_full");
 
-	m_iHeight = m_hFull[Vest].rect.bottom - m_hEmpty[Vest].rect.top;
+	m_iHeight = m_hFull[Vest].rect.Height();
 	m_fFade = 0;
 
 	return 1;
 }
 
-void CHudBattery::InitHUDData( void )
-{
-	m_enArmorType = Vest;
-}
 
 int CHudBattery:: MsgFunc_Battery(const char *pszName, int iSize, void *pbuf )
 {
@@ -66,6 +62,8 @@ int CHudBattery:: MsgFunc_Battery(const char *pszName, int iSize, void *pbuf )
 	{
 		m_fFade = FADE_TIME;
 		m_iBat = x;
+		if( m_iBat < 0 )
+			m_enArmorType = Vest;
 	}
 
 	return 1;
@@ -125,7 +123,7 @@ int CHudBattery::Draw( float flTime )
 		SPR_DrawAdditive( 0, x, y + (rc.top - m_hEmpty[m_enArmorType].rect.top), &rc );
 	}
 
-	x += (m_hEmpty[m_enArmorType].rect.right - m_hEmpty[m_enArmorType].rect.left);
+	x += (m_hEmpty[m_enArmorType].rect.Width());
 	x = DrawUtils::DrawHudNumber( x, y, DHN_3DIGITS|DHN_DRAWZERO, m_iBat, r, g, b );
 
 	return 1;

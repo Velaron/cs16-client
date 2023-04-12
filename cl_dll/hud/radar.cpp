@@ -192,7 +192,7 @@ int CHudRadar::VidInit(void)
 
 	m_hRadar.SetSpriteByName( "radar" );
 	m_hRadarOpaque.SetSpriteByName( "radaropaque" );
-	iMaxRadius = (m_hRadar.rect.right - m_hRadar.rect.left) / 2.0f;
+	iMaxRadius = (m_hRadar.rect.Width()) / 2.0f;
 	return 1;
 }
 
@@ -380,7 +380,7 @@ int CHudRadar::Draw(float flTime)
 	}
 
 	if( gHUD.GetGameType() == GAME_CZERO )
-		DrawPlayerLocation( ( m_hRadarOpaque.rect.bottom - m_hRadarOpaque.rect.top ) + 10 );
+		DrawPlayerLocation( ( m_hRadarOpaque.rect.Height() ) + 10 );
 
 	return 0;
 }
@@ -390,7 +390,7 @@ void CHudRadar::DrawPlayerLocation( int y )
 	const char *szLocation = g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].location;
 	if( szLocation[0] )
 	{
-		int x = (m_hRadarOpaque.rect.right - m_hRadarOpaque.rect.left) / 2;
+		int x = (m_hRadarOpaque.rect.Width()) / 2;
 		int len = DrawUtils::ConsoleStringLen( szLocation );
 
 		x = x - len / 2;

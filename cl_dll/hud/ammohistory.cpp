@@ -159,7 +159,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				DrawUtils::ScaleColors(r, g, b, min(scale, 255) );
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
-				int xpos = ScreenWidth - (weap->rcInactive.right - weap->rcInactive.left);
+				int xpos = ScreenWidth - (weap->rcInactive.Width());
 				SPR_Set( weap->hInactive, r, g, b );
 				SPR_DrawAdditive( 0, xpos, ypos, &weap->rcInactive );
 			}
@@ -177,7 +177,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				DrawUtils::ScaleColors(r, g, b, min(scale, 255) );
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
-				int xpos = ScreenWidth - (rect.right - rect.left) - 10;
+				int xpos = ScreenWidth - (rect.Width()) - 10;
 
 				SPR_Set( gHUD.GetSprite( rgAmmoHistory[i].iId ), r, g, b );
 				SPR_DrawAdditive( 0, xpos, ypos, &rect );

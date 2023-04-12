@@ -332,9 +332,9 @@ int CHudMessage::Draw( float fTime )
 		{
 			brightness = FadeBlend( m_pGameTitle->fadein, m_pGameTitle->fadeout, m_pGameTitle->holdtime, localTime );
 
-			int halfWidth = gHUD.GetSpriteRect(m_HUD_title_half).right - gHUD.GetSpriteRect(m_HUD_title_half).left;
-			int fullWidth = halfWidth + gHUD.GetSpriteRect(m_HUD_title_life).right - gHUD.GetSpriteRect(m_HUD_title_life).left;
-			int fullHeight = gHUD.GetSpriteRect(m_HUD_title_half).bottom - gHUD.GetSpriteRect(m_HUD_title_half).top;
+			int halfWidth = gHUD.GetSpriteRect(m_HUD_title_half).Width();
+			int fullWidth = halfWidth + gHUD.GetSpriteRect(m_HUD_title_life).Width();
+			int fullHeight = gHUD.GetSpriteRect(m_HUD_title_half).Height();
 
 			int x = XPosition( m_pGameTitle->x, fullWidth, fullWidth );
 			int y = YPosition( m_pGameTitle->y, fullHeight );

@@ -157,7 +157,7 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 
 int DrawUtils::DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, int b )
 {
-	int iWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).right - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).left;
+	int iWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).Width();
 	int k;
 
 	if ( iNumber > 0 )
@@ -224,7 +224,7 @@ int DrawUtils::DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int 
 
 int DrawUtils::DrawHudNumber2( int x, int y, bool DrawZero, int iDigits, int iNumber, int r, int g, int b )
 {
-	int iWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).right - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).left;
+	int iWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).Width();
 	x += ( iDigits - 1 ) * iWidth;
 
 	int ResX = x + iWidth;
@@ -243,7 +243,7 @@ int DrawUtils::DrawHudNumber2( int x, int y, bool DrawZero, int iDigits, int iNu
 
 int DrawUtils::DrawHudNumber2( int x, int y, int iNumber, int r, int g, int b )
 {
-	int iWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).right - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).left;
+	int iWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).Width();
 
 	int iDigits = 0;
 	int temp    = iNumber;
