@@ -1647,6 +1647,24 @@ void V_CalcThirdPersonRefdef( ref_params_t *pparams )
 
 	lasttime = pparams->time;
 
+	vec3_t ofs, camAngles, camForward, camRight, camUp;
+
+	ofs[0] = ofs[1] = ofs[2] = 0.0;
+
+	CL_CameraOffset( (float *)&ofs );
+
+	VectorCopy( ofs, camAngles );
+	camAngles[ ROLL ]	= 0;
+
+	AngleVectors( camAngles, camForward, camRight, camUp );
+
+	for ( int i = 0; i < 3; i++ )
+	{
+		pparams->vieworg[ i ] += -ofs[2] * camForward[ i ];
+	}
+
+	VectorCopy( camAngles, pparams->viewangles);
+
 	V_GetChaseOrigin( pparams->viewangles, pparams->vieworg, cl_chasedist->value, pparams->vieworg );
 
 	float pitch = pparams->viewangles[PITCH];

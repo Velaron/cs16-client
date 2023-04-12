@@ -29,6 +29,7 @@ public:
 	int MsgFunc_BombPickup(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_Location(const char *pszName, int iSize, void *pbuf);
 private:
 
 	cvar_t *cl_radartype;
@@ -49,7 +50,7 @@ private:
 	inline void DrawColoredTexture( int x, int y, int size, byte r, byte g, byte b, byte a, int texHandle );
 
 	bool bUseRenderAPI, bTexturesInitialized;
-	int hDot, hCross, hT, hFlippedT;
+	int hCross, hT, hFlippedT;
 	int iMaxRadius;
 };
 

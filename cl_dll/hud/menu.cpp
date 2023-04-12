@@ -215,11 +215,12 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 	if ( !NeedMore )
 	{  // we have the whole string, so we can localise it now
 		strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ), MAX_MENU_STRING );
-
+		g_szMenuString[MAX_MENU_STRING-1] = 0;
 		// Swap in characters
 		if ( KB_ConvertString( g_szMenuString, &temp ) )
 		{
 			strncpy( g_szMenuString, temp, MAX_MENU_STRING );
+			g_szMenuString[MAX_MENU_STRING-1] = 0;
 			free( temp );
 		}
 	}
@@ -263,6 +264,7 @@ void CHudMenu::UserCmd_OldStyleMenuOpen()
 {
 	m_flShutoffTime = -1; // stay open until user will not close it
 	strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString("Buy"), MAX_MENU_STRING );
+	g_szMenuString[MAX_MENU_STRING-1] = 0;
 }
 
 void CHudMenu::UserCmd_OldStyleMenuClose()

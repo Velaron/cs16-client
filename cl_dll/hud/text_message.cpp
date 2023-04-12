@@ -70,7 +70,10 @@ char *CHudTextMessage::LocaliseTextString( const char *msg, char *dst_buffer, in
 				continue;
 			}
 
-			if(clmsg->pMessage[0] == '#') strncpy(dst, Localize(clmsg->pMessage+1), buffer_size);
+			if(clmsg->pMessage[0] == '#')
+			{
+				strncpy(dst, Localize(clmsg->pMessage+1), buffer_size);
+			}
 
 			// copy string into message over the msg name
 			for ( char *wsrc = (char*)clmsg->pMessage; *wsrc != 0; wsrc++, dst++ )
@@ -162,30 +165,30 @@ char* ConvertCRtoNL( char *str )
 //   string: message parameter 4
 // any string that starts with the character '#' is a message name, and is used to look up the real message in titles.txt
 // the next (optional) one to four strings are parameters for that string (which can also be message names if they begin with '#')
-#define MAX_TEXTMSG_STRING 256
+#define MAX_TEXTMSG_STRING 512
 int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf )
 {
 	BufferReader reader( pszName, pbuf, iSize );
 
 	int msg_dest = reader.ReadByte();
+	int clientIdx = -1;
 
 	static char szBuf[6][MAX_TEXTMSG_STRING];
 	char *msg_text = LookupString( reader.ReadString(), &msg_dest );
 	msg_text = strncpy( szBuf[0], msg_text, MAX_TEXTMSG_STRING );
+	szBuf[0][MAX_TEXTMSG_STRING - 1] = 0;
 
 	// keep reading strings and using C format strings for substituting the strings into the localised text string
-	char *sstr1 = LookupString( reader.ReadString() );
-	sstr1 = strncpy( szBuf[1], sstr1, MAX_TEXTMSG_STRING );
-	StripEndNewlineFromString( sstr1 );  // these strings are meant for subsitution into the main strings, so cull the automatic end newlines
-	char *sstr2 = LookupString( reader.ReadString() );
-	sstr2 = strncpy( szBuf[2], sstr2, MAX_TEXTMSG_STRING );
-	StripEndNewlineFromString( sstr2 );
-	char *sstr3 = LookupString( reader.ReadString() );
-	sstr3 = strncpy( szBuf[3], sstr3, MAX_TEXTMSG_STRING );
-	StripEndNewlineFromString( sstr3 );
-	char *sstr4 = LookupString( reader.ReadString() );
-	sstr4 = strncpy( szBuf[4], sstr4, MAX_TEXTMSG_STRING );
-	StripEndNewlineFromString( sstr4 );
+	for( int i = 1; i <= 4; i++ )
+	{
+		char *str = LookupString( reader.ReadString() );
+		strncpy( szBuf[i], str, MAX_TEXTMSG_STRING );
+		szBuf[i][MAX_TEXTMSG_STRING-1] = 0;
+
+		// these strings are meant for subsitution into the main strings, so cull the automatic end newlines
+		StripEndNewlineFromString( szBuf[i] );
+	}
+
 	char *psz = szBuf[5];
 
 	// Remove numbers after %s.
@@ -210,7 +213,7 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	{
 	case HUD_PRINTCENTER:
 	{
-		snprintf( psz, MAX_TEXTMSG_STRING, msg_text, sstr1, sstr2, sstr3, sstr4 );
+		snprintf( psz, MAX_TEXTMSG_STRING, msg_text, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
 
 		/*ConvertCRtoNL( psz );
 
@@ -223,33 +226,28 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	}
 	case HUD_PRINTNOTIFY:
 		psz[0] = 1;  // mark this message to go into the notify buffer
-		snprintf( psz+1, MAX_TEXTMSG_STRING - 1, msg_text, sstr1, sstr2, sstr3, sstr4 );
+		snprintf( psz+1, MAX_TEXTMSG_STRING - 1, msg_text, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
 		ConsolePrint( ConvertCRtoNL( psz ) );
 		break;
 
 	case HUD_PRINTTALK:
 		psz[0] = 2; // mark, so SayTextPrint will color it
-		snprintf( psz+1, MAX_TEXTMSG_STRING-1, msg_text, sstr1, sstr2, sstr3, sstr4 );
+		snprintf( psz+1, MAX_TEXTMSG_STRING-1, msg_text, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
 		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128 );
 		break;
 
 	case HUD_PRINTCONSOLE:
-		snprintf( psz, MAX_TEXTMSG_STRING, msg_text, sstr1, sstr2, sstr3, sstr4 );
+		snprintf( psz, MAX_TEXTMSG_STRING, msg_text, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
 		ConsolePrint( ConvertCRtoNL( psz ) );
 		break;
 
 	case HUD_PRINTRADIO:
 		// For some reason, HUD_PRINTRADIO always have "1" in msg_text
-		for( int i = 1; i < MAX_PLAYERS; i++ )
-		{
-			if( g_PlayerInfoList[i].name && !strncmp(g_PlayerInfoList[i].name, sstr2, strlen(sstr2)) )
-			{
-				psz[0] = 2;
-				snprintf( psz + 1, MAX_TEXTMSG_STRING-1, sstr1, sstr2, sstr3, sstr4 );
-				gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128, i );
-				break;
-			}
-		}
+		psz[0] = 2;
+		snprintf( psz + 1, MAX_TEXTMSG_STRING-1, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+
+		clientIdx = atoi( szBuf[0] );
+		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128, clientIdx );
 		break;
 	}
 

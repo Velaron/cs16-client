@@ -105,6 +105,15 @@ int CHud :: Redraw( float flTime, int intermission )
 			ConsolePrint( "hud_scale is forced to 1. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
 			gEngfuncs.Cvar_SetValue( "hud_scale", 1.0f );
 		}
+		if( hand_xash && hand_xash->value )
+		{
+			ConsolePrint( "hand is forced to 0. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
+			gEngfuncs.Cvar_SetValue( "hand", 0.0f );
+		}
+		if( viewsize && viewsize->value < 120 )
+		{
+			ConsolePrint( "viewsize is forced to 120. Set cl_android_force_defaults to 0, if you want to disable this behaviour" );
+			gEngfuncs.Cvar_SetValue( "sv_skipshield", 120.0f );
 	}
 #endif
 	

@@ -84,6 +84,69 @@ void __CmdFunc_GunSmoke()
 		gEngfuncs.Cvar_SetValue( "cl_gunsmoke", 1 );
 }
 
+/*
+============
+COM_FileBase
+============
+*/
+// Extracts the base name of a file (no path, no extension, assumes '/' as path separator)
+void COM_FileBase ( const char *in, char *out)
+{
+	int len, start, end;
+
+	len = strlen( in );
+
+	// scan backward for '.'
+	end = len - 1;
+	while ( end && in[end] != '.' && in[end] != '/' && in[end] != '\\' )
+		end--;
+
+	if ( in[end] != '.' )		// no '.', copy to end
+		end = len-1;
+	else
+		end--;					// Found ',', copy to left of '.'
+
+
+	// Scan backward for '/'
+	start = len-1;
+	while ( start >= 0 && in[start] != '/' && in[start] != '\\' )
+		start--;
+
+	if ( in[start] != '/' && in[start] != '\\' )
+		start = 0;
+	else
+		start++;
+
+	// Length of new sting
+	len = end - start + 1;
+
+	// Copy partial string
+	strncpy( out, &in[start], len );
+	// Terminate it
+	out[len] = 0;
+}
+
+/*
+=================
+HUD_IsGame
+
+=================
+*/
+int HUD_IsGame( const char *game )
+{
+	const char *gamedir;
+	char gd[ 1024 ];
+
+	gamedir = gEngfuncs.pfnGetGameDirectory();
+	if ( gamedir && gamedir[0] )
+	{
+		COM_FileBase( gamedir, gd );
+		if ( !stricmp( gd, game ) )
+			return 1;
+	}
+	return 0;
+}
+
 #define XASH_GENERATE_BUILDNUM
 
 #if defined(XASH_GENERATE_BUILDNUM)
@@ -136,6 +199,7 @@ int __MsgFunc_ServerName( const char *name, int size, void *buf )
 {
 	BufferReader reader( name, buf, size );
 	strncpy( gHUD.m_szServerName, reader.ReadString(), 64 );
+	gHUD.m_szServerName[63] = 0;
 	return 1;
 }
 
@@ -182,13 +246,15 @@ void CHud :: Init( void )
 	hud_scale    = gEngfuncs.pfnGetCvarPointer( "hud_scale" );
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
 	hud_colored  = CVAR_CREATE( "hud_colored", "0", FCVAR_ARCHIVE );
-	cl_righthand = CVAR_CREATE( "hand", "1", FCVAR_ARCHIVE );
+	cl_righthand = CVAR_CREATE( "cl_righthand", "1", FCVAR_ARCHIVE );
 	cl_weather   = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE );
 	cl_minmodels = CVAR_CREATE( "cl_minmodels", "0", FCVAR_ARCHIVE );
 	cl_min_t     = CVAR_CREATE( "cl_min_t", "1", FCVAR_ARCHIVE );
 	cl_min_ct    = CVAR_CREATE( "cl_min_ct", "2", FCVAR_ARCHIVE );
 	cl_lw        = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 	cl_nopred   = gEngfuncs.pfnGetCvarPointer( "cl_nopred" );
+	hand_xash    = gEngfuncs.pfnGetCvarPointer( "hand" );
+	viewsize     = gEngfuncs.pfnGetCvarPointer( "viewsize" );
 #ifdef __ANDROID__
 	cl_android_force_defaults  = CVAR_CREATE( "cl_android_force_defaults", "1", FCVAR_ARCHIVE );
 #endif
@@ -203,6 +269,8 @@ void CHud :: Init( void )
 	sv_skipshield = gEngfuncs.pfnGetCvarPointer( "sv_skipshield" );
 
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
+
+	m_bIsCZero = (bool)HUD_IsGame("czero");
 
 	m_iLogo = 0;
 	m_iFOV = 0;
@@ -221,6 +289,8 @@ void CHud :: Init( void )
 	m_flTime = 1.0;
 	m_iNoConsolePrint = 0;
 	m_szServerName[0] = 0;
+
+
 
 	Localize_Init();
 
@@ -390,6 +460,12 @@ void CHud :: VidInit( void )
 		return;
 	}
 
+	if( g_iXash )
+	{
+		// get internal texture
+		m_WhiteTex = gRenderAPI.GL_LoadTexture( "*white", NULL, 0, 0 );
+	}
+
 	m_iFontHeight = GetSpriteRect(m_HUD_number_0).bottom - GetSpriteRect(m_HUD_number_0).top;
 
 	m_hGasPuff = SPR_Load("sprites/gas_puff_01.spr");
@@ -451,69 +527,6 @@ int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)
 	m_iLogo = reader.ReadByte();
 
 	return 1;
-}
-
-/*
-============
-COM_FileBase
-============
-*/
-// Extracts the base name of a file (no path, no extension, assumes '/' as path separator)
-void COM_FileBase ( const char *in, char *out)
-{
-	int len, start, end;
-
-	len = strlen( in );
-	
-	// scan backward for '.'
-	end = len - 1;
-	while ( end && in[end] != '.' && in[end] != '/' && in[end] != '\\' )
-		end--;
-	
-	if ( in[end] != '.' )		// no '.', copy to end
-		end = len-1;
-	else
-		end--;					// Found ',', copy to left of '.'
-
-
-	// Scan backward for '/'
-	start = len-1;
-	while ( start >= 0 && in[start] != '/' && in[start] != '\\' )
-		start--;
-
-	if ( in[start] != '/' && in[start] != '\\' )
-		start = 0;
-	else
-		start++;
-
-	// Length of new sting
-	len = end - start + 1;
-
-	// Copy partial string
-	strncpy( out, &in[start], len );
-	// Terminate it
-	out[len] = 0;
-}
-
-/*
-=================
-HUD_IsGame
-
-=================
-*/
-int HUD_IsGame( const char *game )
-{
-	const char *gamedir;
-	char gd[ 1024 ];
-
-	gamedir = gEngfuncs.pfnGetGameDirectory();
-	if ( gamedir && gamedir[0] )
-	{
-		COM_FileBase( gamedir, gd );
-		if ( !stricmp( gd, game ) )
-			return 1;
-	}
-	return 0;
 }
 
 /*

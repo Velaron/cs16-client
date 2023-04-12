@@ -134,7 +134,7 @@ int CHudSayText :: Draw( float flTime )
 
 				// draw the first x characters in the player color
 				strncpy( buf, g_szLineBuffer[i], min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+32) );
-				buf[ min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+31) ] = 0;
+				buf[ min(g_iNameLengths[i]-1, MAX_PLAYER_NAME_LENGTH+31) ] = 0;
 				DrawUtils::SetConsoleTextColor( g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2] );
 				int x = DrawUtils::DrawConsoleString( LINE_START, y, buf );
 
@@ -190,12 +190,14 @@ CSimpleMap sayTextFmt[] =
 int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 {
 	BufferReader reader( pszName, pbuf, iSize );
-	char szBuf[3][64] = { 0 };
+	char szBuf[3][512] = { 0 };
 
 	int client_index = reader.ReadByte();		// the client who spoke the message
 	strncpy( szBuf[0], reader.ReadString(), sizeof(szBuf[0]));
 	strncpy( szBuf[1], reader.ReadString(), sizeof(szBuf[1]));
 	strncpy( szBuf[2], reader.ReadString(), sizeof(szBuf[2]));
+
+	szBuf[0][511] = szBuf[1][511] = szBuf[2][511] = 0;
 
 	const char *fmt =  "\x02%s";
 	int i = 0;
@@ -239,6 +241,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 		const char *pName = g_PlayerInfoList[client_index].name;
 		snprintf( dst, sizeof( dst ), fmt, pName, szBuf[2]);
 	}
+
 	SayTextPrint( dst, strlen(dst),  client_index );
 	
 	return 1;

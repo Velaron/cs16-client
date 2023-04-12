@@ -283,9 +283,10 @@ int UTIL_FindEntityInMap( const char * name, float * origin, float * angle)
 			{
 				gEngfuncs.Con_DPrintf("UTIL_FindEntityInMap: EOF without closing brace\n");
 				return 0;
-			};
+			}
 			
 			strncpy (keyname, token, sizeof(keyname));
+			keyname[sizeof(keyname)-1]=0;
 
 			// another hack to fix keynames with trailing spaces
 			n = strlen(keyname);
@@ -1096,7 +1097,7 @@ bool CHudSpectator::ParseOverviewFile( )
 				{
 					pfile = gEngfuncs.COM_ParseFile(pfile,token);
 					strncpy(m_OverviewData.layersImages[ m_OverviewData.layers ], token, 255);
-					
+					m_OverviewData.layersImages[ m_OverviewData.layers ][254] = 0;
 					
 				}
 				else if ( !stricmp( token, "height" ) )

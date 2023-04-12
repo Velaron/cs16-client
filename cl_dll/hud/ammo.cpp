@@ -31,6 +31,7 @@
 #include "eventscripts.h"
 #include "com_weapons.h"
 #include "draw_util.h"
+#include "triangleapi.h"
 
 enum WeaponIdType
 {
@@ -710,6 +711,7 @@ int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )
 	WEAPON Weapon;
 
 	strncpy( Weapon.szName, reader.ReadString(), MAX_WEAPON_NAME );
+	Weapon.szName[MAX_WEAPON_NAME-1] = 0;
 	Weapon.iAmmoType = (int)reader.ReadChar();
 	
 	Weapon.iMax1 = reader.ReadByte();
@@ -1022,7 +1024,7 @@ void CHudAmmo::UserCmd_Autobuy()
 {
 	char *afile = (char*)gEngfuncs.COM_LoadFile("autobuy.txt", 5, NULL);
 	char *pfile = afile;
-	char token[256];
+	char token[1024];
 	char szCmd[1024];
 
 	if( !pfile )
@@ -1036,13 +1038,11 @@ void CHudAmmo::UserCmd_Autobuy()
 	while((pfile = gEngfuncs.COM_ParseFile( pfile, token )))
 	{
 		// append space first
-		strcat(szCmd, " ");
-		strcat(szCmd, token);
+		strncat(szCmd, " ", 1024);
+		strncat(szCmd, token, 1024);
 	}
 
-	ConsolePrint( szCmd );
 	gEngfuncs.pfnServerCmd( szCmd );
-
 	gEngfuncs.COM_FreeFile( afile );
 }
 
@@ -1050,7 +1050,7 @@ void CHudAmmo::UserCmd_Rebuy()
 {
 	char *afile = (char*)gEngfuncs.COM_LoadFile("rebuy.txt", 5, NULL);
 	char *pfile = afile;
-	char token[64];
+	char token[1024];
 	char szCmd[1024];
 	int lastCh;
 
@@ -1063,21 +1063,17 @@ void CHudAmmo::UserCmd_Rebuy()
 	// start with \"
 	strncpy(szCmd, "cl_setrebuy \"", sizeof(szCmd));
 
-
-
 	while((pfile = gEngfuncs.COM_ParseFile( pfile, token )))
 	{
-		strcat(szCmd, token);
+		strncat(szCmd, token, 1024 );
 		// append space after token
-		strcat(szCmd, " ");
+		strncat(szCmd, " ", 1024);
 	}
 	// replace last space with ", before terminator
 	lastCh = strlen(szCmd);
 	szCmd[lastCh - 1] = '\"';
 
-	ConsolePrint(szCmd);
 	gEngfuncs.pfnServerCmd(szCmd);
-
 	gEngfuncs.COM_FreeFile( afile );
 }
 
@@ -1221,6 +1217,14 @@ int CHudAmmo::Draw(float flTime)
 #define SOUTH_YPOS (ScreenHeight / 2 + flCrosshairDistance)
 #define NORTH_SOUTH_XPOS (ScreenWidth / 2)
 
+#define WEST_XPOS_R (TrueWidth / 2 - flCrosshairDistance - iLength + 1)
+#define EAST_XPOS_R (flCrosshairDistance + TrueWidth / 2)
+#define EAST_WEST_YPOS_R (TrueHeight / 2)
+
+#define NORTH_YPOS_R (TrueHeight / 2 - flCrosshairDistance - iLength + 1)
+#define SOUTH_YPOS_R (TrueHeight / 2 + flCrosshairDistance)
+#define NORTH_SOUTH_XPOS_R (TrueWidth / 2)
+
 int Distances[30][2] =
 {
 { 8, 3 }, // 0
@@ -1352,25 +1356,53 @@ void CHudAmmo::DrawCrosshair( float flTime )
 	
 	if ( m_iAlpha > 255 )
 		m_iAlpha = 255;
-	
-	if ( ScreenWidth != m_iCrosshairScaleBase )
+
+	if( g_iXash )
 	{
-		flCrosshairDistance = ScreenWidth * m_flCrosshairDistance / m_iCrosshairScaleBase;
-		iLength = ScreenWidth * iLength / m_iCrosshairScaleBase;
+		if( TrueWidth != m_iCrosshairScaleBase )
+		{
+			flCrosshairDistance = TrueWidth * m_flCrosshairDistance / m_iCrosshairScaleBase;
+			iLength = TrueWidth * iLength / m_iCrosshairScaleBase;
+		}
+		else
+		{
+			flCrosshairDistance = m_flCrosshairDistance;
+		}
 	}
 	else
 	{
-		flCrosshairDistance = m_flCrosshairDistance;
+		if ( ScreenWidth != m_iCrosshairScaleBase )
+		{
+			flCrosshairDistance = ScreenWidth * m_flCrosshairDistance / m_iCrosshairScaleBase;
+			iLength = ScreenWidth * iLength / m_iCrosshairScaleBase;
+		}
+		else
+		{
+			flCrosshairDistance = m_flCrosshairDistance;
+		}
 	}
 
-
 	// drawing
-	if ( gHUD.m_NVG.m_iFlags )
+	if( g_iXash )
 	{
-		FillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	iLength, 1, 250, 50, 50, m_iAlpha);
-		FillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	iLength, 1, 250, 50, 50, m_iAlpha);
-		FillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, 250, 50, 50, m_iAlpha);
-		FillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, 250, 50, 50, m_iAlpha);
+		gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
+
+		if( m_bAdditive )
+			gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+		else
+			gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
+
+		gEngfuncs.pTriAPI->Color4ub( m_R, m_G, m_B, m_iAlpha );
+
+		DrawUtils::Draw2DQuad( WEST_XPOS_R, EAST_WEST_YPOS_R,
+							   WEST_XPOS_R + iLength, EAST_WEST_YPOS_R + 1);
+		DrawUtils::Draw2DQuad( EAST_XPOS_R, EAST_WEST_YPOS_R,
+							   EAST_XPOS_R + iLength, EAST_WEST_YPOS_R + 1);
+		DrawUtils::Draw2DQuad( NORTH_SOUTH_XPOS_R, NORTH_YPOS_R,
+							   NORTH_SOUTH_XPOS_R + 1, NORTH_YPOS_R + iLength );
+		DrawUtils::Draw2DQuad( NORTH_SOUTH_XPOS_R, SOUTH_YPOS_R,
+							   NORTH_SOUTH_XPOS_R + 1, SOUTH_YPOS_R + iLength );
+
 	}
 	else if ( m_bAdditive )
 	{
@@ -1398,14 +1430,15 @@ void CHudAmmo::CalcCrosshairSize()
 		return;
 	
 	strncpy( prevSize, size, sizeof(prevSize) );
+	prevSize[63] = 0;
 	
 	if( !stricmp(size, "auto") )
 	{
-		if( ScreenWidth <= 640 )
+		if( TrueWidth <= 640 )
 		{
 			m_iCrosshairScaleBase = 1024;
 		}
-		else if( ScreenWidth <= 1024 )
+		else if( TrueWidth <= 1024 )
 		{
 			m_iCrosshairScaleBase = 800;
 		}
@@ -1434,6 +1467,12 @@ void CHudAmmo::CalcCrosshairDrawMode()
 	static float prevDrawMode = -1;
 	float drawMode = m_pClCrosshairTranslucent->value;
 	
+	if( gHUD.m_NVG.m_iFlags )
+	{
+		m_bAdditive = 0;
+		return;
+	}
+
 	if( drawMode == prevDrawMode )
 		return;
 	
@@ -1459,9 +1498,18 @@ void CHudAmmo::CalcCrosshairColor()
 	static char prevColors[64] = { 0 };
 	const char *colors = m_pClCrosshairColor->string;
 
+	if( gHUD.m_NVG.m_iFlags )
+	{
+		m_R = 250;
+		m_G = 50;
+		m_B = 50;
+		return;
+	}
+
 	if( strncmp( prevColors, colors, 64 ) )
 	{
 		strncpy( prevColors, colors, 64 );
+		prevColors[63] = 0;
 	
 		sscanf( colors, "%d %d %d", &m_cvarR, &m_cvarG, &m_cvarB);
 

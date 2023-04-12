@@ -925,6 +925,8 @@ public:
 	cvar_t *zoom_sens_ratio;
 	cvar_t *cl_lw;
 	cvar_t *cl_righthand;
+	cvar_t *hand_xash;
+	cvar_t *viewsize;
 	cvar_t *cl_weather;
 	cvar_t *cl_minmodels;
 	cvar_t *cl_min_t;
@@ -994,6 +996,8 @@ public:
 	int m_HUD_number_0;
 
 	char m_szServerName[64];
+
+	int m_WhiteTex;
 
 private:
 	HUDLIST	*m_pHudList;

@@ -44,6 +44,7 @@ DECLARE_MESSAGE( m_Radar, HostageK )
 DECLARE_MESSAGE( m_Radar, HostagePos )
 DECLARE_MESSAGE( m_Radar, BombDrop )
 DECLARE_MESSAGE( m_Radar, BombPickup )
+DECLARE_MESSAGE( m_Radar, Location )
 
 
 static byte	r_RadarCross[8][8] =
@@ -95,6 +96,7 @@ int CHudRadar::Init()
 	HOOK_MESSAGE( HostagePos );
 	HOOK_MESSAGE( BombDrop );
 	HOOK_MESSAGE( BombPickup );
+	HOOK_MESSAGE( Location );
 
 	m_iFlags = HUD_DRAW;
 
@@ -170,8 +172,6 @@ int CHudRadar::InitBuiltinTextures( void )
 
 		//gRenderAPI.GL_SetTextureType( *textures[i].texnum, textures[i].texType );
 	}
-
-	hDot = gRenderAPI.GL_LoadTexture( "*white", NULL, 0, 0 );
 
 	bTexturesInitialized = true;
 
@@ -413,7 +413,7 @@ void CHudRadar::DrawRadarDot( int x, int y, int r, int g, int b, int a )
 	const int size = 1;
 	if( bUseRenderAPI )
 	{
-		DrawColoredTexture( x, y, size, r, g, b, a, hDot );
+		DrawColoredTexture( x, y, size, r, g, b, a, gHUD.m_WhiteTex );
 	}
 	else
 	{
@@ -564,4 +564,20 @@ int CHudRadar::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 	}
 
 	return 1;
+}
+
+int CHudRadar::MsgFunc_Location(const char *pszName, int iSize, void *pbuf)
+{
+	BufferReader reader( pszName, pbuf, iSize );
+
+	if( gHUD.IsCZero() )
+		return 1;
+
+	int player = reader.ReadByte();
+	if( player <= MAX_PLAYERS )
+	{
+		strncpy( g_PlayerExtraInfo[player].location, reader.ReadString(), sizeof( g_PlayerExtraInfo[player].location ) );
+		g_PlayerExtraInfo[player].location[31] = 0;
+	}
+	return 0;
 }

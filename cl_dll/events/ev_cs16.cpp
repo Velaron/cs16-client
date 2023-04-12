@@ -135,6 +135,7 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 		if ( pTextureName )
 		{
 			strncpy( texname, pTextureName, sizeof( texname ) );
+			texname[ sizeof( texname ) - 1 ] = 0;
 			pTextureName = texname;
 
 			if( !strcmp( pTextureName, "sky" ) )
@@ -431,7 +432,8 @@ void EV_HugWalls(TEMPENTITY *te, pmtrace_s *ptr)
 	te->entity.baseline.origin.z = v2.x * len * 1.5;
 }
 
-void EV_CS16Client_CreateSmoke(int type, Vector origin, Vector dir, int speed, float scale, int r, int g, int b , bool wind, Vector velocity, int framerate )
+void EV_CS16Client_CreateSmoke(int type, Vector origin, Vector dir,
+	int speed, float scale, int r, int g, int b , bool wind, Vector velocity, int framerate , int teflags )
 {
 	TEMPENTITY *te = NULL;
 	void ( *callback )( struct tempent_s *ent, float frametime, float currenttime ) = NULL;
@@ -478,7 +480,7 @@ void EV_CS16Client_CreateSmoke(int type, Vector origin, Vector dir, int speed, f
 	{
 		te->callback = callback;
 		te->hitcallback = EV_HugWalls;
-		te->flags |= FTENT_COLLIDEALL | FTENT_CLIENTCUSTOM;
+		te->flags |= teflags | FTENT_CLIENTCUSTOM;
 		te->entity.curstate.rendermode = kRenderTransAdd;
 		te->entity.curstate.rendercolor.r = r;
 		te->entity.curstate.rendercolor.g = g;

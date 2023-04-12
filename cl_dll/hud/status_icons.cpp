@@ -142,6 +142,7 @@ void CHudStatusIcons::EnableIcon( const char *pszIconName, unsigned char red, un
 	m_IconList[i].g = green;
 	m_IconList[i].b = blue;
 	strncpy( m_IconList[i].szSpriteName, pszIconName, MAX_ICONSPRITENAME_LENGTH );
+	m_IconList[i].szSpriteName[MAX_ICONSPRITENAME_LENGTH-1]=0;
 }
 
 void CHudStatusIcons::DisableIcon( const char *pszIconName )

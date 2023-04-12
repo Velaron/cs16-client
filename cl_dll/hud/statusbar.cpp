@@ -40,6 +40,7 @@ inline void InsertTextMsg( char *szDst, size_t sLen, const char *szMsgName)
 		strncpy( szDst, msg->pMessage, sLen );
 	}
 	else strncpy( szDst, szMsgName, sLen );
+	szDst[sLen-1] = 0;
 }
 
 int CHudStatusBar :: Init( void )

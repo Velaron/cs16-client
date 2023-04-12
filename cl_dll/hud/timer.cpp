@@ -235,6 +235,8 @@ int CHudProgressBar::MsgFunc_BotProgress(const char *pszName, int iSize, void *p
 			m_fPercent = fNewPercent;
 		}
 		strncpy(m_szHeader, reader.ReadString(), sizeof(m_szHeader));
+		m_szHeader[sizeof(m_szHeader)-1] = 0;
+
 		if( m_szHeader[0] == '#' )
 			m_szLocalizedHeader = Localize(m_szHeader + 1);
 		else

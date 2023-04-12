@@ -40,6 +40,8 @@
 #include "event_api.h"
 #include "pm_defs.h"
 
+#include "com_weapons.h"
+
 extern CGameStudioModelRenderer g_StudioRenderer;
 extern engine_studio_api_t IEngineStudio;
 typedef struct pmtrace_s pmtrace_t;
@@ -621,7 +623,8 @@ void CStudioModelRenderer::StudioSetupBones(void)
 	static float pos4[MAXSTUDIOBONES][3];
 	static vec4_t q4[MAXSTUDIOBONES];
 
-	if (m_pCurrentEntity->curstate.sequence >= m_pStudioHeader->numseq)
+	if( m_pCurrentEntity->curstate.sequence >= m_pStudioHeader->numseq
+		|| m_pCurrentEntity->curstate.sequence < 0 )
 		m_pCurrentEntity->curstate.sequence = 0;
 
 	pseqdesc = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + m_pCurrentEntity->curstate.sequence;
@@ -722,6 +725,8 @@ void CStudioModelRenderer::StudioSetupBones(void)
 		}
 	}
 
+	bool bIsViewModel = gEngfuncs.GetViewModel() == m_pCurrentEntity;
+
 	for (i = 0; i < m_pStudioHeader->numbones; i++)
 	{
 		QuaternionMatrix(q[i], bonematrix);
@@ -734,6 +739,17 @@ void CStudioModelRenderer::StudioSetupBones(void)
 		{
 			if (IEngineStudio.IsHardware())
 			{
+				if( bIsViewModel && (( gHUD.cl_righthand->value != 0.0f ) ^ (g_bHoldingKnife || g_bHoldingShield)) )
+				{
+					bonematrix[1][0] = -bonematrix[1][0];
+					bonematrix[1][1] = -bonematrix[1][1];
+					bonematrix[1][2] = -bonematrix[1][2];
+					bonematrix[1][3] = -bonematrix[1][3];
+
+					if( gHUD.hand_xash && gHUD.hand_xash->value != 0.0f )
+						IEngineStudio.StudioSetCullState( 1 ); // set backface culling
+				}
+
 				ConcatTransforms((*m_protationmatrix), bonematrix, (*m_pbonetransform)[i]);
 				MatrixCopy((*m_pbonetransform)[i], (*m_plighttransform)[i]);
 			}
@@ -891,15 +907,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
 	StudioSetUpTransform(0);
-
-	if(m_pCurrentEntity == gEngfuncs.GetViewModel() && (gHUD.cl_righthand->value))
-	{
-		(*m_protationmatrix)[0][1] *= -1;
-		(*m_protationmatrix)[1][1] *= -1;
-		(*m_protationmatrix)[2][1] *= -1;
-
-		//IEngineStudio.StudioSetCullState(true);
-	}
 
 	if (flags & STUDIO_RENDER)
 	{

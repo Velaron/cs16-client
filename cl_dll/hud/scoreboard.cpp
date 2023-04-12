@@ -486,6 +486,7 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 		// set the players team
 		char teamName[MAX_TEAM_NAME];
 		strncpy( teamName, reader.ReadString(), MAX_TEAM_NAME );
+		teamName[MAX_TEAM_NAME-1] = 0;
 
 		if( !strcmp( teamName, "TERRORIST") )
 			teamNumber = TEAM_TERRORIST;

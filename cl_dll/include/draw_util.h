@@ -175,6 +175,9 @@ public:
 	}
 
 	static void Draw2DQuad( float x1, float y1, float x2, float y2 );
+	static void DrawStretchPic( float x, float y, float w, float h,
+								float s1 = 0, float t1 = 0, float s2 = 1, float t2 = 1);
+
 
 private:
 	// console string color

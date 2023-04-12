@@ -110,6 +110,9 @@ public:
 	int MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_ClCorpse(const char *pszName,  int iSize, void *pbuf);
 
+	void UserCmd_Fart( void );
+	void UserCmd_Pee( void );
+
 
 	int m_iHealth;
 	int m_HUD_dmg_bio;
@@ -124,7 +127,6 @@ private:
 	void DrawHealthBar( float flTime );
 	void CalcDamageDirection( Vector vecFrom );
 	void UpdateTiles( float fTime, long bits );
-	void DrawPlayerLocation( void );
 
 	HSPRITE m_hSprite;
 	HSPRITE m_hDamage;

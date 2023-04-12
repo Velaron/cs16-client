@@ -30,18 +30,22 @@
 
 #include "draw_util.h"
 
+#include "ev_hldm.h"
+#include "com_weapons.h"
+
 DECLARE_MESSAGE(m_Health, Health )
 DECLARE_MESSAGE(m_Health, Damage )
 DECLARE_MESSAGE(m_Health, ScoreAttrib )
 DECLARE_MESSAGE(m_Health, ClCorpse )
+
+DECLARE_COMMAND( m_Health, Fart )
+DECLARE_COMMAND( m_Health, Pee )
 
 #define PAIN_NAME "sprites/%d_pain.spr"
 #define DAMAGE_NAME "sprites/%d_dmg.spr"
 #define EPSILON 0.4f
 
 int giDmgHeight, giDmgWidth;
-
-float g_LocationColor[3];
 
 int giDmgFlags[NUM_DMG_TYPES] = 
 {
@@ -73,6 +77,9 @@ int CHudHealth::Init(void)
 	HOOK_MESSAGE(Damage);
 	HOOK_MESSAGE(ScoreAttrib);
 	HOOK_MESSAGE(ClCorpse);
+
+	HOOK_COMMAND("fart", Fart);
+	HOOK_COMMAND("pee", Pee);
 
 	m_iHealth = 100;
 	m_fFade = 0;
@@ -511,6 +518,60 @@ int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 	CreateCorpse( &origin, &angles, szModel, delay, sequence, classID );
 #endif
    return 0;
+}
+
+void CHudHealth::UserCmd_Fart( void )
+{
+	cl_entity_t *e = gEngfuncs.GetLocalPlayer();
+	if(!e)
+		return;
+
+	Vector org = e->origin;
+	Vector ang = e->angles;
+	Vector dir;
+	ang.x = 0; // ignore yaw
+
+	gEngfuncs.pfnAngleVectors( ang, dir, NULL, NULL );
+
+
+	if( !(g_iPlayerFlags & FL_DUCKING) )
+	{
+		org = org - dir * 10;
+		org.z -= 5;
+	}
+	else
+	{
+		org = org - dir * 15;
+	}
+
+	EV_CS16Client_CreateSmoke( SMOKE_WALLPUFF, org, -dir, 10, 0.5, 75, 42, 15, true,
+		g_vPlayerVelocity, 35, FTENT_COLLIDEWORLD );
+}
+
+void CHudHealth::UserCmd_Pee( void )
+{
+	cl_entity_t *e = gEngfuncs.GetLocalPlayer();
+	if(!e)
+		return;
+
+	Vector org = e->origin;
+	Vector ang = e->angles;
+	Vector dir;
+	//ang.x = 0; // ignore yaw
+
+	gEngfuncs.pfnAngleVectors( ang, dir, NULL, NULL );
+
+	if( !(g_iPlayerFlags & FL_DUCKING) )
+	{
+		org = org + dir * 5;
+		org.z -= 5;
+	}
+	else
+	{
+		org = org - dir * 10;
+	}
+
+	gEngfuncs.pEfxAPI->R_BloodStream( org, dir, gEngfuncs.pEfxAPI->R_LookupColor( 255, 160, 0 ), 50 );
 }
 
 /*
