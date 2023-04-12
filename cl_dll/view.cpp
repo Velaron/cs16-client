@@ -613,6 +613,7 @@ void V_CalcQuakeGuns()
 	org[0] += forward[0] + up[0] + right[0]*gunoffsetr;
 	org[1] += forward[1] + up[1] + right[1]*gunoffsetr;
 	org[2] += forward[2] + up[2] + right[2]*gunoffsetr;
+#endif
 }
 
 
