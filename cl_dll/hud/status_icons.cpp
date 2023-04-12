@@ -142,13 +142,6 @@ void CHudStatusIcons::EnableIcon( const char *pszIconName, unsigned char red, un
 	m_IconList[i].g = green;
 	m_IconList[i].b = blue;
 	strncpy( m_IconList[i].szSpriteName, pszIconName, MAX_ICONSPRITENAME_LENGTH );
-
-	// Hack: Play Timer sound when a grenade icon is played (in 0.8 seconds)
-	if ( strstr(m_IconList[i].szSpriteName, "grenade") )
-	{
-		cl_entity_t *pthisplayer = gEngfuncs.GetLocalPlayer();
-		gEngfuncs.pEventAPI->EV_PlaySound( pthisplayer->index, pthisplayer->origin, CHAN_STATIC, "weapons/timer.wav", 1.0, ATTN_NORM, 0, PITCH_NORM );
-	}
 }
 
 void CHudStatusIcons::DisableIcon( const char *pszIconName )

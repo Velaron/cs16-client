@@ -14,6 +14,7 @@ public:
 	virtual int Init();
 	virtual int VidInit();
 	virtual int Draw( float flTime );
+	virtual void InitHUDData();
 	virtual void Reset();
 	virtual void Shutdown();
 

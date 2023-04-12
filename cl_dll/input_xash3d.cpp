@@ -129,7 +129,7 @@ void IN_ClientMoveEvent( float forwardmove, float sidemove )
 void IN_ClientLookEvent( float relyaw, float relpitch )
 {
 #ifdef __ANDROID__
-	if( evdev_open || bMouseInUse ) return;
+	if( evdev_open ) return;
 #endif
 	rel_yaw += relyaw;
 	rel_pitch += relpitch;

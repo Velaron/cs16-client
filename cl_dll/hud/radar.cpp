@@ -189,6 +189,12 @@ void CHudRadar::Shutdown( void )
 	}
 }
 
+void CHudRadar::InitHUDData( void )
+{
+	UserCmd_ShowRadar();
+	Reset();
+}
+
 int CHudRadar::VidInit(void)
 {
 	bUseRenderAPI = g_iXash && InitBuiltinTextures();

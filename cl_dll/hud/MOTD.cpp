@@ -39,11 +39,8 @@ int CHudMOTD :: Init( void )
 
 	HOOK_MESSAGE( MOTD );
 
-	m_bShow = false;
-
-	m_iFlags &= ~HUD_DRAW;  // start out inactive
-	m_szMOTD[0] = 0;
 	cl_hide_motd = CVAR_CREATE("cl_hide_motd", "0", FCVAR_ARCHIVE); // hide motd
+	Reset();
 
 	return 1;
 }
@@ -59,7 +56,7 @@ void CHudMOTD :: Reset( void )
 	m_iFlags &= ~HUD_DRAW;  // start out inactive
 	m_szMOTD[0] = 0;
 	m_iLines = 0;
-	m_bShow = 0;
+	m_bShow = false;
 	ignoreThisMotd = false;
 }
 

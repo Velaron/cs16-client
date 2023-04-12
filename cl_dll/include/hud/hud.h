@@ -329,6 +329,7 @@ private:
 	bool m_bForceDraw; // if called by showscoreboard2
 	bool m_bShowscoresHeld;
 	cvar_t *cl_showpacketloss;
+	cvar_t *cl_showplayerversion;
 };
 
 //
@@ -731,6 +732,7 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw( float flTime );
+	void Reset( void );
 
 	// start progress bar
 	// [short] Duration
@@ -775,6 +777,7 @@ class CHudNVG: public CHudBase
 public:
 	int Init( void );
 	int Draw( float flTime );
+	void Reset( void );
 	CHudMsgFunc(NVGToggle);
 
 	CHudUserCmd(NVGAdjustUp);

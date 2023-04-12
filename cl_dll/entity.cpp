@@ -143,7 +143,7 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 
 	// Save off some data so other areas of the Client DLL can get to it
 	cl_entity_t *player = gEngfuncs.GetLocalPlayer();	// Get the local player's index
-	if ( dst->number == player->index )
+	if( dst->number == player->index )
 	{
 		g_iTeamNumber = g_PlayerExtraInfo[dst->number].teamnumber;
 

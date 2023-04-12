@@ -132,11 +132,7 @@ int CHudProgressBar::Init()
 	HOOK_MESSAGE( BarTime );
 	HOOK_MESSAGE( BarTime2 );
 	HOOK_MESSAGE( BotProgress );
-	m_iFlags = 0;
-	m_szLocalizedHeader = NULL;
-	m_szHeader[0] = '\0';
-	m_fStartTime = m_fPercent = 0.0f;
-
+	Reset( );
 	gHUD.AddHudElem(this);
 	return 1;
 }
@@ -144,6 +140,14 @@ int CHudProgressBar::Init()
 int CHudProgressBar::VidInit()
 {
 	return 1;
+}
+
+void CHudProgressBar::Reset( void )
+{
+	m_iFlags = 0;
+	m_szLocalizedHeader = NULL;
+	m_szHeader[0] = '\0';
+	m_fStartTime = m_fPercent = 0.0f;
 }
 
 int CHudProgressBar::Draw( float flTime )
