@@ -35,7 +35,7 @@ private:
 	cvar_t *cl_radartype;
 
 	int InitBuiltinTextures();
-	void DrawPlayerLocation();
+	void DrawPlayerLocation(int y);
 	void DrawRadarDot(int x, int y, int r, int g, int b, int a);
 	void DrawCross(int x, int y, int r, int g, int b, int a );
 

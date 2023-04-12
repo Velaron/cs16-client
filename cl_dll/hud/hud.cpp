@@ -201,8 +201,8 @@ void CHud :: Init( void )
 	HOOK_COMMAND_FUNC( "gunsmoke", __CmdFunc_GunSmoke, );
 
 #ifdef __ANDROID__
-	HOOK_COMMAND( gHUD, "evdev_mouseopen", MouseSucksOpen );
-	HOOK_COMMAND( gHUD, "evdev_mouseclose", MouseSucksClose );
+	HOOK_COMMAND_FUNC( "evdev_mouseopen", __CmdFunc_MouseSucksOpen );
+	HOOK_COMMAND_FUNC( "evdev_mouseclose", __CmdFunc_MouseSucksClose );
 #endif
 	
 	HOOK_MESSAGE( gHUD, Logo );
@@ -293,6 +293,7 @@ void CHud :: Init( void )
 	m_Battery.Init();
 	m_StatusIcons.Init();
 	m_Radar.Init();
+	m_Scenario.Init();
 
 	// chat, death notice, status bars and other
 	m_SayText.Init();
@@ -481,6 +482,7 @@ void CHud :: VidInit( void )
 		m_WhiteTex = gRenderAPI.GL_LoadTexture( "*white", NULL, 0, 0 );
 	}
 
+	m_iFontWidth  = GetSpriteRect(m_HUD_number_0).right  - GetSpriteRect(m_HUD_number_0).left;
 	m_iFontHeight = GetSpriteRect(m_HUD_number_0).bottom - GetSpriteRect(m_HUD_number_0).top;
 
 	m_hGasPuff = SPR_Load("sprites/gas_puff_01.spr");
