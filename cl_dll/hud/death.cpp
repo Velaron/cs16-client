@@ -25,8 +25,6 @@
 
 float color[3];
 
-DECLARE_MESSAGE( m_DeathNotice, DeathMsg )
-
 struct DeathNoticeItem {
 	char szKiller[MAX_PLAYER_NAME_LENGTH*2];
 	char szVictim[MAX_PLAYER_NAME_LENGTH*2];
@@ -51,7 +49,7 @@ int CHudDeathNotice :: Init( void )
 {
 	gHUD.AddHudElem( this );
 
-	HOOK_MESSAGE( DeathMsg );
+	HOOK_MESSAGE( gHUD.m_DeathNotice, DeathMsg );
 
 	hud_deathnotice_time = CVAR_CREATE( "hud_deathnotice_time", "6", 0 );
 	m_iFlags = 0;

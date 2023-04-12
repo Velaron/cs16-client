@@ -25,13 +25,10 @@
 #include "parsemsg.h"
 #include "draw_util.h"
 
-DECLARE_MESSAGE( m_AmmoSecondary, SecAmmoVal )
-DECLARE_MESSAGE( m_AmmoSecondary, SecAmmoIcon )
-
 int CHudAmmoSecondary :: Init( void )
 {
-	HOOK_MESSAGE( SecAmmoVal );
-	HOOK_MESSAGE( SecAmmoIcon );
+	HOOK_MESSAGE( gHUD.m_AmmoSecondary, SecAmmoVal );
+	HOOK_MESSAGE( gHUD.m_AmmoSecondary, SecAmmoIcon );
 
 	gHUD.AddHudElem(this);
 	m_HUD_ammoicon = 0;

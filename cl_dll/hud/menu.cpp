@@ -34,26 +34,17 @@ char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 
 int KB_ConvertString( char *in, char **ppout );
 
-DECLARE_MESSAGE( m_Menu, ShowMenu )
-DECLARE_MESSAGE( m_Menu, VGUIMenu )
-DECLARE_MESSAGE( m_Menu, BuyClose )
-DECLARE_MESSAGE( m_Menu, AllowSpec )
-
-DECLARE_COMMAND( m_Menu, OldStyleMenuOpen )
-DECLARE_COMMAND( m_Menu, OldStyleMenuClose )
-DECLARE_COMMAND( m_Menu, ShowVGUIMenu )
-
 int CHudMenu :: Init( void )
 {
 	gHUD.AddHudElem( this );
 
-	HOOK_MESSAGE( ShowMenu );
-	HOOK_MESSAGE( VGUIMenu );
-	HOOK_MESSAGE( BuyClose );
-	HOOK_MESSAGE( AllowSpec );
-	HOOK_COMMAND( "client_buy_open", OldStyleMenuOpen );
-	HOOK_COMMAND( "client_buy_close", OldStyleMenuClose );
-	HOOK_COMMAND( "showvguimenu", ShowVGUIMenu );
+	HOOK_MESSAGE( gHUD.m_Menu, ShowMenu );
+	HOOK_MESSAGE( gHUD.m_Menu, VGUIMenu );
+	HOOK_MESSAGE( gHUD.m_Menu, BuyClose );
+	HOOK_MESSAGE( gHUD.m_Menu, AllowSpec );
+	HOOK_COMMAND( gHUD.m_Menu, "client_buy_open", OldStyleMenuOpen );
+	HOOK_COMMAND( gHUD.m_Menu, "client_buy_close", OldStyleMenuClose );
+	HOOK_COMMAND( gHUD.m_Menu, "showvguimenu", ShowVGUIMenu );
 
 	_extended_menus = CVAR_CREATE("_extended_menus", "1", FCVAR_ARCHIVE);
 

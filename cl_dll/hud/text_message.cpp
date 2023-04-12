@@ -29,11 +29,9 @@
 #include "ctype.h"
 #include "draw_util.h"
 
-DECLARE_MESSAGE( m_TextMessage, TextMsg )
-
 int CHudTextMessage::Init(void)
 {
-	HOOK_MESSAGE( TextMsg );
+	HOOK_MESSAGE( gHUD.m_TextMessage, TextMsg );
 
 	gHUD.AddHudElem( this );
 	m_iFlags = 0;

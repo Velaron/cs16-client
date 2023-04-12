@@ -30,18 +30,14 @@ extern cvar_t *hud_textmode;
 #endif
 
 // Macros to hook function calls into the HUD object
-#define HOOK_MESSAGE(x) gEngfuncs.pfnHookUserMsg(#x, __MsgFunc_##x );
+#define HOOK_MESSAGE_FUNC(name, func) gEngfuncs.pfnHookUserMsg(name, [](const char *pszName, int iSize, void *pbuf) \
+{\
+	return func(pszName, iSize, pbuf);\
+})
+#define HOOK_MESSAGE(obj, name) HOOK_MESSAGE_FUNC( #name, obj.MsgFunc_##name )
 
-#define DECLARE_MESSAGE(y, x) int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf) \
-{ \
-	return gHUD.y.MsgFunc_##x(pszName, iSize, pbuf ); \
-	}
-
-#define HOOK_COMMAND(x, y) gEngfuncs.pfnAddCommand( x, __CmdFunc_##y );
-#define DECLARE_COMMAND(y, x) void __CmdFunc_##x( void ) \
-{ \
-	gHUD.y.UserCmd_##x( ); \
-	}
+#define HOOK_COMMAND_FUNC(str, func, ...) gEngfuncs.pfnAddCommand( str, [](void) { func(__VA_ARGS__); })
+#define HOOK_COMMAND(obj, str, func) HOOK_COMMAND_FUNC( str, obj.UserCmd_##func, )
 
 inline float CVAR_GET_FLOAT( const char *x ) {	return gEngfuncs.pfnGetCvarFloat( (char*)x ); }
 inline char* CVAR_GET_STRING( const char *x ) {	return gEngfuncs.pfnGetCvarString( (char*)x ); }

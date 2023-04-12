@@ -121,7 +121,16 @@ int CHud::MsgFunc_ShadowIdx(const char *pszName, int iSize, void *pbuf)
 {
 	BufferReader reader( pszName, pbuf, iSize );
 
-	int idx = reader.ReadByte();
+	int idx = reader.ReadLong();
 	g_StudioRenderer.StudioSetShadowSprite(idx);
 	return 1;
 }
+
+int CHud::MsgFunc_ServerName( const char *name, int size, void *buf )
+{
+	BufferReader reader( name, buf, size );
+	strncpy( gHUD.m_szServerName, reader.ReadString(), 64 );
+	gHUD.m_szServerName[63] = 0;
+	return 1;
+}
+

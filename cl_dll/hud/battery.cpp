@@ -23,9 +23,6 @@
 #include "cl_util.h"
 #include "draw_util.h"
 
-DECLARE_MESSAGE( m_Battery, Battery )
-DECLARE_MESSAGE( m_Battery, ArmorType )
-
 int CHudBattery::Init( void )
 {
 	m_iBat = 0;
@@ -33,8 +30,8 @@ int CHudBattery::Init( void )
 	m_iFlags = 0;
 	m_enArmorType = Vest;
 
-	HOOK_MESSAGE( Battery );
-	HOOK_MESSAGE( ArmorType );
+	HOOK_MESSAGE( gHUD.m_Battery, Battery );
+	HOOK_MESSAGE( gHUD.m_Battery, ArmorType );
 	gHUD.AddHudElem( this );
 
 	return 1;

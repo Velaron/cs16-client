@@ -37,13 +37,10 @@ version.
 #include <string.h>
 #include "draw_util.h"
 
-DECLARE_MESSAGE( m_Timer, RoundTime )
-DECLARE_MESSAGE( m_Timer, ShowTimer )
-
 int CHudTimer::Init()
 {
-	HOOK_MESSAGE( RoundTime );
-	HOOK_MESSAGE( ShowTimer );
+	HOOK_MESSAGE( gHUD.m_Timer, RoundTime );
+	HOOK_MESSAGE( gHUD.m_Timer, ShowTimer );
 	m_iFlags = 0;
 	m_bPanicColorChange = false;
 	gHUD.AddHudElem(this);
@@ -123,15 +120,11 @@ int CHudTimer::MsgFunc_ShowTimer(const char *pszName, int iSize, void *pbuf)
 #define CREATE_BOTPROGRESS 1
 #define REMOVE_BOTPROGRESS 2
 
-DECLARE_MESSAGE( m_ProgressBar, BarTime )
-DECLARE_MESSAGE( m_ProgressBar, BarTime2 )
-DECLARE_MESSAGE( m_ProgressBar, BotProgress )
-
 int CHudProgressBar::Init()
 {
-	HOOK_MESSAGE( BarTime );
-	HOOK_MESSAGE( BarTime2 );
-	HOOK_MESSAGE( BotProgress );
+	HOOK_MESSAGE( gHUD.m_ProgressBar, BarTime );
+	HOOK_MESSAGE( gHUD.m_ProgressBar, BarTime2 );
+	HOOK_MESSAGE( gHUD.m_ProgressBar, BotProgress );
 	Reset( );
 	gHUD.AddHudElem(this);
 	return 1;

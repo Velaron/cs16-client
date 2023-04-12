@@ -33,15 +33,11 @@ version.
 #include "com_model.h"
 #include <string.h>
 
-DECLARE_MESSAGE( m_Radio, SendAudio )
-DECLARE_MESSAGE( m_Radio, ReloadSound )
-DECLARE_MESSAGE( m_Radio, BotVoice )
-
 int CHudRadio::Init( )
 {
-	HOOK_MESSAGE( SendAudio );
-	HOOK_MESSAGE( ReloadSound );
-	HOOK_MESSAGE( BotVoice );
+	HOOK_MESSAGE( gHUD.m_Radio, SendAudio );
+	HOOK_MESSAGE( gHUD.m_Radio, ReloadSound );
+	HOOK_MESSAGE( gHUD.m_Radio, BotVoice );
 	gHUD.AddHudElem( this );
 	m_iFlags = 0;
 	return 1;

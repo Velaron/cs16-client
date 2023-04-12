@@ -320,7 +320,6 @@ public:
 	CHudMsgFunc(ScoreInfo);
 	CHudMsgFunc(TeamInfo);
 	CHudMsgFunc(TeamScore);
-	CHudMsgFunc(TeamScores);
 	CHudMsgFunc(TeamNames);
 
 	int m_iPlayerNum;
@@ -980,6 +979,7 @@ public:
 	CHudMsgFunc(SetFOV);
 	CHudMsgFunc(Concuss);
 	CHudMsgFunc(ShadowIdx);
+	CHudMsgFunc(ServerName);
 
 	// Screen information
 	SCREENINFO	m_scrinfo;

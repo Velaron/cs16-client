@@ -26,11 +26,9 @@
 
 #include "parsemsg.h"
 
-DECLARE_MESSAGE(m_Geiger, Geiger )
-
 int CHudGeiger::Init(void)
 {
-	HOOK_MESSAGE( Geiger );
+	HOOK_MESSAGE( gHUD.m_Geiger, Geiger );
 
 	m_iGeigerRange = 0;
 	m_iFlags = 0;

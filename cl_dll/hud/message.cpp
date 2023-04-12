@@ -26,20 +26,15 @@
 #include "vgui_parser.h"
 #include "draw_util.h"
 
-DECLARE_MESSAGE( m_Message, HudText )
-DECLARE_MESSAGE( m_Message, GameTitle )
-DECLARE_MESSAGE( m_Message, HudTextPro )
-DECLARE_MESSAGE( m_Message, HudTextArgs )
-
 // 1 Global client_textmessage_t for custom messages that aren't in the titles.txt
 client_textmessage_t	g_pCustomMessage;
 
 int CHudMessage::Init(void)
 {
-	HOOK_MESSAGE( HudText );
-	HOOK_MESSAGE( GameTitle );
-	HOOK_MESSAGE( HudTextPro );
-	HOOK_MESSAGE( HudTextArgs );
+	HOOK_MESSAGE( gHUD.m_Message, HudText );
+	HOOK_MESSAGE( gHUD.m_Message, GameTitle );
+	HOOK_MESSAGE( gHUD.m_Message, HudTextPro );
+	HOOK_MESSAGE( gHUD.m_Message, HudTextArgs );
 
 	gHUD.AddHudElem(this);
 	Reset();

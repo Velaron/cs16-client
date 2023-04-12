@@ -61,28 +61,19 @@ inline int PING_POS_END()		{ return xend - 10; }
 
 //#include "vgui_TeamFortressViewport.h"
 
-DECLARE_COMMAND( m_Scoreboard, ShowScores )
-DECLARE_COMMAND( m_Scoreboard, HideScores )
-DECLARE_COMMAND( m_Scoreboard, ShowScoreboard2 )
-DECLARE_COMMAND( m_Scoreboard, HideScoreboard2 )
-
-DECLARE_MESSAGE( m_Scoreboard, ScoreInfo )
-DECLARE_MESSAGE( m_Scoreboard, TeamInfo )
-DECLARE_MESSAGE( m_Scoreboard, TeamScore )
-
 int CHudScoreboard :: Init( void )
 {
 	gHUD.AddHudElem( this );
 
 	// Hook messages & commands here
-	HOOK_COMMAND( "+showscores", ShowScores );
-	HOOK_COMMAND( "-showscores", HideScores );
-	HOOK_COMMAND( "showscoreboard2", ShowScoreboard2 );
-	HOOK_COMMAND( "hidescoreboard2", HideScoreboard2 );
+	HOOK_COMMAND( gHUD.m_Scoreboard, "+showscores", ShowScores );
+	HOOK_COMMAND( gHUD.m_Scoreboard, "-showscores", HideScores );
+	HOOK_COMMAND( gHUD.m_Scoreboard, "showscoreboard2", ShowScoreboard2 );
+	HOOK_COMMAND( gHUD.m_Scoreboard, "hidescoreboard2", HideScoreboard2 );
 
-	HOOK_MESSAGE( ScoreInfo );
-	HOOK_MESSAGE( TeamScore );
-	HOOK_MESSAGE( TeamInfo );
+	HOOK_MESSAGE( gHUD.m_Scoreboard, ScoreInfo );
+	HOOK_MESSAGE( gHUD.m_Scoreboard, TeamScore );
+	HOOK_MESSAGE( gHUD.m_Scoreboard, TeamInfo );
 
 	InitHUDData();
 
@@ -578,18 +569,21 @@ int CHudScoreboard :: MsgFunc_TeamScore( const char *pszName, int iSize, void *p
 	int i;
 
 	// find the team matching the name
-	for ( i = 1; i <= m_iNumTeams; i++ )
+	for ( i = 0; i < m_iNumTeams; i++ )
 	{
 		if ( !stricmp( TeamName, g_TeamInfo[i].name ) )
 			break;
 	}
 	if ( i > m_iNumTeams )
+	{
+		reader.Flush();
 		return 1;
+	}
 
 	// use this new score data instead of combined player scores
 	g_TeamInfo[i].scores_overriden = TRUE;
 	g_TeamInfo[i].frags = reader.ReadShort();
-	g_TeamInfo[i].deaths = reader.ReadShort();
+	// g_TeamInfo[i].deaths = reader.ReadShort();
 	
 	return 1;
 }

@@ -38,13 +38,11 @@ version.
 #include <string.h>
 #include "vgui_parser.h"
 #include "draw_util.h"
-DECLARE_MESSAGE( m_Money, Money )
-DECLARE_MESSAGE( m_Money, BlinkAcct )
 
 int CHudMoney::Init( )
 {
-	HOOK_MESSAGE( Money );
-	HOOK_MESSAGE( BlinkAcct );
+	HOOK_MESSAGE( gHUD.m_Money, Money );
+	HOOK_MESSAGE( gHUD.m_Money, BlinkAcct );
 	gHUD.AddHudElem(this);
 	m_fFade = 0;
 	m_iFlags = 0;

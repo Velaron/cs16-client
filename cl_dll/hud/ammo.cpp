@@ -282,33 +282,6 @@ int giBucketHeight, giBucketWidth, giABHeight, giABWidth; // Ammo Bar width and 
 
 HSPRITE ghsprBuckets;					// Sprite for top row of weapons menu
 
-DECLARE_MESSAGE(m_Ammo, CurWeapon ) // Current weapon and clip
-DECLARE_MESSAGE(m_Ammo, WeaponList) // new weapon type
-DECLARE_MESSAGE(m_Ammo, AmmoX)      // update known ammo type's count
-DECLARE_MESSAGE(m_Ammo, AmmoPickup) // flashes an ammo pickup record
-DECLARE_MESSAGE(m_Ammo, WeapPickup) // flashes a weapon pickup record
-DECLARE_MESSAGE(m_Ammo, HideWeapon) // hides the weapon, ammo, and crosshair displays temporarily
-DECLARE_MESSAGE(m_Ammo, ItemPickup)
-DECLARE_MESSAGE(m_Ammo, Crosshair)
-DECLARE_MESSAGE(m_Ammo, Brass)
-
-DECLARE_COMMAND(m_Ammo, Slot1)
-DECLARE_COMMAND(m_Ammo, Slot2)
-DECLARE_COMMAND(m_Ammo, Slot3)
-DECLARE_COMMAND(m_Ammo, Slot4)
-DECLARE_COMMAND(m_Ammo, Slot5)
-DECLARE_COMMAND(m_Ammo, Slot6)
-DECLARE_COMMAND(m_Ammo, Slot7)
-DECLARE_COMMAND(m_Ammo, Slot8)
-DECLARE_COMMAND(m_Ammo, Slot9)
-DECLARE_COMMAND(m_Ammo, Slot10)
-DECLARE_COMMAND(m_Ammo, Close)
-DECLARE_COMMAND(m_Ammo, NextWeapon)
-DECLARE_COMMAND(m_Ammo, PrevWeapon)
-DECLARE_COMMAND(m_Ammo, Adjust_Crosshair)
-DECLARE_COMMAND(m_Ammo, Rebuy)
-DECLARE_COMMAND(m_Ammo, Autobuy)
-
 // width of ammo fonts
 #define AMMO_SMALL_WIDTH 10
 #define AMMO_LARGE_WIDTH 20
@@ -319,32 +292,32 @@ int CHudAmmo::Init(void)
 {
 	gHUD.AddHudElem(this);
 
-	HOOK_MESSAGE(CurWeapon);
-	HOOK_MESSAGE(WeaponList);
-	HOOK_MESSAGE(AmmoPickup);
-	HOOK_MESSAGE(WeapPickup);
-	HOOK_MESSAGE(ItemPickup);
-	HOOK_MESSAGE(HideWeapon);
-	HOOK_MESSAGE(AmmoX);
-	HOOK_MESSAGE(Crosshair);
-	HOOK_MESSAGE(Brass);
+	HOOK_MESSAGE(gHUD.m_Ammo, CurWeapon);
+	HOOK_MESSAGE(gHUD.m_Ammo, WeaponList);
+	HOOK_MESSAGE(gHUD.m_Ammo, AmmoPickup);
+	HOOK_MESSAGE(gHUD.m_Ammo, WeapPickup);
+	HOOK_MESSAGE(gHUD.m_Ammo, ItemPickup);
+	HOOK_MESSAGE(gHUD.m_Ammo, HideWeapon);
+	HOOK_MESSAGE(gHUD.m_Ammo, AmmoX);
+	HOOK_MESSAGE(gHUD.m_Ammo, Crosshair);
+	HOOK_MESSAGE(gHUD.m_Ammo, Brass);
 
-	HOOK_COMMAND("slot1", Slot1);
-	HOOK_COMMAND("slot2", Slot2);
-	HOOK_COMMAND("slot3", Slot3);
-	HOOK_COMMAND("slot4", Slot4);
-	HOOK_COMMAND("slot5", Slot5);
-	HOOK_COMMAND("slot6", Slot6);
-	HOOK_COMMAND("slot7", Slot7);
-	HOOK_COMMAND("slot8", Slot8);
-	HOOK_COMMAND("slot9", Slot9);
-	HOOK_COMMAND("slot10", Slot10);
-	HOOK_COMMAND("cancelselect", Close);
-	HOOK_COMMAND("invnext", NextWeapon);
-	HOOK_COMMAND("invprev", PrevWeapon);
-	HOOK_COMMAND("adjust_crosshair", Adjust_Crosshair);
-	HOOK_COMMAND("rebuy", Rebuy);
-	HOOK_COMMAND("autobuy", Autobuy);
+	HOOK_COMMAND(gHUD.m_Ammo, "slot1", Slot1);
+	HOOK_COMMAND(gHUD.m_Ammo, "slot2", Slot2);
+	HOOK_COMMAND(gHUD.m_Ammo, "slot3", Slot3);
+	HOOK_COMMAND(gHUD.m_Ammo, "slot4", Slot4);
+	HOOK_COMMAND(gHUD.m_Ammo, "slot5", Slot5);
+	HOOK_COMMAND(gHUD.m_Ammo, "slot6", Slot6);
+	HOOK_COMMAND(gHUD.m_Ammo, "slot7", Slot7);
+	HOOK_COMMAND(gHUD.m_Ammo, "slot8", Slot8);
+	HOOK_COMMAND(gHUD.m_Ammo, "slot9", Slot9);
+	HOOK_COMMAND(gHUD.m_Ammo, "slot10", Slot10);
+	HOOK_COMMAND(gHUD.m_Ammo, "cancelselect", Close);
+	HOOK_COMMAND(gHUD.m_Ammo, "invnext", NextWeapon);
+	HOOK_COMMAND(gHUD.m_Ammo, "invprev", PrevWeapon);
+	HOOK_COMMAND(gHUD.m_Ammo, "adjust_crosshair", Adjust_Crosshair);
+	HOOK_COMMAND(gHUD.m_Ammo, "rebuy", Rebuy);
+	HOOK_COMMAND(gHUD.m_Ammo, "autobuy", Autobuy);
 
 	Reset();
 

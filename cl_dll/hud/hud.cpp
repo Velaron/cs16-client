@@ -58,17 +58,6 @@ const char *sPlayerModelFiles[12] =
 	"models/player/militia/militia.mdl" // t
 };
 
-#define GHUD_DECLARE_MESSAGE(x) int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf ) { return gHUD.MsgFunc_##x(pszName, iSize, pbuf); }
-
-GHUD_DECLARE_MESSAGE(Logo)
-GHUD_DECLARE_MESSAGE(SetFOV)
-GHUD_DECLARE_MESSAGE(InitHUD)
-GHUD_DECLARE_MESSAGE(Concuss)
-GHUD_DECLARE_MESSAGE(ResetHUD)
-GHUD_DECLARE_MESSAGE(ViewMode)
-GHUD_DECLARE_MESSAGE(GameMode)
-GHUD_DECLARE_MESSAGE(ShadowIdx)
-
 void __CmdFunc_InputCommandSpecial()
 {
 #ifdef _CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
@@ -195,13 +184,6 @@ int __MsgFunc_ItemStatus( const char *name, int size, void *buf ) { return 1; }
 int __MsgFunc_ReqState( const char *name, int size, void *buf ) { return 1; }
 int __MsgFunc_ForceCam( const char *name, int size, void *buf ) { return 1; }
 int __MsgFunc_Spectator( const char *name, int size, void *buf ) { return 1; }
-int __MsgFunc_ServerName( const char *name, int size, void *buf )
-{
-	BufferReader reader( name, buf, size );
-	strncpy( gHUD.m_szServerName, reader.ReadString(), 64 );
-	gHUD.m_szServerName[63] = 0;
-	return 1;
-}
 
 #ifdef __ANDROID__
 bool evdev_open = false;
@@ -215,31 +197,30 @@ void CHud :: Init( void )
 {
 	SetGameType(); // call it first, so we will know gamedir at very early stage
 
-	HOOK_COMMAND( "special", InputCommandSpecial );
-	//HOOK_COMMAND( "gunsmoke", GunSmoke );
+	HOOK_COMMAND_FUNC( "special", __CmdFunc_InputCommandSpecial, );
+	HOOK_COMMAND_FUNC( "gunsmoke", __CmdFunc_GunSmoke, );
 
 #ifdef __ANDROID__
-	HOOK_COMMAND( "evdev_mouseopen", MouseSucksOpen );
-	HOOK_COMMAND( "evdev_mouseclose", MouseSucksClose );
+	HOOK_COMMAND( gHUD, "evdev_mouseopen", MouseSucksOpen );
+	HOOK_COMMAND( gHUD, "evdev_mouseclose", MouseSucksClose );
 #endif
 	
-	HOOK_MESSAGE( Logo );
-	HOOK_MESSAGE( ResetHUD );
-	HOOK_MESSAGE( GameMode );
-	HOOK_MESSAGE( InitHUD );
-	HOOK_MESSAGE( ViewMode );
-	HOOK_MESSAGE( SetFOV );
-	HOOK_MESSAGE( Concuss );
+	HOOK_MESSAGE( gHUD, Logo );
+	HOOK_MESSAGE( gHUD, ResetHUD );
+	HOOK_MESSAGE( gHUD, GameMode );
+	HOOK_MESSAGE( gHUD, InitHUD );
+	HOOK_MESSAGE( gHUD, ViewMode );
+	HOOK_MESSAGE( gHUD, SetFOV );
+	HOOK_MESSAGE( gHUD, Concuss );
+	HOOK_MESSAGE( gHUD, ServerName );
+	HOOK_MESSAGE( gHUD, ShadowIdx );
 
-	HOOK_MESSAGE( ADStop );
-	HOOK_MESSAGE( ItemStatus );
-	HOOK_MESSAGE( ReqState );
-	HOOK_MESSAGE( ForceCam );
-	HOOK_MESSAGE( Spectator ); // ignored due to touch menus
-	HOOK_MESSAGE( ServerName );
+	gEngfuncs.pfnHookUserMsg( "ADStop", __MsgFunc_ADStop );
+	gEngfuncs.pfnHookUserMsg( "ItemStatus", __MsgFunc_ItemStatus );
+	gEngfuncs.pfnHookUserMsg( "ReqState", __MsgFunc_ReqState );
+	gEngfuncs.pfnHookUserMsg( "ForceCam", __MsgFunc_ForceCam );
+	gEngfuncs.pfnHookUserMsg( "Spectator", __MsgFunc_Spectator );
 
-
-	HOOK_MESSAGE( ShadowIdx );
 
 	CVAR_CREATE( "_vgui_menus", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );

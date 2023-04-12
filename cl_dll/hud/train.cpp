@@ -25,12 +25,9 @@
 #include "parsemsg.h"
 #include "draw_util.h"
 
-DECLARE_MESSAGE(m_Train, Train )
-
-
 int CHudTrain::Init(void)
 {
-	HOOK_MESSAGE( Train );
+	HOOK_MESSAGE( gHUD.m_Train, Train );
 
 	m_iPos = 0;
 	m_iFlags = 0;

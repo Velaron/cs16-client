@@ -27,9 +27,6 @@
 #include <stdio.h>
 #include "draw_util.h"
 
-DECLARE_MESSAGE( m_StatusBar, StatusText )
-DECLARE_MESSAGE( m_StatusBar, StatusValue )
-
 #define STATUSBAR_ID_LINE		0
 
 inline void InsertTextMsg( char *szDst, size_t sLen, const char *szMsgName)
@@ -47,8 +44,8 @@ int CHudStatusBar :: Init( void )
 {
 	gHUD.AddHudElem( this );
 
-	HOOK_MESSAGE( StatusText );
-	HOOK_MESSAGE( StatusValue );
+	HOOK_MESSAGE( gHUD.m_StatusBar, StatusText );
+	HOOK_MESSAGE( gHUD.m_StatusBar, StatusValue );
 
 	Reset();
 

@@ -47,55 +47,37 @@ version.
 #define INT_XPOS(x) int(XPOS(x) * ScreenWidth)
 #define INT_YPOS(y) int(YPOS(y) * ScreenHeight)
 
-DECLARE_MESSAGE( m_SpectatorGui, SpecHealth )
-DECLARE_MESSAGE( m_SpectatorGui, SpecHealth2 )
-
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenu )
-
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuOptions )
-// close
-// help
-// settings
-// pip
-// autodirector
-// showscores
-
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuOptionsSettings )
-// settings
-// // chat msgs
-// // show status
-// // view cone
-// // player names
-
-DECLARE_COMMAND( m_SpectatorGui, ToggleSpectatorMenuSpectateOptions )
-// chase map overview
-// free map overview
-// first person
-// free look
-// free chase camera
-// locked chase camera
-
-void __CmdFunc_FindNextPlayerReverse( void )
-{
-	gHUD.m_Spectator.FindNextPlayer(true);
-}
-
-void __CmdFunc_FindNextPlayer( void )
-{
-	gHUD.m_Spectator.FindNextPlayer(false);
-}
-
 int CHudSpectatorGui::Init()
 {
-	HOOK_MESSAGE( SpecHealth );
-	HOOK_MESSAGE( SpecHealth2 );
+	HOOK_MESSAGE( gHUD.m_SpectatorGui, SpecHealth );
+	HOOK_MESSAGE( gHUD.m_SpectatorGui, SpecHealth2 );
 
-	HOOK_COMMAND( "_spec_toggle_menu", ToggleSpectatorMenu );
-	HOOK_COMMAND( "_spec_toggle_menu_options", ToggleSpectatorMenuOptions );
-	HOOK_COMMAND( "_spec_toggle_menu_options_settings", ToggleSpectatorMenuOptionsSettings );
-	HOOK_COMMAND( "_spec_toggle_menu_spectate_options", ToggleSpectatorMenuSpectateOptions );
-	HOOK_COMMAND( "_spec_find_next_player_reverse", FindNextPlayerReverse );
-	HOOK_COMMAND( "_spec_find_next_player", FindNextPlayer );
+	HOOK_COMMAND( gHUD.m_SpectatorGui, "_spec_toggle_menu", ToggleSpectatorMenu );
+	HOOK_COMMAND( gHUD.m_SpectatorGui, "_spec_toggle_menu_options", ToggleSpectatorMenuOptions );
+	// close
+	// help
+	// settings
+	// pip
+	// autodirector
+	// showscores
+
+	HOOK_COMMAND( gHUD.m_SpectatorGui, "_spec_toggle_menu_options_settings", ToggleSpectatorMenuOptionsSettings );
+	// settings
+	// // chat msgs
+	// // show status
+	// // view cone
+	// // player names
+
+	HOOK_COMMAND( gHUD.m_SpectatorGui, "_spec_toggle_menu_spectate_options", ToggleSpectatorMenuSpectateOptions );
+	// chase map overview
+	// free map overview
+	// first person
+	// free look
+	// free chase camera
+	// locked chase camera
+
+	HOOK_COMMAND_FUNC( "_spec_find_next_player_reverse", gHUD.m_Spectator.FindNextPlayer, true );
+	HOOK_COMMAND_FUNC( "_spec_find_next_player", gHUD.m_Spectator.FindNextPlayer, false );
 
 	gHUD.AddHudElem(this);
 	m_iFlags = HUD_DRAW;

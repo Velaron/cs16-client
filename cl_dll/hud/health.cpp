@@ -33,14 +33,6 @@
 #include "ev_hldm.h"
 #include "com_weapons.h"
 
-DECLARE_MESSAGE(m_Health, Health )
-DECLARE_MESSAGE(m_Health, Damage )
-DECLARE_MESSAGE(m_Health, ScoreAttrib )
-DECLARE_MESSAGE(m_Health, ClCorpse )
-
-DECLARE_COMMAND( m_Health, Fart )
-DECLARE_COMMAND( m_Health, Pee )
-
 #define PAIN_NAME "sprites/%d_pain.spr"
 #define DAMAGE_NAME "sprites/%d_dmg.spr"
 #define EPSILON 0.4f
@@ -73,13 +65,14 @@ enum
 
 int CHudHealth::Init(void)
 {
-	HOOK_MESSAGE(Health);
-	HOOK_MESSAGE(Damage);
-	HOOK_MESSAGE(ScoreAttrib);
-	HOOK_MESSAGE(ClCorpse);
+	HOOK_MESSAGE(gHUD.m_Health, Health);
+	HOOK_MESSAGE(gHUD.m_Health, Damage);
+	HOOK_MESSAGE(gHUD.m_Health, ScoreAttrib);
+	HOOK_MESSAGE(gHUD.m_Health, ClCorpse);
 
-	HOOK_COMMAND("fart", Fart);
-	HOOK_COMMAND("pee", Pee);
+	// OMG. It's so shameful
+	// HOOK_COMMAND(gHUD.m_Health, "fart", Fart);
+	// HOOK_COMMAND(gHUD.m_Health, "pee", Pee);
 
 	m_iHealth = 100;
 	m_fFade = 0;

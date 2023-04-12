@@ -36,17 +36,6 @@ version.
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
 
-DECLARE_COMMAND( m_Radar, ShowRadar )
-DECLARE_COMMAND( m_Radar, HideRadar )
-
-DECLARE_MESSAGE( m_Radar, Radar )
-DECLARE_MESSAGE( m_Radar, HostageK )
-DECLARE_MESSAGE( m_Radar, HostagePos )
-DECLARE_MESSAGE( m_Radar, BombDrop )
-DECLARE_MESSAGE( m_Radar, BombPickup )
-DECLARE_MESSAGE( m_Radar, Location )
-
-
 static byte	r_RadarCross[8][8] =
 {
 {1,1,0,0,0,0,1,1},
@@ -89,14 +78,14 @@ static byte	data2D[BLOCK_SIZE_MAX*4];	// intermediate texbuffer
 
 int CHudRadar::Init()
 {
-	HOOK_MESSAGE( Radar );
-	HOOK_COMMAND( "drawradar", ShowRadar );
-	HOOK_COMMAND( "hideradar", HideRadar );
-	HOOK_MESSAGE( HostageK );
-	HOOK_MESSAGE( HostagePos );
-	HOOK_MESSAGE( BombDrop );
-	HOOK_MESSAGE( BombPickup );
-	HOOK_MESSAGE( Location );
+	HOOK_MESSAGE( gHUD.m_Radar, Radar );
+	HOOK_COMMAND( gHUD.m_Radar, "drawradar", ShowRadar );
+	HOOK_COMMAND( gHUD.m_Radar, "hideradar", HideRadar );
+	HOOK_MESSAGE( gHUD.m_Radar, HostageK );
+	HOOK_MESSAGE( gHUD.m_Radar, HostagePos );
+	HOOK_MESSAGE( gHUD.m_Radar, BombDrop );
+	HOOK_MESSAGE( gHUD.m_Radar, BombPickup );
+	HOOK_MESSAGE( gHUD.m_Radar, Location );
 
 	m_iFlags = HUD_DRAW;
 

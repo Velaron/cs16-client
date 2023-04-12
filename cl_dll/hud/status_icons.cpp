@@ -26,11 +26,9 @@
 #include "event_api.h"
 #include "com_weapons.h"
 
-DECLARE_MESSAGE( m_StatusIcons, StatusIcon )
-
 int CHudStatusIcons::Init( void )
 {
-	HOOK_MESSAGE( StatusIcon );
+	HOOK_MESSAGE( gHUD.m_StatusIcons, StatusIcon );
 
 	gHUD.AddHudElem( this );
 

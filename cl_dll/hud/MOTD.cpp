@@ -31,13 +31,11 @@
 #define strcasestr strstr
 #endif
 
-DECLARE_MESSAGE( m_MOTD, MOTD )
-
 int CHudMOTD :: Init( void )
 {
 	gHUD.AddHudElem( this );
 
-	HOOK_MESSAGE( MOTD );
+	HOOK_MESSAGE( gHUD.m_MOTD, MOTD );
 
 	cl_hide_motd = CVAR_CREATE("cl_hide_motd", "0", FCVAR_ARCHIVE); // hide motd
 	Reset();
