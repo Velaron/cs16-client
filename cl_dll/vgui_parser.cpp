@@ -36,6 +36,8 @@
 
 #include "errno.h"
 
+#include "interface.h"
+
 #include <unordered_map>
 #include <string>
 

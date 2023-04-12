@@ -177,9 +177,9 @@ void CC4::PrimaryAttack(void)
 					}
 #endif
 
+#ifndef CLIENT_DLL
 					CGrenade *pBomb = CGrenade::ShootSatchelCharge(m_pPlayer->pev, m_pPlayer->pev->origin, Vector(0, 0, 0));
 
-#ifndef CLIENT_DLL
 					MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
 						WRITE_BYTE(9);
 						WRITE_BYTE(DRC_CMD_EVENT);

@@ -26,7 +26,7 @@
 #include "pm_shared.h"
 
 #include <string.h>
-//#include "interface.h" // not used here
+#include "interface.h" // not used here
 #include "render_api.h"
 #include "mobility_int.h"
 #include "vgui_parser.h"
@@ -513,6 +513,11 @@ public:
 		{
 			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, false);
 		}*/
+	}
+
+	virtual const char *Localize( const char *string )
+	{
+		return ::Localize( string );
 	}
 };
 

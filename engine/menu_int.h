@@ -246,4 +246,5 @@ typedef int (*UITEXTAPI)( ui_extendedfuncs_t* engfuncs );
 #define PLATFORM_UPDATE_PAGE "PlatformUpdatePage"
 #define GENERIC_UPDATE_PAGE "GenericUpdatePage"
 
+typedef void (*ADDTOUCHBUTTONTOLIST)( const char *name, const char *texture, const char *command, unsigned char *color, int flags );
 #endif//MENU_INT_H

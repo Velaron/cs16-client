@@ -93,7 +93,7 @@ public:
 #ifdef WIN32
 #define EXPORT_FUNCTION __declspec( dllexport )
 #else
-#define EXPORT_FUNCTION __attribute__( ( visibility( "default" ) ) )
+	#define EXPORT_FUNCTION __attribute__((visibility("default")))
 #endif
 
 // This function is automatically exported and allows you to access any interfaces exposed with the above macros.
