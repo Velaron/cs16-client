@@ -1409,8 +1409,7 @@ void CHudAmmo::DrawCrosshair( float flTime )
 
 		gEngfuncs.pTriAPI->Color4ub( m_R, m_G, m_B, m_iAlpha );
 
-		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-
+		// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 		DrawUtils::Draw2DQuad( WEST_XPOS_R, EAST_WEST_YPOS_R,
 							   WEST_XPOS_R + iLength, EAST_WEST_YPOS_R + 1);
 		DrawUtils::Draw2DQuad( EAST_XPOS_R, EAST_WEST_YPOS_R,
@@ -1419,8 +1418,7 @@ void CHudAmmo::DrawCrosshair( float flTime )
 							   NORTH_SOUTH_XPOS_R + 1, NORTH_YPOS_R + iLength );
 		DrawUtils::Draw2DQuad( NORTH_SOUTH_XPOS_R, SOUTH_YPOS_R,
 							   NORTH_SOUTH_XPOS_R + 1, SOUTH_YPOS_R + iLength );
-
-		gEngfuncs.pTriAPI->End( );
+		// gEngfuncs.pTriAPI->End( );
 
 	}
 	else if ( m_bAdditive )

@@ -93,12 +93,12 @@ int CHudSniperScope::Draw(float flTime)
 	DrawTexture( m_iScopeArc[3], left, centery, centerx, TrueHeight );
 
 	gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
-	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 		DrawUtils::Draw2DQuad( 0, 0, left + 2, TrueHeight );
 		DrawUtils::Draw2DQuad( right, 0, right + ( TrueWidth - right ), TrueHeight );
 		DrawUtils::Draw2DQuad( left, centery - 1, right, centery + 1 );
 		DrawUtils::Draw2DQuad( centerx - 1, 0, centerx + 1, TrueHeight );
-	gEngfuncs.pTriAPI->End();
+	// gEngfuncs.pTriAPI->End();
 
 	return 0;
 }

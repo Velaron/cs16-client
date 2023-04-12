@@ -169,12 +169,12 @@ int CHudSpectatorGui::Draw( float flTime )
 				gRenderAPI.GL_SelectTexture( 0 );
 				gRenderAPI.GL_Bind(0, m_hTimerTexture);
 				gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-				gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+				// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 				DrawUtils::Draw2DQuad( (INT_XPOS(12.5) + 10) * gHUD.m_flScale,
 									   (INT_YPOS(2) * 0.5) * gHUD.m_flScale,
 									   (INT_XPOS(12.5) + 10 + gHUD.GetCharHeight() ) * gHUD.m_flScale,
 									   (INT_YPOS(2) * 0.5 + gHUD.GetCharHeight() ) * gHUD.m_flScale );
-				gEngfuncs.pTriAPI->End();
+				// gEngfuncs.pTriAPI->End();
 			}
 			DrawUtils::DrawHudString( INT_XPOS(12.5) + gHUD.GetCharHeight() * 1.5 + gHUD.GetCharWidth('M') , INT_YPOS(2) * 0.5, ScreenWidth,
 									  label.m_szTimer, r, g, b );
