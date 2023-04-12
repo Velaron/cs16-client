@@ -87,6 +87,7 @@ int CHudScoreboard :: Init( void )
 	InitHUDData();
 
 	cl_showpacketloss = CVAR_CREATE( "cl_showpacketloss", "0", FCVAR_ARCHIVE );
+	cl_showplayerversion = CVAR_CREATE( "cl_showplayerversion", "0", 0 );
 
 	return 1;
 }
@@ -389,13 +390,20 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 
 		DrawUtils::DrawHudString( NAME_POS_START() + nameoffset, ypos, NAME_POS_END(), pl_info->name, r, g, b );
 
-		// draw bomb( if player have the bomb )
-		if( g_PlayerExtraInfo[best_player].dead )
-			DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Dead", r, g, b );
-		else if( g_PlayerExtraInfo[best_player].has_c4 )
-			DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Bomb", r, g, b );
-		else if( g_PlayerExtraInfo[best_player].vip )
-			DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "VIP",  r, g, b );
+		if( cl_showplayerversion->value == 0.0f )
+		{
+			// draw bomb( if player have the bomb )
+			if( g_PlayerExtraInfo[best_player].dead )
+				DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Dead", r, g, b );
+			else if( g_PlayerExtraInfo[best_player].has_c4 )
+				DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Bomb", r, g, b );
+			else if( g_PlayerExtraInfo[best_player].vip )
+				DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "VIP",  r, g, b );
+		}
+		else
+		{
+			DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), gEngfuncs.PlayerInfo_ValueForKey( best_player, "cscl_ver" ),  r, g, b );
+		}
 
 		// draw kills (right to left)
 		DrawUtils::DrawHudNumberString( KILLS_POS_END(), ypos, KILLS_POS_START(), g_PlayerExtraInfo[best_player].frags, r, g, b );
