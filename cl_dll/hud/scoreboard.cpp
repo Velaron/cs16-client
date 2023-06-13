@@ -397,10 +397,13 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 		}
 
 		// draw kills (right to left)
-		DrawUtils::DrawHudNumberString( KILLS_POS_END(), ypos, KILLS_POS_START(), g_PlayerExtraInfo[best_player].frags, r, g, b );
+		if( stricmp( team, "SPECTATOR" ) )
+		{
+			DrawUtils::DrawHudNumberString( KILLS_POS_END(), ypos, KILLS_POS_START(), g_PlayerExtraInfo[best_player].frags, r, g, b );
 
-		// draw deaths
-		DrawUtils::DrawHudNumberString( DEATHS_POS_END(), ypos, DEATHS_POS_START(), g_PlayerExtraInfo[best_player].deaths, r, g, b );
+			// draw deaths
+			DrawUtils::DrawHudNumberString( DEATHS_POS_END(), ypos, DEATHS_POS_START(), g_PlayerExtraInfo[best_player].deaths, r, g, b );
+		}
 
 		// draw ping & packetloss
 		const char *value;
