@@ -280,7 +280,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 	{
 		m_parms.lineLength = 0;
 		m_parms.width = 0;
-		while ( *pText && *pText != '\n' && m_parms.lineLength < 80)
+		while ( *pText && *pText != '\n' && m_parms.lineLength < sizeof (line) - 1)
 		{
 			unsigned char c = *pText;
 			line[m_parms.lineLength] = c;
