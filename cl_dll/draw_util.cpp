@@ -72,6 +72,9 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 			case 'y':
 				UnpackRGB( r, g, b, RGB_YELLOWISH );
 				continue;
+			case 'r':
+				UnpackRGB( r, g, b, RGB_REDISH );
+				continue;
 			case 'w':
 				r = g = b = 255;
 				continue;
