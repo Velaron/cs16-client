@@ -397,7 +397,7 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 		}
 
 		// draw kills (right to left)
-		if( stricmp( team, "SPECTATOR" ) )
+		if( team && stricmp( team, "SPECTATOR" ) )
 		{
 			DrawUtils::DrawHudNumberString( KILLS_POS_END(), ypos, KILLS_POS_START(), g_PlayerExtraInfo[best_player].frags, r, g, b );
 
