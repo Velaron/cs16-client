@@ -50,7 +50,7 @@ if(NOT MSVC)
 	add_definitions(-DLINUX -D_LINUX)
 	add_definitions(-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -fms-extensions)
 else()
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -DWIN32)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
 endif()
 
 add_library(${CLIENT_LIB} MODULE ${CS_CLIENT_SRC})
