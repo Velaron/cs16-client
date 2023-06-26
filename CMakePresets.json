@@ -7,7 +7,7 @@
     },
     "configurePresets": [
         {
-            "name": "win32-debug-x64",
+            "name": "win32-debug-amd64",
             "displayName": "Windows Debug - amd64",
             "generator": "Ninja",
             "architecture": {
@@ -30,7 +30,7 @@
         },
         {
             "name": "win32-debug-x86",
-            "inherits": "win32-debug-x64",
+            "inherits": "win32-debug-amd64",
             "displayName": "Windows Debug - x86",
             "architecture": {
                 "value": "x86",
@@ -38,8 +38,8 @@
             }
         },
         {
-            "name": "win32-release-x64",
-            "inherits": "win32-debug-x64",
+            "name": "win32-release-amd64",
+            "inherits": "win32-debug-amd64",
             "displayName": "Windows Release - amd64",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
@@ -54,8 +54,8 @@
             }
         },
         {
-            "name": "linux-release-x64",
-            "inherits": "linux-release-x86",
+            "name": "linux-release-amd64",
+            "inherits": "linux-release-i386",
             "displayName": "Linux Release - amd64",
             "generator": "Ninja",
             "architecture": {
@@ -64,7 +64,7 @@
             }
         },
         {
-            "name": "linux-release-x86",
+            "name": "linux-release-i386",
             "displayName": "Linux Release - x86",
             "generator": "Ninja",
             "architecture": {

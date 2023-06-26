@@ -1277,7 +1277,7 @@ void CHudAmmo::DrawCrosshair()
 
 	CalcCrosshairColor();
 	CalcCrosshairDrawMode();
-	CalcCrosshairSize();
+	CalculateCrosshairSize();
 
 	m_iAmmoLastCheck = g_iShotsFired;
 	m_flCrosshairDistance = max( m_flCrosshairDistance, iDistance );
@@ -1356,46 +1356,63 @@ void CHudAmmo::DrawCrosshair()
 	return;
 }
 
-void CHudAmmo::CalcCrosshairSize()
+void CHudAmmo::CalculateCrosshairSize()
 {
-	static char prevSize[64] = { 0 };
-	const char *size = m_pClCrosshairSize->string;
+	int size;
 
-	if( !strncmp( prevSize, size, sizeof(prevSize) ) )
-		return;
-	
-	strncpy( prevSize, size, sizeof(prevSize) );
-	prevSize[63] = 0;
-	
-	if( !stricmp( size, "small" ))
+	size = strtol( m_pClCrosshairSize->string, 0, 10 );
+
+	if( size > 3 )
 	{
+		size = -1;
+	}
+	else if( size == 0 && strcmp( "0", m_pClCrosshairSize->string ))
+	{
+		size = -1;
+	}
+	
+	if( !stricmp( m_pClCrosshairSize->string, "auto" ))
+	{
+		size = 0;
+	}
+	else if( !stricmp( m_pClCrosshairSize->string, "small" ))
+	{
+		size = 1;
+	}
+	else if( !stricmp( m_pClCrosshairSize->string, "medium" ))
+	{
+		size = 2;
+	}
+	else if( !stricmp( m_pClCrosshairSize->string, "large" ))
+	{
+		size = 3;
+	}
+
+	switch( size )
+	{
+	case -1:
+		gEngfuncs.Con_Printf( "usage: cl_crosshair_size <auto|small|medium|large>\n" );
+        break;
+	case 0:
+		if( gHUD.m_scrinfo.iWidth > 640 )
+		{
+			if( gHUD.m_scrinfo.iWidth < 1024 )
+				m_iCrosshairScaleBase = 800;
+			else
+				m_iCrosshairScaleBase = 640;
+		}
+		break;
+	case 1:
 		m_iCrosshairScaleBase = 1024;
-	}
-	else if( !stricmp( size, "medium" ))
-	{
+		break;
+	case 2:
 		m_iCrosshairScaleBase = 800;
-	}
-	else if( !stricmp( size, "large" ))
-	{
+		break;
+	case 3:
+	default:
 		m_iCrosshairScaleBase = 640;
+		break;
 	}
-	else //( !stricmp(size, "auto") )
-	{
-		if( TrueWidth <= 640 )
-		{
-			m_iCrosshairScaleBase = 1024;
-		}
-		else if( TrueWidth <= 1024 )
-		{
-			m_iCrosshairScaleBase = 800;
-		}
-		else
-		{
-			m_iCrosshairScaleBase = 640;
-		}
-	}
-
-	return;
 }
 
 void CHudAmmo::CalcCrosshairDrawMode()

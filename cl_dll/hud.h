@@ -157,7 +157,7 @@ public:
 
 	// dynamic crosshair
 	void DrawCrosshair();
-	void CalcCrosshairSize();
+	void CalculateCrosshairSize();
 	void CalcCrosshairDrawMode();
 	void CalcCrosshairColor();
 

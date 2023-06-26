@@ -40,6 +40,10 @@ jobs:
   windows:
     name: Windows
     runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: ['x86', 'amd64']
+      fail-fast: false
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
@@ -49,9 +53,9 @@ jobs:
       - name: Setup Visual Studio
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: x86
+          arch: ${{ matrix.arch }}
       - name: Configure project
-        run: cmake --preset "win32-release-x86"
+        run: cmake --preset "win32-release-${{ matrix.arch }}"
       - name: Run appversion.sh
         run: regamedll/version/appversion.sh "${{ github.workspace }}/3rdparty/ReGameDLL_CS"
         shell: bash
@@ -59,31 +63,18 @@ jobs:
       - name: Build
         run: cmake --build .
         working-directory: build
-      - name: Setup Visual Studio (x64)
-        uses: ilammy/msvc-dev-cmd@v1
-      - name: Configure project (x64)
-        run: cmake --preset "win32-release-x64"
-      - name: Build (x64)
-        run: cmake --build .
-        working-directory: build
       - name: Generate extras.pk3
         run: Compress-Archive -Path 3rdparty/cs16client-extras/* -Destination build/extras.pk3 -CompressionLevel NoCompression
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: win32-i386
+          name: win32-${{ matrix.arch }}
           path: |
             build/3rdparty/ReGameDLL_CS/regamedll/mp.dll
-            build/3rdparty/mainui_cpp/menu.dll
-            build/cl_dll/client.dll
-            build/extras.pk3
-      - name: Upload artifacts (x64)
-        uses: actions/upload-artifact@v3
-        with:
-          name: win32-amd64
-          path: |
             build/3rdparty/ReGameDLL_CS/regamedll/mp_amd64.dll
+            build/3rdparty/mainui_cpp/menu.dll
             build/3rdparty/mainui_cpp/menu_amd64.dll
+            build/cl_dll/client.dll
             build/cl_dll/client_amd64.dll
             build/extras.pk3
   linux:
@@ -104,7 +95,7 @@ jobs:
         run: |
           export CC="gcc -m32"
           export CXX="g++ -m32"
-          cmake --preset "linux-release-x86"
+          cmake --preset "linux-release-i386"
       - name: Build
         run: cmake --build .
         working-directory: build
@@ -123,7 +114,7 @@ jobs:
         run: rm -rf *
         working-directory: build
       - name: Configure project (x64)
-        run: cmake --preset "linux-release-x64"
+        run: cmake --preset "linux-release-amd64"
       - name: Build (x64)
         run: cmake --build .
         working-directory: build
@@ -158,11 +149,11 @@ jobs:
 
           mkdir -p cstrike/dlls
           mkdir -p cstrike/cl_dlls
-          mv win32-i386/3rdparty/ReGameDLL_CS/regamedll/mp.dll cstrike/dlls
-          mv win32-i386/3rdparty/mainui_cpp/menu.dll cstrike/cl_dlls
-          mv win32-i386/cl_dll/client.dll cstrike/cl_dlls
-          mv win32-i386/extras.pk3 cstrike
-          zip -r cs16-client_win32_i386.zip cstrike/
+          mv win32-x86/3rdparty/ReGameDLL_CS/regamedll/mp.dll cstrike/dlls
+          mv win32-x86/3rdparty/mainui_cpp/menu.dll cstrike/cl_dlls
+          mv win32-x86/cl_dll/client.dll cstrike/cl_dlls
+          mv win32-x86/extras.pk3 cstrike
+          zip -r cs16-client_win32_x86.zip cstrike/
           rm -r cstrike
 
           mkdir -p cstrike/dlls

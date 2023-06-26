@@ -996,18 +996,6 @@ int GetWeaponAccuracyFlags( int weaponid )
 	return result;
 }
 
-
-// Name says it!
-// Override stupid Xash(or even GoldSrc?) bug with overwriting
-// already predicted values, like maxspeed or punchangle vector
-#define _CS16CLIENT_TAKE_PREDICTED_INFO_FOR_WEAPON_PREDICTION
-
-#ifdef _CS16CLIENT_TAKE_PREDICTED_INFO_FOR_WEAPON_PREDICTION
-#define STATE to
-#else
-#define STATE from
-#endif
-
 /*
 =====================
 HUD_WeaponsPostThink
@@ -1232,8 +1220,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 	player.pev->deadflag   = from->client.deadflag;
 	player.pev->waterlevel = from->client.waterlevel;
-	player.pev->maxspeed   = STATE->client.maxspeed; //!!! Taking "to"
-	player.pev->punchangle = STATE->client.punchangle; //!!! Taking "to"
+	player.pev->maxspeed   = from->client.maxspeed;
+	player.pev->punchangle = from->client.punchangle;
 	player.pev->fov        = from->client.fov;
 	player.pev->weaponanim = from->client.weaponanim;
 	player.pev->viewmodel  = from->client.viewmodel;
@@ -1259,7 +1247,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	cl_entity_t *pplayer = gEngfuncs.GetLocalPlayer();
 	if( pplayer )
 	{
-		player.pev->origin = STATE->client.origin; //!!! Taking "to"
+		player.pev->origin = from->client.origin;
 		player.pev->angles	= pplayer->angles;
 		player.pev->v_angle = v_angles;
 	}

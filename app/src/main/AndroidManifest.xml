@@ -31,5 +31,6 @@
 
     <queries>
         <package android:name="su.xash.engine" />
+        <package android:name="su.xash.engine.test" />
     </queries>
 </manifest>

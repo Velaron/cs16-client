@@ -383,13 +383,16 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 
 		if( cl_showplayerversion->value == 0.0f )
 		{
-			// draw bomb( if player have the bomb )
-			if( g_PlayerExtraInfo[best_player].dead )
-				DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Dead", r, g, b );
-			else if( g_PlayerExtraInfo[best_player].has_c4 )
-				DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Bomb", r, g, b );
-			else if( g_PlayerExtraInfo[best_player].vip )
-				DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "VIP",  r, g, b );
+			if ( stricmp( team, "SPECTATOR" ))
+			{
+				// draw bomb( if player have the bomb )
+				if( g_PlayerExtraInfo[best_player].dead )
+					DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Dead", r, g, b );
+				else if( g_PlayerExtraInfo[best_player].has_c4 )
+					DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Bomb", r, g, b );
+				else if( g_PlayerExtraInfo[best_player].vip )
+					DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "VIP",  r, g, b );
+			}
 		}
 		else
 		{
