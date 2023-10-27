@@ -5,87 +5,81 @@ import java.time.temporal.ChronoUnit
 apply plugin: 'com.android.application'
 
 android {
-    ndkVersion '26.0.10792818'
-    namespace 'in.celest.xash3d.cs16client'
+	ndkVersion '26.1.10909125'
+	namespace 'in.celest.xash3d.cs16client'
 
-    packagingOptions {
-        jniLibs {
-            useLegacyPackaging = true
-        }
-    }
+	packagingOptions {
+		jniLibs {
+			useLegacyPackaging = true
+		}
+	}
 
-    defaultConfig {
-        applicationId 'in.celest.xash3d'
-        applicationIdSuffix 'cs16client'
-        versionName '1.35'
-        versionCode getBuildNum()
-        minSdkVersion 19
-        targetSdk 34
-        compileSdk 34
-    }
+	defaultConfig {
+		applicationId 'in.celest.xash3d'
+		applicationIdSuffix 'cs16client'
+		versionName '1.35'
+		versionCode getBuildNum()
+		minSdkVersion 19
+		targetSdk 34
+		compileSdk 34
+	}
 
-    externalNativeBuild {
-        cmake {
-            version '3.22.1'
-        }
-    }
+	externalNativeBuild {
+		cmake {
+			version '3.22.1+'
+			path file('../CMakeLists.txt')
+		}
+	}
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_1_8
+		targetCompatibility JavaVersion.VERSION_1_8
+	}
 
-    buildTypes {
-        debug {
-            minifyEnabled false
-            shrinkResources false
-            debuggable true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-        }
-        release {
-            minifyEnabled false
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-        }
-    }
+	buildTypes {
+		debug {
+			minifyEnabled false
+			shrinkResources false
+			debuggable true
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+		}
+		release {
+			minifyEnabled false
+			shrinkResources false
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+		}
+	}
 
-    externalNativeBuild {
-        cmake {
-            path file('../CMakeLists.txt')
-        }
-    }
+	lint {
+		abortOnError false
+	}
 
-    lint {
-        abortOnError false
-    }
-    
-    buildFeatures {
-        viewBinding true
-        buildConfig true
-    }
+	buildFeatures {
+		viewBinding true
+		buildConfig true
+	}
 
+	sourceSets {
+		main {
+			assets {
+				srcDirs += "${project.projectDir}/../3rdparty/cs16client-extras"
+			}
+		}
+	}
 
-    sourceSets {
-        main {
-            assets {
-                srcDirs += "${project.projectDir}/../3rdparty/cs16client-extras"
-            }
-        }
-    }
-
-    androidResources {
-        noCompress ''
-    }
+	androidResources {
+		noCompress ['']
+	}
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+	implementation 'androidx.appcompat:appcompat:1.6.1'
 }
 
 static def getBuildNum() {
-    LocalDateTime now = LocalDateTime.now()
-    LocalDateTime releaseDate = LocalDateTime.of(2015, Month.OCTOBER, 29, 0, 0, 0)
-    int qBuildNum = releaseDate.until(now, ChronoUnit.DAYS)
-    int minuteOfDay = now.getHour() * 60 + now.getMinute()
-    return qBuildNum * 10000 + minuteOfDay
+	LocalDateTime now = LocalDateTime.now()
+	LocalDateTime releaseDate = LocalDateTime.of(2015, Month.OCTOBER, 29, 0, 0, 0)
+	int qBuildNum = releaseDate.until(now, ChronoUnit.DAYS)
+	int minuteOfDay = now.getHour() * 60 + now.getMinute()
+	return qBuildNum * 10000 + minuteOfDay
 }
