@@ -742,7 +742,8 @@ void CStudioModelRenderer::StudioSetupBones(void)
 		{
 			if (IEngineStudio.IsHardware())
 			{
-				if( gHUD.cl_righthand && gHUD.cl_righthand->value > 0.0f && bIsViewModel && !g_bHoldingKnife )
+				// i know this looks HORRIBLE but I'm too lazy to simplify this right now
+				if( gHUD.cl_righthand && gHUD.cl_righthand->value > 0.0f && bIsViewModel && !g_bHoldingShield || gHUD.GetGameType() == GAME_CZERO && bIsViewModel && g_bHoldingShield )
 				{
 					bonematrix[1][0] = -bonematrix[1][0];
 					bonematrix[1][1] = -bonematrix[1][1];
