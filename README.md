@@ -24,16 +24,18 @@ git clone https://github.com/Velaron/cs16-client --recursive
 ```
 ### Windows
 ```
+cd cs16-client
 cmake -A Win32 -S . -B build
 cmake --build build --config Release
 ```
 ### Linux
 ```
+cd cs16-client
 cmake -S . -B build
 cmake --build build --config Release
 ```
 ### Android
 ```
-cd android
+cd cs16-client
 ./gradlew assembleRelease
 ```
