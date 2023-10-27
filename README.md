@@ -1,58 +1,39 @@
-# CS16Client
-## Counter-Strike 1.6 client.dll rewrite project.
+# CS16Client [![Build Status](https://github.com/Velaron/cs16-client/actions/workflows/build.yml/badge.svg)](https://github.com/Velaron/cs16-client/actions) <img align="right" width="128" height="128" src="https://github.com/Velaron/cs16-client/raw/master/app/src/main/ic_launcher-playstore.png" alt="CS16Client" />
+Counter-Strike reverse-engineered.
 
-* Based on HLSDK 2.3. 
-* Works without VGUI.
-* Runs on your phone.
-* Helpful for modders.
+## Donate
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/velaron)
 
-[Latest stable release](https://github.com/SDLash3D/cs16-client/releases/latest)
+[Support](https://www.buymeacoffee.com/velaron) me on Buy Me A Coffee, if you like my work and would like to support further development goals, like a working server implementation and reverse-engineering other great mods.
 
-## How to run
+## Download
+You can download a build at the [Releases](https://github.com/Velaron/cs16-client/releases/tag/continuous) section, or use these links:
+* [Android](https://github.com/Velaron/cs16-client/releases/download/continuous/cs16-client.apk)
+* [Linux](https://github.com/Velaron/cs16-client/releases/download/continuous/cs16-client_linux_i386.tar.gz) (not recommended, just use the Steam version)
+* [Windows](https://github.com/Velaron/cs16-client/releases/download/continuous/cs16-client_win32_x86.zip) (not recommended, same as above)
 
-**Install**:
+## Installation
+To run CS16Client you need the latest developer build of Xash3D FWGS, which you can get [here](https://github.com/FWGS/xash3d-fwgs/releases/tag/continuous) (unless on [Android](https://github.com/Velaron/xash3d-fwgs/releases/tag/continuous-android)).
+You have to own the [game on Steam](https://store.steampowered.com/app/10/CounterStrike//) and copy `valve` and `cstrike` folders into your Xash3D FWGS directory.
+After that, just install the APK and run.
 
-1) Install the APK from [Google Play](https://play.google.com/store/apps/details?id=in.celest.xash3d.cs16client).
-
-2) Install the latest [Xash3D FWGS](https://play.google.com/store/apps/details?id=in.celest.xash3d.hl).
-
-3) Copy `cstrike` and `valve` folders from your **Steam CS1.6** installation to `xash` folder on SDCard. 
-
-4) Run CS16Client and enjoy!
-
-### How to build
-
-* Install Android NDK and SDK.
-* Run script named "build" in android/ directory. 
-NOTE: Don't forget to init git submodules!
-
-Other platforms than Android is **not** officially supported. Issues for platforms other than Android will not be accepted.
-
-## Contributing
-
-There is many things must be done. For example:
-
-* Translations!
-* Better and user-friendly Java Launcher design.
-* Fixing crashes.
-* CZero support.
-
-#### CS1.6 incompability
-1) Explain what's wrong with cs16-client.
-
-2) Attach a screenshot from Steam version of CS1.6. 
-
-#### Crashes or bugs
-1) Explain what's wrong with cs16-client
-
-2) Attach a screenshot with cs16-client. Attach an engine.log. (if engine.log isn't written, rerun engine with `-log` parameter)
-
-If you are experiencing bug on Android, attach an ADB log. 
-
-### Code guide
-
-For some reason, originally client is more "C with classes" than "C++". Someday it will be refactored, but now I recommend to use "C++" if it looks more convenient. 
-
-For example, if you need to work with vectors, use `Vector` class, instead of `float[3]`. They are data-compatible, but `Vector` is more convenient for C++ code.
-
-For code-style guide: Use `.clang-format`, Luke!
+## Building
+Clone the source code:
+```
+git clone https://github.com/Velaron/cs16-client --recursive
+```
+### Windows
+```
+cmake -A Win32 -S . -B build
+cmake --build build --config Release
+```
+### Linux
+```
+cmake -S . -B build
+cmake --build build --config Release
+```
+### Android
+```
+cd android
+./gradlew assembleRelease
+```
