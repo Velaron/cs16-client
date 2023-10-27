@@ -58,12 +58,6 @@ android {
     lint {
         abortOnError false
     }
-    
-    buildFeatures {
-        viewBinding true
-        buildConfig true
-    }
-
 
     sourceSets {
         main {
@@ -74,7 +68,7 @@ android {
     }
 
     androidResources {
-        noCompress ''
+        noCompress += ''
     }
 }
 

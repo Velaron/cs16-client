@@ -34,6 +34,5 @@ cmake --build build --config Release
 ```
 ### Android
 ```
-cd android
 ./gradlew assembleRelease
 ```
