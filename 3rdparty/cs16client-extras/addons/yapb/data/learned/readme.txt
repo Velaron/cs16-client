@@ -1,1 +1,0 @@
-bot's learn'd map data here

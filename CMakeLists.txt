@@ -18,7 +18,7 @@ if(BUILD_CLIENT)
 endif()
 
 if(BUILD_SERVER)
-#	add_subdirectory(3rdparty/yapb)
+	add_subdirectory(3rdparty/yapb)
 	add_subdirectory(3rdparty/ReGameDLL_CS)
 endif()
 

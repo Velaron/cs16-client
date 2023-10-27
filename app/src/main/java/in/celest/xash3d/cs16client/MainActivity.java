@@ -50,7 +50,10 @@ public class MainActivity extends AppCompatActivity {
         mActivityResultLauncher.launch(new Intent().setComponent(new ComponentName(pkg, "su.xash.engine.XashActivity"))
 //                don't set yet because it breaks getCallingPackage
 //                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                .putExtra("gamedir", "cstrike").putExtra("gamelibdir", getApplicationInfo().nativeLibraryDir).putExtra("package", getPackageName()));
+                .putExtra("gamedir", "cstrike")
+                .putExtra("gamelibdir", getApplicationInfo().nativeLibraryDir)
+                .putExtra("argv", "-dev 2 -log -dll " + getApplicationInfo().nativeLibraryDir + "/libyapb.so")
+                .putExtra("package", getPackageName()));
         finish();
     }
 }

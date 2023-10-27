@@ -5,9 +5,7 @@ import java.time.temporal.ChronoUnit
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk 33
-    ndkVersion '25.2.9519653'
-    buildToolsVersion '33.0.2'
+    ndkVersion '26.0.10792818'
     namespace 'in.celest.xash3d.cs16client'
 
     packagingOptions {
@@ -21,8 +19,9 @@ android {
         applicationIdSuffix 'cs16client'
         versionName '1.35'
         versionCode getBuildNum()
-        minSdkVersion 16
-        targetSdk 33
+        minSdkVersion 19
+        targetSdk 34
+        compileSdk 34
     }
 
     externalNativeBuild {
