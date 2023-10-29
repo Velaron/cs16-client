@@ -94,7 +94,9 @@ jobs:
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install libatomic1:i386 libgcc-s1:i386 libstdc++6:i386 gcc-multilib g++-multilib cmake ninja-build libfontconfig-dev:i386 libfontconfig-dev
+          sudo apt-get install libatomic1:i386 libgcc-s1:i386 \
+            libstdc++6:i386 gcc-multilib g++-multilib cmake \
+            ninja-build libfontconfig-dev:i386 libfontconfig-dev
       - name: Configure project
         run: |
           if [[ ${{ matrix.arch }} == i386 ]]; then
@@ -113,8 +115,11 @@ jobs:
           name: linux-${{ matrix.arch }}
           path: |
             build/3rdparty/ReGameDLL_CS/regamedll/cs.so
+            build/3rdparty/ReGameDLL_CS/regamedll/cs_amd64.so
             build/3rdparty/mainui_cpp/menu.so
+            build/3rdparty/mainui_cpp/menu_amd64.so
             build/cl_dll/client.so
+            build/cl_dll/client_amd64.so
             build/extras.pk3
   release:
     name: Release
