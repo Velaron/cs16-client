@@ -4,13 +4,13 @@ Counter-Strike reverse-engineered.
 ## Donate
 [![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/velaron)
 
-[Support](https://www.buymeacoffee.com/velaron) me on Buy Me A Coffee, if you like my work and would like to support further development goals, like a working server implementation and reverse-engineering other great mods.
+[Support](https://www.buymeacoffee.com/velaron) me on Buy Me A Coffee, if you like my work and would like to support further development goals, like  reverse-engineering other great mods.
 
 ## Download
 You can download a build at the [Releases](https://github.com/Velaron/cs16-client/releases/tag/continuous) section, or use these links:
 * [Android](https://github.com/Velaron/cs16-client/releases/download/continuous/cs16-client.apk)
-* [Linux](https://github.com/Velaron/cs16-client/releases/download/continuous/cs16-client_linux_i386.tar.gz) (not recommended, just use the Steam version)
-* [Windows](https://github.com/Velaron/cs16-client/releases/download/continuous/cs16-client_win32_x86.zip) (not recommended, same as above)
+* [Linux](https://github.com/Velaron/cs16-client/releases/download/continuous/cs16-client_linux_i386.tar.gz) (not recommended)
+* [Windows](https://github.com/Velaron/cs16-client/releases/download/continuous/cs16-client_win32_x86.zip) (not recommended)
 
 ## Installation
 To run CS16Client you need the latest developer build of Xash3D FWGS, which you can get [here](https://github.com/FWGS/xash3d-fwgs/releases/tag/continuous) (unless on [Android](https://github.com/Velaron/xash3d-fwgs/releases/tag/continuous-android)).
