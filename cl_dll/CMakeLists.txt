@@ -55,11 +55,7 @@ endif()
 
 add_library(${CLIENT_LIB} MODULE ${CS_CLIENT_SRC})
 
-if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Android")
-	set_target_properties(${CLIENT_LIB} PROPERTIES
-		OUTPUT_NAME ${CLIENT_LIB}
-		PREFIX "")
-endif()
+set_target_postfix(${CLIENT_LIB})
 
 install(TARGETS ${CLIENT_LIB}
 	DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/"

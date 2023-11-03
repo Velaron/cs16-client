@@ -194,8 +194,10 @@ endif()
 
 message(STATUS "Library postfix: " ${POSTFIX})
 
-set(CMAKE_RELEASE_POSTFIX ${POSTFIX})
-set(CMAKE_DEBUG_POSTFIX ${POSTFIX})
-set(CMAKE_RELWITHDEBINFO_POSTFIX ${POSTFIX})
-set(CMAKE_MINSIZEREL_POSTFIX ${POSTFIX})
-set(CMAKE_POSTFIX ${POSTFIX})
+macro(set_target_postfix target)
+	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${target}${POSTFIX}")
+
+	if(NOT XASH_ANDROID)
+		set_target_properties(${target} PROPERTIES PREFIX "")
+	endif()
+endmacro()
