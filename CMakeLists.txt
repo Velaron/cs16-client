@@ -13,6 +13,11 @@ set(GAME_DIR "cstrike" CACHE STRING "Game directory name.")
 set(CLIENT_INSTALL_DIR "cl_dlls" CACHE STRING "Client library location.")
 set(SERVER_INSTALL_DIR "dlls" CACHE STRING "Server library location.")
 
+if(VITA)
+	message(STATUS "Building for PS Vita")
+	add_compile_options(-fno-use-cxa-atexit)
+endif()
+
 if(BUILD_CLIENT)
 	add_subdirectory(cl_dll)
 endif()
