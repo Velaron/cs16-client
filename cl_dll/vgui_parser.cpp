@@ -39,223 +39,231 @@
 
 #include "interface.h"
 
-typedef unsigned int	uint;
+#include "miniutl.h"
+#include "utlhashmap.h"
 
-// for localized titles.txt strings
-typedef struct base_command_hashmap_s
+static CUtlHashMap<const char *, const char *> hashed_cmds;
+
+char *StringCopy( const char *input )
 {
-	const char					*name;
-	const char             		*value;    // key for searching
-	struct base_command_hashmap_s *next;
-} base_command_hashmap_t;
+	if( !input ) return NULL;
 
-#define HASH_SIZE 256 // 256 * 4 * 4 == 4096 bytes
-static base_command_hashmap_t *hashed_cmds[HASH_SIZE];
+	char *out = new char[strlen( input ) + 1];
+	strcpy( out, input );
 
-/*
-=================
-Com_HashKey
-
-returns hash key for string
-=================
-*/
-static uint Com_HashKey( const char *string, uint hashSize )
-{
-	uint	i, hashKey = 0;
-
-	for( i = 0; string[i]; i++ )
-	{
-		hashKey = (hashKey + i) * 37 + tolower( string[i] );
-	}
-
-	return (hashKey % hashSize);
-}
-
-/*
-============
-BaseCmd_FindInBucket
-
-Find base command in bucket
-============
-*/
-base_command_hashmap_t *BaseCmd_FindInBucket( base_command_hashmap_t *bucket, const char *name )
-{
-	base_command_hashmap_t *i = bucket;
-	for( ; i && strcasecmp( name, i->name ); // filter out
-		 i = i->next );
-
-	return i;
-}
-
-/*
-============
-BaseCmd_GetBucket
-
-Get bucket which contain basecmd by given name
-============
-*/
-base_command_hashmap_t *BaseCmd_GetBucket( const char *name )
-{
-	return hashed_cmds[ Com_HashKey( name, HASH_SIZE ) ];
+	return out;
 }
 
 const char *Localize( const char *szStr )
 {
-	char *str = strdup( szStr );
-	StripEndNewlineFromString( str );
-	
-	base_command_hashmap_t *base = BaseCmd_GetBucket( str );
-	base_command_hashmap_t *found = BaseCmd_FindInBucket( base, str );
-	
-	free( str );
-
-	if( found )
-		return found->value;
-	return "";
-}
-
-/*
-============
-BaseCmd_Insert
-
-Add new typed base command to hashmap
-============
-*/
-void BaseCmd_Insert( const char *name, const char *second )
-{
-	uint hash = Com_HashKey( name, HASH_SIZE );
-	base_command_hashmap_t *elem;
-
-	elem = new base_command_hashmap_t;
-	elem->name = strdup(name);
-	elem->value = strdup(second);
-	elem->next   = hashed_cmds[hash];
-	hashed_cmds[hash] = elem;
-}
-
-
-static void Localize_AddToDictionary( const char *gamedir, const char *name, const char *lang )
-{
-	char filename[64];
-	snprintf( filename, sizeof( filename ), "resource/%s_%s.txt", name, lang );
-
-	int unicodeLength;
-	uchar16 *unicodeBuf = (uchar16*)gEngfuncs.COM_LoadFile( filename, 5, &unicodeLength );
-
-	if( unicodeBuf ) // no problem, so read it.
+	if( szStr )
 	{
-		int ansiLength = unicodeLength / 2;
-		char *afile = new char[ansiLength]; // save original pointer, so we can free it later
-		char *pfile = afile;
-		char *token = new char[MAX_LOCALIZEDSTRING_SIZE];
-		int i = 0;
+		if( *szStr == '#' )
+			szStr++;
 
-		Q_UTF16ToUTF8( unicodeBuf + 1, afile, ansiLength, STRINGCONVERT_ASSERT_REPLACE );
+		int i = hashed_cmds.Find( szStr );
 
-		pfile = gEngfuncs.COM_ParseFile( pfile, token );
+		if( i != hashed_cmds.InvalidIndex() )
+			return hashed_cmds[i];
+	}
 
-		if( stricmp( token, "lang" ))
-		{
-			gEngfuncs.Con_Printf( "Localize_AddToDict( %s, %s, %s ): invalid header, got %s", gamedir, name, lang, token );
-			goto error;
-		}
+	return szStr;
+}
 
-		pfile = gEngfuncs.COM_ParseFile( pfile, token );
+static void Dictionary_Insert( const char *key, const char *value )
+{
+	int i = hashed_cmds.Find( key );
 
-		if( strcmp( token, "{" ))
-		{
-			gEngfuncs.Con_Printf( "Localize_AddToDict( %s, %s, %s ): want {, got %s", gamedir, name, lang, token );
-			goto error;
-		}
+	// don't allow dupes, delete older strings
+	if( i != hashed_cmds.InvalidIndex() )
+	{
+		const char *old = hashed_cmds[i];
 
-		pfile = gEngfuncs.COM_ParseFile( pfile, token );
+		hashed_cmds[i] = StringCopy( value );
 
-		if( stricmp( token, "Language" ))
-		{
-			gEngfuncs.Con_Printf( "Localize_AddToDict( %s, %s, %s ): want Language, got %s", gamedir, name, lang, token );
-			goto error;
-		}
-
-		// skip language actual name
-		pfile = gEngfuncs.COM_ParseFile( pfile, token );
-
-		pfile = gEngfuncs.COM_ParseFile( pfile, token );
-
-		if( stricmp( token, "Tokens" ))
-		{
-			gEngfuncs.Con_Printf( "Localize_AddToDict( %s, %s, %s ): want Tokens, got %s", gamedir, name, lang, token );
-			goto error;
-		}
-
-		pfile = gEngfuncs.COM_ParseFile( pfile, token );
-
-		if( strcmp( token, "{" ))
-		{
-			gEngfuncs.Con_Printf( "Localize_AddToDict( %s, %s, %s ): want { after Tokens, got %s", gamedir, name, lang, token );
-			goto error;
-		}
-
-		while( (pfile = gEngfuncs.COM_ParseFile( pfile, token )))
-		{
-			if( !strcmp( token, "}" ))
-				break;
-
-			char szLocString[MAX_LOCALIZEDSTRING_SIZE];
-			pfile = gEngfuncs.COM_ParseFile( pfile, szLocString );
-
-			if( !strcmp( szLocString, "}" ))
-				break;
-			
-
-			if( pfile )
-			{				
-				BaseCmd_Insert( token, szLocString );
-				i++;
-			}
-		}
-
-		gEngfuncs.Con_Printf( "Localize_AddToDict: loaded %i words from %s\n", i, filename );
-
-error:
-		delete[] token;
-		delete[] afile;
-
-		gEngfuncs.COM_FreeFile( unicodeBuf );
+		delete[] old;
 	}
 	else
 	{
-		gEngfuncs.Con_Printf( "Couldn't open file %s. Strings will not be localized!.\n", filename );
+		const char *first = StringCopy( key );
+		const char *second = StringCopy( value );
+
+		hashed_cmds.Insert( first, second );
 	}
 }
 
-void Localize_Init( )
+static void Localize_AddToDictionary( const char *name, const char *lang )
 {
-	const char *gamedir = gEngfuncs.pfnGetGameDirectory( );
-	
-	memset( hashed_cmds, 0, sizeof( hashed_cmds ) );
+	char filename[64], token[4096];
+	char *pfile, *afile = nullptr, *pFileBuf;
+	int i = 0, len;
+	bool isUtf16 = false;
 
-	Localize_AddToDictionary( gamedir, gamedir,  "english" );
-	Localize_AddToDictionary( "valve", "valve",  "english" );
-	Localize_AddToDictionary( "valve", "gameui", "english" );
-}
+	snprintf( filename, sizeof( filename ), "resource/%s_%s.txt", name, lang );
 
-void Localize_Free( )
-{
-	
-	for( int i = 0; i < HASH_SIZE; i++ )
+	pFileBuf = reinterpret_cast<char*>( gEngfuncs.COM_LoadFile( filename, 5, &len ));
+
+	if( !pFileBuf )
 	{
-		base_command_hashmap_t *base = hashed_cmds[i];
-		while( base )
+		gEngfuncs.Con_Printf( "Localize_AddToDict( %s ): couldn't open file. Some strings will not be localized!.\n", filename );
+		return;
+	}
+
+	// support only utf-16le
+	if( pFileBuf[0] == '\xFF' && pFileBuf[1] == '\xFE' )
+	{
+		if( len > 3 && !pFileBuf[2] && !pFileBuf[3] )
 		{
-			base_command_hashmap_t *next = base->next;
-			
-			delete [] base->value;
-			delete [] base->name;
-			delete base;
-			
-			base = next;
+			gEngfuncs.Con_Printf( "Localize_AddToDict( %s ): couldn't parse file. UTF-32 little endian isn't supported\n", filename );
+			goto error;
+		}
+		isUtf16 = true;
+	}
+	else if( pFileBuf[0] == '\xFE' && pFileBuf[1] == '\xFF' )
+	{
+		gEngfuncs.Con_Printf( "Localize_AddToDict( %s ): couldn't parse file. UTF-16/UTF-32 big endian isn't supported\n", filename );
+		goto error;
+	}
+
+	if( isUtf16 )
+	{
+		int ansiLength = len + 1;
+		uchar16 *autf16 = new uchar16[len/2 + 1];
+
+		memcpy( autf16, pFileBuf + 2, len - 1 );
+		autf16[len/2-1] = 0; //null terminator
+
+		afile = new char[ansiLength]; // save original pointer, so we can free it later
+
+		Q_UTF16ToUTF8( autf16, afile, ansiLength, STRINGCONVERT_ASSERT_REPLACE );
+
+		delete[] autf16;
+	}
+	else
+	{
+		afile = pFileBuf;
+
+		// strip UTF-8 BOM
+		if( afile[0] == '\xEF' && afile[1] == '\xBB' && afile[2] == '\xBF')
+			afile += 3;
+	}
+
+	pfile = afile;
+
+	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+	if( stricmp( token, "lang" ))
+	{
+		gEngfuncs.Con_Printf( "Localize_AddToDict( %s ): invalid header, got %s", filename, token );
+		goto error;
+	}
+
+	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+	if( strcmp( token, "{" ))
+	{
+		gEngfuncs.Con_Printf( "Localize_AddToDict( %s ): want {, got %s", filename, token );
+		goto error;
+	}
+
+	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+	if( stricmp( token, "Language" ))
+	{
+		gEngfuncs.Con_Printf( "Localize_AddToDict( %s ): want Language, got %s", filename, token );
+		goto error;
+	}
+
+	// skip language actual name
+	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+	if( stricmp( token, "Tokens" ))
+	{
+		gEngfuncs.Con_Printf( "Localize_AddToDict( %s ): want Tokens, got %s", filename, token );
+		goto error;
+	}
+
+	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+
+	if( strcmp( token, "{" ))
+	{
+		gEngfuncs.Con_Printf( "Localize_AddToDict( %s ): want { after Tokens, got %s", filename, token );
+		goto error;
+	}
+
+	while( (pfile = gEngfuncs.COM_ParseFile( pfile, token )))
+	{
+		if( !strcmp( token, "}" ))
+			break;
+
+		char szLocString[4096];
+		pfile = gEngfuncs.COM_ParseFile( pfile, szLocString );
+
+		if( !strcmp( szLocString, "}" ))
+			break;
+
+		if( pfile )
+		{
+			// Con_DPrintf("New token: %s %s\n", token, szLocString );
+			Dictionary_Insert( token, szLocString );
+			i++;
 		}
 	}
-	
-	return;
+
+error:
+	if( isUtf16 && afile )
+		delete[] afile;
+
+	gEngfuncs.COM_FreeFile( pFileBuf );
+}
+
+static void Localize_InitLanguage( const char *language )
+{
+	const char *gamedir = gEngfuncs.pfnGetGameDirectory();
+
+	// if gamedir isn't gameui, then load standard gameui strings
+	if( strcmp( gamedir, "gameui" ))
+		Localize_AddToDictionary( "gameui", language );
+
+	// if gamedir isn't valve, then load standard HL1 strings
+	if( strcmp( gamedir, "valve" ))
+		Localize_AddToDictionary( "valve",  language );
+
+	// if gamedir isn't mainui, then load standard mainui strings
+	if( strcmp( gamedir, "mainui" ))
+		Localize_AddToDictionary( "mainui", language );
+
+	// mod strings override default ones
+	Localize_AddToDictionary( gamedir,  language );
+}
+
+void Localize_Init( void )
+{
+	gEngfuncs.pfnClientCmd( "exec mainui.cfg\n" );
+
+	hashed_cmds.Purge();
+
+	// always load default language translation
+	Localize_InitLanguage( "english" );
+
+	const char *language = gEngfuncs.pfnGetCvarString( "ui_language" );
+
+	if( language[0] && strcmp( language, "english" ))
+		Localize_InitLanguage( language );
+}
+
+void Localize_Free( void )
+{
+	FOR_EACH_HASHMAP( hashed_cmds, i )
+	{
+		const char *first = hashed_cmds.Key( i );
+		const char *second = hashed_cmds.Element( i );
+
+		delete[] (char*)first;
+		delete[] (char*)second;
+	}
+
+	hashed_cmds.Purge();
 }

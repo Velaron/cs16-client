@@ -11,6 +11,7 @@ file(GLOB CS_HUD_SRC "hud/*.cpp")
 file(GLOB CS_STUDIO_SRC "studio/*.cpp")
 file(GLOB CS_INPUT_SRC "input/*.cpp")
 file(GLOB CS_PM_SRC "../pm_shared/*.cpp")
+file(GLOB MINIUTL_SRC "../3rdparty/mainui_cpp/miniutl/*.cpp")
 
 list(REMOVE_ITEM CS_CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/ev_hldm.cpp")
 list(REMOVE_ITEM CS_INPUT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/input/input_sdl.cpp")
@@ -25,6 +26,7 @@ list(APPEND CS_CLIENT_SRC ${CS_HUD_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_STUDIO_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_PM_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_INPUT_SRC})
+list(APPEND CS_CLIENT_SRC ${MINIUTL_SRC})
 
 include_directories(
 	include/

@@ -13,6 +13,11 @@ set(GAME_DIR "cstrike" CACHE STRING "Game directory name.")
 set(CLIENT_INSTALL_DIR "cl_dlls" CACHE STRING "Client library location.")
 set(SERVER_INSTALL_DIR "dlls" CACHE STRING "Server library location.")
 
+# if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+# 	add_compile_options(/fsanitize=address)
+# 	add_link_options(/fsanitize=address)
+# endif()
+
 if(VITA)
 	message(STATUS "Building for PS Vita")
 	add_compile_options(-fno-use-cxa-atexit)
