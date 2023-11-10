@@ -31,21 +31,8 @@
 inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent);
 extern globalvars_t *gpGlobals;
 
-#if !defined(__x86_64__) && !defined(_WIN64) && !defined(__aarch64__) && !defined(__powerpc64__) && !defined(__ppc64__)
 #define STRING(offset) reinterpret_cast<const char *>(gpGlobals->pStringBase + (uintp)offset)
 #define MAKE_STRING(str) (reinterpret_cast<uintp>(str) - reinterpret_cast<uintp>(STRING(0)))
-#else
-#define STRING(offset)      ((const char *)(gpGlobals->pStringBase + (int)offset))
-
-static inline int MAKE_STRING(const char *szValue)
-{
-	long long ptrdiff = szValue - STRING(0);
-	if( ptrdiff > INT_MAX || ptrdiff < INT_MIN )
-		return ALLOC_STRING( szValue );
-	else
-		return (int)ptrdiff;
-}
-#endif
 
 inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName)
 {
