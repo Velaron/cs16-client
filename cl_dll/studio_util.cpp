@@ -55,14 +55,15 @@ void SinCosFastVector(float r1, float r2, float r3, float r4,
 CrossProduct
 
 ====================
-*//*
+*/
+/*
 void CrossProduct (const float *v1, const float *v2, float *cross)
 {
 	cross[0] = v1[1]*v2[2] - v1[2]*v2[1];
 	cross[1] = v1[2]*v2[0] - v1[0]*v2[2];
 	cross[2] = v1[0]*v2[1] - v1[1]*v2[0];
 }
-
+*/
 /*
 ================
 ConcatTransforms

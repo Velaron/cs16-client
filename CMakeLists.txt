@@ -4,6 +4,7 @@ project(cs16-client)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
 include(LibraryNaming)
+include(ExternalProject)
 
 option(BUILD_CLIENT "Build client library." ON)
 option(BUILD_MAINUI "Build menu library." ON)
@@ -27,7 +28,24 @@ if(BUILD_CLIENT)
 	add_subdirectory(cl_dll)
 endif()
 
+# if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+# 	set(MESON_BUILD_TYPE debug)
+# elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+# 	set(MESON_BUILD_TYPE debugoptimized)
+# else()
+# 	set(MESON_BUILD_TYPE release)
+# endif()
+
 if(BUILD_SERVER)
+	# ExternalProject_Add(
+	# 	yapb
+	# 	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yapb
+	# 	CONFIGURE_COMMAND meson setup --buildtype ${MESON_BUILD_TYPE} build
+	# 	BUILD_COMMAND meson compile -C build
+	# 	BUILD_ALWAYS 1
+	# 	BUILD_IN_SOURCE 1
+	# 	INSTALL_COMMAND meson install -C build --destdir ${CMAKE_INSTALL_PREFIX}
+	# )
 	add_subdirectory(3rdparty/yapb)
 	add_subdirectory(3rdparty/ReGameDLL_CS)
 endif()

@@ -39,8 +39,13 @@
 
 #include "interface.h"
 
+// evil pasta hacks
+#define uint64 uint64_bruh
+#define int64 int64_bruh
 #include "miniutl.h"
 #include "utlhashmap.h"
+#undef uint64
+#undef int64
 
 static CUtlHashMap<const char *, const char *> hashed_cmds;
 

@@ -740,7 +740,7 @@ void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAn
 		model->entity.curstate.framerate = 1.0f;
 		model->entity.curstate.animtime = flAnimTime;
 		model->entity.curstate.frame = 0.0f;
-		model->entity.curstate.fuser1 = gHUD.m_flTime; + 1.0f;
+		model->entity.curstate.fuser1 = gHUD.m_flTime + 1.0f;
 		model->entity.curstate.sequence = iSequence;
 		model->entity.curstate.body = iBody;
 		model->entity.baseline.renderamt = 255;
