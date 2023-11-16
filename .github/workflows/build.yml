@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: android
-          path: app/build/outputs/apk/debug/app-debug-unsigned-signed.apk
+          path: app/build/outputs/apk/debug/app-debug-signed.apk
   # psvita:
   #   name: PS Vita
   #   runs-on: ubuntu-latest
@@ -150,7 +150,7 @@ jobs:
           repo: Velaron/cs16-client
       - name: Repackage binaries
         run: |
-          mv android/app-debug-unsigned-signed.apk cs16-client.apk
+          mv android/app-debug-signed.apk cs16-client.apk
 
           mkdir -p cstrike/{dlls,cl_dlls}
           mv win32-x86/3rdparty/ReGameDLL_CS/regamedll/mp.dll cstrike/dlls
