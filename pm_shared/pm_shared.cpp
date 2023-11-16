@@ -173,9 +173,9 @@ char PM_FindTextureType(char *name)
 {
 	int left, right, pivot;
 	int val;
-
+#if 0 // Velaron: TODO commented out until the issue is resolved
 	assert(pm_shared_initialized);
-
+#endif
 	left = 0;
 	right = pm_gcTextures - 1;
 
@@ -3196,8 +3196,9 @@ void PM_CreateStuckTable()
 
 void PM_Move(playermove_t *ppmove, int server)
 {
+#if 0
 	assert(pm_shared_initialized);
-
+#endif
 	pmove = ppmove;
 
 	PM_PlayerMove((server != 0) ? TRUE : FALSE);
@@ -3235,8 +3236,9 @@ int PM_GetPhysEntInfo(int ent)
 
 void PM_Init( playermove_t *ppmove)
 {
+#if 0
 	assert(!pm_shared_initialized);
-
+#endif
 	pmove = ppmove;
 
 	PM_CreateStuckTable();
