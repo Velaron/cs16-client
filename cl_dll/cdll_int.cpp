@@ -57,7 +57,7 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	gEngfuncs = *pEnginefuncs;
 
-	g_iXash = (int)CVAR_GET_FLOAT("buildnum");
+	sscanf( CVAR_GET_STRING( "host_ver" ), "%d", &g_iXash );
 
 	Game_HookEvents();
 
@@ -322,9 +322,9 @@ int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, re
 	// *callback = renderInterface;
 
 	// we have here a Host_Error, so check Xash for version
-	if( g_iXash < 3366 )
+	if( g_iXash < MIN_XASH_VERSION )
 	{
-		gRenderAPI.Host_Error("Xash3D Android version check failed!\nPlease update your Xash3D Android!\n");
+		gRenderAPI.Host_Error("Xash3D version check failed!\nPlease update your Xash3D!\n");
 	}
 
 	return true;

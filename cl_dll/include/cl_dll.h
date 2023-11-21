@@ -32,6 +32,8 @@ typedef unsigned short word;
 typedef float vec_t;
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
+#define MIN_XASH_VERSION 3137
+
 #include <stdint.h>
 
 #include "util_vector.h"
