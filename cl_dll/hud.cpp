@@ -237,6 +237,8 @@ void CHud :: Init( void )
 	CVAR_CREATE( "numericalmenu", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "numericalmenu_clientonly", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "checkscoreboard", "1", FCVAR_ARCHIVE );
+	cscl_currentmap = CVAR_CREATE( "cscl_currentmap", "", 0 );
+	cscl_currentmoney = CVAR_CREATE( "cscl_currentmoney", "0", 0 );
 
 	hud_scale    = gEngfuncs.pfnGetCvarPointer( "hud_scale" );
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
