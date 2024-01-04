@@ -380,40 +380,7 @@ void CStudioModelRenderer::StudioSetUpTransform(int trivial_accept)
 	angles[PITCH] = m_pCurrentEntity->curstate.angles[PITCH];
 	angles[YAW] = m_pCurrentEntity->curstate.angles[YAW];
 
-	if (m_pCurrentEntity->curstate.movetype == MOVETYPE_STEP)
-	{
-		float f = 0;
-		float d;
-
-		if ((m_clTime < m_pCurrentEntity->curstate.animtime + 1.0f) && (m_pCurrentEntity->curstate.animtime != m_pCurrentEntity->latched.prevanimtime))
-			f = (m_clTime - m_pCurrentEntity->curstate.animtime) / (m_pCurrentEntity->curstate.animtime - m_pCurrentEntity->latched.prevanimtime);
-
-		if (m_fDoInterp)
-			f = f - 1.0;
-		else
-			f = 0;
-
-		for (i = 0; i < 3; i++)
-			modelpos[i] += (m_pCurrentEntity->origin[i] - m_pCurrentEntity->latched.prevorigin[i]) * f;
-
-		for (i = 0; i < 3; i++)
-		{
-			float ang1, ang2;
-
-			ang1 = m_pCurrentEntity->angles[i];
-			ang2 = m_pCurrentEntity->latched.prevangles[i];
-
-			d = ang1 - ang2;
-
-			if (d > 180)
-				d -= 360;
-			else if (d < -180)
-				d += 360;
-
-			angles[i] += d * f;
-		}
-	}
-	else if (m_pCurrentEntity->curstate.movetype != MOVETYPE_NONE)
+	if (m_pCurrentEntity->curstate.movetype != MOVETYPE_NONE)
 	{
 		VectorCopy(m_pCurrentEntity->angles, angles);
 	}
