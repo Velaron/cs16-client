@@ -5,8 +5,8 @@ import java.time.temporal.ChronoUnit
 apply plugin: 'com.android.application'
 
 android {
-    ndkVersion '26.0.10792818'
-    namespace 'in.celest.xash3d.cs16client'
+    ndkVersion '26.1.10909125'
+    namespace 'su.xash.cs16client'
 
     packagingOptions {
         jniLibs {
@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId 'in.celest.xash3d'
+        applicationId 'su.xash'
         applicationIdSuffix 'cs16client'
         versionName '1.35'
         versionCode getBuildNum()
@@ -70,10 +70,6 @@ android {
     androidResources {
         noCompress += ''
     }
-}
-
-dependencies {
-    implementation 'androidx.appcompat:appcompat:1.6.1'
 }
 
 static def getBuildNum() {
