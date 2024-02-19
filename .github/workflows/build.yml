@@ -27,7 +27,7 @@ jobs:
       - name: Build
         run: ./gradlew assembleDebug
       - name: Sign APK
-        uses: noriban/sign-android-release@v5
+        uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: app/build/outputs/apk/debug
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
@@ -37,7 +37,7 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android
           path: app/build/outputs/apk/debug/app-debug-signed.apk
@@ -81,7 +81,7 @@ jobs:
       - name: Generate extras.pk3
         run: Compress-Archive -Path 3rdparty/cs16client-extras/* -Destination build/extras.pk3 -CompressionLevel NoCompression
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: win32-${{ matrix.arch }}
           path: |
@@ -125,7 +125,7 @@ jobs:
       - name: Generate extras.pk3
         run: zip -0 -r build/extras.pk3 3rdparty/cs16client-extras
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-${{ matrix.arch }}
           path: |
@@ -144,12 +144,13 @@ jobs:
       - name: Fetch artifacts
         uses: actions/download-artifact@v4
       - name: Remove old release
-        uses: dev-drprasad/delete-tag-and-release@v1.0
+        uses: ClementTsang/delete-tag-and-release@v0.3.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: continuous
           delete_release: true
-          github_token: ${{ secrets.REPO_TOKEN }}
-          repo: Velaron/cs16-client
+          repo: ${{ env.GITHUB_REPOSITORY }}
       - name: Repackage binaries
         run: |
           mv android/app-debug-signed.apk cs16-client.apk
