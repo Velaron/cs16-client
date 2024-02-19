@@ -10,24 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
       - name: Fetch YaPB Graphs from DB
         run: scripts/yapb_graph_dl.sh
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
           cache: gradle
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v3
       - name: Build
         run: ./gradlew assembleDebug
       - name: Sign APK
-        uses: r0adkll/sign-android-release@v1
+        uses: noriban/sign-android-release@v5
         with:
           releaseDirectory: app/build/outputs/apk/debug
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
@@ -46,7 +46,7 @@ jobs:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Checkout sources
-  #       uses: actions/checkout@v3
+  #       uses: actions/checkout@v4
   #       with:
   #         fetch-depth: 0
   #         submodules: recursive
@@ -61,7 +61,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
@@ -101,7 +101,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
@@ -142,7 +142,7 @@ jobs:
     needs: [android, windows, linux]
     steps:
       - name: Fetch artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
       - name: Remove old release
         uses: dev-drprasad/delete-tag-and-release@v1.0
         with:
@@ -193,8 +193,8 @@ jobs:
       - name: Upload new release
         uses: svenstaro/upload-release-action@v2
         with:
-          repo_name: Velaron/cs16-client
-          repo_token: ${{ secrets.REPO_TOKEN }}
+          repo_name: ${{ env.GITHUB_REPOSITORY }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           file_glob: true
           file: cs16-client*
           tag: continuous
