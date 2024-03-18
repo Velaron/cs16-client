@@ -14,6 +14,8 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+      - name: Install YaPB Extras
+        run: mv 3rdparty/yapb/cfg/addons 3rdparty/cs16client-extras
       - name: Fetch YaPB Graphs from DB
         run: scripts/yapb_graph_dl.sh
       - name: Setup Java
