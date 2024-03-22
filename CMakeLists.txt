@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 project(cs16-client)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+set(EXTRAS_DIR "${CMAKE_CURRENT_BINARY_DIR}/extras")
 
 include(LibraryNaming)
-include(ExternalProject)
+# include(ExternalProject)
 
 option(BUILD_CLIENT "Build client library." ON)
 option(BUILD_MAINUI "Build menu library." ON)
@@ -56,6 +57,31 @@ if(BUILD_MAINUI)
 	add_subdirectory(3rdparty/mainui_cpp)
 endif()
 
-set(CPACK_GENERATOR "ZIP")
+# ugly and not performant but cmake is what it is
+if(NOT ANDROID)
+	add_custom_command(OUTPUT ${EXTRAS_DIR}
+		COMMAND ${CMAKE_COMMAND} -E make_directory "${EXTRAS_DIR}")
+
+	add_custom_target(pack_extras ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/cs16client-extras" "${EXTRAS_DIR}"
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yapb/cfg/addons" "${EXTRAS_DIR}"
+		COMMAND ${CMAKE_COMMAND} -E tar cf "${EXTRAS_DIR}.pk3" --format=zip .
+		WORKING_DIRECTORY "${EXTRAS_DIR}"
+		DEPENDS "${EXTRAS_DIR}")
+
+	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/extras.pk3" DESTINATION "${GAME_DIR}/")
+endif()
+
+if(WIN32)
+	set(CPACK_GENERATOR "ZIP")
+	set(CPACK_PACKAGE_FILE_NAME "CS16Client-${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
+else()
+	set(CPACK_GENERATOR "TGZ")
+	set(CPACK_PACKAGE_FILE_NAME "CS16Client-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+endif()
+
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
+
 include(CPack)

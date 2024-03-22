@@ -14,8 +14,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-      - name: Install YaPB Extras
-        run: mv 3rdparty/yapb/cfg/addons 3rdparty/cs16client-extras
       - name: Fetch YaPB Graphs from DB
         run: scripts/yapb_graph_dl.sh
       - name: Setup Java
@@ -41,7 +39,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: android
+          name: Android
           path: app/build/outputs/apk/debug/app-debug-signed.apk
   # psvita:
   #   name: PS Vita
@@ -80,20 +78,14 @@ jobs:
       - name: Build
         run: cmake --build .
         working-directory: build
-      - name: Generate extras.pk3
-        run: Compress-Archive -Path 3rdparty/cs16client-extras/* -Destination build/extras.pk3 -CompressionLevel NoCompression
+      - name: Package
+        run: cpack --config CPackConfig.cmake
+        working-directory: build
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: win32-${{ matrix.arch }}
-          path: |
-            build/3rdparty/ReGameDLL_CS/regamedll/mp.dll
-            build/3rdparty/ReGameDLL_CS/regamedll/mp_amd64.dll
-            build/3rdparty/mainui_cpp/menu.dll
-            build/3rdparty/mainui_cpp/menu_amd64.dll
-            build/cl_dll/client.dll
-            build/cl_dll/client_amd64.dll
-            build/extras.pk3
+          name: ${{ runner.os }}-${{ matrix.arch }}
+          path: build/*.zip
   linux:
     name: Linux
     runs-on: ubuntu-latest
@@ -115,29 +107,18 @@ jobs:
             libstdc++6:i386 gcc-multilib g++-multilib cmake \
             ninja-build libfontconfig-dev:i386 libfontconfig-dev
       - name: Configure project
-        run: |
-          if [[ ${{ matrix.arch }} == i386 ]]; then
-            export CC="gcc -m32"
-            export CXX="g++ -m32"
-          fi
-          cmake --preset "linux-release-${{ matrix.arch }}"
+        run: cmake --preset "linux-release-${{ matrix.arch }}"
       - name: Build
         run: cmake --build .
         working-directory: build
-      - name: Generate extras.pk3
-        run: zip -0 -r build/extras.pk3 3rdparty/cs16client-extras
+      - name: Package
+        run: cpack --config CPackConfig.cmake
+        working-directory: build
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-${{ matrix.arch }}
-          path: |
-            build/3rdparty/ReGameDLL_CS/regamedll/cs.so
-            build/3rdparty/ReGameDLL_CS/regamedll/cs_amd64.so
-            build/3rdparty/mainui_cpp/menu.so
-            build/3rdparty/mainui_cpp/menu_amd64.so
-            build/cl_dll/client.so
-            build/cl_dll/client_amd64.so
-            build/extras.pk3
+          name: ${{ runner.os }}-${{ matrix.arch }}
+          path: build/*.tar.gz
   release:
     name: Release
     runs-on: ubuntu-latest
@@ -153,40 +134,12 @@ jobs:
           tag_name: continuous
           delete_release: true
           repo: ${{ env.GITHUB_REPOSITORY }}
-      - name: Repackage binaries
+      - name: Prepare release
         run: |
-          mv android/app-debug-signed.apk cs16-client.apk
+          mv Android/app-debug-signed.apk CS16Client-Android.apk
 
-          mkdir -p cstrike/{dlls,cl_dlls}
-          mv win32-x86/3rdparty/ReGameDLL_CS/regamedll/mp.dll cstrike/dlls
-          mv win32-x86/3rdparty/mainui_cpp/menu.dll cstrike/cl_dlls
-          mv win32-x86/cl_dll/client.dll cstrike/cl_dlls
-          mv win32-x86/extras.pk3 cstrike
-          zip -r cs16-client_win32_x86.zip cstrike/
-          rm -r cstrike
-
-          mkdir -p cstrike/{dlls,cl_dlls}
-          mv win32-amd64/3rdparty/ReGameDLL_CS/regamedll/mp_amd64.dll cstrike/dlls
-          mv win32-amd64/3rdparty/mainui_cpp/menu_amd64.dll cstrike/cl_dlls
-          mv win32-amd64/cl_dll/client_amd64.dll cstrike/cl_dlls
-          mv win32-amd64/extras.pk3 cstrike
-          zip -r cs16-client_win32_amd64.zip cstrike/
-          rm -r cstrike
-
-          mkdir -p cstrike/{dlls,cl_dlls}
-          mv linux-i386/3rdparty/ReGameDLL_CS/regamedll/cs.so cstrike/dlls
-          mv linux-i386/3rdparty/mainui_cpp/menu.so cstrike/cl_dlls
-          mv linux-i386/cl_dll/client.so cstrike/cl_dlls
-          mv linux-i386/extras.pk3 cstrike
-          tar -czvf cs16-client_linux_i386.tar.gz cstrike/
-          rm -r cstrike
-
-          mkdir -p cstrike/{dlls,cl_dlls}
-          mv linux-amd64/3rdparty/ReGameDLL_CS/regamedll/cs_amd64.so cstrike/dlls
-          mv linux-amd64/3rdparty/mainui_cpp/menu_amd64.so cstrike/cl_dlls
-          mv linux-amd64/cl_dll/client_amd64.so cstrike/cl_dlls
-          mv linux-amd64/extras.pk3 cstrike
-          tar -czvf cs16-client_linux_amd64.tar.gz cstrike/
+          mv */*.zip .
+          mv */*.tar.gz .
 
           sleep 60s
       - name: Purge artifacts
@@ -199,7 +152,7 @@ jobs:
           repo_name: ${{ env.GITHUB_REPOSITORY }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file_glob: true
-          file: cs16-client*
+          file: CS16Client-*
           tag: continuous
           overwrite: true
           prerelease: true

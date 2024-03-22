@@ -1,8 +1,8 @@
 {
-    "version": 2,
+    "version": 3,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 19,
+        "minor": 21,
         "patch": 0
     },
     "configurePresets": [
@@ -55,17 +55,20 @@
         },
         {
             "name": "linux-release-amd64",
-            "inherits": "linux-release-i386",
             "displayName": "Linux Release - amd64",
             "generator": "Ninja",
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
-            }
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            },
+            "binaryDir": "${sourceDir}/build"
         },
         {
             "name": "linux-release-i386",
-            "displayName": "Linux Release - x86",
+            "displayName": "Linux Release - i386",
             "generator": "Ninja",
             "architecture": {
                 "value": "x86",
@@ -74,7 +77,8 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             },
-            "binaryDir": "${sourceDir}/build"
+            "binaryDir": "${sourceDir}/build",
+            "toolchainFile": "${sourceDir}/toolchains/i386-linux-gnu.cmake"
         }
     ]
 }
