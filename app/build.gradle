@@ -62,7 +62,7 @@ android {
     sourceSets {
         main {
             assets {
-                srcDirs += ["${project.projectDir}/../3rdparty/cs16client-extras", "${project.projectDir}/../3rdparty/yapb/cfg/addons"]
+                srcDirs += ["${project.projectDir}/../3rdparty/cs16client-extras", "${project.projectDir}/../3rdparty/yapb/cfg"]
             }
         }
     }
