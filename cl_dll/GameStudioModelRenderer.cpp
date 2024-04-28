@@ -766,12 +766,6 @@ int CGameStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t *pplaye
 
 	m_pplayer = pplayer;
 
-	if( g_iUser1 == OBS_IN_EYE && g_iUser2 == pplayer->number )
-		return 0;
-
-	if( !g_iUser1 && !cam_thirdperson && gEngfuncs.pEventAPI->EV_IsLocal( pplayer->number - 1 ))
-		return 0;
-
 	if (m_bLocal && IEngineStudio.GetCurrentEntity() == gEngfuncs.GetLocalPlayer())
 		isLocalPlayer = true;
 
