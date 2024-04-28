@@ -80,8 +80,7 @@ int CHudMenu :: Draw( float flTime )
 	{
 		if ( m_flShutoffTime <= gHUD.m_flTime )
 		{  // times up, shutoff
-			m_fMenuDisplayed = 0;
-			m_iFlags &= ~HUD_DRAW;
+			UserCmd_OldStyleMenuClose();
 			return 1;
 		}
 	}
@@ -130,9 +129,7 @@ void CHudMenu :: SelectMenuItem( int menu_item )
 		sprintf( szbuf, "menuselect %d\n", menu_item );
 		ClientCmd( szbuf );
 
-		// remove the menu
-		m_fMenuDisplayed = 0;
-		m_iFlags &= ~HUD_DRAW;
+		UserCmd_OldStyleMenuClose();
 	}
 }
 
@@ -163,7 +160,6 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 	{
 		m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
 		m_iFlags &= ~HUD_DRAW;
-		ClientCmd("touch_removebutton _menu_*");
 		return 1;
 	}
 
@@ -239,7 +235,6 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 
 int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
-	UserCmd_OldStyleMenuClose();
 	gMobileAPI.pfnTouchRemoveButton("_menu_*");
 	return 1;
 }
@@ -334,9 +329,8 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 		szCmd = "exec touch/numerical_menu.cfg";
 		break;
 	default:
-		szCmd = "touch_removebutton _menu_*"; // back to the default touch page
-		m_fMenuDisplayed = 0;
-		break;
+		UserCmd_OldStyleMenuClose();
+		return;
 	}
 
 	m_fMenuDisplayed = 1;
