@@ -238,6 +238,7 @@ void CHud :: Init( void )
 	CVAR_CREATE( "numericalmenu_clientonly", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "checkscoreboard", "1", FCVAR_ARCHIVE );
 	cscl_currentmap = CVAR_CREATE( "cscl_currentmap", "", 0 );
+	cscl_mapprefix = CVAR_CREATE( "cscl_mapprefix", "", 0 );
 	cscl_currentmoney = CVAR_CREATE( "cscl_currentmoney", "0", 0 );
 	CVAR_CREATE( "teammenu_showscores", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "menu_bg_fill", "0", FCVAR_ARCHIVE );
