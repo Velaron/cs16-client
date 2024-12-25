@@ -153,22 +153,6 @@ int CHudSayText :: Draw( float flTime )
 	return 1;
 }
 
-enum
-{
-	CHAT_CT = 0,
-	CHAT_T,
-	CHAT_CT_DEAD,
-	CHAT_T_DEAD,
-	CHAT_SPEC,
-	CHAT_ALL,
-	CHAT_ALLDEAD,
-	CHAT_ALLSPEC,
-	CHAT_NAME_CHANGE,
-	CHAT_T_LOC,
-	CHAT_CT_LOC,
-	CHAT_LAST,
-};
-
 struct
 {
 	const char key[32];
@@ -233,15 +217,20 @@ struct
 		"#Cstrike_Chat_CT_Loc",
 		"\x02*(Counter-Terrorist) %s @ %s : %s",
 		3, true, true, true
-	}
+	},
+	{
+		"#Spec_PlayerItem",
+		"%s",
+		1, true, false, false,
+	},
 };
 
 int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 {
 	BufferReader reader( pszName, pbuf, iSize );
-	int i = CHAT_LAST, client_index, argc, numArgs;		// the client who spoke the message
+	int client_index, argc, numArgs;		// the client who spoke the message
 	char *arg, *fmt, *argv[3] = {};
-	const char *fmt_tran;
+	const char *fmt_tran = nullptr;
 	bool allowDead, replaceFirstArgToName, swap;
 	int len;
 
@@ -268,9 +257,9 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	// see if argv[0] is translatable
 	if( fmt[0] == '#' )
 	{
-		for( i = CHAT_CT; i < CHAT_LAST; i++ )
+		for( int i = 0; i < sizeof( sayTextFmt ) / sizeof( sayTextFmt[0] ); i++ )
 		{
-			if( !strcmp( fmt, sayTextFmt[i].key ) )
+			if( !strcmp( fmt, sayTextFmt[i].key ))
 			{
 				fmt_tran = (char*)sayTextFmt[i].value;
 				allowDead = sayTextFmt[i].allowDead;
@@ -287,7 +276,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	}
 
 	// no translations
-	if( i == CHAT_LAST )
+	if( !fmt_tran )
 	{
 		fmt_tran = fmt;
 		numArgs = argc;
@@ -339,7 +328,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	}
 
 	SayTextPrint( dst, strlen(dst), client_index );
-	
+
 	delete[] fmt;
 
 	for( int i = 0; i < argc; i++ )
