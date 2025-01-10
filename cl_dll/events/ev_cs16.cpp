@@ -721,8 +721,8 @@ void RemoveBody( TEMPENTITY *te, float frametime, float current_time )
 
 void HitBody( TEMPENTITY *ent, pmtrace_s *ptr )
 {
-	if ( ptr->plane.normal.z > 0.0 )
-    	ent->flags |= 0x200000;
+	if ( ptr->plane.normal.z > 0.0f )
+    	ent->flags |= FTENT_BODYGRAVITY;
 }
 
 TEMPENTITY *g_DeadPlayerModels[64];
@@ -735,7 +735,7 @@ void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAn
 
 	if( model )
 	{
-		model->flags = (FTENT_CLIENTCUSTOM|FTENT_COLLIDEALL|FTENT_SPRANIMATE|FTENT_FADEOUT|FTENT_COLLIDEWORLD|0x100000);
+		model->flags = (FTENT_CLIENTCUSTOM|FTENT_COLLIDEALL|FTENT_SPRANIMATE|FTENT_FADEOUT|FTENT_COLLIDEWORLD|FTENT_BODYTRACE);
 		model->frameMax = 255.0f;
 		model->entity.curstate.framerate = 1.0f;
 		model->entity.curstate.animtime = flAnimTime;

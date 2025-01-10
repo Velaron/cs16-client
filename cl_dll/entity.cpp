@@ -397,6 +397,13 @@ void DLLEXPORT HUD_TempEntUpdate (
 	TEMPENTITY	*pTemp, *pnext, *pprev;
 	float		gravity, gravitySlow, life, fastFreq;
 
+	// g_flGravity = cl_gravity;
+
+/*
+	if ( g_pParticleMan )
+		g_pParticleMan->SetVariables( cl_gravity, vAngles );
+*/
+
 	// Nothing to simulate
 	if ( !*ppTempEntActive )		
 		return;
@@ -419,7 +426,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 	pTemp = *ppTempEntActive;
 
 	// !!! Don't simulate while paused....  This is sort of a hack, revisit.
-	if ( frametime <= 0 )
+	if ( frametime <= 0.0 )
 	{
 		while ( pTemp )
 		{
@@ -545,7 +552,6 @@ void DLLEXPORT HUD_TempEntUpdate (
 
 					if ( pTemp->flags & 0x100000 )
 					{
-						// cs 1.6 corpse stuff
 						pTemp = pnext;
 						continue;
 					}
@@ -582,7 +588,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 				VectorCopy( pTemp->entity.angles, pTemp->entity.latched.prevangles );
 			}
 
-			if ( pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD) && !( pTemp->flags & 0x200000 ))
+			if ( pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD) && !( pTemp->flags & FTENT_BODYGRAVITY ))
 			{
 				vec3_t	traceNormal;
 				float	traceFraction = 1;
@@ -615,10 +621,25 @@ void DLLEXPORT HUD_TempEntUpdate (
 				else if ( pTemp->flags & FTENT_COLLIDEWORLD )
 				{
 					pmtrace_t pmtrace;
+					Vector *p_vEndPos;
 					
 					gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 
-					gEngfuncs.pEventAPI->EV_PlayerTrace( pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace );					
+					if ( pTemp->flags & FTENT_BODYTRACE )
+					{
+						Vector vVel, vEndPos;
+
+						VectorCopy( pTemp->entity.baseline.velocity, vVel );
+						VectorNormalize( vVel );
+						VectorMA( pTemp->entity.baseline.velocity, 36.0f, vVel, vEndPos );
+						p_vEndPos = &vEndPos;
+					}
+					else
+					{
+						p_vEndPos = &pTemp->entity.origin;
+					}
+
+					gEngfuncs.pEventAPI->EV_PlayerTrace( pTemp->entity.prevstate.origin, *p_vEndPos, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace );
 
 					if ( pmtrace.fraction != 1 )
 					{
@@ -695,8 +716,8 @@ void DLLEXPORT HUD_TempEntUpdate (
 
 							VectorScale( pTemp->entity.baseline.origin, damp, pTemp->entity.baseline.origin );
 
-							if ( !( pTemp->flags & 0x100000 ))
-								VectorScale( pTemp->entity.angles, 0.9, pTemp->entity.angles );
+							if ( !( pTemp->flags & FTENT_BODYTRACE ))
+								VectorScale( pTemp->entity.angles, 0.9f, pTemp->entity.angles );
 						}
 					}
 				}
@@ -719,7 +740,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 				gEngfuncs.pEfxAPI->R_RocketTrail (pTemp->entity.prevstate.origin, pTemp->entity.origin, 1);
 			}
 
-			if ( !( pTemp->flags & 0x200000 ))
+			if ( !( pTemp->flags & FTENT_BODYGRAVITY ))
 			{
 				if ( pTemp->flags & FTENT_GRAVITY )
 					pTemp->entity.baseline.origin[2] += gravity;
