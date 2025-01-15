@@ -7,9 +7,6 @@
 [submodule "3rdparty/ReGameDLL_CS"]
 	path = 3rdparty/ReGameDLL_CS
 	url = https://github.com/Velaron/ReGameDLL_CS
-[submodule "3rdparty/openvgui"]
-	path = 3rdparty/openvgui
-	url = https://github.com/Velaron/openvgui
 [submodule "3rdparty/miniutl"]
 	path = 3rdparty/miniutl
 	url = https://github.com/FWGS/MiniUTL
