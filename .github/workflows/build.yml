@@ -29,7 +29,7 @@ jobs:
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/build/outputs/apk/debug
+          releaseDirectory: android/app/build/outputs/apk/debug
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Android
-          path: app/build/outputs/apk/debug/app-debug-signed.apk
+          path: android/app/build/outputs/apk/debug/app-debug-signed.apk
   # psvita:
   #   name: PS Vita
   #   runs-on: ubuntu-latest

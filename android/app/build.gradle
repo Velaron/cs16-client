@@ -5,34 +5,44 @@ import java.time.temporal.ChronoUnit
 apply plugin: 'com.android.application'
 
 android {
-    ndkVersion '26.1.10909125'
     namespace 'su.xash.cs16client'
-
-    packagingOptions {
-        jniLibs {
-            useLegacyPackaging = true
-        }
-    }
+    ndkVersion = "27.2.12479018"
+    compileSdk 35
 
     defaultConfig {
-        applicationId 'su.xash'
-        applicationIdSuffix 'cs16client'
+        applicationId 'su.xash.cs16client'
         versionName '1.35'
         versionCode getBuildNum()
-        minSdkVersion 19
-        targetSdk 34
-        compileSdk 34
+        minSdkVersion 21
+        targetSdk 35
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     externalNativeBuild {
         cmake {
             version '3.22.1'
+            path file('../../CMakeLists.txt')
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    lint {
+        abortOnError false
+    }
+
+    androidResources {
+        noCompress += ""
+    }
+
+    sourceSets {
+        main {
+            assets {
+                srcDirs += ["${project.projectDir}/../../3rdparty/cs16client-extras", "${project.projectDir}/../../3rdparty/yapb/cfg"]
+            }
+        }
     }
 
     buildTypes {
@@ -47,28 +57,6 @@ android {
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
-    }
-
-    externalNativeBuild {
-        cmake {
-            path file('../CMakeLists.txt')
-        }
-    }
-
-    lint {
-        abortOnError false
-    }
-
-    sourceSets {
-        main {
-            assets {
-                srcDirs += ["${project.projectDir}/../3rdparty/cs16client-extras", "${project.projectDir}/../3rdparty/yapb/cfg"]
-            }
-        }
-    }
-
-    androidResources {
-        noCompress += ''
     }
 }
 
