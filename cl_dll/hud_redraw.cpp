@@ -85,8 +85,6 @@ int CHud :: Redraw( float flTime, int intermission )
 	m_flTimeDelta = (double)m_flTime - m_fOldTime;
 	static int m_flShotTime = 0;
 
-	m_cvarChecker.Run( flTime );
-
 	// Clock was reset, reset delta
 	if ( m_flTimeDelta < 0 )
 		m_flTimeDelta = 0;

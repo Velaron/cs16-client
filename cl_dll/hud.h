@@ -35,7 +35,6 @@
 
 #include "csprite.h"
 #include "cvardef.h"
-#include "cvar_checker.h"
 
 #define MIN_ALPHA	 100	
 #define	HUDELEM_ACTIVE	1
@@ -1078,8 +1077,6 @@ private:
 	cvar_t *hud_draw;
 	cvar_t *default_fov;
 	cvar_t *zoom_sens_ratio;
-
-	CCVarChecker m_cvarChecker;
 };
 
 extern CHud gHUD;

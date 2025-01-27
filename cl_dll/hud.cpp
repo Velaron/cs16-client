@@ -268,13 +268,6 @@ void CHud :: Init( void )
 		cl_fog_b = CVAR_CREATE( "cl_fog_b", "0", 0 );
 	}
 
-	m_cvarChecker.Init();
-	m_cvarChecker.AddToCheckList( "cl_lw", GetGameType() == GAME_CZERODS ? 0.0f : 1.0f );
-	m_cvarChecker.AddToCheckList( "cl_lc", 1.0f );
-	m_cvarChecker.AddToCheckList( "cl_nopred", 0.0f );
-	m_cvarChecker.AddToCheckList( "sv_skipshield", 1.0f );
-	m_cvarChecker.AddToCheckList( "viewsize", 140.0f );
-
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
 
 	m_iLogo = 0;
