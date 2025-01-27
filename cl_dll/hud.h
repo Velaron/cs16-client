@@ -49,11 +49,13 @@ public:
 
 enum 
 { 
-	MAX_PLAYERS = 33, // including the bomb
-	MAX_TEAMS = 3,
+	MAX_PLAYERS = 64,
+	MAX_TEAMS = 64,
 	MAX_TEAM_NAME = 16,
-	MAX_HOSTAGES = 24,
+	MAX_LOCATION_NAME = 32
 };
+
+#define MAX_HOSTAGES 24
 
 #define PLAYERMODEL_PLAYER	0
 #define PLAYERMODEL_LEET	1
@@ -410,7 +412,9 @@ struct extra_player_info_t
 	int radarflashes;
 	float radarflashtime;
 	float radarflashtimedelta;
-	char location[32];
+	char location[MAX_LOCATION_NAME];
+	int sb_health;
+	int sb_account;
 };
 
 struct team_info_t 
@@ -1050,6 +1054,9 @@ public:
 	char m_szServerName[64];
 
 	int m_WhiteTex;
+
+	cvar_t *m_pShowHealth;
+	cvar_t *m_pShowMoney;
 
 private:
 	void SetGameType();

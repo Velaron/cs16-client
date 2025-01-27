@@ -69,6 +69,8 @@ int CHudHealth::Init(void)
 	HOOK_MESSAGE(gHUD.m_Health, Damage);
 	HOOK_MESSAGE(gHUD.m_Health, ScoreAttrib);
 	HOOK_MESSAGE(gHUD.m_Health, ClCorpse);
+	HOOK_MESSAGE( gHUD.m_Health, HealthInfo );
+	HOOK_MESSAGE( gHUD.m_Health, Account );
 
 	m_iHealth = 100;
 	m_fFade = 0;
@@ -519,4 +521,30 @@ bool CL_IsDead()
 	if( gHUD.m_Health.m_iHealth <= 0 )
 		return true;
 	return false;
+}
+
+int CHudHealth::MsgFunc_HealthInfo( const char *pszName, int iSize, void *buf )
+{
+	BufferReader reader( pszName, buf, iSize );
+
+	int idx = reader.ReadByte();
+	int health = reader.ReadLong();
+
+	if ( idx < MAX_PLAYERS )
+		g_PlayerExtraInfo[idx].sb_health = health;
+
+	return 1;
+}
+
+int CHudHealth::MsgFunc_Account( const char *pszName, int iSize, void *buf )
+{
+	BufferReader reader( pszName, buf, iSize );
+
+	int idx = reader.ReadByte();
+	int account = reader.ReadLong();
+
+	if ( idx < MAX_PLAYERS )
+		g_PlayerExtraInfo[idx].sb_account = account;
+
+	return 1;
 }

@@ -260,6 +260,9 @@ void CHud :: Init( void )
 	cl_weapon_wallpuff = CVAR_CREATE( "cl_weapon_wallpuff", "1", FCVAR_ARCHIVE );
 	zoom_sens_ratio = CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
 
+	m_pShowHealth = CVAR_CREATE( "scoreboard_showhealth", "1", FCVAR_ARCHIVE );
+	m_pShowMoney = CVAR_CREATE( "scoreboard_showmoney", "1", FCVAR_ARCHIVE );
+
 	if ( gEngfuncs.pfnGetCvarFloat( "developer" ) > 0.0f )
 	{
 		cl_fog_density = CVAR_CREATE( "cl_fog_density", "0", 0 );

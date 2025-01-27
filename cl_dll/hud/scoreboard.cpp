@@ -45,12 +45,18 @@ int xstart, xend;
 int ystart, yend;
 // relative to the side of the scoreboard
 inline int NAME_POS_START()		{ return xstart + 15; }
-inline int NAME_POS_END()		{ return xend - 210; }
+inline int NAME_POS_END()		{ return xend - 350; }
 // 10 pixels gap
-inline int ATTRIB_POS_START()	{ return xend - 210; }
-inline int ATTRIB_POS_END()		{ return xend - 150; }
+inline int ATTRIB_POS_START()	{ return xend - 350; }
+inline int ATTRIB_POS_END()		{ return xend - 290; }
 // 10 pixels gap
-inline int KILLS_POS_START()	{ return xend - 140; }
+inline int HP_POS_START()		{ return xend - 280; }
+inline int HP_POS_END()			{ return xend - 250; }
+// 10 pixels gap
+inline int MONEY_POS_START()	{ return xend - 240; }
+inline int MONEY_POS_END()		{ return xend - 180; }
+// 10 pixels gap
+inline int KILLS_POS_START()	{ return xend - 170; }
 inline int KILLS_POS_END()		{ return xend - 110; }
 // 10 pixels gap
 inline int DEATHS_POS_START()	{ return xend - 100; }
@@ -104,6 +110,12 @@ void CHudScoreboard :: InitHUDData( void )
 	m_iPlayerNum = 0;
 	m_iNumTeams = 0;
 	memset( g_TeamInfo, 0, sizeof g_TeamInfo );
+
+	for ( int i = 1; i <= MAX_PLAYERS; i++ )
+	{
+		g_PlayerExtraInfo[i].sb_health = -1;
+		g_PlayerExtraInfo[i].sb_account = -1;
+	}
 
 	m_iFlags &= ~HUD_DRAW;  // starts out inactive
 
@@ -164,7 +176,9 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 		strncpy( ServerName, gHUD.m_Teamplay ? "TEAMS" : "PLAYERS", 80 );
 
 	DrawUtils::DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), ServerName, 255, 140, 0 );
-	DrawUtils::DrawHudStringReverse( KILLS_POS_END(), ypos, 0, "KILLS", 255, 140, 0 );
+	DrawUtils::DrawHudStringReverse( HP_POS_END(), ypos, 0, "HP", 255, 140, 0 );
+	DrawUtils::DrawHudString( MONEY_POS_START(), ypos, MONEY_POS_END(), "MONEY", 255, 140, 0 );
+	DrawUtils::DrawHudStringReverse( KILLS_POS_END(), ypos, KILLS_POS_START(), "KILLS", 255, 140, 0 );
 	DrawUtils::DrawHudString( DEATHS_POS_START(), ypos, DEATHS_POS_END(), "DEATHS", 255, 140, 0 );
 	DrawUtils::DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), "PING", 255, 140, 0 );
 
@@ -397,6 +411,26 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 		else
 		{
 			DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), gEngfuncs.PlayerInfo_ValueForKey( best_player, "cscl_ver" ),  r, g, b );
+		}
+
+		if ( g_PlayerExtraInfo[best_player].sb_health >= 0 && !g_PlayerExtraInfo[best_player].dead )
+		{
+			if ( gHUD.m_pShowHealth->value )
+			{
+				static char buf[64];
+				sprintf( buf, "%d", g_PlayerExtraInfo[best_player].sb_health );
+				DrawUtils::DrawHudStringReverse( HP_POS_END(), ypos, HP_POS_START(), buf, r, g, b );
+			}
+		}
+
+		if ( g_PlayerExtraInfo[best_player].sb_account >= 0 )
+		{
+			if ( gHUD.m_pShowMoney->value )
+			{
+				static char buf[64];
+				sprintf( buf, "$%d", g_PlayerExtraInfo[best_player].sb_account );
+				DrawUtils::DrawHudString( MONEY_POS_START(), ypos, MONEY_POS_END(), buf, r, g, b );
+			}
 		}
 
 		// draw kills (right to left)

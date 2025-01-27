@@ -111,6 +111,8 @@ public:
 	int MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_ClCorpse(const char *pszName,  int iSize, void *pbuf);
+	int MsgFunc_HealthInfo( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_Account( const char *pszName, int iSize, void *pbuf );
 
 	int m_iHealth;
 	int m_HUD_dmg_bio;
