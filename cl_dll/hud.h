@@ -132,7 +132,7 @@ struct HUDLIST {
 //
 //-----------------------------------------------------
 //
-//#include "voice_status.h"
+#include "voice_status.h"
 #include "hud_spectator.h"
 
 
@@ -349,13 +349,14 @@ public:
 	int m_iPlayerNum;
 	int m_iNumTeams;
 
+	bool m_bForceDraw; // if called by showscoreboard2
+	bool m_bShowscoresHeld;
+
 private:
 	int m_iLastKilledBy;
 	int m_fLastKillTime;
 	RGBA m_colors;
 	bool m_bDrawStroke;
-	bool m_bForceDraw; // if called by showscoreboard2
-	bool m_bShowscoresHeld;
 	cvar_t *cl_showpacketloss;
 	cvar_t *cl_showplayerversion;
 };

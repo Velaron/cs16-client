@@ -274,6 +274,8 @@ void DLLEXPORT HUD_Frame( double time )
 #ifdef _CS16CLIENT_ENABLE_GSRC_SUPPORT
 	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
 #endif
+
+	GetClientVoice()->Frame( time );
 }
 
 
@@ -287,7 +289,23 @@ Called when a player starts or stops talking.
 
 void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
 {
-	gHUD.m_Radio.Voice( entindex, bTalking );
+	// gHUD.m_Radio.Voice( entindex, bTalking );
+
+	if ( entindex >= 0 && entindex < gEngfuncs.GetMaxClients() )
+	{
+		if ( bTalking )
+		{
+			g_PlayerExtraInfo[entindex].radarflashtime = gHUD.m_flTime;
+			g_PlayerExtraInfo[entindex].radarflashes = 99999;
+		}
+		else
+		{
+			g_PlayerExtraInfo[entindex].radarflashtime = -1.0f;
+			g_PlayerExtraInfo[entindex].radarflashes = 0;
+		}
+	}
+
+	GetClientVoice()->UpdateSpeakerStatus( entindex, bTalking );
 }
 
 /*
@@ -479,32 +497,28 @@ public:
 	}
 
 	// ingame voice manipulation
-	virtual bool IsPlayerGameVoiceMuted(int playerIndex)
+	virtual bool IsPlayerGameVoiceMuted( int playerIndex )
 	{
-		/*if (GetClientVoiceMgr())
-			return GetClientVoiceMgr()->IsPlayerBlocked(playerIndex);*/
+		if ( GetClientVoice() )
+			return GetClientVoice()->IsPlayerBlocked( playerIndex );
+
 		return false;
 	}
 
-	virtual void MutePlayerGameVoice(int playerIndex)
+	virtual void MutePlayerGameVoice( int playerIndex )
 	{
-		/*if (GetClientVoiceMgr())
+		if ( GetClientVoice() )
 		{
-			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, true);
-		}*/
+			GetClientVoice()->SetPlayerBlockedState( playerIndex, true );
+		}
 	}
 
-	virtual void UnmutePlayerGameVoice(int playerIndex)
+	virtual void UnmutePlayerGameVoice( int playerIndex )
 	{
-		/*if (GetClientVoiceMgr())
+		if ( GetClientVoice() )
 		{
-			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, false);
-		}*/
-	}
-
-	virtual const char *Localize( const char *string )
-	{
-		return ::Localize( string );
+			GetClientVoice()->SetPlayerBlockedState( playerIndex, false );
+		}
 	}
 };
 

@@ -45,6 +45,56 @@ cvar_t *cl_fog_density;
 
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 
+// Team Colors
+int iNumberOfTeamColors = 3;
+int iTeamColors[3][3] =
+{
+	{ 204, 204, 204 }, // Spectators
+	{ 255, 64, 64 }, // CT's
+	{ 153, 204, 255 }  // T's
+};
+
+class CCStrikeVoiceStatusHelper : public IVoiceStatusHelper
+{
+public:
+	virtual void GetPlayerTextColor( int entindex, int color[3] )
+	{
+		color[0] = color[1] = color[2] = 255;
+
+		if ( entindex < MAX_PLAYERS )
+		{
+			int iTeam = g_PlayerExtraInfo[entindex].teamnumber;
+
+			if ( iTeam < 0 )
+			{
+				iTeam = 0;
+			}
+
+			iTeam = iTeam % iNumberOfTeamColors;
+
+			color[0] = iTeamColors[iTeam][0];
+			color[1] = iTeamColors[iTeam][1];
+			color[2] = iTeamColors[iTeam][2];
+		}
+	}
+
+	virtual void UpdateCursorState()
+	{
+		// gViewPort->UpdateCursorState();
+	}
+
+	virtual int GetAckIconHeight()
+	{
+		return gHUD.m_iFontHeight * 3 + 6;
+	}
+
+	virtual bool CanShowSpeakerLabels()
+	{
+		return !gHUD.m_Scoreboard.m_bForceDraw && !gHUD.m_Scoreboard.m_bShowscoresHeld;
+	}
+};
+static CCStrikeVoiceStatusHelper g_VoiceStatusHelper;
+
 wrect_t nullrc = { 0, 0, 0, 0 };
 float g_lastFOV = 0.0;
 const char *sPlayerModelFiles[12] =
@@ -186,7 +236,7 @@ char *Q_buildnum( void )
 
 int __MsgFunc_ADStop( const char *name, int size, void *buf ) { return 1; }
 int __MsgFunc_ItemStatus( const char *name, int size, void *buf ) { return 1; }
-int __MsgFunc_ReqState( const char *name, int size, void *buf ) { return 1; }
+// int __MsgFunc_ReqState( const char *name, int size, void *buf ) { return 1; }
 int __MsgFunc_ForceCam( const char *name, int size, void *buf ) { return 1; }
 int __MsgFunc_Spectator( const char *name, int size, void *buf ) { return 1; }
 
@@ -222,7 +272,7 @@ void CHud :: Init( void )
 
 	gEngfuncs.pfnHookUserMsg( "ADStop", __MsgFunc_ADStop );
 	gEngfuncs.pfnHookUserMsg( "ItemStatus", __MsgFunc_ItemStatus );
-	gEngfuncs.pfnHookUserMsg( "ReqState", __MsgFunc_ReqState );
+	// gEngfuncs.pfnHookUserMsg( "ReqState", __MsgFunc_ReqState );
 	gEngfuncs.pfnHookUserMsg( "ForceCam", __MsgFunc_ForceCam );
 	gEngfuncs.pfnHookUserMsg( "Spectator", __MsgFunc_Spectator );
 
@@ -331,6 +381,8 @@ void CHud :: Init( void )
 	m_ProgressBar.Init();
 	m_Menu.Init();
 	m_Scoreboard.Init();
+
+	GetClientVoice()->Init( &g_VoiceStatusHelper );
 
 	InitRain();
 

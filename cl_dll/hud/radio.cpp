@@ -142,7 +142,9 @@ int CHudRadio::MsgFunc_BotVoice( const char *pszName, int iSize, void *buf )
 	int enable   = reader.ReadByte();
 	int entIndex = reader.ReadByte();
 
-	Voice( entIndex, enable );
+	HUD_VoiceStatus( entIndex, enable );
+
+	// Voice( entIndex, enable );
 
 	return 1;
 }
