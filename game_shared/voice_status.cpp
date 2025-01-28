@@ -180,7 +180,7 @@ void CVoiceStatus::UpdateServerState( bool bForce )
 		m_bServerModEnable = bCVarModEnable;
 
 		char str[256];
-		_snprintf( str, sizeof( str ), "VModEnable %d", m_bServerModEnable );
+		sprintf( str, "VModEnable %d", m_bServerModEnable );
 		ServerCmd( str );
 
 		if ( gEngfuncs.pfnGetCvarFloat( "voice_clientdebug" ) )
@@ -317,7 +317,7 @@ void CVoiceStatus::UpdateSpeakerStatus( int entindex, bool bTalking )
 		if ( gEngfuncs.pfnGetCvarFloat( "voice_clientdebug" ) )
 		{
 			char msg[256];
-			_snprintf( msg, sizeof( msg ), "CVoiceStatus::UpdateSpeakerStatus: ent %d talking = %d\n", entindex, bTalking );
+			sprintf( msg, "CVoiceStatus::UpdateSpeakerStatus: ent %d talking = %d\n", entindex, bTalking );
 			gEngfuncs.pfnConsolePrint( msg );
 		}
 
