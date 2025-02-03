@@ -113,7 +113,7 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 
 int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, float scale, bool drawing )
 {
-	// iterate throug the string in reverse
+	// iterate through the string in reverse
 	for ( signed int i = strlen( szString ); i >= 0; i-- )
 	{
 		int next = xpos - gHUD.GetCharWidth((unsigned char)szString[i]); // variable-width fonts look cool

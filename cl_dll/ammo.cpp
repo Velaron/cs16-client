@@ -1312,20 +1312,19 @@ void CHudAmmo::DrawCrosshair()
 	}
 
 	// drawing
-#if 0
 	if( g_iXash )
-#else
-	if ( FALSE )
-#endif
 	{
-		gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
-
-		if( m_bAdditive )
+		if ( m_bAdditive )
 			gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 		else
 			gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
 
+		gEngfuncs.pTriAPI->Brightness( 1.0f );
 		gEngfuncs.pTriAPI->Color4ub( m_R, m_G, m_B, m_iAlpha );
+		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+
+		gRenderAPI.GL_SelectTexture( 0 );
+		gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
 
 		// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 		DrawUtils::Draw2DQuad( WEST_XPOS_R, EAST_WEST_YPOS_R,
@@ -1337,7 +1336,6 @@ void CHudAmmo::DrawCrosshair()
 		DrawUtils::Draw2DQuad( NORTH_SOUTH_XPOS_R, SOUTH_YPOS_R,
 							   NORTH_SOUTH_XPOS_R + 1, SOUTH_YPOS_R + iLength );
 		// gEngfuncs.pTriAPI->End( );
-
 	}
 	else if ( m_bAdditive )
 	{
@@ -1353,14 +1351,13 @@ void CHudAmmo::DrawCrosshair()
 		FillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
 		FillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
 	}
-	return;
 }
 
 void CHudAmmo::CalculateCrosshairSize()
 {
 	int size;
 
-	size = strtol( m_pClCrosshairSize->string, 0, 10 );
+	size = strtol( m_pClCrosshairSize->string, NULL, 10 );
 
 	if( size > 3 )
 	{

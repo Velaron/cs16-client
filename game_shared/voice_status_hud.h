@@ -98,10 +98,10 @@ public:
 		gRenderAPI.GL_Bind( 0, g_VoiceLabelIcon );
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
 		gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		DrawUtils::Draw2DQuad( x,
-		                       y + offset,
-		                       x + iconsize,
-		                       y + iconsize + offset );
+		DrawUtils::Draw2DQuad( x * gHUD.m_flScale,
+		                       ( y + offset ) * gHUD.m_flScale,
+		                       ( x + iconsize ) * gHUD.m_flScale,
+		                       ( y + iconsize + offset ) * gHUD.m_flScale );
 
 		int textx = x + iconsize + offset;
 		int texty = y + ( tall - gHUD.GetCharHeight() ) / 2;

@@ -430,13 +430,7 @@ void CHud :: VidInit( void )
 	
 	m_hsprLogo = 0;
 
-	m_flScale = CVAR_GET_FLOAT( "hud_scale" );
-
-	if( m_flScale < 1.0f )
-	{
-		gEngfuncs.Cvar_SetValue( "hud_scale", 1.0f );
-		m_flScale = 1.0f;
-	}
+	m_flScale = (float)TrueWidth / (float)ScreenWidth;
 
 	m_iRes = 640;
 

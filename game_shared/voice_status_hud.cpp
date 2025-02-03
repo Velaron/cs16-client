@@ -445,10 +445,10 @@ int CVoiceStatusHud::Draw( float flTime )
 		gRenderAPI.GL_Bind( 0, m_pLocalPlayerTalkIcon );
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
 		gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		DrawUtils::Draw2DQuad( m_LocalPlayerTalkIconXPos,
-		                       m_LocalPlayerTalkIconYPos,
-		                       m_LocalPlayerTalkIconXPos + m_LocalPlayerTalkIconXSize,
-		                       m_LocalPlayerTalkIconYPos + m_LocalPlayerTalkIconYSize );
+		DrawUtils::Draw2DQuad( m_LocalPlayerTalkIconXPos * gHUD.m_flScale,
+		                       m_LocalPlayerTalkIconYPos * gHUD.m_flScale,
+		                       ( m_LocalPlayerTalkIconXPos + m_LocalPlayerTalkIconXSize ) * gHUD.m_flScale,
+		                       ( m_LocalPlayerTalkIconYPos + m_LocalPlayerTalkIconYSize ) * gHUD.m_flScale );
 	}
 
 	for ( int i = 0; i < m_Labels.Count(); i++ )
