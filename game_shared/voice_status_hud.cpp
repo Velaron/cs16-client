@@ -136,8 +136,8 @@ void CVoiceLabel::SetPlayerName( const char *name )
 	if ( name )
 	{
 		// m_playerName = CloneString( name );
-		m_playerName = new char[sizeof( name )];
-		strncpy( m_playerName, name, sizeof( m_playerName ) );
+		m_playerName = new char[strlen( name ) + 1];
+		strcpy( m_playerName, name );
 		// m_playerName[sizeof( m_locationString ) - 1] = '\0';
 	}
 
