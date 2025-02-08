@@ -57,9 +57,12 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 {
 	char *szIt = (char *)str;
 	// draw the string until we hit the null character or a newline character
+	Con_UtfProcessChar( 0 );
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		int next = xpos + gHUD.GetCharWidth((unsigned char)*szIt); // variable-width fonts look cool
+		int ch = Con_UtfProcessChar( (unsigned char)*szIt );
+		if ( !ch ) continue;
+		int next = xpos + gHUD.GetCharWidth(ch); // variable-width fonts look cool
 		if ( next > iMaxX )
 			return xpos;
 
@@ -100,11 +103,10 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 		}
 		if ( g_iXash )
 		{
-			int c = (unsigned int)(unsigned char)*szIt;
-			xpos += gEngfuncs.pfnVGUI2DrawCharacterAdd( xpos, ypos, c, r, g, b, 0 );
+			xpos += gEngfuncs.pfnVGUI2DrawCharacterAdd( xpos, ypos, ch, r, g, b, 0 );
 		}	
 		else
-			xpos += TextMessageDrawChar( xpos, ypos, *szIt, r, g, b, scale );
+			xpos += TextMessageDrawChar( xpos, ypos, ch, r, g, b, scale );
 	}
 
 	return xpos;
@@ -113,10 +115,16 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 
 int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, float scale, bool drawing )
 {
+	// Maybe we can use the engine api to draw StringReverse?
+	// return gEngfuncs.pfnDrawStringReverse( xpos, ypos, szString, r, g, b );
+	
 	// iterate through the string in reverse
+	Con_UtfProcessChar( 0 );
 	for ( signed int i = strlen( szString ); i >= 0; i-- )
 	{
-		int next = xpos - gHUD.GetCharWidth((unsigned char)szString[i]); // variable-width fonts look cool
+		int ch = Con_UtfProcessChar( (unsigned char)szString[i] );
+		if ( !ch ) continue;
+		int next = xpos - gHUD.GetCharWidth(ch); // variable-width fonts look cool
 		if ( next < iMinX )
 			return xpos;
 		xpos = next;
@@ -157,7 +165,7 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 			}
 		}
 
-		TextMessageDrawChar( xpos, ypos, szString[i], r, g, b, scale );
+		TextMessageDrawChar( xpos, ypos, ch, r, g, b, scale );
 	}
 
 	return xpos;
