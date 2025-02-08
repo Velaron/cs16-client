@@ -241,7 +241,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 {
 	int i, j, length, width;
 	const char *pText;
-	unsigned char line[80];
+	int line[80];
 
 	pText = pMessage->pMessage;
 	// Count lines
@@ -251,6 +251,9 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 	length = 0;
 	width = 0;
 	m_parms.totalWidth = 0;
+
+	DrawUtils::Con_UtfProcessChar( 0 );
+
 	while ( *pText )
 	{
 		if ( *pText == '\n' )
@@ -259,9 +262,14 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			if ( width > m_parms.totalWidth )
 				m_parms.totalWidth = width;
 			width = 0;
+			DrawUtils::Con_UtfProcessChar( 0 );
 		}
 		else
-			width += gHUD.GetCharWidth((unsigned char)*pText);
+		{
+			int ch = DrawUtils::Con_UtfProcessChar( (unsigned char)*pText );
+			if ( ch )
+				width += gHUD.GetCharWidth( ch );
+		}
 		pText++;
 		length++;
 	}
@@ -276,16 +284,21 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 
 	MessageScanStart();
 
+	DrawUtils::Con_UtfProcessChar( 0 );
+
 	for ( i = 0; i < m_parms.lines; i++ )
 	{
 		m_parms.lineLength = 0;
 		m_parms.width = 0;
 		while ( *pText && *pText != '\n' && m_parms.lineLength < sizeof (line) - 1)
 		{
-			unsigned char c = *pText;
-			line[m_parms.lineLength] = c;
-			m_parms.width += gHUD.GetCharWidth(c);
-			m_parms.lineLength++;
+			int ch = DrawUtils::Con_UtfProcessChar( (unsigned char)*pText );
+			if (ch)
+			{
+				line[m_parms.lineLength] = ch;
+				m_parms.width += gHUD.GetCharWidth( ch );
+				m_parms.lineLength++;
+			}
 			pText++;
 		}
 		pText++;		// Skip LF

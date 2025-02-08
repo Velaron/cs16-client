@@ -175,6 +175,75 @@ public:
 		}
 	}
 
+	static inline int Con_UtfProcessChar( int in )
+	{
+		static int m = -1, k = 0; // multibyte state
+		static int uc = 0;        // unicode char
+
+		if ( !in )
+		{
+			m = -1;
+			k = 0;
+			uc = 0;
+			return 0;
+		}
+
+		// Get character length
+		if ( m == -1 )
+		{
+			uc = 0;
+			if ( in >= 0xF8 )
+			{
+				return 0;
+			}
+			else if ( in >= 0xF0 )
+			{
+				uc = in & 0x07;
+				m = 3;
+			}
+			else if ( in >= 0xE0 )
+			{
+				uc = in & 0x0F;
+				m = 2;
+			}
+			else if ( in >= 0xC0 )
+			{
+				uc = in & 0x1F;
+				m = 1;
+			}
+			else if ( in <= 0x7F )
+			{
+				return in; // ascii
+			}
+			// return 0 if we need more chars to decode one
+			k = 0;
+			return 0;
+		}
+		// get more chars
+		else if ( k <= m )
+		{
+			uc <<= 6;
+			uc += in & 0x3F;
+			k++;
+		}
+		if ( in > 0xBF || m < 0 )
+		{
+			m = -1;
+			return 0;
+		}
+
+		if ( k == m )
+		{
+			k = m = -1;
+
+			return uc;
+
+			// not implemented yet
+			// return '?';
+		}
+		return 0;
+	}
+
 	static void Draw2DQuad( float x1, float y1, float x2, float y2 );
 	static void DrawStretchPic( float x, float y, float w, float h,
 								float s1 = 0, float t1 = 0, float s2 = 1, float t2 = 1);

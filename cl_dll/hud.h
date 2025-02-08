@@ -942,9 +942,10 @@ public:
 		return -1; // invalid sprite
 	}
 
-	inline short GetCharWidth ( unsigned char ch )
+	inline short GetCharWidth ( int ch )
 	{
-		return m_scrinfo.charWidths[ ch ];
+		return gEngfuncs.pfnDrawCharacter( m_scrinfo.iWidth + 1, 0, ch, 0, 0, 0 );
+		//return m_scrinfo.charWidths[ ch ];
 	}
 	inline int GetCharHeight( )
 	{
