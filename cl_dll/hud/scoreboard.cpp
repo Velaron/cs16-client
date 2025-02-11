@@ -397,7 +397,7 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 
 		if( cl_showplayerversion->value == 0.0f )
 		{
-			if ( stricmp( team, "SPECTATOR" ))
+			if( team && stricmp( team, "SPECTATOR" ))
 			{
 				// draw bomb( if player have the bomb )
 				if( g_PlayerExtraInfo[best_player].dead )
