@@ -235,7 +235,9 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 
 int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
-	gMobileAPI.pfnTouchRemoveButton("_menu_*");
+	// gMobileAPI.pfnTouchRemoveButton("_menu_*");
+	ClientCmd( "_erase_frame" );
+
 	return 1;
 }
 
@@ -259,7 +261,10 @@ void CHudMenu::UserCmd_OldStyleMenuClose()
 {
 	m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
 	m_iFlags &= ~HUD_DRAW;
-	gMobileAPI.pfnTouchRemoveButton("_menu_*");
+
+	// gMobileAPI.pfnTouchRemoveButton("_menu_*");
+
+	ClientCmd( "_erase_frame" );
 }
 
 // lol, no real VGUI here
