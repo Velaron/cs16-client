@@ -235,7 +235,7 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b, int &a )
 
 	if (m_iHealth > 25)
 	{
-		DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
+		DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
 	}
 	else
 	{
@@ -360,8 +360,8 @@ void CHudHealth::DrawDamage(float flTime)
 	if (!m_bitsDamage)
 		return;
 
-	DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
-	
+	DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
+
 	a = (int)( fabs(sin(flTime*2)) * 256.0);
 
 	DrawUtils::ScaleColors(r, g, b, a);
