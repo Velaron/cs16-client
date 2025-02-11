@@ -994,6 +994,10 @@ public:
 	cvar_t *cscl_currentmap;
 	cvar_t *cscl_mapprefix;
 
+	cvar_t* m_pCvarColor;
+	unsigned long m_iDefaultHUDColor;
+	void UpdateDefaultHUDColor();
+
 	HSPRITE m_hGasPuff;
 
 	int m_iFontHeight, m_iFontWidth;

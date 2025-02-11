@@ -313,6 +313,8 @@ void CHud :: Init( void )
 	m_pShowHealth = CVAR_CREATE( "scoreboard_showhealth", "1", FCVAR_ARCHIVE );
 	m_pShowMoney = CVAR_CREATE( "scoreboard_showmoney", "1", FCVAR_ARCHIVE );
 
+	m_pCvarColor = CVAR_CREATE( "hud_color", "", FCVAR_ARCHIVE );
+
 	if ( gEngfuncs.pfnGetCvarFloat( "developer" ) > 0.0f )
 	{
 		cl_fog_density = CVAR_CREATE( "cl_fog_density", "0", 0 );

@@ -126,7 +126,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				HSPRITE *spr = gWR.GetAmmoPicFromWeapon( rgAmmoHistory[i].iId, rcPic );
 
 				int r, g, b;
-				DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
+				DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
 				DrawUtils::ScaleColors(r, g, b, min(scale, 255) );
 
@@ -150,7 +150,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 					continue;  // we don't know about the weapon yet, so don't draw anything
 
 				int r, g, b;
-				DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
+				DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
 
 				if ( !gWR.HasAmmo( weap ) )
 					DrawUtils::UnpackRGB(r,g,b, RGB_REDISH);	// if the weapon doesn't have ammo, display it as red
@@ -172,7 +172,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 
 				wrect_t rect = gHUD.GetSpriteRect( rgAmmoHistory[i].iId );
 
-				DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
+				DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
 				DrawUtils::ScaleColors(r, g, b, min(scale, 255) );
 
