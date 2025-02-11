@@ -81,8 +81,7 @@ cvar_t	*cl_bobup;
 cvar_t	*cl_waterdist;
 cvar_t	*cl_chasedist;
 cvar_t	*cl_weaponlag;
-cvar_t	*cl_weaponlag_enable;
-cvar_t	*cl_quakeguns_enable;
+cvar_t	*cl_quakeguns;
 
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
@@ -594,7 +593,7 @@ void V_CalcQuakeGuns()
 #if 1
 	cl_entity_s * vm = gEngfuncs.GetViewModel();
 
-	if(!cl_quakeguns_enable->value)
+	if(!cl_quakeguns->value)
 		return;
 	
 	if(!vm)
@@ -624,7 +623,7 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles )
 {
 	static Vector m_vecLastFacing;
 
-	if( !cl_weaponlag_enable->value || cl_weaponlag->value <= 0.0f )
+	if( cl_weaponlag->value <= 0.0f )
 		return;
 
 	// Calculate our drift
@@ -653,7 +652,7 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles )
 	}
 
 	// this just breaks centered weapons on pitch changing
-	if( !cl_quakeguns_enable->value )
+	if( !cl_quakeguns->value )
 	{
 		AngleVectors( v_angles, forward, right, up );
 
@@ -1874,7 +1873,6 @@ void V_Init (void)
 	cl_waterdist		= gEngfuncs.pfnRegisterVariable( "cl_waterdist","4", 0 );
 	cl_chasedist		= gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
 
-	cl_quakeguns_enable	= gEngfuncs.pfnRegisterVariable( "cl_quakeguns_enable", "0", FCVAR_ARCHIVE );
-	cl_weaponlag_enable = gEngfuncs.pfnRegisterVariable( "cl_weaponlag_enable", "0", FCVAR_ARCHIVE );
-	cl_weaponlag		= gEngfuncs.pfnRegisterVariable( "cl_weaponlag", "1.0", FCVAR_ARCHIVE );
+	cl_quakeguns		= gEngfuncs.pfnRegisterVariable( "cl_quakeguns", "0", FCVAR_ARCHIVE );
+	cl_weaponlag		= gEngfuncs.pfnRegisterVariable( "cl_weaponlag", "0", FCVAR_ARCHIVE );
 }

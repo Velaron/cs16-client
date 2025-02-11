@@ -17,6 +17,13 @@ To run CS16Client you need the latest developer build of Xash3D FWGS, which you 
 You have to own the [game on Steam](https://store.steampowered.com/app/10/CounterStrike//) and copy `valve` and `cstrike` folders into your Xash3D FWGS directory.
 After that, just install the APK and run.
 
+## Configuration (CVars)
+| CVar         | Default     | Min | Max | Description             |
+|--------------|-------------|-----|-----|-------------------------|
+| hud_color    | "255 160 0" | -   | -   | HUD color in RGB.       |
+| cl_quakeguns | 0           | 0   | 1   | Draw centered weapons.  |
+| cl_weaponlag | 0           | 0.0 | -   | Enable weapon lag/sway. |
+
 ## Building
 Clone the source code:
 ```
