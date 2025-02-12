@@ -85,7 +85,7 @@ int CHudTimer::Draw( float fTime )
     
 	int iWatchWidth = gHUD.GetSpriteRect(m_HUD_timer).Width();
     
-	int x = ScreenWidth/2;
+	int x = ScreenWidth/2 - 50;
 	int y = ScreenHeight - 1.5 * gHUD.m_iFontHeight ;
     
     SPR_Set(gHUD.GetSprite(m_HUD_timer), r, g, b);
