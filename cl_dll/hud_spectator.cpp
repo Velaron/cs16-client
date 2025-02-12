@@ -1353,7 +1353,7 @@ void CHudSpectator::DrawOverviewEntities()
 
 	z = m_OverviewData.layersHeights[0] * zScale;
 	// get yellow/brown HUD color
-	DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
+	DrawUtils::UnpackRGB( ir, ig, ib, gHUD.m_iDefaultHUDColor );
 	r = (float)ir/255.0f;
 	g = (float)ig/255.0f;
 	b = (float)ib/255.0f;
