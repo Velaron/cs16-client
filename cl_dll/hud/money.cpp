@@ -104,7 +104,7 @@ int CHudMoney::Draw(float flTime)
 
 			if( m_iDelta > 0 )
 			{
-				r = interpolate * ((RGB_YELLOWISH & 0xFF0000) >> 16);
+				r = interpolate * ((gHUD.m_iDefaultHUDColor & 0xFF0000) >> 16);
 				g = (RGB_GREENISH & 0xFF00) >> 8;
 				b = (RGB_GREENISH & 0xFF);
 
@@ -115,7 +115,7 @@ int CHudMoney::Draw(float flTime)
 			else if( m_iDelta < 0)
 			{
 				r = (RGB_REDISH & 0xFF0000) >> 16;
-				g = ((RGB_REDISH & 0xFF00) >> 8) + interpolate * (((RGB_YELLOWISH & 0xFF00) >> 8) - ((RGB_REDISH & 0xFF00) >> 8));
+				g = ((RGB_REDISH & 0xFF00) >> 8) + interpolate * (((gHUD.m_iDefaultHUDColor & 0xFF00) >> 8) - ((RGB_REDISH & 0xFF00) >> 8));
 				b = (RGB_REDISH & 0xFF) - interpolate * (RGB_REDISH & 0xFF);
 
 				SPR_Set(m_hMinus.spr, iDeltaR, iDeltaG, iDeltaB );

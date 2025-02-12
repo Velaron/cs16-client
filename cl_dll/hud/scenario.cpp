@@ -66,7 +66,7 @@ int CHudScenario::Draw(float flTime)
 
 	int r, g, b;
 	int x, y;
-	DrawUtils::UnpackRGB( r, g, b, RGB_YELLOWISH );
+	DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
 
 	if( m_fFlashRate != 0.0f && m_fNextFlash > flTime )
 	{
