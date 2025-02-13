@@ -71,7 +71,7 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
       - name: Configure project
-        run: cmake --preset "win32-release-${{ matrix.arch }}"
+        run: cmake --preset "win32-ci-${{ matrix.arch }}"
       - name: Run appversion.sh
         run: regamedll/version/appversion.sh "${{ github.workspace }}/3rdparty/ReGameDLL_CS"
         shell: bash
@@ -108,7 +108,7 @@ jobs:
             libstdc++6:i386 gcc-multilib g++-multilib cmake \
             ninja-build libfontconfig-dev:i386 libfontconfig-dev
       - name: Configure project
-        run: cmake --preset "linux-release-${{ matrix.arch }}"
+        run: cmake --preset "linux-ci-${{ matrix.arch }}"
       - name: Build
         run: cmake --build .
         working-directory: build
