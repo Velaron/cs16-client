@@ -57,6 +57,13 @@ android {
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
+        register("ci") {
+            initWith(getByName("release"))
+
+            externalNativeBuild.cmake {
+                arguments "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+            }
+        }
     }
 }
 
