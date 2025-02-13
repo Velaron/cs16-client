@@ -44,6 +44,7 @@ int CHudTextMessage::Init(void)
 // the new value is pushed into dst_buffer
 char *CHudTextMessage::LocaliseTextString( const char *msg, char *dst_buffer, int buffer_size )
 {
+	int len = buffer_size;
 	char *dst = dst_buffer;
 	for ( char *src = (char*)msg; *src != 0 && buffer_size > 0; buffer_size-- )
 	{
@@ -102,7 +103,7 @@ char *CHudTextMessage::LocaliseTextString( const char *msg, char *dst_buffer, in
 		}
 	}
 
-	dst_buffer[buffer_size-1] = 0; // ensure null termination
+	dst_buffer[len-1] = 0; // ensure null termination
 	return dst_buffer;
 }
 
