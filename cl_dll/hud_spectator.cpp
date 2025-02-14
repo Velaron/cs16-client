@@ -690,7 +690,7 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 							break;*/
 
 	case DRC_CMD_STUFFTEXT:
-		ClientCmd( reader.ReadString() );
+		FilteredClientCmd( reader.ReadString() );
 		break;
 	default			:	gEngfuncs.Con_DPrintf("CHudSpectator::DirectorMessage: unknown command %i.\n", cmd );
 	}

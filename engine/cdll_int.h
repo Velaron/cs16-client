@@ -193,6 +193,7 @@ extern module_t	g_module;
 #define RecEnghudHookUserMsg(a, b)			(g_engdstAddrs.pfnHookUserMsg(&a, &b))
 #define RecEnghudServerCmd(a)				(g_engdstAddrs.pfnServerCmd(&a))
 #define RecEnghudClientCmd(a)				(g_engdstAddrs.pfnClientCmd(&a))
+#define RecEnghudFilteredClientCmd(a)		(g_engdstAddrs.pfnFilteredClientCmd(&a))
 #define RecEngPrimeMusicStream(a, b)	(g_engdstAddrs.pfnPrimeMusicStream(&a, &b))
 #define RecEnghudGetPlayerInfo(a, b)		(g_engdstAddrs.pfnGetPlayerInfo(&a, &b))
 #define RecEnghudPlaySoundByName(a, b)		(g_engdstAddrs.pfnPlaySoundByName(&a, &b))
@@ -410,6 +411,7 @@ extern void NullDst(void);
 	(pfnEngDst_pfnGetAppID_t)						NullDst, \
 	(pfnEngDst_pfnGetAliases_t)						NullDst, \
 	(pfnEngDst_pfnVguiWrap2_GetMouseDelta_t)		NullDst, \
+	(pfnEngDst_pfnFilteredClientCmd_t)				NullDst, \
 };
 
 // Use this to init a cldll_func_dst structure to point to NullDst
