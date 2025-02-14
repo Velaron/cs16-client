@@ -49,6 +49,8 @@ if(BUILD_SERVER)
 	# )
 	add_subdirectory(3rdparty/yapb)
 	add_subdirectory(3rdparty/ReGameDLL_CS)
+
+	set_target_postfix(yapb)
 endif()
 
 if(BUILD_MAINUI)
