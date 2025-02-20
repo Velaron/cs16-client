@@ -76,9 +76,10 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 				UnpackRGB( r, g, b, RGB_REDISH );
 				continue;
 			case 'w':
-				r = g = b = 255;
+				UnpackRGB( r, g, b, RGB_WHITE );
 				continue;
 			case 'd':
+				UnpackRGB( r, g, b, RGB_GRAY );
 				continue;
 			case 'R':
 				//if( drawing ) return xpos;
@@ -132,14 +133,18 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 				case 'y':
 					UnpackRGB( r, g, b, RGB_YELLOWISH );
 					break;
+				case 'r':
+					UnpackRGB( r, g, b, RGB_REDISH );
+					break;
 				case 'w':
-					r = g = b = 255;
+					UnpackRGB( r, g, b, RGB_WHITE );
 					break;
 				case 'R':
 				//if( drawing ) return xpos;
 				//else return DrawHudString( iMinX, ypos, first_xpos, &szString[i - 1], r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
 				//xpos = iMinX + gHUD.m_scrinfo.charWidths['M'] * i ;
 				case 'd':
+					UnpackRGB( r, g, b, RGB_GRAY );
 					break;
 				}
 				continue;
