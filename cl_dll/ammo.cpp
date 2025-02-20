@@ -301,6 +301,23 @@ int CHudAmmo::Init(void)
 	gWR.Init();
 	gHR.Init();
 
+	xhair_enable = CVAR_CREATE( "xhair_enable", "0", FCVAR_ARCHIVE );
+	xhair_gap = CVAR_CREATE( "xhair_gap", "0", FCVAR_ARCHIVE );
+	xhair_size = CVAR_CREATE( "xhair_size", "4", FCVAR_ARCHIVE );
+	xhair_thick = CVAR_CREATE( "xhair_thick", "0", FCVAR_ARCHIVE );
+	xhair_pad = CVAR_CREATE( "xhair_pad", "0", FCVAR_ARCHIVE );
+	xhair_dot = CVAR_CREATE( "xhair_dot", "0", FCVAR_ARCHIVE );
+	xhair_t = CVAR_CREATE( "xhair_t", "0", FCVAR_ARCHIVE );
+	xhair_dynamic_scale = CVAR_CREATE( "xhair_dynamic_scale", "0", FCVAR_ARCHIVE );
+	xhair_gap_useweaponvalue = CVAR_CREATE( "xhair_gap_useweaponvalue", "0", FCVAR_ARCHIVE );
+	xhair_dynamic_move = CVAR_CREATE( "xhair_dynamic_move", "1", FCVAR_ARCHIVE );
+
+	xhair_color_r = CVAR_CREATE( "xhair_color_r", "0", FCVAR_ARCHIVE );
+	xhair_color_g = CVAR_CREATE( "xhair_color_g", "255", FCVAR_ARCHIVE );
+	xhair_color_b = CVAR_CREATE( "xhair_color_b", "0", FCVAR_ARCHIVE );
+	xhair_alpha = CVAR_CREATE( "xhair_alpha", "255", FCVAR_ARCHIVE );
+	xhair_additive = CVAR_CREATE( "xhair_additive", "0", FCVAR_ARCHIVE );
+
 	return 1;
 }
 
@@ -1188,26 +1205,377 @@ int Distances[30][2] =
 { 7, 3 }, // 29
 };
 
+enum
+{
+	ACCURACY_NONE = 0,
+	ACCURACY_JUMP = ( 1 << 0 ),
+	ACCURACY_RUN = ( 1 << 1 ),
+	// ACCURACY_DUCK = (1 << 2),
+	ACCURACY_INACCURATE = ( 1 << 3 ),
+	ACCURACY_VERY_INACCURATE = ( 1 << 4 )
+};
+
+int CHudAmmo::GetWeaponAccuracyFlags( int weaponId )
+{
+	int xhairWeaponFlags = g_iWeaponFlags;
+
+	switch ( weaponId )
+	{
+	case WEAPON_P228:
+	case WEAPON_FIVESEVEN:
+	case WEAPON_DEAGLE:
+		return ( ACCURACY_DUCK | ACCURACY_RUN | ACCURACY_JUMP );
+
+	case WEAPON_MAC10:
+	case WEAPON_UMP45:
+	case WEAPON_MP5N:
+	case WEAPON_TMP:
+		return ACCURACY_JUMP;
+
+	case WEAPON_AUG:
+	case WEAPON_GALIL:
+	case WEAPON_M249:
+	case WEAPON_SG552:
+	case WEAPON_AK47:
+	case WEAPON_P90:
+		return ( ACCURACY_RUN | ACCURACY_JUMP );
+
+	case WEAPON_FAMAS:
+		return ( xhairWeaponFlags & 16 ) ? ( ACCURACY_VERY_INACCURATE | ACCURACY_RUN | ACCURACY_JUMP ) : ( ACCURACY_RUN | ACCURACY_JUMP );
+
+	case WEAPON_USP:
+		return ( xhairWeaponFlags & 1 ) ? ( ACCURACY_INACCURATE | ACCURACY_DUCK | ACCURACY_RUN | ACCURACY_JUMP ) : ( ACCURACY_DUCK | ACCURACY_RUN | ACCURACY_JUMP );
+
+	case WEAPON_GLOCK18:
+		return ( xhairWeaponFlags & 2 ) ? ( ACCURACY_VERY_INACCURATE | ACCURACY_DUCK | ACCURACY_RUN | ACCURACY_JUMP ) : ( ACCURACY_DUCK | ACCURACY_RUN | ACCURACY_JUMP );
+
+	case WEAPON_M4A1:
+		return ( xhairWeaponFlags & 4 ) ? ( ACCURACY_INACCURATE | ACCURACY_RUN | ACCURACY_JUMP ) : ( ACCURACY_RUN | ACCURACY_JUMP );
+	}
+
+	return ACCURACY_NONE;
+}
+
+#define MAX_XHAIR_GAP 15
+
+int CHudAmmo::ScaleForRes( float value, int height )
+{
+	/* "default" resolution is 640x480 */
+	return rint( value * ( (float)height / 480.0f ) );
+}
+
+float CHudAmmo::GetCrosshairGap( int weaponId )
+{
+	static float xhairGap;
+	static int lastShotsFired;
+	static float xhairPrevTime;
+	float minGap, deltaGap;
+
+	int xhairPlayerFlags = g_iPlayerFlags;
+	float xhairPlayerSpeed = g_flPlayerSpeed;
+	float clientTime = gEngfuncs.GetClientTime();
+	int xhairShotsFired = g_iShotsFired;
+
+	switch ( weaponId )
+	{
+	case WEAPON_P228:
+	case WEAPON_HEGRENADE:
+	case WEAPON_SMOKEGRENADE:
+	case WEAPON_FIVESEVEN:
+	case WEAPON_USP:
+	case WEAPON_GLOCK18:
+	case WEAPON_AWP:
+	case WEAPON_FLASHBANG:
+	case WEAPON_DEAGLE:
+		minGap = 8;
+		deltaGap = 3;
+		break;
+
+	case WEAPON_SCOUT:
+	case WEAPON_SG550:
+	case WEAPON_SG552:
+		minGap = 5;
+		deltaGap = 3;
+		break;
+
+	case WEAPON_XM1014:
+		minGap = 9;
+		deltaGap = 4;
+		break;
+
+	case WEAPON_C4:
+	case WEAPON_UMP45:
+	case WEAPON_M249:
+		minGap = 6;
+		deltaGap = 3;
+		break;
+
+	case WEAPON_MAC10:
+		minGap = 9;
+		deltaGap = 3;
+		break;
+
+	case WEAPON_AUG:
+		minGap = 3;
+		deltaGap = 3;
+		break;
+
+	case WEAPON_MP5N:
+		minGap = 6;
+		deltaGap = 2;
+		break;
+
+	case WEAPON_M3:
+		minGap = 8;
+		deltaGap = 6;
+		break;
+
+	case WEAPON_TMP:
+	case WEAPON_KNIFE:
+	case WEAPON_P90:
+		minGap = 7;
+		deltaGap = 3;
+		break;
+
+	case WEAPON_G3SG1:
+		minGap = 6;
+		deltaGap = 4;
+		break;
+
+	case WEAPON_AK47:
+		minGap = 4;
+		deltaGap = 4;
+		break;
+
+	default:
+		minGap = 4;
+		deltaGap = 3;
+		break;
+	}
+
+	if ( !xhair_gap_useweaponvalue->value )
+		minGap = 4;
+
+	float baseMinGap = minGap;
+	float absMinGap = baseMinGap * 0.5f;
+
+	int flags = GetWeaponAccuracyFlags( weaponId );
+	if ( xhair_dynamic_move->value && flags )
+	{
+		if ( !( xhairPlayerFlags & FL_ONGROUND ) && ( flags & ACCURACY_AIR ) )
+		{
+			minGap *= 2.0f;
+		}
+		else if ( ( xhairPlayerFlags & FL_DUCKING ) && ( flags & ACCURACY_DUCK ) )
+		{
+			minGap *= 0.5f;
+		}
+		else
+		{
+			float runLimit;
+
+			switch ( weaponId )
+			{
+			case WEAPON_AUG:
+			case WEAPON_GALIL:
+			case WEAPON_FAMAS:
+			case WEAPON_M249:
+			case WEAPON_M4A1:
+			case WEAPON_SG552:
+			case WEAPON_AK47:
+				runLimit = 140;
+				break;
+
+			case WEAPON_P90:
+				runLimit = 170;
+				break;
+
+			default:
+				runLimit = 0;
+				break;
+			}
+
+			if ( xhairPlayerSpeed > runLimit && ( flags & ACCURACY_RUN ) )
+				minGap *= 1.5f;
+		}
+
+		if ( flags & ACCURACY_INACCURATE )
+			minGap *= 1.4f;
+
+		if ( flags & ACCURACY_VERY_INACCURATE )
+			minGap *= 1.4f;
+
+		minGap = baseMinGap + ( minGap - baseMinGap ) * xhair_dynamic_scale->value;
+		minGap = max( minGap, absMinGap );
+	}
+
+	if ( xhairPrevTime > clientTime )
+	{
+		// client restart
+		xhairPrevTime = clientTime;
+	}
+
+	float deltaTime = clientTime - xhairPrevTime;
+	xhairPrevTime = clientTime;
+
+	if ( xhairShotsFired <= lastShotsFired )
+	{
+		// decay the crosshair as if we were always running at 100 fps
+		xhairGap -= ( 100 * deltaTime ) * ( 0.013f * xhairGap + 0.1f );
+	}
+	else
+	{
+		xhairGap += deltaGap * xhair_dynamic_scale->value;
+		xhairGap = min( xhairGap, MAX_XHAIR_GAP );
+	}
+
+	if ( xhairShotsFired > 600 )
+		xhairShotsFired = 1;
+
+	lastShotsFired = xhairShotsFired;
+
+	xhairGap = max( xhairGap, minGap );
+
+	return xhairGap + xhair_gap->value;
+}
+
+void CHudAmmo::DrawCrosshairSection( int _x0, int _y0, int _x1, int _y1 )
+{
+	float x0 = (float)_x0;
+	float y0 = (float)_y0;
+	float x1 = (float)_x1;
+	float y1 = (float)_y1;
+
+	// float top_left[2] = { x0, y0 };
+	// float top_right[2] = { x1, y0 };
+	// float bottom_right[2] = { x1, y1 };
+	// float bottom_left[2] = { x0, y1 };
+
+	gEngfuncs.pTriAPI->Color4ub( xhair_color_r->value,
+	                            xhair_color_g->value,
+	                            xhair_color_b->value,
+	                            xhair_alpha->value );
+
+	DrawUtils::Draw2DQuad( x0, y0, x1, y1 );
+}
+
+void CHudAmmo::DrawCrosshairPadding( int _pad, int _x0, int _y0, int _x1, int _y1 )
+{
+	float pad = (float)_pad;
+	float x0 = (float)_x0;
+	float y0 = (float)_y0;
+	float x1 = (float)_x1;
+	float y1 = (float)_y1;
+
+	// float out_top_left[2] = { x0 - pad, y0 - pad };
+	// float out_top_right[2] = { x1 + pad, y0 - pad };
+	// float out_bottom_right[2] = { x1 + pad, y1 + pad };
+	// float out_bottom_left[2] = { x0 - pad, y1 + pad };
+	// float in_top_left[2] = { x0, y0 };
+	// float in_top_right[2] = { x1, y0 };
+	// float in_bottom_right[2] = { x1, y1 };
+	// float in_bottom_left[2] = { x0, y1 };
+
+	gEngfuncs.pTriAPI->Color4ub( 0, 0, 0, xhair_alpha->value );
+
+	DrawUtils::Draw2DQuad( x0, y0, x1, y1 );
+	DrawUtils::Draw2DQuad( x0 + pad, y0 + pad, x1 + pad, y1 + pad );
+}
+
+void CHudAmmo::DrawCrosshair( int weaponId )
+{
+	int center_x, center_y;
+	int gap, length, thickness;
+	int y0, y1, x0, x1;
+	wrect_t inner;
+	wrect_t outer;
+
+	/* calculate the coordinates */
+	center_x = ScreenWidth / 2;
+	center_y = ScreenHeight / 2;
+
+	gap = ScaleForRes( GetCrosshairGap( weaponId ), ScreenHeight );
+	length = ScaleForRes( xhair_size->value, ScreenHeight );
+	thickness = ScaleForRes( xhair_thick->value, ScreenHeight );
+	thickness = max( 1, thickness );
+
+	inner.left = ( center_x - gap - thickness / 2 );
+	inner.right = ( inner.left + 2 * gap + thickness );
+	inner.top = ( center_y - gap - thickness / 2 );
+	inner.bottom = ( inner.top + 2 * gap + thickness );
+
+	outer.left = ( inner.left - length );
+	outer.right = ( inner.right + length );
+	outer.top = ( inner.top - length );
+	outer.bottom = ( inner.bottom + length );
+
+	y0 = ( center_y - thickness / 2 );
+	x0 = ( center_x - thickness / 2 );
+	y1 = ( y0 + thickness );
+	x1 = ( x0 + thickness );
+
+	gEngfuncs.pTriAPI->Brightness( 1.0f );
+	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+
+	gRenderAPI.GL_SelectTexture( 0 );
+	gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
+
+	if ( xhair_additive->value )
+		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+	else
+		gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
+
+	if ( xhair_dot->value )
+		DrawCrosshairSection( x0, y0, x1, y1 );
+
+	if ( !xhair_t->value )
+		DrawCrosshairSection( x0, outer.top, x1, inner.top );
+
+	DrawCrosshairSection( x0, inner.bottom, x1, outer.bottom );
+	DrawCrosshairSection( outer.left, y0, inner.left, y1 );
+	DrawCrosshairSection( inner.right, y0, outer.right, y1 );
+
+	if ( xhair_additive->value )
+		gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
+
+	/* draw padding if wanted */
+	if ( xhair_pad->value )
+	{
+		/* don't scale this */
+		int pad = (int)xhair_pad->value;
+
+		if ( xhair_dot->value )
+			DrawCrosshairPadding( pad, x0, y0, x1, y1 );
+
+		if ( !xhair_t->value )
+			DrawCrosshairPadding( pad, x0, outer.top, x1, inner.top );
+
+		DrawCrosshairPadding( pad, x0, inner.bottom, x1, outer.bottom );
+		DrawCrosshairPadding( pad, outer.left, y0, inner.left, y1 );
+		DrawCrosshairPadding( pad, inner.right, y0, outer.right, y1 );
+	}
+}
+
 void CHudAmmo::DrawCrosshair()
 {
 	int flags, iDeltaDistance, iDistance, iLength, weaponid;
 	float flCrosshairDistance;
 
-	if( !m_pWeapon )
+	if ( !m_pWeapon )
 		return;
 
 	weaponid = m_pWeapon->iId;
 
-	if(    weaponid == WEAPON_AWP 
-		|| weaponid == WEAPON_SCOUT 
-		|| weaponid == WEAPON_SG550 
-		|| weaponid == WEAPON_G3SG1 )
+	if ( weaponid == WEAPON_AWP
+	     || weaponid == WEAPON_SCOUT
+	     || weaponid == WEAPON_SG550
+	     || weaponid == WEAPON_G3SG1 )
 		return;
 
 	if ( g_iWeaponFlags & WPNSTATE_SHIELD_DRAWN )
 		return;
 
-	if( weaponid <= 30 )
+	if ( weaponid <= 30 )
 	{
 		iDistance = Distances[weaponid - 1][0];
 		iDeltaDistance = Distances[weaponid - 1][1];
@@ -1217,9 +1585,9 @@ void CHudAmmo::DrawCrosshair()
 		iDistance = 4;
 		iDeltaDistance = 3;
 	}
-	
+
 	flags = GetWeaponAccuracyFlags( weaponid );
-	if ( flags && m_pClDynamicCrosshair->value && !(gHUD.m_iHideHUDDisplay & 1) )
+	if ( flags && m_pClDynamicCrosshair->value && !( gHUD.m_iHideHUDDisplay & 1 ) )
 	{
 		if ( g_iPlayerFlags & FL_ONGROUND || !( flags & ACCURACY_AIR ) )
 		{
@@ -1231,27 +1599,27 @@ void CHudAmmo::DrawCrosshair()
 			{
 				int iWeaponSpeed = 0;
 
-				switch( weaponid )
+				switch ( weaponid )
 				{
 				case WEAPON_P90: // p90
 					iWeaponSpeed = 170;
 					break;
-				case WEAPON_AUG: // aug
+				case WEAPON_AUG:   // aug
 				case WEAPON_GALIL: // galil
 				case WEAPON_FAMAS: // famas
-				case WEAPON_M249: // m249
-				case WEAPON_M4A1: // m4a1
+				case WEAPON_M249:  // m249
+				case WEAPON_M4A1:  // m4a1
 				case WEAPON_SG552: // sg552
-				case WEAPON_AK47: // ak47
+				case WEAPON_AK47:  // ak47
 					iWeaponSpeed = 140;
 					break;
 				}
 
-				if ( (flags & ACCURACY_SPEED) && (g_flPlayerSpeed >= iWeaponSpeed) )
+				if ( ( flags & ACCURACY_SPEED ) && ( g_flPlayerSpeed >= iWeaponSpeed ) )
 					iDistance *= 1.5;
 			}
 		}
-		else 
+		else
 		{
 			iDistance *= 2;
 		}
@@ -1263,7 +1631,7 @@ void CHudAmmo::DrawCrosshair()
 
 	if ( m_iAmmoLastCheck >= g_iShotsFired )
 	{
-		m_flCrosshairDistance -= (m_flCrosshairDistance * 0.013 + 0.1 );
+		m_flCrosshairDistance -= ( m_flCrosshairDistance * 0.013 + 0.1 );
 		m_iAlpha += 2;
 	}
 	else
@@ -1281,75 +1649,41 @@ void CHudAmmo::DrawCrosshair()
 
 	m_iAmmoLastCheck = g_iShotsFired;
 	m_flCrosshairDistance = max( m_flCrosshairDistance, iDistance );
-	iLength = (m_flCrosshairDistance - iDistance) * 0.5 + 5;
-	
+	iLength = ( m_flCrosshairDistance - iDistance ) * 0.5 + 5;
+
 	if ( m_iAlpha > 255 )
 		m_iAlpha = 255;
 
-	if( g_iXash )
+	if ( ScreenWidth != m_iCrosshairScaleBase )
 	{
-		if( TrueWidth != m_iCrosshairScaleBase )
-		{
-			flCrosshairDistance = TrueWidth * m_flCrosshairDistance / m_iCrosshairScaleBase;
-			iLength = TrueWidth * iLength / m_iCrosshairScaleBase;
-		}
-		else
-		{
-			flCrosshairDistance = m_flCrosshairDistance;
-		}
+		flCrosshairDistance = ScreenWidth * m_flCrosshairDistance / m_iCrosshairScaleBase;
+		iLength = ScreenWidth * iLength / m_iCrosshairScaleBase;
 	}
 	else
 	{
-		if ( ScreenWidth != m_iCrosshairScaleBase )
-		{
-			flCrosshairDistance = ScreenWidth * m_flCrosshairDistance / m_iCrosshairScaleBase;
-			iLength = ScreenWidth * iLength / m_iCrosshairScaleBase;
-		}
-		else
-		{
-			flCrosshairDistance = m_flCrosshairDistance;
-		}
+		flCrosshairDistance = m_flCrosshairDistance;
 	}
 
 	// drawing
-	if( g_iXash )
+	if ( g_iXash && xhair_enable->value )
 	{
-		if ( m_bAdditive )
-			gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
-		else
-			gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
-
-		gEngfuncs.pTriAPI->Brightness( 1.0f );
-		gEngfuncs.pTriAPI->Color4ub( m_R, m_G, m_B, m_iAlpha );
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
-
-		gRenderAPI.GL_SelectTexture( 0 );
-		gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
-
-		// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		DrawUtils::Draw2DQuad( WEST_XPOS_R, EAST_WEST_YPOS_R,
-							   WEST_XPOS_R + iLength, EAST_WEST_YPOS_R + 1);
-		DrawUtils::Draw2DQuad( EAST_XPOS_R, EAST_WEST_YPOS_R,
-							   EAST_XPOS_R + iLength, EAST_WEST_YPOS_R + 1);
-		DrawUtils::Draw2DQuad( NORTH_SOUTH_XPOS_R, NORTH_YPOS_R,
-							   NORTH_SOUTH_XPOS_R + 1, NORTH_YPOS_R + iLength );
-		DrawUtils::Draw2DQuad( NORTH_SOUTH_XPOS_R, SOUTH_YPOS_R,
-							   NORTH_SOUTH_XPOS_R + 1, SOUTH_YPOS_R + iLength );
-		// gEngfuncs.pTriAPI->End( );
+		DrawCrosshair( weaponid );
+		return;
 	}
-	else if ( m_bAdditive )
+
+	if ( m_bAdditive )
 	{
-		FillRGBA(WEST_XPOS, EAST_WEST_YPOS,		iLength, 1, m_R, m_G, m_B, m_iAlpha);
-		FillRGBA(EAST_XPOS, EAST_WEST_YPOS,		iLength, 1, m_R, m_G, m_B, m_iAlpha);
-		FillRGBA(NORTH_SOUTH_XPOS,	NORTH_YPOS,	1, iLength, m_R, m_G, m_B, m_iAlpha);
-		FillRGBA(NORTH_SOUTH_XPOS, SOUTH_YPOS,	1, iLength, m_R, m_G, m_B, m_iAlpha);
+		FillRGBA( WEST_XPOS, EAST_WEST_YPOS, iLength, 1, m_R, m_G, m_B, m_iAlpha );
+		FillRGBA( EAST_XPOS, EAST_WEST_YPOS, iLength, 1, m_R, m_G, m_B, m_iAlpha );
+		FillRGBA( NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha );
+		FillRGBA( NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha );
 	}
 	else
 	{
-		FillRGBABlend(WEST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
-		FillRGBABlend(EAST_XPOS, EAST_WEST_YPOS,	iLength, 1, m_R, m_G, m_B, m_iAlpha);
-		FillRGBABlend(NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
-		FillRGBABlend(NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha);
+		FillRGBABlend( WEST_XPOS, EAST_WEST_YPOS, iLength, 1, m_R, m_G, m_B, m_iAlpha );
+		FillRGBABlend( EAST_XPOS, EAST_WEST_YPOS, iLength, 1, m_R, m_G, m_B, m_iAlpha );
+		FillRGBABlend( NORTH_SOUTH_XPOS, NORTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha );
+		FillRGBABlend( NORTH_SOUTH_XPOS, SOUTH_YPOS, 1, iLength, m_R, m_G, m_B, m_iAlpha );
 	}
 }
 
