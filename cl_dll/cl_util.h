@@ -83,6 +83,7 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 #define GetScreenInfo (*gEngfuncs.pfnGetScreenInfo)
 #define ServerCmd (*gEngfuncs.pfnServerCmd)
 #define ClientCmd (*gEngfuncs.pfnClientCmd)
+#define FilteredClientCmd (*gEngfuncs.pfnFilteredClientCmd)
 #define AngleVectors (*gEngfuncs.pfnAngleVectors)
 #define Com_RandomLong (*gEngfuncs.pfnRandomLong)
 #define Com_RandomFloat (*gEngfuncs.pfnRandomFloat)

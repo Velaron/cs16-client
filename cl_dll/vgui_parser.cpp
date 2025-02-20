@@ -63,11 +63,11 @@ const char *Localize( const char *szStr )
 {
 	if( szStr )
 	{
+		if( *szStr == '#' )
+			szStr++;
+
 		char *str = strdup( szStr );
 		StripEndNewlineFromString( str );
-
-		if( *str == '#' )
-			str++;
 
 		int i = hashed_cmds.Find( str );
 

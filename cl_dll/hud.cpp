@@ -313,6 +313,9 @@ void CHud :: Init( void )
 	m_pShowHealth = CVAR_CREATE( "scoreboard_showhealth", "1", FCVAR_ARCHIVE );
 	m_pShowMoney = CVAR_CREATE( "scoreboard_showmoney", "1", FCVAR_ARCHIVE );
 
+	// The cvar was taken from the OpenAG client
+	m_pCvarColor = CVAR_CREATE( "hud_color", "255 160 0", FCVAR_ARCHIVE );
+
 	if ( gEngfuncs.pfnGetCvarFloat( "developer" ) > 0.0f )
 	{
 		cl_fog_density = CVAR_CREATE( "cl_fog_density", "0", 0 );
@@ -387,12 +390,12 @@ void CHud :: Init( void )
 	InitRain();
 
 	//ServersInit();
-
-	gEngfuncs.Cvar_SetValue( "hand", 1 );
-	gEngfuncs.Cvar_SetValue( "sv_skipshield", 1.0f );
-#ifdef __ANDROID__
-	gEngfuncs.Cvar_SetValue( "hud_fastswitch", 1 );
+#ifndef __ANDROID__
+	gEngfuncs.Cvar_SetValue( "_vgui_menus", 0 );
+	gEngfuncs.Cvar_SetValue( "_extended_menus", 0 );
 #endif
+
+	gEngfuncs.Con_Printf( "%s: ^2CS16Client^7 ver. %s initialized.\n", __FUNCTION__, CVAR_GET_STRING( "cscl_ver" ) );
 
 	MsgFunc_ResetHUD(0, 0, NULL );
 }

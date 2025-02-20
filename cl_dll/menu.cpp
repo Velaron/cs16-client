@@ -34,6 +34,12 @@ char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 
 int KB_ConvertString( char *in, char **ppout );
 
+void Touch_CloseMenu()
+{
+	gMobileAPI.pfnTouchRemoveButton( "_menu_*" );
+	gMobileAPI.pfnTouchSetClientOnly( 0 );
+}
+
 int CHudMenu :: Init( void )
 {
 	gHUD.AddHudElem( this );
@@ -158,8 +164,7 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 
 	if ( !m_bitsValidSlots )
 	{
-		m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
-		m_iFlags &= ~HUD_DRAW;
+		UserCmd_OldStyleMenuClose(); // no valid slots means that the menu should be turned off
 		return 1;
 	}
 
@@ -187,9 +192,7 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 		}
 		else ShowVGUIMenu(MENU_NUMERICAL_MENU);
 	}
-#ifdef __ANDROID__
 	else ShowVGUIMenu(MENU_NUMERICAL_MENU);
-#endif
 
 	if ( !m_fWaitingForMore ) // this is the start of a new menu
 	{
@@ -235,7 +238,8 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 
 int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
-	gMobileAPI.pfnTouchRemoveButton("_menu_*");
+	Touch_CloseMenu();
+
 	return 1;
 }
 
@@ -259,7 +263,8 @@ void CHudMenu::UserCmd_OldStyleMenuClose()
 {
 	m_fMenuDisplayed = 0; // no valid slots means that the menu should be turned off
 	m_iFlags &= ~HUD_DRAW;
-	gMobileAPI.pfnTouchRemoveButton("_menu_*");
+
+	Touch_CloseMenu();
 }
 
 // lol, no real VGUI here
@@ -326,8 +331,12 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 		szCmd = "exec touch/radioselector.cfg";
 		break;
 	case MENU_NUMERICAL_MENU:
+#ifdef __ANDROID__
 		szCmd = "exec touch/numerical_menu.cfg";
 		break;
+#else
+		return;
+#endif
 	default:
 		UserCmd_OldStyleMenuClose();
 		return;

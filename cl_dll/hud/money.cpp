@@ -83,7 +83,7 @@ int CHudMoney::Draw(float flTime)
 	if( m_iBlinkAmt )
 	{
 		m_fBlinkTime += gHUD.m_flTimeDelta;
-		DrawUtils::UnpackRGB( r, g, b, m_fBlinkTime > 0.5f? RGB_REDISH : RGB_YELLOWISH );
+		DrawUtils::UnpackRGB( r, g, b, m_fBlinkTime > 0.5f? RGB_REDISH : gHUD.m_iDefaultHUDColor );
 
 		if( m_fBlinkTime > 1.0f )
 		{
@@ -104,7 +104,7 @@ int CHudMoney::Draw(float flTime)
 
 			if( m_iDelta > 0 )
 			{
-				r = interpolate * ((RGB_YELLOWISH & 0xFF0000) >> 16);
+				r = interpolate * ((gHUD.m_iDefaultHUDColor & 0xFF0000) >> 16);
 				g = (RGB_GREENISH & 0xFF00) >> 8;
 				b = (RGB_GREENISH & 0xFF);
 
@@ -115,7 +115,7 @@ int CHudMoney::Draw(float flTime)
 			else if( m_iDelta < 0)
 			{
 				r = (RGB_REDISH & 0xFF0000) >> 16;
-				g = ((RGB_REDISH & 0xFF00) >> 8) + interpolate * (((RGB_YELLOWISH & 0xFF00) >> 8) - ((RGB_REDISH & 0xFF00) >> 8));
+				g = ((RGB_REDISH & 0xFF00) >> 8) + interpolate * (((gHUD.m_iDefaultHUDColor & 0xFF00) >> 8) - ((RGB_REDISH & 0xFF00) >> 8));
 				b = (RGB_REDISH & 0xFF) - interpolate * (RGB_REDISH & 0xFF);
 
 				SPR_Set(m_hMinus.spr, iDeltaR, iDeltaG, iDeltaB );
@@ -127,7 +127,7 @@ int CHudMoney::Draw(float flTime)
 									   iDeltaR, iDeltaG, iDeltaB);
 			FillRGBA(x + iDollarWidth / 4, y - iDollarHeight * 1.5 + gHUD.m_iFontHeight / 4, 2, 2, iDeltaR, iDeltaG, iDeltaB, iDeltaAlpha );
 		}
-		else DrawUtils::UnpackRGB(r, g, b, RGB_YELLOWISH );
+		else DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
 	}
 
 	alphaBalance = 255 - interpolate * (255 - MIN_ALPHA);

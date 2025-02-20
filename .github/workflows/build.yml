@@ -25,12 +25,12 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
       - name: Build
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleCi
         working-directory: android
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: android/app/build/outputs/apk/debug
+          releaseDirectory: android/app/build/outputs/apk/ci
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -41,7 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Android
-          path: android/app/build/outputs/apk/debug/app-debug-signed.apk
+          path: android/app/build/outputs/apk/ci/app-ci-unsigned-signed.apk
   # psvita:
   #   name: PS Vita
   #   runs-on: ubuntu-latest
@@ -71,7 +71,7 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
       - name: Configure project
-        run: cmake --preset "win32-release-${{ matrix.arch }}"
+        run: cmake --preset "win32-ci-${{ matrix.arch }}"
       - name: Run appversion.sh
         run: regamedll/version/appversion.sh "${{ github.workspace }}/3rdparty/ReGameDLL_CS"
         shell: bash
@@ -108,7 +108,7 @@ jobs:
             libstdc++6:i386 gcc-multilib g++-multilib cmake \
             ninja-build libfontconfig-dev:i386 libfontconfig-dev
       - name: Configure project
-        run: cmake --preset "linux-release-${{ matrix.arch }}"
+        run: cmake --preset "linux-ci-${{ matrix.arch }}"
       - name: Build
         run: cmake --build .
         working-directory: build
@@ -137,7 +137,7 @@ jobs:
           repo: ${{ env.GITHUB_REPOSITORY }}
       - name: Prepare release
         run: |
-          mv Android/app-debug-signed.apk CS16Client-Android.apk
+          mv Android/app-ci-unsigned-signed.apk CS16Client-Android.apk
 
           mv */*.zip .
           mv */*.tar.gz .

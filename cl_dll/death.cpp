@@ -51,7 +51,7 @@ int CHudDeathNotice :: Init( void )
 
 	HOOK_MESSAGE( gHUD.m_DeathNotice, DeathMsg );
 
-	hud_deathnotice_time = CVAR_CREATE( "hud_deathnotice_time", "6", 0 );
+	hud_deathnotice_time = CVAR_CREATE( "hud_deathnotice_time", "6", FCVAR_ARCHIVE );
 	m_iFlags = 0;
 
 	return 1;

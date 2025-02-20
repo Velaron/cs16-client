@@ -67,7 +67,7 @@ int CHudTimer::Draw( float fTime )
 
 	if( minutes * 60 + seconds > 20 )
 	{
-		DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH );
+		DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
 	}
 	else
 	{
@@ -78,7 +78,7 @@ int CHudTimer::Draw( float fTime )
 			m_flPanicTime = 0;
 			m_bPanicColorChange = !m_bPanicColorChange;
 		}
-		DrawUtils::UnpackRGB( r, g, b, m_bPanicColorChange ? RGB_YELLOWISH : RGB_REDISH );
+		DrawUtils::UnpackRGB( r, g, b, m_bPanicColorChange ? gHUD.m_iDefaultHUDColor : RGB_REDISH );
 	}
 
 	DrawUtils::ScaleColors( r, g, b, MIN_ALPHA );
@@ -155,7 +155,7 @@ int CHudProgressBar::Draw( float flTime )
 	if( m_szLocalizedHeader && m_szLocalizedHeader[0] )
 	{
 		int r, g, b;
-		DrawUtils::UnpackRGB( r, g, b, RGB_YELLOWISH );
+		DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
 		DrawUtils::DrawHudString( ScreenWidth / 4, ScreenHeight / 2, ScreenWidth, (char*)m_szLocalizedHeader, r, g, b );
 
 		DrawUtils::DrawRectangle( ScreenWidth/ 4, ScreenHeight / 2 + gHUD.GetCharHeight(), ScreenWidth/2, ScreenHeight/30 );

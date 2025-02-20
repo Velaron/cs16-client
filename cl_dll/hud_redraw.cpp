@@ -97,6 +97,8 @@ int CHud :: Redraw( float flTime, int intermission )
 
 	m_iIntermission = intermission;
 
+	UpdateDefaultHUDColor();
+
 	if ( m_pCvarDraw->value && (intermission || !(m_iHideHUDDisplay & HIDEHUD_ALL) ) )
 	{
 		for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
@@ -133,4 +135,23 @@ int CHud :: Redraw( float flTime, int intermission )
 	}
 
 	return 1;
+}
+
+void CHud::UpdateDefaultHUDColor()
+{
+	int r, g, b;
+
+	if (sscanf(m_pCvarColor->string, "%d %d %d", &r, &g, &b) == 3) {
+		r = max(r, 0);
+		g = max(g, 0);
+		b = max(b, 0);
+
+		r = min(r, 255);
+		g = min(g, 255);
+		b = min(b, 255);
+
+		m_iDefaultHUDColor = (r << 16) | (g << 8) | b;
+	} else {
+		m_iDefaultHUDColor = RGB_YELLOWISH;
+	}
 }

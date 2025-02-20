@@ -68,17 +68,45 @@
         },
         {
             "name": "linux-release-i386",
+            "inherits": "linux-release-amd64",
             "displayName": "Linux Release - i386",
-            "generator": "Ninja",
             "architecture": {
                 "value": "x86",
                 "strategy": "external"
             },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            },
-            "binaryDir": "${sourceDir}/build",
             "toolchainFile": "${sourceDir}/toolchains/i386-linux-gnu.cmake"
+        },
+        {
+            "name": "linux-ci-amd64",
+            "inherits": "linux-release-amd64",
+            "displayName": "Linux CI - amd64",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "linux-ci-i386",
+            "inherits": "linux-release-i386",
+            "displayName": "Linux CI - i386",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "win32-ci-amd64",
+            "inherits": "win32-debug-amd64",
+            "displayName": "Windows CI - amd64",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "win32-ci-x86",
+            "inherits": "win32-debug-x86",
+            "displayName": "Windows CI - x86",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
         }
     ]
 }

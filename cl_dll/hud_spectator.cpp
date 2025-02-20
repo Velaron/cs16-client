@@ -242,7 +242,8 @@ void UTIL_StringToVector( float * pVector, const char *pString )
 	char *pstr, *pfront, tempString[128];
 	int	j;
 
-	strncpy( tempString, pString, sizeof(tempString) );
+	strncpy( tempString, pString, sizeof( tempString ) );
+	tempString[ sizeof( tempString ) - 1 ] = '\0';
 	pstr = pfront = tempString;
 	
 	for ( j = 0; j < 3; j++ )
@@ -689,7 +690,7 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 							break;*/
 
 	case DRC_CMD_STUFFTEXT:
-		ClientCmd( reader.ReadString() );
+		FilteredClientCmd( reader.ReadString() );
 		break;
 	default			:	gEngfuncs.Con_DPrintf("CHudSpectator::DirectorMessage: unknown command %i.\n", cmd );
 	}
@@ -1353,7 +1354,7 @@ void CHudSpectator::DrawOverviewEntities()
 
 	z = m_OverviewData.layersHeights[0] * zScale;
 	// get yellow/brown HUD color
-	DrawUtils::UnpackRGB(ir,ig,ib, RGB_YELLOWISH);
+	DrawUtils::UnpackRGB( ir, ig, ib, gHUD.m_iDefaultHUDColor );
 	r = (float)ir/255.0f;
 	g = (float)ig/255.0f;
 	b = (float)ib/255.0f;
