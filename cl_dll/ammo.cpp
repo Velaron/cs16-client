@@ -1491,12 +1491,12 @@ void CHudAmmo::DrawCrosshair( int weaponId )
 	wrect_t outer;
 
 	/* calculate the coordinates */
-	center_x = ScreenWidth / 2;
-	center_y = ScreenHeight / 2;
+	center_x = ( ScreenWidth / 2 ) * gHUD.m_flScale;
+	center_y = ( ScreenHeight / 2 ) * gHUD.m_flScale;
 
-	gap = ScaleForRes( GetCrosshairGap( weaponId ), ScreenHeight );
-	length = ScaleForRes( xhair_size->value, ScreenHeight );
-	thickness = ScaleForRes( xhair_thick->value, ScreenHeight );
+	gap = ScaleForRes( GetCrosshairGap( weaponId ), ScreenHeight * gHUD.m_flScale );
+	length = ScaleForRes( xhair_size->value, ScreenHeight * gHUD.m_flScale );
+	thickness = ScaleForRes( xhair_thick->value, ScreenHeight * gHUD.m_flScale );
 	thickness = max( 1, thickness );
 
 	inner.left = ( center_x - gap - thickness / 2 );
