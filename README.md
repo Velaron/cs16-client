@@ -18,26 +18,23 @@ You have to own the [game on Steam](https://store.steampowered.com/app/10/Counte
 After that, just install the APK and run.
 
 ## Configuration (CVars)
-| CVar                     | Default     | Min | Max | Description                                                                                 |
-|--------------------------|-------------|-----|-----|---------------------------------------------------------------------------------------------|
-| hud_color                | "255 160 0" | -   | -   | HUD color in RGB.                                                                           |
-| cl_quakeguns             | 0           | 0   | 1   | Draw centered weapons.                                                                      |
-| cl_weaponlag             | 0           | 0.0 | -   | Enable weapon lag/sway.                                                                     |
-| xhair_additive           | 0           | 0   | 1   | Makes the crosshair additive.                                                               |
-| xhair_alpha              | 255         | 0   | 255 | Crosshair's transparency.                                                                   |
-| xhair_color_b            | 0           | 0   | 255 | Crosshair color's blue value.                                                               |
-| xhair_color_g            | 255         | 0   | 255 | Crosshair color's green value.                                                              |
-| xhair_color_r            | 0           | 0   | 255 | Crosshair color's red value.                                                                |
-| xhair_dot                | 0           | 0   | 1   | Enables crosshair dot.                                                                      |
-| xhair_dynamic_move       | 1           | 0   | 1   | Jumping, crouching and moving will affect the dynamic crosshair (like cl_dynamiccrosshair). |
-| xhair_dynamic_scale      | 0           | 0   | -   | Scale of the dynamic crosshair movement.                                                    |
-| xhair_gap_useweaponvalue | 0           | 0   | 1   | Makes the crosshair gap scale depend on the active weapon.                                  |
-| xhair_enable             | 0           | 0   | 1   | Enables enhanced crosshair.                                                                 |
-| xhair_gap                | 0           | 0   | -   | Space between crosshair's lines.                                                            |
-| xhair_pad                | 0           | 0   | -   | Border around crosshair.                                                                    |
-| xhair_size               | 4           | 0   | -   | Crosshair size.                                                                             |
-| xhair_t                  | 0           | 0   | 1   | Enables T-shaped crosshair.                                                                 |
-| xhair_thick              | 0           | 0   | -   | Crosshair thickness.                                                                        |
+| CVar                     | Default       | Min | Max | Description                                                                                 |
+|--------------------------|---------------|-----|-----|---------------------------------------------------------------------------------------------|
+| hud_color                | "255 160 0"   | -   | -   | HUD color in RGB.                                                                           |
+| cl_quakeguns             | 0             | 0   | 1   | Draw centered weapons.                                                                      |
+| cl_weaponlag             | 0             | 0.0 | -   | Enable weapon lag/sway.                                                                     |
+| xhair_additive           | 0             | 0   | 1   | Makes the crosshair additive.                                                               |
+| xhair_color              | "0 255 0 255" | -   | -   | Crosshair's color (RGBA).                                                                   |
+| xhair_dot                | 0             | 0   | 1   | Enables crosshair dot.                                                                      |
+| xhair_dynamic_move       | 1             | 0   | 1   | Jumping, crouching and moving will affect the dynamic crosshair (like cl_dynamiccrosshair). |
+| xhair_dynamic_scale      | 0             | 0   | -   | Scale of the dynamic crosshair movement.                                                    |
+| xhair_gap_useweaponvalue | 0             | 0   | 1   | Makes the crosshair gap scale depend on the active weapon.                                  |
+| xhair_enable             | 0             | 0   | 1   | Enables enhanced crosshair.                                                                 |
+| xhair_gap                | 0             | 0   | -   | Space between crosshair's lines.                                                            |
+| xhair_pad                | 0             | 0   | -   | Border around crosshair.                                                                    |
+| xhair_size               | 4             | 0   | -   | Crosshair size.                                                                             |
+| xhair_t                  | 0             | 0   | 1   | Enables T-shaped crosshair.                                                                 |
+| xhair_thick              | 0             | 0   | -   | Crosshair thickness.                                                                        |
 
 ## Building
 Clone the source code:
