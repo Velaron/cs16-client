@@ -312,10 +312,7 @@ int CHudAmmo::Init(void)
 	xhair_gap_useweaponvalue = CVAR_CREATE( "xhair_gap_useweaponvalue", "0", FCVAR_ARCHIVE );
 	xhair_dynamic_move = CVAR_CREATE( "xhair_dynamic_move", "1", FCVAR_ARCHIVE );
 
-	xhair_color_r = CVAR_CREATE( "xhair_color_r", "0", FCVAR_ARCHIVE );
-	xhair_color_g = CVAR_CREATE( "xhair_color_g", "255", FCVAR_ARCHIVE );
-	xhair_color_b = CVAR_CREATE( "xhair_color_b", "0", FCVAR_ARCHIVE );
-	xhair_alpha = CVAR_CREATE( "xhair_alpha", "255", FCVAR_ARCHIVE );
+	xhair_color = CVAR_CREATE( "xhair_color", "0 255 0 255", FCVAR_ARCHIVE );
 	xhair_additive = CVAR_CREATE( "xhair_additive", "0", FCVAR_ARCHIVE );
 
 	return 1;
@@ -1445,16 +1442,23 @@ void CHudAmmo::DrawCrosshairSection( int _x0, int _y0, int _x1, int _y1 )
 	float y0 = (float)_y0;
 	float x1 = (float)_x1;
 	float y1 = (float)_y1;
+	int color[3] = { 0, 255, 0 };
+	float alpha = 255.0f;
 
 	// float top_left[2] = { x0, y0 };
 	// float top_right[2] = { x1, y0 };
 	// float bottom_right[2] = { x1, y1 };
 	// float bottom_left[2] = { x0, y1 };
 
-	gEngfuncs.pTriAPI->Color4ub( xhair_color_r->value,
-	                            xhair_color_g->value,
-	                            xhair_color_b->value,
-	                            xhair_alpha->value );
+	if ( sscanf( xhair_color->string, "%d %d %d %f", &color[0], &color[1], &color[2], &alpha ) == 4 )
+	{
+		color[0] = bound( 0, color[0], 255 );
+		color[1] = bound( 0, color[1], 255 );
+		color[2] = bound( 0, color[2], 255 );
+		alpha = bound( 0.0f, alpha, 255.0f );
+	}
+	gEngfuncs.pTriAPI->Color4ub( color[0], color[1], color[2], alpha );
+	gEngfuncs.pTriAPI->Brightness( alpha / 255.0f );
 
 	DrawUtils::Draw2DQuad( x0, y0, x1, y1 );
 }
@@ -1466,6 +1470,7 @@ void CHudAmmo::DrawCrosshairPadding( int _pad, int _x0, int _y0, int _x1, int _y
 	float y0 = (float)_y0;
 	float x1 = (float)_x1;
 	float y1 = (float)_y1;
+	float alpha = 255.0f;
 
 	// float out_top_left[2] = { x0 - pad, y0 - pad };
 	// float out_top_right[2] = { x1 + pad, y0 - pad };
@@ -1476,7 +1481,12 @@ void CHudAmmo::DrawCrosshairPadding( int _pad, int _x0, int _y0, int _x1, int _y
 	// float in_bottom_right[2] = { x1, y1 };
 	// float in_bottom_left[2] = { x0, y1 };
 
-	gEngfuncs.pTriAPI->Color4ub( 0, 0, 0, xhair_alpha->value );
+	if ( sscanf( xhair_color->string, "%*d %*d %*d %f", &alpha ) == 1 )
+	{
+		alpha = bound( 0.0f, alpha, 255.0f );
+	}
+	gEngfuncs.pTriAPI->Color4ub( 0, 0, 0, alpha );
+	gEngfuncs.pTriAPI->Brightness( alpha / 255.0f );
 
 	DrawUtils::Draw2DQuad( x0, y0, x1, y1 );
 	DrawUtils::Draw2DQuad( x0 + pad, y0 + pad, x1 + pad, y1 + pad );

@@ -242,10 +242,7 @@ private:
 	cvar_t *xhair_gap_useweaponvalue;
 	cvar_t *xhair_dynamic_move;
 
-	cvar_t *xhair_color_r;
-	cvar_t *xhair_color_g;
-	cvar_t *xhair_color_b;
-	cvar_t *xhair_alpha;
+	cvar_t *xhair_color;
 	cvar_t *xhair_additive;
 
 	cvar_t *cl_crosshair_color;
