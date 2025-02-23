@@ -411,7 +411,6 @@ int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 
 extern "C" void DLLEXPORT HUD_ChatInputPosition( int *x, int *y )
 {
-	*x = *y = 0;
 }
 
 extern "C" int DLLEXPORT HUD_GetPlayerTeam(int iplayer)
