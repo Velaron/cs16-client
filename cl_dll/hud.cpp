@@ -390,10 +390,6 @@ void CHud :: Init( void )
 	InitRain();
 
 	//ServersInit();
-#ifndef __ANDROID__
-	gEngfuncs.Cvar_SetValue( "_vgui_menus", 0 );
-	gEngfuncs.Cvar_SetValue( "_extended_menus", 0 );
-#endif
 
 	gEngfuncs.Con_Printf( "%s: ^2CS16Client^7 ver. %s initialized.\n", __FUNCTION__, CVAR_GET_STRING( "cscl_ver" ) );
 
