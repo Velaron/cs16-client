@@ -83,7 +83,9 @@ inline T BufferReader::Read( void )
 	if( sizeof( T ) == 1 )
 		return m_pBuf[m_iRead++];
 
-	T t = *(T*)(m_pBuf + m_iRead);
+	// T t = *(T*)(m_pBuf + m_iRead);
+	T t;
+	memcpy( &t, m_pBuf + m_iRead, sizeof( T ) );
 	m_iRead += sizeof( T );
 
 	return t;
