@@ -628,10 +628,12 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 
 		msg->effect = reader.ReadByte();		// effect
 
-		DrawUtils::UnpackRGB( (int&)msg->r1, (int&)msg->g1, (int&)msg->b1, reader.ReadLong() );		// color
-		msg->r2 = msg->r1;
-		msg->g2 = msg->g1;
-		msg->b2 = msg->b1;
+		int r, g, b;
+
+		DrawUtils::UnpackRGB( r, g, b, reader.ReadLong() );		// color
+		msg->r2 = msg->r1 = bound( 0, r, 255 );
+		msg->g2 = msg->g1 = bound( 0, g, 255 );
+		msg->b2 = msg->b1 = bound( 0, b, 255 );
 		msg->a2 = msg->a1 = 0xFF;	// not transparent
 
 		msg->x = reader.ReadFloat();	// x pos
