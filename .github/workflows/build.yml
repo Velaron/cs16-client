@@ -143,10 +143,10 @@ jobs:
           mv */*.tar.gz .
 
           sleep 60s
-      - name: Purge artifacts
-        uses: geekyeggo/delete-artifact@v2
-        with:
-          name: "*"
+      # - name: Purge artifacts
+      #   uses: geekyeggo/delete-artifact@v2
+      #   with:
+      #     name: "*"
       - name: Upload new release
         uses: svenstaro/upload-release-action@v2
         with:
