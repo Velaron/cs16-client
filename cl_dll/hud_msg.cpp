@@ -76,6 +76,14 @@ int CHud :: MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf )
 	gEngfuncs.Cvar_Set( gHUD.cscl_currentmap->name, szMapName );
 	gEngfuncs.Cvar_Set( gHUD.cscl_mapprefix->name, szMapPrefix );
 
+	// reinitialize models. We assume that server already precached all models.
+	// NOTE: we're doing this in ResetHUD instead of InitHUD because it's not being
+	// sent in demos, as it's not part of the signon packet and it's not sent with
+	// fullupdate. Doing this in InitHUD essentially caches invalid model indices
+	g_iRShell       = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/rshell.mdl" );
+	g_iPShell       = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/pshell.mdl" );
+	g_iShotgunShell = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/shotgunshell.mdl" );
+	
 	return 1;
 }
 
@@ -125,11 +133,6 @@ int CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 
 	// reset round time
 	g_flRoundTime   = 0.0f;
-
-	// reinitialize models. We assume that server already precached all models.
-	g_iRShell       = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/rshell.mdl" );
-	g_iPShell       = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/pshell.mdl" );
-	g_iShotgunShell = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/shotgunshell.mdl" );
 
 	return 1;
 }
