@@ -68,13 +68,14 @@ int CHudScenario::Draw(float flTime)
 	int x, y;
 	DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
 
-	if( m_fFlashRate != 0.0f && m_fNextFlash > flTime )
+	if( m_fFlashRate != 0.0f && m_fNextFlash < flTime )
 	{
-		if( m_iAlpha == 255 ) m_iAlpha = m_iFlashAlpha;
-		else m_iAlpha = MIN_ALPHA;
-
+		m_iAlpha = m_iFlashAlpha;
 		m_fNextFlash = flTime + m_fFlashRate;
 	}
+
+	if ( m_iAlpha > MIN_ALPHA ) m_iAlpha -= 20;
+	else m_iAlpha = MIN_ALPHA;
 
 	DrawUtils::ScaleColors( r, g, b, m_iAlpha );
 
@@ -102,8 +103,7 @@ int CHudScenario::MsgFunc_Scenario(const char *pszName, int iSize, void *buf)
 	const char *spriteName = reader.ReadString();
 	m_sprite.SetSpriteByName( spriteName );
 
-	m_iFlashAlpha = min(reader.ReadByte(), MIN_ALPHA);
-	m_iAlpha = MIN_ALPHA;
+	m_iFlashAlpha = reader.ReadByte();
 	m_fFlashRate = reader.ReadShort() * 0.01;
 	m_fNextFlash = reader.ReadShort() * 0.01 + gHUD.m_flTime;
 
