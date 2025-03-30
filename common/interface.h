@@ -21,16 +21,17 @@
 #ifndef __INTERFACE_H__
 #define __INTERFACE_H__
 
-#if !defined( _WIN32 )
+#include "build.h"
 
+#if XASH_LINUX == 1
 #include <dlfcn.h> // dlopen,dlclose, et al
 #include <unistd.h>
+#endif
 
+#if !defined( _WIN32 )
 #define HMODULE        void *
 #define GetProcAddress dlsym
-
 #define _snprintf snprintf
-
 #endif
 
 void *Sys_GetProcAddress( void *pModuleHandle, const char *pName );

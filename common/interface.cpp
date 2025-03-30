@@ -10,6 +10,12 @@
 #include <stdio.h>
 #include "interface.h"
 
+#if XASH_PSVITA == 1
+#include <unistd.h>
+#define VRTLD_LIBDL_COMPAT
+#include <vrtld.h>
+#endif
+
 #if !defined( _WIN32 )
 // Linux doesn't have this function so this emulates its functionality
 //
