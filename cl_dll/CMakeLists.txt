@@ -57,7 +57,7 @@ else()
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
 endif()
 
-add_library(${CLIENT_LIB} MODULE ${CS_CLIENT_SRC})
+add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
 
 set_target_postfix(${CLIENT_LIB})
 
