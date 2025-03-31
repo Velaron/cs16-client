@@ -50,7 +50,7 @@ if(BUILD_SERVER)
 	add_subdirectory(3rdparty/yapb)
 	set_target_postfix(yapb)
 
-	set(XASH_COMPAT ON)
+	set(XASH_COMPAT ON CACHE BOOL "" FORCE)
 	add_subdirectory(3rdparty/ReGameDLL_CS)
 endif()
 
