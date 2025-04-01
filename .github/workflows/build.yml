@@ -42,17 +42,45 @@ jobs:
         with:
           name: Android
           path: android/app/build/outputs/apk/ci/app-ci-unsigned-signed.apk
-  # psvita:
-  #   name: PS Vita
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout sources
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-  #         submodules: recursive
-  #     - name: Setup PS Vita SDK
-  #       run: scripts/psvita_sdk.sh
+  psvita:
+    name: PS Vita
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libatomic1 libgcc-s1 \
+            libstdc++6 gcc-multilib g++-multilib cmake \
+            ninja-build libfontconfig-dev libfontconfig-dev
+      - name: Setup VitaSDK
+        run: scripts/psvita_sdk.sh
+      - name: Build
+        run: |
+          mkdir build && pushd build
+          export VITASDK=/usr/local/vitasdk
+          export PATH=$VITASDK/bin:$PATH
+          cmake -G"Unix Makefiles" -DBUILD_SERVER=OFF -DMAINUI_USE_STB=ON -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.toolchain.cmake" -DCMAKE_PROJECT_cs16-client_INCLUDE="$VITASDK/share/vrtld_shim.cmake" ..
+          make -j
+          popd
+      - name: Generate configuration files
+        run: |
+          pushd build
+          chmod +x ${{ github.workspace }}/scripts/psvita_generate_configs.sh
+          ${{ github.workspace }}/scripts/psvita_generate_configs.sh
+          popd
+      - name: Package
+        run: cpack --config CPackConfig.cmake
+        working-directory: build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PSVita-armv7hf
+          path: build/*.tar.gz
   windows:
     name: Windows
     runs-on: windows-latest
@@ -123,7 +151,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: [android, windows, linux]
+    needs: [android, windows, linux, psvita]
     steps:
       - name: Fetch artifacts
         uses: actions/download-artifact@v4

@@ -26,8 +26,9 @@
 #include <string.h>
 #include <stdio.h>
 #include "draw_util.h"
+#include "build.h"
 
-#if _WIN32
+#if XASH_WIN32 == 1 || XASH_PSVITA == 1
 #define strcasestr strstr
 #endif
 
