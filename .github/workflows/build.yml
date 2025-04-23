@@ -56,23 +56,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install libatomic1 libgcc-s1 \
             libstdc++6 gcc-multilib g++-multilib cmake \
-            ninja-build libfontconfig-dev libfontconfig-dev
+            ninja-build libfontconfig-dev
       - name: Setup VitaSDK
-        run: scripts/psvita_sdk.sh
+        run: |
+          chmod +x scripts/psvita_sdk.sh
+          scripts/psvita_sdk.sh
+          echo "VITASDK=/usr/local/vitasdk" >> $GITHUB_ENV
+          echo "$VITASDK/bin" >> $GITHUB_PATH
+      - name: Create build environment
+        run: cmake -E make_directory ${{github.workspace}}/build
+      - name: Configure CMake
+        working-directory: build
+        run: cmake .. --preset "psvita-release"
       - name: Build
-        run: |
-          mkdir build && pushd build
-          export VITASDK=/usr/local/vitasdk
-          export PATH=$VITASDK/bin:$PATH
-          cmake -G"Unix Makefiles" -DBUILD_SERVER=OFF -DMAINUI_USE_STB=ON -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.toolchain.cmake" -DCMAKE_PROJECT_cs16-client_INCLUDE="$VITASDK/share/vrtld_shim.cmake" ..
-          make -j
-          popd
+        working-directory: build
+        run: cmake --build . --parallel $(nproc)
       - name: Generate configuration files
+        working-directory: build
         run: |
-          pushd build
           chmod +x ${{ github.workspace }}/scripts/psvita_generate_configs.sh
           ${{ github.workspace }}/scripts/psvita_generate_configs.sh
-          popd
       - name: Package
         run: cpack --config CPackConfig.cmake
         working-directory: build
