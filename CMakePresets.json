@@ -77,6 +77,32 @@
             "toolchainFile": "${sourceDir}/toolchains/i386-linux-gnu.cmake"
         },
         {
+            "name": "psvita-debug",
+            "displayName": "PS Vita - Debug",
+            "generator": "Unix Makefiles",
+            "toolchainFile": "$env{VITASDK}/share/vita.toolchain.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BUILD_SERVER": "OFF",
+                "MAINUI_USE_STB": "ON",
+                "CMAKE_PROJECT_cs16-client_INCLUDE": "$env{VITASDK}/share/vrtld_shim.cmake"
+            },
+            "binaryDir": "${sourceDir}/build"
+        },
+        {
+            "name": "psvita-release",
+            "displayName": "PS Vita - Release",
+            "generator": "Unix Makefiles",
+            "toolchainFile": "$env{VITASDK}/share/vita.toolchain.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "BUILD_SERVER": "OFF",
+                "MAINUI_USE_STB": "ON",
+                "CMAKE_PROJECT_cs16-client_INCLUDE": "$env{VITASDK}/share/vrtld_shim.cmake"
+            },
+            "binaryDir": "${sourceDir}/build"
+        },
+        {
             "name": "linux-ci-amd64",
             "inherits": "linux-release-amd64",
             "displayName": "Linux CI - amd64",
