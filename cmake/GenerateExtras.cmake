@@ -21,5 +21,9 @@ if(NOT ANDROID)
 			"${CMAKE_CURRENT_BINARY_DIR}/video.cfg" 
 			"${CMAKE_CURRENT_BINARY_DIR}/opengl.cfg" 
 			DESTINATION "${GAME_DIR}/")
+
+		install(FILES 
+			"${CMAKE_CURRENT_BINARY_DIR}/kb_def.lst" 
+			DESTINATION "${GAME_DIR}/gfx/shell")
 	endif()
 endif()
