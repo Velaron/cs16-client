@@ -57,18 +57,38 @@ else()
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
 endif()
 
-add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
+#add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
 
-set_target_postfix(${CLIENT_LIB})
+if("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")
+    # Add .wasm output instead of static library
+    add_executable(client ${CS_CLIENT_SRC})
 
-install(TARGETS ${CLIENT_LIB}
-	DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/"
-	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-	    GROUP_READ GROUP_EXECUTE
-		WORLD_READ WORLD_EXECUTE)
+    # Optional: set output directory
+    set_target_properties(client PROPERTIES
+        RUNTIME_OUTPUT_NAME "client"
+        SUFFIX ".wasm"
+    )
 
-# Install PDB file on Windows
-if(MSVC)
-	install(FILES $<TARGET_PDB_FILE:${CLIENT_LIB}>
-		DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/" OPTIONAL)
+    target_compile_options(client PRIVATE -fPIC)
+
+    target_link_options(client PRIVATE
+        "-sSIDE_MODULE=1"
+    )
+    add_compile_options()
+endif()
+
+# Only install if not building with Emscripten
+if(NOT EMSCRIPTEN)
+	set_target_postfix(${CLIENT_LIB})
+
+	install(TARGETS ${CLIENT_LIB}
+		DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/"
+		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+		    GROUP_READ GROUP_EXECUTE
+			WORLD_READ WORLD_EXECUTE)
+
+	if(MSVC)
+		install(FILES $<TARGET_PDB_FILE:${CLIENT_LIB}>
+			DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/" OPTIONAL)
+	endif()
 endif()
