@@ -68,7 +68,7 @@ wrect_t HUD_GetSpriteRect( int index )
 
 vec3_t g_ColorBlue	= { 0.6, 0.8, 1.0 };
 vec3_t g_ColorRed	= { 1.0, 0.25, 0.25 };
-vec3_t g_ColorGreen	= { 0.6, 1.0, 0.6 };
+vec3_t g_ColorGreen	= { 0.0, 1.0, 0.0 };
 vec3_t g_ColorYellow= { 1.0, 0.7, 0.0 };
 vec3_t g_ColorGrey	= { 0.8, 0.8, 0.8 };
 
@@ -76,11 +76,11 @@ float *GetClientColor( int clientIndex )
 {
 	switch ( g_PlayerExtraInfo[clientIndex].teamnumber )
 	{
-	case TEAM_TERRORIST:  return g_ColorRed;
 	case TEAM_CT:         return g_ColorBlue;
-	case TEAM_SPECTATOR:
-	case TEAM_UNASSIGNED: return g_ColorYellow;
-	case 4:               return g_ColorGreen;
+	case TEAM_TERRORIST:  return g_ColorRed;
+	case TEAM_UNASSIGNED:
+	case TEAM_SPECTATOR:  return g_ColorGrey;
+	case 4:		          return g_ColorGreen;
 	default:              return g_ColorGrey;
 	}
 }
