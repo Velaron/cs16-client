@@ -120,36 +120,74 @@ int CHudSayText :: Draw( float flTime )
 			m_iFlags &= ~HUD_DRAW;
 		}
 	}
-
-	for ( int i = 0; i < MAX_LINES; i++ )
+	
+	for (int i = 0; i < MAX_LINES; i++)
 	{
-		if ( *g_szLineBuffer[i] )
+		if (!g_szLineBuffer[i][0]) // skip empty string
+			continue;
+
+		int current_x = LINE_START;
+		const char* text = g_szLineBuffer[i];
+		size_t length = strlen(text);
+
+		// default color if not set
+		DrawUtils::SetConsoleTextColor(g_ColorYellow[0], g_ColorYellow[1], g_ColorYellow[2]);
+
+		// buffer for accumulating characters of the same color
+		char color_buffer[256] = {0};
+		size_t buffer_pos = 0;
+
+		for (size_t c = 0; c < length; c++)
 		{
-			if ( *g_szLineBuffer[i] == 2 && g_pflNameColors[i] )
+			// color code parse
+			// '\x01' - normal (yellow); '\0x03' - teamcolor (R GREY B); '\x04' - green
+			if (text[c] == '\x01' || text[c] == '\x03' || text[c] == '\x04')
 			{
-				// it's a saytext string
-				static char buf[MAX_PLAYER_NAME_LENGTH+32];
+				// if there are characters in the buffer, we draw them with the current color
+				if (buffer_pos > 0)
+				{
+					color_buffer[buffer_pos] = '\x00';
+					current_x = DrawUtils::DrawConsoleString(current_x, y, color_buffer);
+					buffer_pos = 0;
+				}
 
-				// draw the first x characters in the player color
-				strncpy( buf, g_szLineBuffer[i], min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+32) );
-				buf[ min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+31) ] = 0;
-				DrawUtils::SetConsoleTextColor( g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2] );
-				int x = DrawUtils::DrawConsoleString( LINE_START, y, buf );
-
-				// color is reset after each string draw
-				DrawUtils::DrawConsoleString( x, y, g_szLineBuffer[i] + g_iNameLengths[i] );
+				// switch to color code
+				char color_code = text[c];
+				switch (color_code)
+				{
+					case '\x01': // yellow normal
+						DrawUtils::SetConsoleTextColor(g_ColorYellow[0], g_ColorYellow[1], g_ColorYellow[2]);
+						break;
+					case '\x03': // team color
+						if (g_pflNameColors[i])
+						{
+							DrawUtils::SetConsoleTextColor(g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2]);
+						}
+						break;
+					case '\x04': // green
+						DrawUtils::SetConsoleTextColor(g_ColorGreen[0], g_ColorGreen[1], g_ColorGreen[2]);
+						break;
+				}
+				continue;
 			}
-			else
+
+			// add char to buf
+			if (buffer_pos < sizeof(color_buffer) - 1)
 			{
-				// normal draw
-				DrawUtils::DrawConsoleString( LINE_START, y, g_szLineBuffer[i] );
+				color_buffer[buffer_pos++] = text[c];
 			}
+		}
+
+		// draw the remaining characters
+		if (buffer_pos > 0)
+		{
+			color_buffer[buffer_pos] = '\x00';
+			DrawUtils::DrawConsoleString(current_x, y, color_buffer);
 		}
 
 		y += line_height;
 	}
-
-
+	
 	return 1;
 }
 
@@ -165,57 +203,57 @@ struct
 {
 	{
 		"#Cstrike_Chat_CT",
-		"\x02(Counter-Terrorist) %s :  %s",
+		"\x03(Counter-Terrorist) %s : \x01%s",
 		2, true, true, false
 	},
 	{
 		"#Cstrike_Chat_T",
-		"\x02(Terrorist) %s :  %s",
+		"\x03(Terrorist) %s : \x01%s",
 		2, true, true, false
 	},
 	{
 		"#Cstrike_Chat_CT_Dead",
-		"\x02*DEAD*(Counter-Terrorist) %s :  %s",
+		"\x03*DEAD*(Counter-Terrorist) %s : \x01%s",
 		2, false, true, false
 	},
 	{
 		"#Cstrike_Chat_T_Dead",
-		"\x02*DEAD*(Terrorist) %s :  %s",
+		"\x03*DEAD*(Terrorist) %s : \x01%s",
 		2, false, true, false
 	},
 	{
 		"#Cstrike_Chat_Spec",
-		"\x02(Spectator) %s :  %s",
+		"\x03(Spectator) %s : \x03%s",
 		2, false, true, false
 	},
 	{
 		"#Cstrike_Chat_All",
-		"\x02%s :  %s",
+		"\x03%s : \x01%s",
 		2, true, true, false
 	},
 	{
 		"#Cstrike_Chat_AllDead",
-		"\x02*DEAD* %s:  %s",
+		"\x03*DEAD* %s: \x01%s",
 		2, false, true, false
 	},
 	{
 		"#Cstrike_Chat_AllSpec",
-		"\x02*SPEC* %s:  %s",
+		"\x03*SPEC* %s: \x03%s",
 		2, false, true, false
 	},
 	{
 		"#Cstrike_Name_Change",
-		"\x02* %s changed name to %s",
+		"\x03* %s changed name to %s",
 		2, true, false, false
 	},
 	{
 		"#Cstrike_Chat_T_Loc",
-		"\x02*(Terrorist) %s @ %s : %s",
+		"\x03*(Terrorist) %s @ %s : \x01%s",
 		3, true, true, true
 	},
 	{
 		"#Cstrike_Chat_CT_Loc",
-		"\x02*(Counter-Terrorist) %s @ %s : %s",
+		"\x03*(Counter-Terrorist) %s @ %s : \x01%s",
 		3, true, true, true
 	},
 	{
@@ -326,7 +364,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 		dst[sizeof(dst)-1] = 0;
 		break;
 	}
-
+	
 	SayTextPrint( dst, strlen(dst), client_index );
 
 	delete[] fmt;
@@ -365,10 +403,11 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 
 #if 1
 	// if it's a say message, search for the players name in the string
-	if ( *pszBuf == 2 && clientIndex > 0 )
+	if ( clientIndex > 0 )
 	{
 		GetPlayerInfo( clientIndex, &g_PlayerInfoList[clientIndex] );
 		const char *pName = g_PlayerInfoList[clientIndex].name;
+		g_pflNameColors[i] = GetClientColor( clientIndex );
 
 		if ( pName )
 		{
@@ -377,7 +416,6 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 			if ( nameInString )
 			{
 				g_iNameLengths[i] = strlen( pName ) + (nameInString - pszBuf);
-				g_pflNameColors[i] = GetClientColor( clientIndex );
 			}
 		}
 	}
