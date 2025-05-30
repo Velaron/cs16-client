@@ -57,9 +57,13 @@ else()
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
 endif()
 
-#add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
-
 if("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")
+    set(EMSCRIPTEN TRUE)
+else()
+    set(EMSCRIPTEN FALSE)
+endif()
+
+if(EMSCRIPTEN)
     # Add .wasm output instead of static library
     add_executable(client ${CS_CLIENT_SRC})
 
@@ -69,12 +73,13 @@ if("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")
         SUFFIX ".wasm"
     )
 
-    target_compile_options(client PRIVATE -fPIC)
+    target_compile_options(client PRIVATE -fno-rtti -fPIC)
 
     target_link_options(client PRIVATE
-        "-sSIDE_MODULE=1"
+        -sSIDE_MODULE=1
     )
-    add_compile_options()
+else()
+    add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
 endif()
 
 # Only install if not building with Emscripten
