@@ -158,7 +158,7 @@ inline HSPRITE LoadSprite(const char *pszName)
 	return SPR_Load(sz);
 }
 
-extern vec3_t g_ColorRed, g_ColorBlue, g_ColorYellow, g_ColorGrey;
+extern vec3_t g_ColorRed, g_ColorBlue, g_ColorYellow, g_ColorGrey, g_ColorGreen;
 
 inline void GetTeamColor( int &r, int &g, int &b, int teamIndex )
 {
