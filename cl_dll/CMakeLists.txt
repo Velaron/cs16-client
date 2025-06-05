@@ -73,10 +73,14 @@ if(EMSCRIPTEN)
         SUFFIX ".wasm"
     )
 
-    target_compile_options(client PRIVATE -fno-rtti -fPIC)
+    target_compile_options(client PRIVATE -fPIC -g -sASSERTIONS=2 -sSAFE_HEAP=1 -sSTACK_OVERFLOW_CHECK=2 -fvisibility=hidden)
 
     target_link_options(client PRIVATE
         -sSIDE_MODULE=1
+        -sSAFE_HEAP=1
+        -g
+        -sASSERTIONS=2
+        -sSTACK_OVERFLOW_CHECK=2
     )
 else()
     add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
