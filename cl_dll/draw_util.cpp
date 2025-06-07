@@ -375,7 +375,7 @@ int DrawUtils::HudStringLen( const char *szIt, float scale )
 			continue;
 		}
 
-		int uch = Con_UtfProcessChar( (unsigned int)*szIt );
+		int uch = Con_UtfProcessChar( (unsigned char)*szIt );
 
 		if ( !uch )
 			continue;
