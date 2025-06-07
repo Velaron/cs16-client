@@ -488,6 +488,17 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 				message->holdtime = 5;
 			}
 
+			// safety check - don't add empty messages
+            if ( !message->pMessage || message->pMessage[0] == '\0' ) 
+            {
+                // clean up custom messages
+                if ( !strcmp(message->pName, "Custom") ) 
+                {
+                    delete[] message->pMessage;
+                }
+                return; // bail out if message is empty
+            }
+
 			for ( j = 0; j < maxHUDMessages; j++ )
 			{
 				if ( m_pMessages[j] )
