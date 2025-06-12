@@ -7,6 +7,11 @@ set(EXTRAS_DIR "${CMAKE_CURRENT_BINARY_DIR}/extras")
 include(LibraryNaming)
 # include(ExternalProject)
 
+if(APPLE)
+	set(BUILD_SERVER OFF CACHE BOOL "Build menu library." FORCE)
+	set(BUILD_MAINUI OFF CACHE BOOL "Build server library." FORCE)
+endif()
+
 option(BUILD_CLIENT "Build client library." ON)
 option(BUILD_MAINUI "Build menu library." ON)
 option(BUILD_SERVER "Build server library." ON)

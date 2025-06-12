@@ -10,6 +10,11 @@
 #include <stdio.h>
 #include "interface.h"
 
+#if !defined( _WIN32 )
+#include <dlfcn.h>
+#include <unistd.h>
+#endif
+
 #if XASH_PSVITA == 1
 #include <unistd.h>
 #define VRTLD_LIBDL_COMPAT

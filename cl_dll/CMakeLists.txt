@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(client)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CLIENT_LIB client)
 
 file(GLOB CS_CLIENT_SRC "*.cpp")

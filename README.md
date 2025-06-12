@@ -55,3 +55,8 @@ cmake --build build --config Release
 ```
 ./gradlew assembleRelease
 ```
+### MacOS (client only)
+```
+cmake -S . -B build
+cmake --build build --config Release
+```
