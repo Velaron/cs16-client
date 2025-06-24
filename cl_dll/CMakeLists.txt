@@ -57,47 +57,29 @@ else()
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
 endif()
 
-if("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")
-    set(EMSCRIPTEN TRUE)
-else()
-    set(EMSCRIPTEN FALSE)
-endif()
-
 if(EMSCRIPTEN)
-    # Add .wasm output instead of static library
-    add_executable(client ${CS_CLIENT_SRC})
+	add_executable(${CLIENT_LIB} ${CS_CLIENT_SRC})
 
-    # Optional: set output directory
-    set_target_properties(client PROPERTIES
-        RUNTIME_OUTPUT_NAME "client"
-        SUFFIX ".wasm"
-    )
+    set_target_properties(${CLIENT_LIB} PROPERTIES SUFFIX ".wasm")
 
-    target_compile_options(client PRIVATE -fPIC -g -sASSERTIONS=2 -sSAFE_HEAP=1 -sSTACK_OVERFLOW_CHECK=2 -fvisibility=hidden)
+    target_compile_options(client PRIVATE -fPIC -fvisibility=hidden)
 
     target_link_options(client PRIVATE
         -sSIDE_MODULE=1
-        -sSAFE_HEAP=1
-        -g
-        -sASSERTIONS=2
-        -sSTACK_OVERFLOW_CHECK=2
     )
 else()
-    add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
+	add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
 endif()
 
-# Only install if not building with Emscripten
-if(NOT EMSCRIPTEN)
-	set_target_postfix(${CLIENT_LIB})
+set_target_postfix(${CLIENT_LIB})
 
-	install(TARGETS ${CLIENT_LIB}
-		DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/"
-		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-		    GROUP_READ GROUP_EXECUTE
-			WORLD_READ WORLD_EXECUTE)
+install(TARGETS ${CLIENT_LIB}
+	DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/"
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+	    GROUP_READ GROUP_EXECUTE
+		WORLD_READ WORLD_EXECUTE)
 
-	if(MSVC)
-		install(FILES $<TARGET_PDB_FILE:${CLIENT_LIB}>
-			DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/" OPTIONAL)
-	endif()
+if(MSVC)
+	install(FILES $<TARGET_PDB_FILE:${CLIENT_LIB}>
+		DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/" OPTIONAL)
 endif()
