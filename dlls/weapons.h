@@ -204,7 +204,7 @@ public:
 	virtual int iItemSlot(void) { return 0; }
 
 public:
-	void EXPORT DestroyItem(void) {}
+	BOOL EXPORT DestroyItem(void) {return TRUE;}
 	void EXPORT DefaultTouch(CBaseEntity *pOther) {}
 	void EXPORT FallThink(void) {}
 	void EXPORT Materialize(void) {}

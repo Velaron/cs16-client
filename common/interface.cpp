@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================
@@ -9,6 +9,27 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "interface.h"
+#ifdef __EMSCRIPTEN__
+#define RTLD_NOW 0
+#include <cstdio>  // for NULL
+
+inline char* getcwd(char* buf, size_t size)
+{
+    // Optionally return empty string or null pointer if you don't support it
+    if (buf && size > 0) {
+        buf[0] = '\0';  // empty cwd
+        return buf;
+    }
+    return NULL;
+}
+
+// Provide dummy implementations or disable the feature
+void* dlopen(const char*, int) { return nullptr; }
+void* dlsym(void*, const char*) { return nullptr; }
+int dlclose(void*) { return 0; }
+char* dlerror() { return (char*)"dlopen not available on Emscripten"; }
+
+#endif
 
 #if XASH_PSVITA == 1
 #include <unistd.h>

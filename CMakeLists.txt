@@ -20,6 +20,12 @@ set(SERVER_INSTALL_DIR "dlls" CACHE STRING "Server library location.")
 # 	add_link_options(/fsanitize=address)
 # endif()
 
+if("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")
+	set(EMSCRIPTEN TRUE)
+else()
+	set(EMSCRIPTEN FALSE)
+endif()
+
 if(VITA)
 	message(STATUS "Building for PS Vita")
 	add_compile_options(-fno-use-cxa-atexit)
@@ -47,8 +53,10 @@ if(BUILD_SERVER)
 	# 	BUILD_IN_SOURCE 1
 	# 	INSTALL_COMMAND meson install -C build --destdir ${CMAKE_INSTALL_PREFIX}
 	# )
-	add_subdirectory(3rdparty/yapb)
-	set_target_postfix(yapb)
+	if (!EMSCRIPTEN)
+		add_subdirectory(3rdparty/yapb)
+		set_target_postfix(yapb)
+	endif()
 
 	set(XASH_COMPAT ON CACHE BOOL "" FORCE)
 	add_subdirectory(3rdparty/ReGameDLL_CS)
