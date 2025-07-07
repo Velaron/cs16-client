@@ -58,7 +58,19 @@ else()
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
 endif()
 
-add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
+if(EMSCRIPTEN)
+	add_executable(${CLIENT_LIB} ${CS_CLIENT_SRC})
+
+    set_target_properties(${CLIENT_LIB} PROPERTIES SUFFIX ".wasm")
+
+    target_compile_options(client PRIVATE -fPIC -fvisibility=hidden)
+
+    target_link_options(client PRIVATE
+        -sSIDE_MODULE=1
+    )
+else()
+	add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
+endif()
 
 set_target_postfix(${CLIENT_LIB})
 
@@ -68,7 +80,6 @@ install(TARGETS ${CLIENT_LIB}
 	    GROUP_READ GROUP_EXECUTE
 		WORLD_READ WORLD_EXECUTE)
 
-# Install PDB file on Windows
 if(MSVC)
 	install(FILES $<TARGET_PDB_FILE:${CLIENT_LIB}>
 		DESTINATION "${GAME_DIR}/${CLIENT_INSTALL_DIR}/" OPTIONAL)
