@@ -53,7 +53,7 @@ if(BUILD_SERVER)
 	# 	BUILD_IN_SOURCE 1
 	# 	INSTALL_COMMAND meson install -C build --destdir ${CMAKE_INSTALL_PREFIX}
 	# )
-	if (!EMSCRIPTEN)
+	if (NOT EMSCRIPTEN)
 		add_subdirectory(3rdparty/yapb)
 		set_target_postfix(yapb)
 	endif()
