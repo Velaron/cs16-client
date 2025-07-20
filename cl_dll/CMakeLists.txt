@@ -66,7 +66,10 @@ if(EMSCRIPTEN)
     target_compile_options(client PRIVATE -fPIC -fvisibility=hidden)
 
     target_link_options(client PRIVATE
-        -sSIDE_MODULE=1
+        "-sSIDE_MODULE=1"
+		"-Oz"
+		"--closure 1"
+		"--minify-wasm-imports"
     )
 else()
 	add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
