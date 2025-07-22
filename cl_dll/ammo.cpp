@@ -1488,8 +1488,10 @@ void CHudAmmo::DrawCrosshairPadding( int _pad, int _x0, int _y0, int _x1, int _y
 	gEngfuncs.pTriAPI->Color4ub( 0, 0, 0, alpha );
 	gEngfuncs.pTriAPI->Brightness( alpha / 255.0f );
 
-	DrawUtils::Draw2DQuad( x0, y0, x1, y1 );
-	DrawUtils::Draw2DQuad( x0 + pad, y0 + pad, x1 + pad, y1 + pad );
+	DrawUtils::Draw2DQuad( x0 - pad, y0 - pad, x1 + pad, y0 ); // top part
+	DrawUtils::Draw2DQuad( x0 - pad, y1, x1 + pad, y1 + pad ); // bottom part
+	DrawUtils::Draw2DQuad( x0 - pad, y0, x0, y1 );             // left part
+	DrawUtils::Draw2DQuad( x1, y0, x1 + pad, y1 );             // right part
 }
 
 void CHudAmmo::DrawCrosshair( int weaponId )
@@ -1530,6 +1532,26 @@ void CHudAmmo::DrawCrosshair( int weaponId )
 	gRenderAPI.GL_SelectTexture( 0 );
 	gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
 
+	/* draw padding if wanted */
+	if ( xhair_pad->value )
+	{
+		/* padding shouldn't be additive */
+		gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
+
+		/* don't scale this */
+		int pad = (int)xhair_pad->value;
+
+		if ( xhair_dot->value )
+			DrawCrosshairPadding( pad, x0, y0, x1, y1 );
+
+		if ( !xhair_t->value )
+			DrawCrosshairPadding( pad, x0, outer.top, x1, inner.top );
+
+		DrawCrosshairPadding( pad, x0, inner.bottom, x1, outer.bottom );
+		DrawCrosshairPadding( pad, outer.left, y0, inner.left, y1 );
+		DrawCrosshairPadding( pad, inner.right, y0, outer.right, y1 );
+	}
+
 	if ( xhair_additive->value )
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 	else
@@ -1544,26 +1566,6 @@ void CHudAmmo::DrawCrosshair( int weaponId )
 	DrawCrosshairSection( x0, inner.bottom, x1, outer.bottom );
 	DrawCrosshairSection( outer.left, y0, inner.left, y1 );
 	DrawCrosshairSection( inner.right, y0, outer.right, y1 );
-
-	if ( xhair_additive->value )
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransTexture );
-
-	/* draw padding if wanted */
-	if ( xhair_pad->value )
-	{
-		/* don't scale this */
-		int pad = (int)xhair_pad->value;
-
-		if ( xhair_dot->value )
-			DrawCrosshairPadding( pad, x0, y0, x1, y1 );
-
-		if ( !xhair_t->value )
-			DrawCrosshairPadding( pad, x0, outer.top, x1, inner.top );
-
-		DrawCrosshairPadding( pad, x0, inner.bottom, x1, outer.bottom );
-		DrawCrosshairPadding( pad, outer.left, y0, inner.left, y1 );
-		DrawCrosshairPadding( pad, inner.right, y0, outer.right, y1 );
-	}
 }
 
 void CHudAmmo::DrawCrosshair()
