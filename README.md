@@ -30,7 +30,7 @@ After that, just install the APK and run.
 | xhair_dynamic_scale      | 0             | 0   | -   | Scale of the dynamic crosshair movement.                                                    |
 | xhair_gap_useweaponvalue | 0             | 0   | 1   | Makes the crosshair gap scale depend on the active weapon.                                  |
 | xhair_enable             | 0             | 0   | 1   | Enables enhanced crosshair.                                                                 |
-| xhair_gap                | 0             | 0   | -   | Space between crosshair's lines.                                                            |
+| xhair_gap                | 0             | 0   | 15  | Space between crosshair's lines.                                                            |
 | xhair_pad                | 0             | 0   | -   | Border around crosshair.                                                                    |
 | xhair_size               | 4             | 0   | -   | Crosshair size.                                                                             |
 | xhair_t                  | 0             | 0   | 1   | Enables T-shaped crosshair.                                                                 |
