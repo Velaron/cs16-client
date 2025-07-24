@@ -363,6 +363,8 @@ public:
 	void SetScoreboardDefaults( void );
 	void GetAllPlayersInfo( void );
 
+	bool ShouldDrawScoreboard() const;
+
 	CHudUserCmd(ShowScores);
 	CHudUserCmd(HideScores);
 	CHudUserCmd(ShowScoreboard2);
