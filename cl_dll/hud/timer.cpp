@@ -82,21 +82,40 @@ int CHudTimer::Draw( float fTime )
 	}
 
 	DrawUtils::ScaleColors( r, g, b, MIN_ALPHA );
-    
+
 	int iWatchWidth = gHUD.GetSpriteRect(m_HUD_timer).Width();
-    
-	int x = ScreenWidth/2 - 50;
-	int y = ScreenHeight - 1.5 * gHUD.m_iFontHeight ;
-    
-    SPR_Set(gHUD.GetSprite(m_HUD_timer), r, g, b);
-    SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_timer));
-        
-	x = DrawUtils::DrawHudNumber2( x + iWatchWidth / 4, y, false, 2, minutes, r, g, b );
+	int iDigitWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).Width();
+	int colonWidth = 4; // Width reserved for the colon ':'
+	int spacing = 4; // Spacing between elements
+
+	// Reserve space for 2 minute digits so that ":SS" (colon + seconds) always stays aligned
+	int totalWidth = iWatchWidth + spacing + (2 * iDigitWidth) + colonWidth + (2 * iDigitWidth);
+
+	int x = (ScreenWidth - totalWidth) / 2;
+	int y = ScreenHeight - 1.5 * gHUD.m_iFontHeight;
+
+	SPR_Set(gHUD.GetSprite(m_HUD_timer), r, g, b);
+	SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_timer));
+
+	// Move the x position to the right, past the timer icon + spacing
+	x += iWatchWidth + spacing;
+
+	// Draw minutes without leading zero, but keep space for it
+	if (minutes < 10)
+	{
+		x += iDigitWidth;  // Skip the slot for leading zero (empty space)
+		x = DrawUtils::DrawHudNumber2(x, y, false, 1, minutes, r, g, b);
+	}
+	else
+	{
+		x = DrawUtils::DrawHudNumber2(x, y, false, 2, minutes, r, g, b);
+	}
+
 	// draw :
 	FillRGBA(x + iWatchWidth / 4, y + gHUD.m_iFontHeight / 4, 2, 2, r, g, b, 100);
 	FillRGBA(x + iWatchWidth / 4, y + gHUD.m_iFontHeight - gHUD.m_iFontHeight / 4, 2, 2, r, g, b, 100);
 
-	m_right = DrawUtils::DrawHudNumber2( x + iWatchWidth / 2, y, true, 2, seconds, r, g, b );
+	m_right = DrawUtils::DrawHudNumber2(x + iWatchWidth / 2, y, true, 2, seconds, r, g, b);
 	return 1;
 }
 
