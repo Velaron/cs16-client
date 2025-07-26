@@ -56,7 +56,7 @@ int CHudTimer::VidInit()
 int CHudTimer::Draw( float fTime )
 {
 	if ( ( gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH ) )
-        return 1;
+		return 1;
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
 		return 1;
@@ -85,11 +85,9 @@ int CHudTimer::Draw( float fTime )
 
 	int iWatchWidth = gHUD.GetSpriteRect(m_HUD_timer).Width();
 	int iDigitWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).Width();
-	int colonWidth = 4; // Width reserved for the colon ':'
-	int spacing = 4; // Spacing between elements
 
 	// Reserve space for 2 minute digits so that ":SS" (colon + seconds) always stays aligned
-	int totalWidth = iWatchWidth + spacing + (2 * iDigitWidth) + colonWidth + (2 * iDigitWidth);
+	int totalWidth = iWatchWidth + (2 * iDigitWidth) + (2 * iDigitWidth);
 
 	int x = (ScreenWidth - totalWidth) / 2;
 	int y = ScreenHeight - 1.5 * gHUD.m_iFontHeight;
@@ -97,8 +95,8 @@ int CHudTimer::Draw( float fTime )
 	SPR_Set(gHUD.GetSprite(m_HUD_timer), r, g, b);
 	SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_timer));
 
-	// Move the x position to the right, past the timer icon + spacing
-	x += iWatchWidth + spacing;
+	// Move the x position to the right, past the timer
+	x += iWatchWidth;
 
 	// Draw minutes without leading zero, but keep space for it
 	if (minutes < 10)
@@ -108,7 +106,7 @@ int CHudTimer::Draw( float fTime )
 	}
 	else
 	{
-		x = DrawUtils::DrawHudNumber2(x, y, false, 2, minutes, r, g, b);
+		x = DrawUtils::DrawHudNumber2(x, y, true, 2, minutes, r, g, b);
 	}
 
 	// draw :
