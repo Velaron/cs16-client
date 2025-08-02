@@ -2,9 +2,9 @@
 Counter-Strike reverse-engineered.
 
 ## Donate
-[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/velaron)
+[![Boosty.to](https://img.shields.io/badge/Boosty-F15F2C?logo=boosty&logoColor=fff&style=for-the-badge)](https://boosty.to/velaron)
 
-[Support](https://www.buymeacoffee.com/velaron) me on Buy Me A Coffee, if you like my work and would like to support further development goals, like  reverse-engineering other great mods.
+[Support](https://boosty.to/velaron) me on Boosty.to, if you like my work and would like to support further development goals, like reverse-engineering other great mods.
 
 ## Download
 You can download a build at the [Releases](https://github.com/Velaron/cs16-client/releases/tag/continuous) section, or use these links:
