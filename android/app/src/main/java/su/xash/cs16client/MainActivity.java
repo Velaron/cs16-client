@@ -31,7 +31,7 @@ public class MainActivity extends Activity {
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 .putExtra("gamedir", "cstrike")
                 .putExtra("gamelibdir", getApplicationInfo().nativeLibraryDir)
-                .putExtra("argv", "-dev 2 -log -dll " + getApplicationInfo().nativeLibraryDir + "/libyapb.so")
+                .putExtra("argv", "-dev 2 -log -dll @yapb")
                 .putExtra("package", getPackageName()));
         finish();
     }
