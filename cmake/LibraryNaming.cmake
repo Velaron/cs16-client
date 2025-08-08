@@ -207,10 +207,16 @@ endif()
 message(STATUS "Library postfix: " ${POSTFIX})
 
 macro(set_target_postfix target)
-	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${target}${POSTFIX}" PREFIX "")
+	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${target}${POSTFIX}")
+	if(NOT ANDROID)
+		set_target_properties(${target} PROPERTIES PREFIX "")
+	endif()
 endmacro()
 
 macro(set_target_postfix_with_name target name)
-	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${name}${POSTFIX}" PREFIX "")
+	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${name}${POSTFIX}")
+	if(NOT ANDROID)
+		set_target_properties(${target} PROPERTIES PREFIX "")
+	endif()
 endmacro()
 
