@@ -26,12 +26,12 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
       - name: Build
-        run: ./gradlew assembleCi
+        run: ./gradlew assembleGitContinuous
         working-directory: android
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: android/app/build/outputs/apk/ci
+          releaseDirectory: android/app/build/outputs/apk/git/continuous
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Android
-          path: android/app/build/outputs/apk/ci/app-ci-unsigned-signed.apk
+          path: android/app/build/outputs/apk/ci/app-git-continuous-unsigned-signed.apk
   psvita:
     name: PS Vita
     runs-on: ubuntu-latest
@@ -169,7 +169,7 @@ jobs:
           repo: ${{ env.GITHUB_REPOSITORY }}
       - name: Prepare release
         run: |
-          mv Android/app-ci-unsigned-signed.apk CS16Client-Android.apk
+          mv Android/app-git-continuous-unsigned-signed.apk CS16Client-Android.apk
 
           mv */*.zip .
           mv */*.tar.gz .

@@ -2,41 +2,41 @@ import java.time.LocalDateTime
 import java.time.Month
 import java.time.temporal.ChronoUnit
 
-apply plugin: 'com.android.application'
+apply plugin: "com.android.application"
 
 android {
-    namespace 'su.xash.cs16client'
-    ndkVersion "28.2.13676358"
-    compileSdk 36
+    namespace = "su.xash.cs16client"
+    ndkVersion = "28.2.13676358"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId 'su.xash.cs16client'
-        versionName '1.35'
-        versionCode getBuildNum()
-        minSdkVersion 21
-        targetSdk 36
+        applicationId = "su.xash.cs16client"
+        versionName = "1.35-" + getGitHash()
+        versionCode = getBuildNum()
+        minSdk = 21
+        targetSdk = 36
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     externalNativeBuild {
         cmake {
-            version '3.22.1'
-            path file('../../CMakeLists.txt')
+            version = "3.22.1"
+            path file("../../CMakeLists.txt")
         }
     }
 
     lint {
-        abortOnError false
+        abortOnError = false
     }
 
     packaging {
         jniLibs {
             keepDebugSymbols.add("**/*.so")
-            useLegacyPackaging true
+            useLegacyPackaging = true
         }
     }
 
@@ -50,25 +50,43 @@ android {
 
     buildTypes {
         debug {
-            minifyEnabled false
-            shrinkResources false
-            debuggable true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            debuggable = true
+            applicationIdSuffix = ".test"
+
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.txt"
         }
 
         release {
-            minifyEnabled false
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            minifyEnabled = true
+            shrinkResources = true
+
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.txt"
         }
 
-        register("ci") {
+        create("continuous") {
             initWith(getByName("release"))
-
-            externalNativeBuild.cmake {
-                arguments "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-            }
+            applicationIdSuffix = ".test"
         }
+    }
+
+    flavorDimensions += "version"
+
+    productFlavors {
+        create("googlePlay") {
+            dimension = "version"
+            applicationId = "in.celest.xash3d.cs16client"
+            buildConfigField("Boolean", "IS_GOOGLE_PLAY_BUILD", "true")
+        }
+
+        create("git") {
+            dimension = "version"
+            buildConfigField("Boolean", "IS_GOOGLE_PLAY_BUILD", "false")
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
+        aidl = true
     }
 }
 
@@ -78,4 +96,13 @@ static def getBuildNum() {
     int qBuildNum = releaseDate.until(now, ChronoUnit.DAYS)
     int minuteOfDay = now.getHour() * 60 + now.getMinute()
     return qBuildNum * 10000 + minuteOfDay
+}
+
+def getGitHash() {
+    Process process = new ProcessBuilder("git", "rev-parse", "--short", "HEAD").directory(project.rootDir)
+            .redirectErrorStream(true).start()
+    InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream())
+    BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
+
+    return bufferedReader.getText().trim()
 }
