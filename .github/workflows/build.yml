@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Android
-          path: android/app/build/outputs/apk/ci/app-git-continuous-unsigned-signed.apk
+          path: android/app/build/outputs/apk/git/continuous/app-git-continuous-unsigned-signed.apk
   psvita:
     name: PS Vita
     runs-on: ubuntu-latest
@@ -164,7 +164,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: continuous
+          tag_name: ${{ github.ref_name == 'main' && 'continuous' || format('continuous-{0}', github.ref_name) }}
           delete_release: true
           repo: ${{ env.GITHUB_REPOSITORY }}
       - name: Prepare release
@@ -186,7 +186,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file_glob: true
           file: CS16Client-*
-          tag: continuous
+          tag: ${{ github.ref_name == 'main' && 'continuous' || format('continuous-{0}', github.ref_name) }}
           overwrite: true
           prerelease: true
           release_name: CS16Client development build
