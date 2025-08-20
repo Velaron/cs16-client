@@ -141,7 +141,7 @@ jobs:
         run: |
           TAG_NAME=${{ github.ref_name == 'main' && 'continuous' || format('continuous-{0}', github.ref_name) }}
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          if gh release list | grep -q -e "$TAG_NAME"; then
+          if gh release list --repo ${{ github.repository }} | grep -q -e "$TAG_NAME"; then
             gh release delete "$TAG_NAME" --yes --cleanup-tag --repo ${{ github.repository }}
           fi
         env:

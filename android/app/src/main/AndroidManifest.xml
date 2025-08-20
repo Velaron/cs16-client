@@ -9,10 +9,6 @@
         android:roundIcon="@mipmap/ic_launcher"
         tools:targetApi="r">
 
-        <meta-data
-            android:name="su.xash.engine.gamedir"
-            android:value="cstrike" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true">
