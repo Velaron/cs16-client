@@ -46,7 +46,7 @@ git clone https://github.com/Velaron/cs16-client --recursive
 cmake -A Win32 -S . -B build
 cmake --build build --config Release
 ```
-### Linux
+### Linux and macOS
 ```
 cmake -S . -B build
 cmake --build build --config Release
