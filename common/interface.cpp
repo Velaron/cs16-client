@@ -8,14 +8,15 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <dlfcn.h>
-#include <unistd.h>
 #include "interface.h"
 
 #if XASH_PSVITA == 1
 #include <unistd.h>
 #define VRTLD_LIBDL_COMPAT
 #include <vrtld.h>
+#elif XASH_APPLE == 1
+#include <dlfcn.h>
+#include <unistd.h>
 #endif
 
 #if !defined( _WIN32 )

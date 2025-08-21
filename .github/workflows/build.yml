@@ -1,5 +1,5 @@
 name: Build and Deploy
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
   android:
@@ -73,7 +73,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        arch: ['x86', 'amd64']
+        arch: [ 'x86', 'amd64' ]
       fail-fast: false
     steps:
       - name: Checkout sources
@@ -102,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: ['i386', 'amd64']
+        arch: [ 'i386', 'amd64' ]
       fail-fast: false
     steps:
       - name: Checkout sources
@@ -129,11 +129,40 @@ jobs:
         with:
           name: ${{ runner.os }}-${{ matrix.arch }}
           path: build/*.tar.gz
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [ 'x86_64', 'arm64' ]
+      fail-fast: false
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install cmake gcc ninja fontconfig
+      - name: Configure
+        run: cmake --preset "macos-ci-${{ matrix.arch }}"
+      - name: Build and Package
+        run: |
+          cmake --build .
+          cpack --config CPackConfig.cmake
+        working-directory: build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }}-${{ matrix.arch }}
+          path: build/*.tar.gz
   release:
     name: Release
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    needs: [android, windows, linux, psvita]
+    needs: [ android, windows, linux, psvita ]
     steps:
       - name: Fetch artifacts
         uses: actions/download-artifact@v4
