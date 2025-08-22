@@ -147,7 +147,9 @@
         "CMAKE_C_COMPILER": "gcc",
         "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_CXX_STANDARD": "11",
-        "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+        "CMAKE_OSX_ARCHITECTURES": "x86_64",
+        "CMAKE_APPLE_SILICON_PROCESSOR": "x86_64"
       },
       "binaryDir": "${sourceDir}/build"
     },
@@ -158,6 +160,10 @@
       "architecture": {
         "value": "arm64",
         "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_OSX_ARCHITECTURES": "arm64",
+        "CMAKE_APPLE_SILICON_PROCESSOR": "arm64"
       }
     }
   ]
