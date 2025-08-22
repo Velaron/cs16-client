@@ -187,6 +187,6 @@ jobs:
       - name: Upload new release
         run: |
           gh release create ${{ env.TAG_NAME }} --title "CS16Client development build" --prerelease */CS16Client-* \
-            --repo ${{ github.repository }} --latest
+            --repo ${{ github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
