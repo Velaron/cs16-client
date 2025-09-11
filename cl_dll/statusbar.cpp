@@ -298,6 +298,12 @@ int CHudStatusBar :: MsgFunc_StatusValue( const char *pszName, int iSize, void *
 	m_iStatusValues[index] = reader.ReadShort();
 	m_iFlags |= HUD_DRAW;  // we have status text, so turn on the status bar
 
+	if (index == SBAR_ID_TARGETHEALTH && m_iStatusValues[SBAR_ID_TARGETTYPE] != SBAR_TARGETTYPE_HOSTAGE)//killers health
+	{
+		int entindex = m_iStatusValues[SBAR_ID_TARGETNAME];
+		g_PlayerExtraInfo[entindex].health = m_iStatusValues[SBAR_ID_TARGETHEALTH];
+	}
+	
 	m_bReparseString = TRUE;
 	
 	return 1;
