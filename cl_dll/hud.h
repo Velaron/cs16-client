@@ -412,6 +412,20 @@ protected:
 		MAX_STATUSBAR_LINES = 2,
 	};
 
+	enum {
+		SBAR_TARGETTYPE_TEAMMATE = 1,
+		SBAR_TARGETTYPE_ENEMY,
+		SBAR_TARGETTYPE_HOSTAGE,
+	};
+
+	enum sbar_data
+	{
+		SBAR_ID_TARGETTYPE = 1,
+		SBAR_ID_TARGETNAME,
+		SBAR_ID_TARGETHEALTH,
+		SBAR_END
+	};
+
 	char m_szStatusText[MAX_STATUSBAR_LINES][MAX_STATUSTEXT_LENGTH];  // a text string describing how the status bar is to be drawn
 	char m_szStatusBar[MAX_STATUSBAR_LINES][MAX_STATUSTEXT_LENGTH];	// the constructed bar that is drawn
 	int m_iStatusValues[MAX_STATUSBAR_VALUES];  // an array of values for use in the status bar
