@@ -64,6 +64,9 @@ cvar_t	*cl_yawspeed;
 cvar_t	*cl_pitchspeed;
 cvar_t	*cl_anglespeedkey;
 cvar_t	*cl_vsmoothing;
+cvar_t *cl_aimbot = NULL;
+cvar_t *cl_aimbot_fov = NULL;
+cvar_t *cl_aimbot_smooth = NULL;
 /*
 ===============================================================================
 
@@ -711,6 +714,8 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 
 		// Allow mice and other controllers to add their inputs
 		IN_Move ( frametime, cmd );
+
+		Aimbot_Think(cmd); // Aimbot'u çalıştır
 	}
 
 	cmd->impulse = in_impulse;
@@ -723,6 +728,7 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	//
 	cmd->buttons = CL_ButtonBits( 1 );
 
+	
 	// If they're in a modal dialog, ignore the attack button.
 	if ( GetClientVoice()->IsInSquelchMode() )
 		cmd->buttons &= ~IN_ATTACK;
@@ -976,6 +982,10 @@ void InitInput (void)
 	m_yaw				= gEngfuncs.pfnRegisterVariable ( "m_yaw","0.022", FCVAR_ARCHIVE );
 	m_forward			= gEngfuncs.pfnRegisterVariable ( "m_forward","1", FCVAR_ARCHIVE );
 	m_side				= gEngfuncs.pfnRegisterVariable ( "m_side","0.8", FCVAR_ARCHIVE );
+
+	cl_aimbot = gEngfuncs.pfnRegisterVariable("cl_aimbot", "0", FCVAR_ARCHIVE);
+    cl_aimbot_fov = gEngfuncs.pfnRegisterVariable("cl_aimbot_fov", "30", FCVAR_ARCHIVE);
+    cl_aimbot_smooth = gEngfuncs.pfnRegisterVariable("cl_aimbot_smooth", "10", FCVAR_ARCHIVE);
 
 	// Initialize third person camera controls.
 	CAM_Init();
