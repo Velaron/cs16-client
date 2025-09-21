@@ -24,9 +24,14 @@ jobs:
           KEY_ALIAS: ${{ secrets.ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.SIGNING_KEY }}" | base64 --decode > ${{ env.KEYSTORE_FILE_PATH }}
-          ./gradlew assembleGitContinuous
-          mv app/build/outputs/apk/git/continuous/app-git-continuous.apk CS16Client-Android.apk
+          if [[ -n "${{ secrets.SIGNING_KEY }}" ]]; then
+            echo "${{ secrets.SIGNING_KEY }}" | base64 --decode > ${{ env.KEYSTORE_FILE_PATH }}
+            ./gradlew assembleGitContinuous
+            mv app/build/outputs/apk/git/continuous/app-git-continuous.apk CS16Client-Android.apk
+          else
+            ./gradlew assembleGitDebug
+            mv app/build/outputs/apk/git/debug/app-git-debug.apk CS16Client-Android.apk
+          fi
         working-directory: android
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
