@@ -136,14 +136,17 @@ jobs:
           path: build/*.tar.gz
   macos:
     name: macOS
-    runs-on: macos-latest
     strategy:
       matrix:
+        os: [ 'macos-15-intel', 'macos-latest' ]
         arch: [ 'x86_64', 'arm64' ]
+        exclude:
+          - os: macos-15-intel
+            arch: arm64
+          - os: macos-latest
+            arch: x86_64
       fail-fast: false
-    defaults:
-      run:
-        shell: arch -${{ matrix.arch }} bash --noprofile --norc -eo pipefail {0}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout sources
         uses: actions/checkout@v5
@@ -151,14 +154,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
       - name: Install dependencies
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          if [ "${{ matrix.arch }}" == "arm64" ]; then
-            eval "$(/opt/homebrew/bin/brew shellenv)"
-          else
-            eval "$(/usr/local/bin/brew shellenv)"
-          fi
-          brew install cmake gcc ninja fontconfig
+        run: brew install cmake gcc ninja fontconfig
       - name: Configure
         run: cmake --preset "macos-ci-${{ matrix.arch }}"
       - name: Build and Package
