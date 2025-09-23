@@ -83,7 +83,7 @@ void CVoiceLabel::SetLocation( const char *location )
 	// const wchar_t *newLocation = vgui::localize()->Find( location );
 	const char *newLocation = Localize( location );
 
-	if ( strcmp( newLocation, location + 1 ) != 0 )
+	if ( strcmp( newLocation, location ) != 0 )
 	{
 		// localized version
 		if ( m_locationString && strcmp( newLocation, m_locationString ) )
@@ -161,7 +161,7 @@ void CVoiceLabel::RebuildLabelText()
 		{
 			// formatStr = localize()->Find( "#Voice_Location" );
 			formatStr = Localize( "#Voice_Location" );
-			if ( !strcmp( formatStr, "Voice_Location") )
+			if ( !strcmp( formatStr, "#Voice_Location") )
 				formatStr = "%ls/%ls   ";
 		}
 		// _snwprintf( buf, BufLen, formatStr, wsPlayer, m_locationString );

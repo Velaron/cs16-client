@@ -63,11 +63,12 @@ const char *Localize( const char *szStr )
 {
 	if( szStr )
 	{
-		if( *szStr == '#' )
-			szStr++;
-
 		char *str = strdup( szStr );
+		
 		StripEndNewlineFromString( str );
+
+		if( *str == '#' )
+			str++;
 
 		int i = hashed_cmds.Find( str );
 
@@ -276,4 +277,24 @@ void Localize_Free( void )
 	}
 
 	hashed_cmds.Purge();
+}
+
+void Localize_StripIndices( char *s )
+{
+	if ( strlen( s ) >= 3 )
+	{
+		for ( size_t i = 0; i < strlen( s ) - 2; i++ )
+		{
+			if ( s[i] == '%' && s[i + 1] == 's' && isdigit( s[i + 2] ) )
+			{
+				char *first = &s[i + 2];
+				char *second = &s[i + 3];
+
+				size_t len = strlen( second );
+
+				memmove( first, second, strlen( second ) );
+				first[len] = '\0'; // one character has been removed and string moved, set null terminator
+			}
+		}
+	}
 }

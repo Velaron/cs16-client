@@ -321,24 +321,13 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 		sprintf( numPlayers, "%d", team_info->players );
 
 		char fmtString[32];
-		strncpy( fmtString, Localize( team_info->players == 1 ? "#Cstrike_ScoreBoard_Player" : "#Cstrike_ScoreBoard_Players" ), sizeof( fmtString ) );
+		const char *fmtStringName = team_info->players == 1 ? "#Cstrike_ScoreBoard_Player" : "#Cstrike_ScoreBoard_Players";
+		strncpy( fmtString, Localize( fmtStringName ), sizeof( fmtString ) );
 
-		if ( !strcmp( fmtString, team_info->players == 1 ? "Cstrike_ScoreBoard_Player" : "Cstrike_ScoreBoard_Players" ) )
+		if ( !strcmp( fmtString, fmtStringName ) )
 			strncpy( fmtString, team_info->players == 1 ? "%s    -   %s player" : "%s    -   %s players", sizeof( fmtString ) );
 		else
-			for ( size_t i = 0; i < strlen( fmtString ) - 2; i++ )
-			{
-				if ( fmtString[i] == '%' && fmtString[i + 1] == 's' && isdigit( fmtString[i + 2] ) )
-				{
-					char *first = &fmtString[i + 2];
-					char *second = &fmtString[i + 3];
-
-					size_t len = strlen( second );
-
-					memmove( first, second, strlen( second ) );
-					first[len] = '\0';
-				}
-			}
+			Localize_StripIndices( fmtString );
 
 		GetTeamColor( r, g, b, team_info->teamnumber );
 		switch ( team_info->teamnumber )
