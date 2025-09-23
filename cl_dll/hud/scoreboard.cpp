@@ -28,6 +28,8 @@
 #include <string.h>
 #include <stdio.h>
 #include "draw_util.h"
+#include "vgui_parser.h"
+#include <ctype.h>
 
 hud_player_info_t   g_PlayerInfoList[MAX_PLAYERS+1]; // player info from the engine
 extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS+1]; // additional player info sent directly to the client dll
@@ -180,16 +182,17 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	int ypos = ystart + (list_slot * ROW_GAP) + 5;
 
 	if( gHUD.m_szServerName[0] )
-		snprintf( ServerName, 80, "%s SERVER: %s", (char*)(gHUD.m_Teamplay ? "TEAMS" : "PLAYERS"), gHUD.m_szServerName );
+		// snprintf( ServerName, 80, "%s", (char*)(gHUD.m_Teamplay ? "TEAMS" : "PLAYERS"), gHUD.m_szServerName );
+		strncpy( ServerName, gHUD.m_szServerName, 80 );
 	else
 		strncpy( ServerName, gHUD.m_Teamplay ? "TEAMS" : "PLAYERS", 80 );
 
 	DrawUtils::DrawHudString( NAME_POS_START(), ypos, NAME_POS_END(), ServerName, 255, 140, 0 );
-	DrawUtils::DrawHudStringReverse( HP_POS_END(), ypos, 0, "HP", 255, 140, 0 );
-	DrawUtils::DrawHudString( MONEY_POS_START(), ypos, MONEY_POS_END(), "MONEY", 255, 140, 0 );
-	DrawUtils::DrawHudStringReverse( KILLS_POS_END(), ypos, KILLS_POS_START(), "KILLS", 255, 140, 0 );
-	DrawUtils::DrawHudString( DEATHS_POS_START(), ypos, DEATHS_POS_END(), "DEATHS", 255, 140, 0 );
-	DrawUtils::DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), "PING", 255, 140, 0 );
+	DrawUtils::DrawHudStringReverse( HP_POS_END(), ypos, 0, Localize( "#Cstrike_HEALTH" ), 255, 140, 0 );
+	DrawUtils::DrawHudString( MONEY_POS_START(), ypos, MONEY_POS_END(), Localize( "#Cstrike_ACCOUNT" ), 255, 140, 0 );
+	DrawUtils::DrawHudStringReverse( KILLS_POS_END(), ypos, KILLS_POS_START(), Localize( "#PlayerScore" ), 255, 140, 0 );
+	DrawUtils::DrawHudString( DEATHS_POS_START(), ypos, DEATHS_POS_END(), Localize( "#PlayerDeath" ), 255, 140, 0 );
+	DrawUtils::DrawHudStringReverse( PING_POS_END(), ypos, PING_POS_START(), Localize( "#PlayerPing" ), 255, 140, 0 );
 
 	list_slot += 2;
 	ypos = ystart + (list_slot * ROW_GAP);
@@ -314,20 +317,43 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 		int r, g, b;
 		char teamName[64];
 
+		char numPlayers[16];
+		sprintf( numPlayers, "%d", team_info->players );
+
+		char fmtString[32];
+		strncpy( fmtString, Localize( team_info->players == 1 ? "#Cstrike_ScoreBoard_Player" : "#Cstrike_ScoreBoard_Players" ), sizeof( fmtString ) );
+
+		if ( !strcmp( fmtString, team_info->players == 1 ? "Cstrike_ScoreBoard_Player" : "Cstrike_ScoreBoard_Players" ) )
+			strncpy( fmtString, team_info->players == 1 ? "%s    -   %s player" : "%s    -   %s players", sizeof( fmtString ) );
+		else
+			for ( size_t i = 0; i < strlen( fmtString ) - 2; i++ )
+			{
+				if ( fmtString[i] == '%' && fmtString[i + 1] == 's' && isdigit( fmtString[i + 2] ) )
+				{
+					char *first = &fmtString[i + 2];
+					char *second = &fmtString[i + 3];
+
+					size_t len = strlen( second );
+
+					memmove( first, second, strlen( second ) );
+					first[len] = '\0';
+				}
+			}
+
 		GetTeamColor( r, g, b, team_info->teamnumber );
-		switch( team_info->teamnumber )
+		switch ( team_info->teamnumber )
 		{
 		case TEAM_TERRORIST:
-			snprintf(teamName, sizeof(teamName), "Terrorists   -   %i players", team_info->players);
-			DrawUtils::DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
+			snprintf( teamName, sizeof( teamName ), fmtString, Localize( "#Cstrike_ScoreBoard_Ter" ), numPlayers );
+			DrawUtils::DrawHudNumberString( KILLS_POS_END(), ypos, KILLS_POS_START(), team_info->frags, r, g, b );
 			break;
 		case TEAM_CT:
-			snprintf(teamName, sizeof(teamName), "Counter-Terrorists   -   %i players", team_info->players);
-			DrawUtils::DrawHudNumberString( KILLS_POS_END(),  ypos, KILLS_POS_START(),  team_info->frags,  r, g, b );
+			snprintf( teamName, sizeof( teamName ), fmtString, Localize( "#Cstrike_ScoreBoard_CT" ), numPlayers );
+			DrawUtils::DrawHudNumberString( KILLS_POS_END(), ypos, KILLS_POS_START(), team_info->frags, r, g, b );
 			break;
 		case TEAM_SPECTATOR:
 		case TEAM_UNASSIGNED:
-			strncpy( teamName, "Spectators", sizeof(teamName) );
+			strncpy( teamName, Localize( "#Spectators" ), sizeof( teamName ) );
 			break;
 		}
 
@@ -410,11 +436,13 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 			{
 				// draw bomb( if player have the bomb )
 				if( g_PlayerExtraInfo[best_player].dead )
-					DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Dead", r, g, b );
+					DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), Localize( "#Cstrike_DEAD" ), r, g, b );
 				else if( g_PlayerExtraInfo[best_player].has_c4 )
-					DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "Bomb", r, g, b );
+					DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), Localize( "#Cstrike_BOMB" ), r, g, b );
 				else if( g_PlayerExtraInfo[best_player].vip )
-					DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), "VIP",  r, g, b );
+					DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), Localize( "#Cstrike_VIP" ),  r, g, b );
+				else if (g_PlayerExtraInfo[best_player].has_defuse_kit )
+					DrawUtils::DrawHudString( ATTRIB_POS_START(), ypos, ATTRIB_POS_END(), Localize( "#Cstrike_DEFUSE_KIT" ),  r, g, b );
 			}
 		}
 		else
