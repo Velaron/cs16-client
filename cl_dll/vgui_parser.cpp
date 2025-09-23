@@ -64,13 +64,14 @@ const char *Localize( const char *szStr )
 	if( szStr )
 	{
 		char *str = strdup( szStr );
-		
+		char *p = str;
+
 		StripEndNewlineFromString( str );
 
-		if( *str == '#' )
-			str++;
+		if( *p == '#' )
+			p++;
 
-		int i = hashed_cmds.Find( str );
+		int i = hashed_cmds.Find( p );
 
 		free( str );
 
