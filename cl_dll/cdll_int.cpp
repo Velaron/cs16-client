@@ -415,6 +415,7 @@ extern "C" void DLLEXPORT HUD_ChatInputPosition( int *x, int *y )
 
 extern "C" int DLLEXPORT HUD_GetPlayerTeam(int iplayer)
 {
+	// original seems to return team_id, but I'm not sure it's even set somewhere
 	if ( iplayer <= MAX_PLAYERS )
 		return g_PlayerExtraInfo[iplayer].teamnumber;
 	return 0;

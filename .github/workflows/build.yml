@@ -24,9 +24,14 @@ jobs:
           KEY_ALIAS: ${{ secrets.ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.SIGNING_KEY }}" | base64 --decode > ${{ env.KEYSTORE_FILE_PATH }}
-          ./gradlew assembleGitContinuous
-          mv app/build/outputs/apk/git/continuous/app-git-continuous.apk CS16Client-Android.apk
+          if [[ -n "${{ secrets.SIGNING_KEY }}" ]]; then
+            echo "${{ secrets.SIGNING_KEY }}" | base64 --decode > ${{ env.KEYSTORE_FILE_PATH }}
+            ./gradlew assembleGitContinuous
+            mv app/build/outputs/apk/git/continuous/app-git-continuous.apk CS16Client-Android.apk
+          else
+            ./gradlew assembleGitDebug
+            mv app/build/outputs/apk/git/debug/app-git-debug.apk CS16Client-Android.apk
+          fi
         working-directory: android
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -131,11 +136,17 @@ jobs:
           path: build/*.tar.gz
   macos:
     name: macOS
-    runs-on: macos-latest
     strategy:
       matrix:
+        os: [ 'macos-15-intel', 'macos-latest' ]
         arch: [ 'x86_64', 'arm64' ]
+        exclude:
+          - os: macos-15-intel
+            arch: arm64
+          - os: macos-latest
+            arch: x86_64
       fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout sources
         uses: actions/checkout@v5
@@ -143,24 +154,13 @@ jobs:
           fetch-depth: 0
           submodules: recursive
       - name: Install dependencies
-        run: |
-          arch -${{ matrix.arch }} /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          if [ "${{ matrix.arch }}" == "arm64" ]; then
-            arch -${{ matrix.arch }} brew install cmake gcc ninja fontconfig
-          else
-            arch -${{ matrix.arch }} /usr/local/bin/brew install cmake gcc ninja fontconfig
-          fi
+        run: brew install cmake gcc ninja fontconfig
       - name: Configure
         run: cmake --preset "macos-ci-${{ matrix.arch }}"
       - name: Build and Package
         run: |
-          if [ "${{ matrix.arch }}" == "arm64" ]; then
-            arch -${{ matrix.arch }} cmake --build .
-            arch -${{ matrix.arch }} cpack --config CPackConfig.cmake
-          else
-            arch -${{ matrix.arch }} /usr/local/bin/cmake --build .
-            arch -${{ matrix.arch }} /usr/local/bin/cpack --config CPackConfig.cmake
-          fi
+          cmake --build .
+          cpack --config CPackConfig.cmake
         working-directory: build
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -170,7 +170,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && always()
     needs: [ android, windows, linux, psvita, macos ]
     steps:
       - name: Fetch artifacts
