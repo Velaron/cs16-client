@@ -120,18 +120,6 @@ int CHudScoreboard :: VidInit( void )
 	yend = ScreenHeight - ystart;
 	m_bForceDraw = false;
 
-	g_Columns[COL_PING] = Column( xend - 15, Localize( "#PlayerPing" ) );
-	g_Columns[COL_DEATHS] = Column( g_Columns[COL_PING].end - 10, Localize( "#PlayerDeath" ) );
-	g_Columns[COL_KILLS] = Column( g_Columns[COL_DEATHS].end - 10, Localize( "#PlayerScore" ) );
-	g_Columns[COL_MONEY] = Column( g_Columns[COL_KILLS].end - 10, Localize( "#Cstrike_ACCOUNT" ) );
-	g_Columns[COL_MONEY].end = g_Columns[COL_MONEY].start - DrawUtils::HudStringLen( "$16000" );
-	g_Columns[COL_HP] = Column( g_Columns[COL_MONEY].end - 10, Localize( "#Cstrike_HEALTH" ) );
-	g_Columns[COL_HP].end = g_Columns[COL_HP].start - DrawUtils::HudStringLen( "100" );
-	g_Columns[COL_ATTRIB] = Column( g_Columns[COL_HP].end - 10 );
-	g_Columns[COL_ATTRIB].end = g_Columns[COL_ATTRIB].start - DrawUtils::HudStringLen( "#Cstrike_DEFUSE_KIT" );
-	g_Columns[COL_NAME] = Column( xstart + 15, nullptr, false );
-	g_Columns[COL_NAME].end = g_Columns[COL_ATTRIB].end - 10;
-
 	// Load sprites here
 	return 1;
 }
@@ -205,6 +193,19 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	// just sort the list on the fly
 	// list is sorted first by frags, then by deaths
 	float list_slot = 0;
+
+	// calculate columns sizes
+	g_Columns[COL_PING] = Column( xend - 15, Localize( "#PlayerPing" ) );
+	g_Columns[COL_DEATHS] = Column( g_Columns[COL_PING].end - 10, Localize( "#PlayerDeath" ) );
+	g_Columns[COL_KILLS] = Column( g_Columns[COL_DEATHS].end - 10, Localize( "#PlayerScore" ) );
+	g_Columns[COL_MONEY] = Column( g_Columns[COL_KILLS].end - 10, Localize( "#Cstrike_ACCOUNT" ) );
+	g_Columns[COL_MONEY].end = g_Columns[COL_MONEY].start - DrawUtils::HudStringLen( "$16000" );
+	g_Columns[COL_HP] = Column( g_Columns[COL_MONEY].end - 10, Localize( "#Cstrike_HEALTH" ) );
+	g_Columns[COL_HP].end = g_Columns[COL_HP].start - DrawUtils::HudStringLen( "100" );
+	g_Columns[COL_ATTRIB] = Column( g_Columns[COL_HP].end - 10 );
+	g_Columns[COL_ATTRIB].end = g_Columns[COL_ATTRIB].start - DrawUtils::HudStringLen( "#Cstrike_DEFUSE_KIT" );
+	g_Columns[COL_NAME] = Column( xstart + 15, nullptr, false );
+	g_Columns[COL_NAME].end = g_Columns[COL_ATTRIB].end - 10;
 
 	// print the heading line
 
