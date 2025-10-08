@@ -93,6 +93,7 @@
 #define MENU_RADIOB 36
 #define MENU_RADIOC 37
 #define MENU_RADIOSELECTOR 38
+#define MENU_BUY_CSDM 39
 #define MENU_NUMERICAL_MENU -1
 // -- cs16client extension end -- //
 

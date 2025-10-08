@@ -13,7 +13,7 @@ Important contributors:
 * [Vladislav4KZ](https://github.com/Vladislav4KZ), bug-tester and maintainer.
 * [SNMetamorph](https://github.com/SNMetamorph), author of the PSVita port.
 * [Alprnn357](https://github.com/Alprnn357), touch menus maintainer.
-* [wh1tesh1t](https://github.com/wh1tesh1t), [pwd491](https://github.com/pwd491),[Elinsrc](https://github.com/Elinsrc), [xiaodo1337](https://github.com/xiaodo1337), [nekonomicon](https://github.com/nekonomicon), [lewa-j](https://github.com/lewa-j) and others for minor contributions.
+* [wh1tesh1t](https://github.com/wh1tesh1t), [pwd491](https://github.com/pwd491), [Elinsrc](https://github.com/Elinsrc), [xiaodo1337](https://github.com/xiaodo1337), [nekonomicon](https://github.com/nekonomicon), [lewa-j](https://github.com/lewa-j) and others for minor contributions.
 
 ## Download
 You can download a build at the `Releases` section, or use these links for common platforms:
