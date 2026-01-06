@@ -22,6 +22,21 @@
                 <action android:name="su.xash.engine.MOD" />
             </intent-filter>
         </activity>
+
+		<activity
+			android:name=".CZeroActivity"
+			android:label="CSCZClient"
+			android:exported="true">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+
+			<intent-filter>
+				<action android:name="su.xash.engine.MOD" />
+			</intent-filter>
+		</activity>
     </application>
 
     <queries>
