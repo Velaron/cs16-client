@@ -387,12 +387,15 @@ void CHudRadar::DrawPlayerLocation( int y )
 	const char *szLocation = g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].location;
 	if( szLocation[0] )
 	{
+		// Localize the location string
+		const char *szLocalizedLocation = Localize( szLocation );
+
 		int x = (m_hRadarOpaque.rect.Width()) / 2;
-		int len = DrawUtils::ConsoleStringLen( szLocation );
+		int len = DrawUtils::ConsoleStringLen( szLocalizedLocation );
 
 		x = x - len / 2;
 
-		DrawUtils::DrawConsoleString( x, y, szLocation );
+		DrawUtils::DrawConsoleString( x, y, szLocalizedLocation );
 	}
 }
 
