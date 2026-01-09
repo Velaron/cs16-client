@@ -194,11 +194,16 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	// keep reading strings and using C format strings for substituting the strings into the localised text string
 	for( int i = 1; i <= 4; i++ )
 	{
-		char *str = LookupString( reader.ReadString() );
-		strncpy( szBuf[i], str, MAX_TEXTMSG_STRING );
+		char *raw = reader.ReadString();
+		
+		// Don't replace the second format argument (player name)
+		char *str = (i == 2) ? raw : LookupString( raw );
+		const char *localized = (i == 2) ? str : Localize( str );
+
+		strncpy( szBuf[i], localized, MAX_TEXTMSG_STRING );
 		szBuf[i][MAX_TEXTMSG_STRING-1] = 0;
 
-		// these strings are meant for subsitution into the main strings, so cull the automatic end newlines
+		// these strings are meant for substitution into the main strings, so cull the automatic end newlines
 		StripEndNewlineFromString( szBuf[i] );
 	}
 
