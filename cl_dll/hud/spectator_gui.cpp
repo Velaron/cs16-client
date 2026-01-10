@@ -154,6 +154,7 @@ int CHudSpectatorGui::Draw( float flTime )
 				gRenderAPI.GL_SelectTexture( 0 );
 				gRenderAPI.GL_Bind(0, m_hTimerTexture);
 				gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+				gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 				// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 				DrawUtils::Draw2DQuad( (INT_XPOS(12.5) + 10) * gHUD.m_flScale,
 									   (INT_YPOS(2) * 0.5) * gHUD.m_flScale,
