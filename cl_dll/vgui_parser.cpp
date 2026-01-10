@@ -247,6 +247,10 @@ static void Localize_InitLanguage( const char *language )
 	if( strcmp( gamedir, "mainui" ))
 		Localize_AddToDictionary( "mainui", language );
 
+	// if gamedir is czero, also load cstrike strings
+	if ( strcmp( gamedir, "czero" ) == 0 )
+		Localize_AddToDictionary( "cstrike", language );
+	
 	// mod strings override default ones
 	Localize_AddToDictionary( gamedir,  language );
 }
