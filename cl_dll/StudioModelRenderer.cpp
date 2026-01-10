@@ -840,11 +840,16 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 	if( g_bHoldingKnife && m_pCurrentEntity == gEngfuncs.GetViewModel() && (flags & STUDIO_RENDER) )
 	{
-		bChangedRightHand = true;
+		// Condition Zero knife viewmodel is left-handed by default, so we need to flip it too
+		const char *pchGameDir = gEngfuncs.pfnGetGameDirectory();
+		if( pchGameDir && stricmp( pchGameDir, "czero" ) != 0 )
+		{
+			bChangedRightHand = true;
 
-		iRightHandValue = gHUD.cl_righthand->value;
+			iRightHandValue = gHUD.cl_righthand->value;
 
-		gHUD.cl_righthand->value = !gHUD.cl_righthand->value;
+			gHUD.cl_righthand->value = !gHUD.cl_righthand->value;
+		}
 	}
 
 	IEngineStudio.GetTimes(&m_nFrameCount, &m_clTime, &m_clOldTime);
