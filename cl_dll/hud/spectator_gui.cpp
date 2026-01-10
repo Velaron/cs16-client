@@ -142,7 +142,23 @@ int CHudSpectatorGui::Draw( float flTime )
 	FillRGBABlend(0, ScreenHeight - INT_YPOS(2), ScreenWidth, INT_YPOS(2), 0, 0, 0, 153);
 
 	// divider
-	FillRGBABlend( INT_XPOS(12.5), INT_YPOS(2) * 0.25, 1, INT_YPOS(2) * 0.5, r, g, b, 255 );
+	{
+		int divX = INT_XPOS(12.5);
+		int divTop = INT_YPOS(2) * 0.25;
+		int divBottom = INT_YPOS(2) * 0.5 + gHUD.GetCharHeight();
+		int divH = divBottom - divTop;
+		if (divH < gHUD.GetCharHeight()) divH = gHUD.GetCharHeight();
+
+		int pad = (gHUD.GetCharHeight() * 2) / 3;
+		if (pad < 1) pad = 1;
+
+		int drawTop = divTop - pad;
+		if (drawTop < 0) drawTop = 0;
+		int drawH = divH + pad * 2;
+		if (drawTop + drawH > ScreenHeight) drawH = ScreenHeight - drawTop;
+
+		FillRGBABlend(divX, drawTop, 1, drawH, r, g, b, 255);
+	}
 
 	{ // mapname. extradata
 		DrawUtils::DrawHudString( INT_XPOS(12.5) + 10, INT_YPOS(2) * 0.25, ScreenWidth, label.m_szMap, r, g, b );
