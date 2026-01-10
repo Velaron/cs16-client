@@ -155,11 +155,17 @@ int CHudSpectatorGui::Draw( float flTime )
 				gRenderAPI.GL_Bind(0, m_hTimerTexture);
 				gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 				gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+
+				float quadX = INT_XPOS(12.5) + 10;
+				float quadY = INT_YPOS(2) * 0.5f;
+				int uploadW = (int)gRenderAPI.RenderGetParm( PARM_TEX_WIDTH, m_hTimerTexture );
+				int uploadH = (int)gRenderAPI.RenderGetParm( PARM_TEX_HEIGHT, m_hTimerTexture );
+
 				// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-				DrawUtils::Draw2DQuad( (INT_XPOS(12.5) + 10) * gHUD.m_flScale,
-									   (INT_YPOS(2) * 0.5) * gHUD.m_flScale,
-									   (INT_XPOS(12.5) + 10 + gHUD.GetCharHeight() ) * gHUD.m_flScale,
-									   (INT_YPOS(2) * 0.5 + gHUD.GetCharHeight() ) * gHUD.m_flScale );
+				DrawUtils::Draw2DQuad( quadX * gHUD.m_flScale,
+									   quadY * gHUD.m_flScale,
+									   (quadX + (float)uploadW) * gHUD.m_flScale,
+									   (quadY + (float)uploadH) * gHUD.m_flScale );
 				// gEngfuncs.pTriAPI->End();
 			}
 			DrawUtils::DrawHudString( INT_XPOS(12.5) + gHUD.GetCharHeight() * 1.5 + gHUD.GetCharWidth('M') , INT_YPOS(2) * 0.5, ScreenWidth,
