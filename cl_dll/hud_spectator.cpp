@@ -909,6 +909,10 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		// if we are NOT in HLTV mode, main spectator mode is set on server
 		if ( !gEngfuncs.IsSpectateOnly() )
 		{
+			char cmdstring[32];
+			// forward command to server
+			sprintf(cmdstring,"specmode %i",iNewMainMode );
+			gEngfuncs.pfnServerCmd(cmdstring);
 			return;
 		}
 
