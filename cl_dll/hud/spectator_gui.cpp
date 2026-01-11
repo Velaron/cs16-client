@@ -141,63 +141,66 @@ int CHudSpectatorGui::Draw( float flTime )
 	FillRGBABlend(startpos, 0, ScreenWidth - startpos, INT_YPOS(2), 0, 0, 0, 153);
 	FillRGBABlend(0, ScreenHeight - INT_YPOS(2), ScreenWidth, INT_YPOS(2), 0, 0, 0, 153);
 
-	// divider
+	if ( gHUD.m_Spectator.m_drawstatus && gHUD.m_Spectator.m_drawstatus->value )
 	{
-		int divX = INT_XPOS(12.5);
-		int divTop = INT_YPOS(2) * 0.25;
-		int divBottom = INT_YPOS(2) * 0.5 + gHUD.GetCharHeight();
-		int divH = divBottom - divTop;
-		if (divH < gHUD.GetCharHeight()) divH = gHUD.GetCharHeight();
-
-		int pad = (gHUD.GetCharHeight() * 2) / 3;
-		if (pad < 1) pad = 1;
-
-		int drawTop = divTop - pad;
-		if (drawTop < 0) drawTop = 0;
-		int drawH = divH + pad * 2;
-		if (drawTop + drawH > ScreenHeight) drawH = ScreenHeight - drawTop;
-
-		FillRGBABlend(divX, drawTop, 1, drawH, r, g, b, 255);
-	}
-
-	{ // mapname. extradata
-		DrawUtils::DrawHudString( INT_XPOS(12.5) + 10, INT_YPOS(2) * 0.25, ScreenWidth, label.m_szMap, r, g, b );
-
-		if( !m_bBombPlanted ) // timer remaining
+		// divider
 		{
-			if( m_hTimerTexture )
-			{
-				gRenderAPI.GL_SelectTexture( 0 );
-				gRenderAPI.GL_Bind(0, m_hTimerTexture);
-				gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-				gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+			int divX = INT_XPOS(12.5);
+			int divTop = INT_YPOS(2) * 0.25;
+			int divBottom = INT_YPOS(2) * 0.5 + gHUD.GetCharHeight();
+			int divH = divBottom - divTop;
+			if (divH < gHUD.GetCharHeight()) divH = gHUD.GetCharHeight();
 
-				float quadX = INT_XPOS(12.5) + 10;
-				float quadY = INT_YPOS(2) * 0.5f;
-				int uploadW = (int)gRenderAPI.RenderGetParm( PARM_TEX_WIDTH, m_hTimerTexture );
-				int uploadH = (int)gRenderAPI.RenderGetParm( PARM_TEX_HEIGHT, m_hTimerTexture );
+			int pad = (gHUD.GetCharHeight() * 2) / 3;
+			if (pad < 1) pad = 1;
 
-				// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-				DrawUtils::Draw2DQuad( quadX * gHUD.m_flScale,
-									   quadY * gHUD.m_flScale,
-									   (quadX + (float)uploadW) * gHUD.m_flScale,
-									   (quadY + (float)uploadH) * gHUD.m_flScale );
-				// gEngfuncs.pTriAPI->End();
-			}
-			DrawUtils::DrawHudString( INT_XPOS(12.5) + gHUD.GetCharHeight() * 1.5 + gHUD.GetCharWidth('M') , INT_YPOS(2) * 0.5, ScreenWidth,
-									  label.m_szTimer, r, g, b );
+			int drawTop = divTop - pad;
+			if (drawTop < 0) drawTop = 0;
+			int drawH = divH + pad * 2;
+			if (drawTop + drawH > ScreenHeight) drawH = ScreenHeight - drawTop;
+
+			FillRGBABlend(divX, drawTop, 1, drawH, r, g, b, 255);
 		}
-	}
+
+		{ // mapname. extradata
+			DrawUtils::DrawHudString( INT_XPOS(12.5) + 10, INT_YPOS(2) * 0.25, ScreenWidth, label.m_szMap, r, g, b );
+
+			if( !m_bBombPlanted ) // timer remaining
+			{
+				if( m_hTimerTexture )
+				{
+					gRenderAPI.GL_SelectTexture( 0 );
+					gRenderAPI.GL_Bind(0, m_hTimerTexture);
+					gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+					gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+
+					float quadX = INT_XPOS(12.5) + 10;
+					float quadY = INT_YPOS(2) * 0.5f;
+					int uploadW = (int)gRenderAPI.RenderGetParm( PARM_TEX_WIDTH, m_hTimerTexture );
+					int uploadH = (int)gRenderAPI.RenderGetParm( PARM_TEX_HEIGHT, m_hTimerTexture );
+
+					// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+					DrawUtils::Draw2DQuad( quadX * gHUD.m_flScale,
+										quadY * gHUD.m_flScale,
+										(quadX + (float)uploadW) * gHUD.m_flScale,
+										(quadY + (float)uploadH) * gHUD.m_flScale );
+					// gEngfuncs.pTriAPI->End();
+				}
+				DrawUtils::DrawHudString( INT_XPOS(12.5) + gHUD.GetCharHeight() * 1.5 + gHUD.GetCharWidth('M') , INT_YPOS(2) * 0.5, ScreenWidth,
+										label.m_szTimer, r, g, b );
+			}
+		}
 
 
-	{ // draw team here
-		int iLen = DrawUtils::HudStringLen("Counter-Terrorists:" );
+		{ // draw team here
+			int iLen = DrawUtils::HudStringLen("Counter-Terrorists:" );
 
-		DrawUtils::DrawHudString( INT_XPOS(12.5) - iLen - 50 , INT_YPOS(2) * 0.25, INT_XPOS(12.5) - 50, "Counter-Terrorists:", r, g, b );
-		DrawUtils::DrawHudString( INT_XPOS(12.5) - iLen - 50, INT_YPOS(2) * 0.5, INT_XPOS(12.5) - 50, "Terrorists:", r, g, b );
-		// count
-		DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.25, INT_XPOS(12.5) - 50, label.m_iCounterTerrorists, r, g, b );
-		DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.5,  INT_XPOS(12.5) - 50, label.m_iTerrorists,        r, g, b );
+			DrawUtils::DrawHudString( INT_XPOS(12.5) - iLen - 50 , INT_YPOS(2) * 0.25, INT_XPOS(12.5) - 50, "Counter-Terrorists:", r, g, b );
+			DrawUtils::DrawHudString( INT_XPOS(12.5) - iLen - 50, INT_YPOS(2) * 0.5, INT_XPOS(12.5) - 50, "Terrorists:", r, g, b );
+			// count
+			DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.25, INT_XPOS(12.5) - 50, label.m_iCounterTerrorists, r, g, b );
+			DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.5,  INT_XPOS(12.5) - 50, label.m_iTerrorists,        r, g, b );
+		}
 	}
 
 	if( m_menuFlags & ROOT_MENU )
