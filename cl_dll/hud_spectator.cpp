@@ -1223,7 +1223,7 @@ void CHudSpectator::DrawOverviewLayer()
 		yTiles = 6;
 	}
 
-	screenaspect = ScreenWidth/ScreenHeight;
+	screenaspect = 4.0f/3.0f;
 
 
 	xs = m_OverviewData.origin[0];
