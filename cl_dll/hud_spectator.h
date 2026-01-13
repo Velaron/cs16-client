@@ -13,10 +13,11 @@
 
 
 #define INSET_OFF				0
-#define	INSET_CHASE_FREE		1
-#define	INSET_IN_EYE			2
-#define	INSET_MAP_FREE			3
-#define	INSET_MAP_CHASE			4
+#define INSET_CHASE_LOCKED		1
+#define	INSET_CHASE_FREE		2
+#define	INSET_IN_EYE			3
+#define	INSET_MAP_FREE			4
+#define	INSET_MAP_CHASE			5
 
 #define MAX_SPEC_HUD_MESSAGES	8
 

@@ -1725,6 +1725,10 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 		// override some settings in certain modes
 		switch ( (int)gHUD.m_Spectator.m_pip->value )
 		{
+		case INSET_CHASE_LOCKED:
+			V_GetChasePos( g_iUser2, NULL, v_origin, v_angles );
+			break;
+		
 		case INSET_CHASE_FREE:
 			V_GetChasePos( g_iUser2, v_cl_angles, v_origin, v_angles );
 			break;

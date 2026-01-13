@@ -918,6 +918,11 @@ private:
 		char m_szNameAndHealth[80];
 	} label;
 	int m_hTimerTexture;
+	int m_hChecked;
+	int m_hArrowDown;
+	int m_hArrowUp;
+	int m_hArrowLeft;
+	int m_hArrowRight;
 
 	enum {
 		ROOT_MENU = (1<<0),
