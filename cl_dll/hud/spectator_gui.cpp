@@ -438,7 +438,7 @@ void CHudSpectatorGui::UserCmd_ToggleSpectatorMenuOptionsSettings()
 	if( !(m_menuFlags & MENU_OPTIONS_SETTINGS) )
 	{
 		m_menuFlags |= MENU_OPTIONS_SETTINGS;
-		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_chat_msgs", "*white", "messagemode; _spec_toggle_menu_options_settings",
+		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_chat_msgs", "*white", "hud_saytext t; _spec_toggle_menu_options_settings",
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 4.5f ), color, 0, 1.0f, 0 );
 		gMobileAPI.pfnTouchAddClientButton( "_spec_opt_set_status", "*white", "spec_drawstatus t; _spec_toggle_menu_options_settings",
 			PLACE_DEFAULT_SIZE_BUTTON_AT_X_Y( 4.5f, 5.5f ), color, 0, 1.0f, 0 );

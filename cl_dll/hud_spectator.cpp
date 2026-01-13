@@ -188,6 +188,23 @@ void SpecPip( void )
 		gEngfuncs.Cvar_Set( name, gEngfuncs.Cmd_Argv(1) );
 }
 
+void HudSayText( void )
+{
+	if ( gEngfuncs.Cmd_Argc() <= 1 )
+	{
+		gEngfuncs.Con_Printf( "usage:  hud_saytext <0|1>\n" );
+		return;
+	}
+
+	const char *name = "hud_saytext_internal";
+	char *arg = gEngfuncs.Cmd_Argv(1);
+
+	if( arg[0] == 't' && arg[1] == '\0' )
+		gEngfuncs.Cvar_SetValue( name, !gEngfuncs.pfnGetCvarFloat(name) );
+	else
+		gEngfuncs.Cvar_Set( name, gEngfuncs.Cmd_Argv(1) );
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -213,6 +230,7 @@ int CHudSpectator::Init()
 	gEngfuncs.pfnAddCommand ("spec_drawnames", SpecDrawNames );
 	gEngfuncs.pfnAddCommand ("spec_drawcone", SpecDrawCone );
 	gEngfuncs.pfnAddCommand ("spec_drawstatus", SpecDrawStatus );
+	gEngfuncs.pfnAddCommand ("hud_saytext", HudSayText );
 	gEngfuncs.pfnAddCommand ("spec_autodirector", SpecAutoDirector );
 	gEngfuncs.pfnAddCommand ("spec_pip", SpecPip );
 

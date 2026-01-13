@@ -99,6 +99,7 @@ public:
 	cvar_t *			m_drawnames;
 	cvar_t *			m_drawcone;
 	cvar_t *			m_drawstatus;
+	cvar_t *			m_HUD_saytext;
 	cvar_t *			m_autoDirector;
 	float				m_lastAutoDirector;
 	cvar_t *			m_pip;
