@@ -735,7 +735,7 @@ void CreateCorpse(Vector vOrigin, Vector vAngles, const char *pModel, float flAn
 
 	if( model )
 	{
-		model->flags = (FTENT_CLIENTCUSTOM|FTENT_COLLIDEALL|FTENT_SPRANIMATE|FTENT_FADEOUT|FTENT_COLLIDEWORLD|FTENT_BODYTRACE);
+		model->flags = (FTENT_CLIENTCUSTOM|FTENT_PERSIST|FTENT_SPRANIMATE|FTENT_FADEOUT|FTENT_COLLIDEWORLD|FTENT_BODYTRACE);
 		model->frameMax = 255.0f;
 		model->entity.curstate.framerate = 1.0f;
 		model->entity.curstate.animtime = flAnimTime;
