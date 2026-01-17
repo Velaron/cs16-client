@@ -51,7 +51,7 @@ int CHudMessage::VidInit( void )
 
 void CHudMessage::Reset( void )
 {
- 	memset( m_pMessages, 0, sizeof( m_pMessages[0] ) * maxHUDMessages );
+	memset( m_pMessages, 0, sizeof( m_pMessages[0] ) * maxHUDMessages );
 	memset( m_startTime, 0, sizeof( m_startTime[0] ) * maxHUDMessages );
 	
 	m_gameTitleTime = 0;
@@ -241,7 +241,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 {
 	int i, j, length, width;
 	const char *pText;
-	unsigned char line[80];
+	unsigned char line[512];
 
 	pText = pMessage->pMessage;
 	// Count lines
@@ -369,9 +369,9 @@ int CHudMessage::Draw( float fTime )
 	for ( i = 0; i < maxHUDMessages; i++ )
 	{
 		// Assume m_parms.time contains last time
-		if ( m_pMessages[i] )
+		if ( m_pMessages[i].pMessage )
 		{
-			pMessage = m_pMessages[i];
+			pMessage = m_pMessages[i].pMessage;
 			if ( m_startTime[i] > gHUD.m_flTime )
 				m_startTime[i] = gHUD.m_flTime + m_parms.time - m_startTime[i] + 0.2;	// Server takes 0.2 seconds to spawn, adjust for this
 		}
@@ -379,9 +379,9 @@ int CHudMessage::Draw( float fTime )
 
 	for ( i = 0; i < maxHUDMessages; i++ )
 	{
-		if ( m_pMessages[i] )
+		if ( m_pMessages[i].pMessage )
 		{
-			pMessage = m_pMessages[i];
+			pMessage = m_pMessages[i].pMessage;
 
 			// This is when the message is over
 			switch( pMessage->effect )
@@ -414,11 +414,11 @@ int CHudMessage::Draw( float fTime )
 			else
 			{
 				// The message is over
-				if( !strcmp( m_pMessages[i]->pName, "Custom" ) )
+				if( !strcmp( m_pMessages[i].pMessage->pName, "Custom" ) )
 				{
-					delete[] m_pMessages[i]->pMessage;
+					delete[] m_pMessages[i].pMessage->pMessage;
 				}
-				m_pMessages[i] = NULL;
+				m_pMessages[i].pMessage = NULL;
 			}
 		}
 	}
@@ -433,14 +433,15 @@ int CHudMessage::Draw( float fTime )
 }
 
 
-void CHudMessage::MessageAdd( const char *pName, float time )
+void CHudMessage::MessageAdd( const char *pName, float time, qboolean hintMessage/*, unsigned int font */ )
 {
-	int i,j;
+	int i, j;
 	client_textmessage_t *tempMessage;
+	client_textmessage_t *message;
 
 	for ( i = 0; i < maxHUDMessages; i++ )
 	{
-		if ( !m_pMessages[i] )
+		if ( !m_pMessages[i].pMessage )
 		{
 			// Trim off a leading # if it's there
 			if ( pName[0] == '#' ) 
@@ -448,7 +449,6 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 			else
 				tempMessage = TextMessageGet( pName );
 
-			client_textmessage_t *message;
 			if( tempMessage )
 			{
 				if( tempMessage->pMessage[0] == '#' )
@@ -466,13 +466,14 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 			}
 			else
 			{
+				char *localized = (char *)pName;
 				if( pName[0] == '#' )
 				{
-					pName = Localize( pName + 1 );
+					localized = (char *)Localize( pName + 1 );
 				}
 
 				// If we couldnt find it in the titles.txt, just create it
-				message = AllocMessage( pName );
+				message = AllocMessage( localized );
 
 				message->effect = 2;
 				message->r1 = message->g1 = message->b1 = message->a1 = 100;
@@ -488,11 +489,46 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 				message->holdtime = 5;
 			}
 
+			if ( message && hintMessage )
+			{
+				message->effect = 2;
+				message->r1 = 40;
+				message->g1 = 255;
+				message->b1 = 40;
+				message->a1 = 200;
+				message->r2 = 0;
+				message->g2 = 255;
+				message->b2 = 0;
+				message->a2 = 200;
+				message->x = -1.0;
+				message->y = 0.7;
+				message->fadein = 0.01;
+				message->fadeout = 0.7;
+				message->fxtime = 0.07;
+				message->holdtime = 5.0;
+
+				if ( !strcmp( pName, "#Spec_Duck" ) )
+				{
+					message->holdtime = 6.0;
+				}
+				else if ( message->pMessage )
+				{
+					float lengthHold = (float)strlen( message->pMessage ) / 25.0f;
+					if ( lengthHold < 1.0f )
+						lengthHold = 1.0f;
+					message->holdtime = lengthHold;
+				}
+				else
+				{
+					message->holdtime = 1.0;
+				}
+			}
+
 			// safety check - don't add empty messages
-            if ( !message->pMessage || message->pMessage[0] == '\0' ) 
+            if ( !message || !message->pMessage || message->pMessage[0] == '\0' ) 
             {
                 // clean up custom messages
-                if ( !strcmp(message->pName, "Custom") ) 
+                if ( message && !strcmp(message->pName, "Custom") ) 
                 {
                     delete[] message->pMessage;
                 }
@@ -501,10 +537,10 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 
 			for ( j = 0; j < maxHUDMessages; j++ )
 			{
-				if ( m_pMessages[j] )
+				if ( m_pMessages[j].pMessage )
 				{
 					// is this message already in the list
-					if ( !strcmp( message->pMessage, m_pMessages[j]->pMessage ) )
+					if ( !strcmp( message->pMessage, m_pMessages[j].pMessage->pMessage ) )
 					{
 						if( !strcmp( message->pName, "Custom" ) )
 						{
@@ -514,18 +550,19 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 					}
 
 					// get rid of any other messages in same location (only one displays at a time)
-					if ( fabs( message->y - m_pMessages[j]->y ) < 0.0001 && fabs( message->x - m_pMessages[j]->x ) < 0.0001 )
+					if ( fabs( message->y - m_pMessages[j].pMessage->y ) < 0.0001 && fabs( message->x - m_pMessages[j].pMessage->x ) < 0.0001 )
 					{
-						if( !strcmp( m_pMessages[j]->pName, "Custom" ) )
+						if( !strcmp( m_pMessages[j].pMessage->pName, "Custom" ) )
 						{
-							delete[] m_pMessages[j]->pMessage;
+							delete[] m_pMessages[j].pMessage->pMessage;
 						}
-						m_pMessages[j] = NULL;
+						m_pMessages[j].pMessage = NULL;
 					}
 				}
 			}
 
-			m_pMessages[i] = message;
+			m_pMessages[i].pMessage = message;
+			// m_pMessages[i].font = font;
 			m_startTime[i] = time;
 			return;
 		}
@@ -584,9 +621,9 @@ void CHudMessage::MessageAdd(client_textmessage_t * newMessage )
 
 	for ( int i = 0; i < maxHUDMessages; i++ )
 	{
-		if ( !m_pMessages[i] )
+		if ( !m_pMessages[i].pMessage )
 		{
-			m_pMessages[i] = message;
+			m_pMessages[i].pMessage = message;
 			m_startTime[i] = gHUD.m_flTime;
 			return;
 		}
@@ -598,12 +635,12 @@ void CHudMessage::MessageAdd(client_textmessage_t * newMessage )
 int CHudMessage::MsgFunc_HudTextPro( const char *pszName, int iSize, void *pbuf )
 {
 	const char *sz;
-	int hint;
+	qboolean hintMessage;
 	BufferReader reader( pszName, pbuf, iSize );
 	sz = reader.ReadString();
-	hint = reader.ReadByte();
+	hintMessage = reader.ReadByte();
 
-	MessageAdd(sz, gHUD.m_flTime/*, hint, Newfont*/); // TODO
+	MessageAdd(sz, gHUD.m_flTime, hintMessage/*, Newfont*/ ); // TODO
 
 	// Remember the time -- to fix up level transitions
 	m_parms.time = gHUD.m_flTime;
@@ -615,19 +652,47 @@ int CHudMessage::MsgFunc_HudTextPro( const char *pszName, int iSize, void *pbuf 
 
 int CHudMessage::MsgFunc_HudTextArgs( const char *pszName, int iSize, void *pbuf )
 {
-	/*BufferReader reader( pszName, pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	const char *sz = reader.ReadString();
-	int hint = reader.ReadByte();
+	qboolean hintMessage = reader.ReadByte();
 
-	MessageAdd(sz, gHUD.m_flTime, hint, Newfont); // TODO
+	MessageAdd( sz, gHUD.m_flTime, hintMessage/*, Newfont*/ ); // TODO
+
+	int slot = -1;
+	for ( int i = 0; i < maxHUDMessages; i++ )
+	{
+		if ( m_pMessages[i].pMessage && m_startTime[i] == gHUD.m_flTime )
+		{
+			slot = i;
+			break;
+		}
+	}
+
+	if ( slot != -1 )
+	{
+		int argCount = reader.ReadByte();
+		if ( argCount > 4 ) argCount = 4;
+		if ( argCount < 0 ) argCount = 0;
+
+		m_pMessages[slot].arg_count = argCount;
+
+		for ( int i = 0; i < argCount; i++ )
+		{
+			const char *arg = reader.ReadString();
+			if ( !arg ) arg = "";
+
+			const char *localizedArg = Localize( arg );
+			strncpy( m_pMessages[slot].args[i], localizedArg, 128 );
+			m_pMessages[slot].args[i][127] = 0;
+		}
+	}
 
 	// Remember the time -- to fix up level transitions
 	m_parms.time = gHUD.m_flTime;
 
 	// Turn on drawing
-	if ( !(m_iFlags & HUD_ACTIVE) )
-		m_iFlags |= HUD_ACTIVE;*/
+	m_iFlags |= HUD_DRAW;
 
 	return 1;
 }
