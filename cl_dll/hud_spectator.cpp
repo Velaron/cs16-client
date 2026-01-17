@@ -911,7 +911,7 @@ void CHudSpectator::HandleButtonsDown( int ButtonPressed )
 void CHudSpectator::HandleButtonsUp( int ButtonPressed )
 {
 	//if ( !gViewPort )
-	return;
+	//return;
 
 	//	if ( !gViewPort->m_pSpectatorPanel->isVisible() )
 	//	return; // don't do anything if not in spectator mode
