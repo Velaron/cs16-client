@@ -55,7 +55,7 @@ int CHudSayText :: Init( void )
 
 	InitHUDData();
 
-	m_HUD_saytext =			gEngfuncs.pfnRegisterVariable( "hud_saytext", "1", 0 );
+	m_HUD_saytext =			gEngfuncs.pfnRegisterVariable( "hud_saytext_internal", "1", 0 );
 	m_HUD_saytext_time =	gEngfuncs.pfnRegisterVariable( "hud_saytext_time", "5", 0 );
 
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission

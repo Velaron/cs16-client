@@ -183,6 +183,42 @@ void SpecPip( void )
 	char *arg = gEngfuncs.Cmd_Argv(1);
 
 	if( arg[0] == 't' && arg[1] == '\0' )
+	{
+		if ( gHUD.m_Spectator.m_pip && (int)gHUD.m_Spectator.m_pip->value != INSET_OFF )
+		{
+			gHUD.m_Spectator.SetModes( -1, INSET_OFF );
+		}
+		else
+		{
+			// ensure overview data and map sprite are loaded before enabling PiP
+			gHUD.m_Spectator.ParseOverviewFile();
+			gHUD.m_Spectator.LoadMapSprites();
+
+			// if map overview is open in fullscreen, show Locked Chase Cam in inset (player chase)
+			int insetMode = INSET_MAP_FREE;
+			if ( g_iUser1 == OBS_MAP_FREE || g_iUser1 == OBS_MAP_CHASE )
+				insetMode = INSET_CHASE_LOCKED;
+			gHUD.m_Spectator.SetModes( -1, insetMode );
+		}
+	}
+	else
+	{
+		gEngfuncs.Cvar_Set( name, gEngfuncs.Cmd_Argv(1) );
+	}
+}
+
+void HudSayText( void )
+{
+	if ( gEngfuncs.Cmd_Argc() <= 1 )
+	{
+		gEngfuncs.Con_Printf( "usage:  hud_saytext <0|1>\n" );
+		return;
+	}
+
+	const char *name = "hud_saytext_internal";
+	char *arg = gEngfuncs.Cmd_Argv(1);
+
+	if( arg[0] == 't' && arg[1] == '\0' )
 		gEngfuncs.Cvar_SetValue( name, !gEngfuncs.pfnGetCvarFloat(name) );
 	else
 		gEngfuncs.Cvar_Set( name, gEngfuncs.Cmd_Argv(1) );
@@ -213,6 +249,7 @@ int CHudSpectator::Init()
 	gEngfuncs.pfnAddCommand ("spec_drawnames", SpecDrawNames );
 	gEngfuncs.pfnAddCommand ("spec_drawcone", SpecDrawCone );
 	gEngfuncs.pfnAddCommand ("spec_drawstatus", SpecDrawStatus );
+	gEngfuncs.pfnAddCommand ("hud_saytext", HudSayText );
 	gEngfuncs.pfnAddCommand ("spec_autodirector", SpecAutoDirector );
 	gEngfuncs.pfnAddCommand ("spec_pip", SpecPip );
 
@@ -220,6 +257,7 @@ int CHudSpectator::Init()
 	m_drawcone		= gEngfuncs.pfnRegisterVariable("spec_drawcone_internal","1",0);
 	m_drawstatus	= gEngfuncs.pfnRegisterVariable("spec_drawstatus_internal","1",0);
 	m_autoDirector	= gEngfuncs.pfnRegisterVariable("spec_autodirector_internal","1",0);
+	m_HUD_saytext 	= gEngfuncs.pfnRegisterVariable("hud_saytext_internal","1",0);
 	m_pip			= gEngfuncs.pfnRegisterVariable("spec_pip_internal","1",0);
 	m_lastAutoDirector = 0.0f;
 	
