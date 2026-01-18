@@ -186,7 +186,7 @@ CVoiceStatusHud::~CVoiceStatusHud()
 
 int CVoiceStatusHud::Init( IVoiceStatusHelper *pHelper, IVoiceStatus *pStatus )
 {
-	m_VoiceHeadModel = NULL;
+	m_VoiceHeadModel = 0;
 
 	m_pHelper = pHelper;
 	m_pStatus = pStatus;
@@ -385,7 +385,8 @@ void CVoiceStatusHud::UpdateSpeakerStatus( int entindex, bool bTalking )
 				// If we don't have a label for this guy yet, then create one.
 				if ( !pLabel )
 				{
-					if ( pLabel = GetFreeVoiceLabel() )
+					pLabel = GetFreeVoiceLabel();  
+					if ( pLabel )
 					{
 						// Get the name from the engine.
 						hud_player_info_t info;

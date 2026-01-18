@@ -186,7 +186,7 @@ void IN_Move( float frametime, usercmd_t *cmd )
 		viewangles[YAW] += rel_yaw;
 		if( bLadder )
 		{
-			if( ( cl_laddermode->value == 1 ) )
+			if( cl_laddermode->value == 1 )
 				viewangles[YAW] -= ac_sidemove * 5;
 			ac_sidemove = 0;
 		}
