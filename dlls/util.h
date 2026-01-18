@@ -65,7 +65,9 @@ inline edict_t *FIND_ENTITY_BY_TARGET(edict_t *entStart, const char *pszName)
 typedef int EOFFSET;
 typedef int BOOL;
 
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
 
 #define DECLARE_GLOBAL_METHOD(MethodName) extern void DLLEXPORT MethodName(void)
 #define GLOBAL_METHOD(funcname) void DLLEXPORT funcname(void)

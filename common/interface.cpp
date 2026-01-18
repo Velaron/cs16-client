@@ -13,8 +13,11 @@
 #if XASH_PSVITA == 1
 #include <unistd.h>
 #define VRTLD_LIBDL_COMPAT
-#include <vrtld.h>
+#include <unistd.h>
 #elif XASH_APPLE == 1
+#include <dlfcn.h>
+#include <unistd.h>
+#elif XASH_OPENBSD == 1
 #include <dlfcn.h>
 #include <unistd.h>
 #endif
