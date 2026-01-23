@@ -25,7 +25,9 @@
 
 		<activity
 			android:name=".CZeroActivity"
+			android:icon="@mipmap/ic_launcher_cz"
 			android:label="CSCZClient"
+			android:roundIcon="@mipmap/ic_launcher_cz"
 			android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
