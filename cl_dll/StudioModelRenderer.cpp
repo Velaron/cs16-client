@@ -710,7 +710,7 @@ void CStudioModelRenderer::StudioSetupBones(void)
 			if (IEngineStudio.IsHardware())
 			{
 				// i know this looks HORRIBLE but I'm too lazy to simplify this right now
-				if( gHUD.cl_righthand && gHUD.cl_righthand->value > 0.0f && bIsViewModel && !g_bHoldingShield || gHUD.GetGameType() == GAME_CZERO && bIsViewModel && g_bHoldingShield )
+				if( gHUD.cl_righthand && gHUD.cl_righthand->value > 0.0f && bIsViewModel )
 				{
 					bonematrix[1][0] = -bonematrix[1][0];
 					bonematrix[1][1] = -bonematrix[1][1];
@@ -838,20 +838,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 
-	if( g_bHoldingKnife && m_pCurrentEntity == gEngfuncs.GetViewModel() && (flags & STUDIO_RENDER) )
-	{
-		// Condition Zero knife viewmodel is left-handed by default, so we need to flip it too
-		const char *pchGameDir = gEngfuncs.pfnGetGameDirectory();
-		if( pchGameDir && stricmp( pchGameDir, "czero" ) != 0 )
-		{
-			bChangedRightHand = true;
-
-			iRightHandValue = gHUD.cl_righthand->value;
-
-			gHUD.cl_righthand->value = !gHUD.cl_righthand->value;
-		}
-	}
-
 	IEngineStudio.GetTimes(&m_nFrameCount, &m_clTime, &m_clOldTime);
 	IEngineStudio.GetViewInfo(m_vRenderOrigin, m_vUp, m_vRight, m_vNormal);
 	IEngineStudio.GetAliasScale(&m_fSoftwareXScale, &m_fSoftwareYScale);
@@ -903,6 +889,26 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 		if (m_pStudioHeader->numbodyparts == 0)
 			return 1;
+	}
+
+	bool bShieldDetected = false;
+	bool bIsViewModel = gEngfuncs.GetViewModel() == m_pCurrentEntity;
+
+	if ( bIsViewModel && m_pStudioHeader )
+	{
+		if ( strstr( m_pStudioHeader->name, "shield" ) )
+		{
+			bShieldDetected = true;
+		}
+	}
+
+	if( ( g_bHoldingKnife || bShieldDetected ) && !( gHUD.GetGameType() == GAME_CZERO ) && bIsViewModel )
+	{
+		bChangedRightHand = true;
+
+		iRightHandValue = gHUD.cl_righthand->value;
+
+		gHUD.cl_righthand->value = !gHUD.cl_righthand->value;
 	}
 
 	if (m_pCurrentEntity->curstate.movetype == MOVETYPE_FOLLOW)
