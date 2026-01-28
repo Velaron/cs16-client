@@ -631,6 +631,14 @@ struct message_parms_t
 	float fadeTime;
 };
 
+struct hud_message_t
+{
+	client_textmessage_t	*pMessage;
+	// unsigned int font;
+	char args[4][256]; // 1024 bytes
+	int arg_count;
+};
+
 //
 //-----------------------------------------------------
 //
@@ -665,8 +673,8 @@ public:
 	int	XPosition( float x, int width, int lineWidth );
 	int YPosition( float y, int height );
 
-	void MessageAdd( const char *pName, float time );
-	void MessageAdd(client_textmessage_t * newMessage );
+	void MessageAdd( const char *pName, float time, qboolean hintMessage = 0/*, unsigned int font = 0 */ );
+	void MessageAdd( client_textmessage_t *newMessage );
 	void MessageDrawScan( client_textmessage_t *pMessage, float time );
 	void MessageScanStart( void );
 	void MessageScanNextChar( void );
@@ -675,7 +683,7 @@ public:
 	client_textmessage_t *AllocMessage( const char *text = NULL, client_textmessage_t *copyFrom = NULL );
 
 private:
-	client_textmessage_t		*m_pMessages[maxHUDMessages];
+	hud_message_t				m_pMessages[maxHUDMessages];
 	float						m_startTime[maxHUDMessages];
 	message_parms_t				m_parms;
 	float						m_gameTitleTime;
