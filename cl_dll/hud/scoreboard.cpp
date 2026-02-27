@@ -107,6 +107,7 @@ int CHudScoreboard :: Init( void )
 
 	cl_showpacketloss = CVAR_CREATE( "cl_showpacketloss", "0", FCVAR_ARCHIVE );
 	cl_showplayerversion = CVAR_CREATE( "cl_showplayerversion", "0", 0 );
+	cl_show_scoreboard_on_death = CVAR_CREATE( "cl_show_scoreboard_on_death", "0", FCVAR_ARCHIVE );
 
 	return 1;
 }
@@ -149,7 +150,10 @@ bool CHudScoreboard :: ShouldDrawScoreboard() const
 	if( m_bForceDraw )
 		return true;
 
-	if( m_bShowscoresHeld || gHUD.m_Health.m_iHealth <= 0 || gHUD.m_iIntermission )
+	if( m_bShowscoresHeld || gHUD.m_iIntermission )
+		return true;
+
+	if( cl_show_scoreboard_on_death && cl_show_scoreboard_on_death->value && gHUD.m_Health.m_iHealth <= 0 )
 		return true;
 
 	return false;
