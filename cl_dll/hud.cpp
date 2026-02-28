@@ -358,10 +358,6 @@ void CHud :: Init( void )
 	m_SniperScope.Init();
 	m_NVG.Init();
 
-	// Spectator GUI is not need in singleplayer czeror
-	if( GetGameType() != GAME_CZERODS )
-		m_SpectatorGui.Init();
-
 	// Game HUD things
 	m_Ammo.Init();
 	m_Health.Init();
@@ -389,6 +385,11 @@ void CHud :: Init( void )
 	// all things that have own background and must be drawn last
 	m_ProgressBar.Init();
 	m_Menu.Init();
+
+	// Spectator GUI is not need in singleplayer czeror
+	if( GetGameType() != GAME_CZERODS )
+		m_SpectatorGui.Init();
+
 	m_Scoreboard.Init();
 
 	GetClientVoice()->Init( &g_VoiceStatusHelper );
