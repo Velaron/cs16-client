@@ -715,7 +715,7 @@ client_textmessage_t *CHudMessage::AllocMessage( const char *text, client_textme
 	if( text )
 	{
 		int len = strlen( text );
-		char *szCustomText = new char[len];
+		char *szCustomText = new char[len + 1];
 		strcpy( szCustomText, text );
 
 		ret->pName = "Custom";
