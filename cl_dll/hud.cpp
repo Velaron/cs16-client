@@ -117,9 +117,10 @@ const char *sPlayerModelFiles[12] =
 
 void __CmdFunc_InputCommandSpecial()
 {
-#ifdef _CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
+	// Quash3D: unlock _special command
+	// #ifdef _CS16CLIENT_ALLOW_SPECIAL_SCRIPTING
 	gEngfuncs.pfnClientCmd("_special");
-#endif
+	// #endif
 }
 
 void __CmdFunc_GunSmoke()
@@ -248,6 +249,22 @@ void __CmdFunc_MouseSucksOpen( void ) { evdev_open = true; }
 void __CmdFunc_MouseSucksClose( void ) { evdev_open = false; }
 #endif
 
+// Quash3D: Bypass pc checks (emulate android) - on
+void __CmdFunc_AndroidLikeOn( void )
+{
+	gEngfuncs.Cvar_Set( "m_ignore", "1" );
+	gEngfuncs.Cvar_Set( "touch_enable", "1" );
+	gEngfuncs.Cvar_Set( "cscl_ver", "3431" );
+	gEngfuncs.Cvar_Set( "host_ver", "1200 0.21 Android arm release" );
+}
+// Quash3D: Bypass pc checks (emulate android) - off
+void __CmdFunc_AndroidLikeOff( void )
+{
+	gEngfuncs.Cvar_Set( "m_ignore", "0" );
+	gEngfuncs.Cvar_Set( "touch_enable", "0" );
+	gEngfuncs.Cvar_Set( "cscl_ver", Q_buildnum() );
+}
+
 
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
@@ -331,6 +348,10 @@ void CHud :: Init( void )
 	}
 
 	CVAR_CREATE( "cscl_ver", Q_buildnum(), 1<<14 | FCVAR_USERINFO ); // init and userinfo
+
+	// Quash3D: force cvar values, Bypass pc checks
+	HOOK_COMMAND_FUNC( "pc_bypass_on", __CmdFunc_AndroidLikeOn );
+	HOOK_COMMAND_FUNC( "pc_bypass_off", __CmdFunc_AndroidLikeOff );
 
 	m_iLogo = 0;
 	m_iFOV = 0;

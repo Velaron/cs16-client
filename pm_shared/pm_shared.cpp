@@ -14,6 +14,10 @@
 #include <ctype.h>
 #include "com_model.h"
 
+// Quash3D: added to support checking cvar values
+// #include "../engine/cdll_int.h"
+// extern cl_enginefunc_t gEngfuncs;
+
 #ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #endif
@@ -2444,7 +2448,13 @@ void PM_Jump()
 	// In the air now.
 	pmove->onground = -1;
 
-	PM_PreventMegaBunnyJumping();
+	// Quash3D: apply bhop cap only when enabled
+	// if( gEngfuncs.pfnGetCvarFloat( "cl_bhopcap" ) )
+	// {
+	// 	PM_PreventMegaBunnyJumping();
+	// }
+
+	// PM_PreventMegaBunnyJumping();
 
 	float fvel = Length(pmove->velocity);
 	float fvol = 1.0f;

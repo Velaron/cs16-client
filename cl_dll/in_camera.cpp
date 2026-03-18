@@ -362,13 +362,14 @@ void CAM_ToThirdPerson(void)
 { 
 	vec3_t viewangles;
 
-#if !defined( _DEBUG )
-	if ( gEngfuncs.GetMaxClients() > 1 )
-	{
-		// no thirdperson in multiplayer.
-		return;
-	}
-#endif
+	// Quash3D: Unlock thirdperson command
+// #if !defined( _DEBUG )
+// 	if ( gEngfuncs.GetMaxClients() > 1 )
+// 	{
+// 		// no thirdperson in multiplayer.
+// 		return;
+// 	}
+// #endif
 
 	gEngfuncs.GetViewAngles( (float *)viewangles );
 

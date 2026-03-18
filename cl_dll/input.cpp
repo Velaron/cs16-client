@@ -64,6 +64,17 @@ cvar_t	*cl_yawspeed;
 cvar_t	*cl_pitchspeed;
 cvar_t	*cl_anglespeedkey;
 cvar_t	*cl_vsmoothing;
+
+// Quash3D: was taken from OpenAG
+cvar_t	*cl_autojump;
+
+extern "C"
+{
+	int g_onground = false;
+	int g_inwater = false;
+	int g_walking = true; // Movetype == MOVETYPE_WALK. Filters out noclip, being on ladder, etc.
+}
+
 /*
 ===============================================================================
 
@@ -112,6 +123,9 @@ kbutton_t	in_score;
 kbutton_t	in_break;
 kbutton_t	in_graph;  // Display the netgraph
 
+// Quash3D: was taken from OpenAG
+kbutton_t	in_ducktap;
+
 struct kblist_t
 {
 	kblist_t *next;
@@ -120,6 +134,75 @@ struct kblist_t
 };
 
 kblist_t *g_kbkeys = NULL;
+
+// Quash3D: was taken from OpenAG
+namespace autofuncs
+{
+	static cvar_t* cl_autojump;
+
+	static struct {
+		bool onground = false;
+		bool inwater = false;
+		bool walking = true; // Movetype == MOVETYPE_WALK. Filters out noclip, being on ladder, etc.
+	} player;
+
+	static void handle_autojump(usercmd_t* cmd)
+	{
+		static bool s_jump_was_down_last_frame = false;
+
+		if (cl_autojump->value != 0.0f)
+		{
+			bool should_release_jump = (!player.onground && !player.inwater && player.walking);
+
+			/*
+			 * Spam pressing and releasing jump if we're stuck in a spot where jumping still results in
+			 * being onground in the end of the frame. Without this check, +jump would remain held and
+			 * when the player exits this spot they would have to release and press the jump button to
+			 * start jumping again. This also helps with exiting water or ladder right onto the ground.
+			 */
+			if (s_jump_was_down_last_frame && player.onground && !player.inwater && player.walking)
+				should_release_jump = true;
+
+			if (should_release_jump)
+				cmd->buttons &= ~IN_JUMP;
+		}
+
+		s_jump_was_down_last_frame = ((cmd->buttons & IN_JUMP) != 0);
+	}
+
+	static void handle_ducktap(usercmd_t* cmd)
+	{
+		static bool s_duck_was_down_last_frame = false;
+		static bool should_release_duck;
+
+		bool duck_is_pressed = false;
+
+		if (in_duck.state & 1)
+			duck_is_pressed = true;
+		else
+			duck_is_pressed = false;
+
+		should_release_duck = (!player.onground && !player.inwater && player.walking && !duck_is_pressed);
+
+		if (s_duck_was_down_last_frame && player.onground && !player.inwater && player.walking)
+			should_release_duck = true;
+
+		if (should_release_duck)
+		{
+			cmd->buttons &= ~IN_DUCK;
+			in_duck.state &= 0;
+		}
+
+		s_duck_was_down_last_frame = ((cmd->buttons & IN_DUCK) != 0);
+	}
+}
+
+extern "C" void update_player_info(int onground, int inwater, int walking)
+{
+	autofuncs::player.onground = (onground != 0);
+	autofuncs::player.inwater = (inwater != 0);
+	autofuncs::player.walking = (walking != 0);
+}
 
 /*
 ============
@@ -521,6 +604,17 @@ void IN_MLookUp (void)
 #endif
 }
 
+// Quash3D: was taken from OpenAG
+void IN_DucktapUp(void)
+{
+	KeyUp( &in_ducktap );
+}
+
+void IN_DucktapDown(void)
+{
+	KeyDown( &in_ducktap );
+}
+
 /*
 ===============
 CL_KeyState
@@ -722,6 +816,14 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	// set button and flag bits
 	//
 	cmd->buttons = CL_ButtonBits( 1 );
+
+	// Quash3D: was taken from OpenAG
+	if (in_ducktap.state & 1)
+	{
+		cmd->buttons |= IN_DUCK;
+		autofuncs::handle_ducktap(cmd); // Ducktap takes priority over autojump
+	} else
+		autofuncs::handle_autojump(cmd);
 
 	// If they're in a modal dialog, ignore the attack button.
 	if ( GetClientVoice()->IsInSquelchMode() )
@@ -957,6 +1059,10 @@ void InitInput (void)
 	gEngfuncs.pfnAddCommand ("+break",IN_BreakDown);
 	gEngfuncs.pfnAddCommand ("-break",IN_BreakUp);
 
+	// Quash3D: was taken from OpenAG
+	gEngfuncs.pfnAddCommand ("+ducktap", IN_DucktapDown);
+	gEngfuncs.pfnAddCommand ("-ducktap", IN_DucktapUp);
+
 	lookstrafe			= gEngfuncs.pfnRegisterVariable ( "lookstrafe", "0", FCVAR_ARCHIVE );
 	lookspring			= gEngfuncs.pfnRegisterVariable ( "lookspring", "0", FCVAR_ARCHIVE );
 	cl_anglespeedkey	= gEngfuncs.pfnRegisterVariable ( "cl_anglespeedkey", "0.67", 0 );
@@ -971,6 +1077,9 @@ void InitInput (void)
 	cl_pitchdown		= gEngfuncs.pfnRegisterVariable ( "cl_pitchdown", "89", 0 );
 
 	cl_vsmoothing		= gEngfuncs.pfnRegisterVariable ( "cl_vsmoothing", "0.05", FCVAR_ARCHIVE );
+
+	// Quash3D: register cl_autojump cvar
+	autofuncs::cl_autojump = gEngfuncs.pfnRegisterVariable ( "cl_autojump", "1", FCVAR_ARCHIVE );
 
 	m_pitch			    = gEngfuncs.pfnRegisterVariable ( "m_pitch","0.022", FCVAR_ARCHIVE );
 	m_yaw				= gEngfuncs.pfnRegisterVariable ( "m_yaw","0.022", FCVAR_ARCHIVE );
