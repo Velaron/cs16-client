@@ -97,9 +97,6 @@ extern cvar_t *cl_fog_g;
 extern cvar_t *cl_fog_b;
 extern cvar_t *cl_fog_density;
 
-// Quash3D: toggle bhop cap removal
-extern cvar_t *cl_bhopcap;
-
 struct FogParameters {
 	float color[3];
 	float density;

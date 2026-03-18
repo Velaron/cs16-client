@@ -2448,13 +2448,7 @@ void PM_Jump()
 	// In the air now.
 	pmove->onground = -1;
 
-	// Quash3D: apply bhop cap only when enabled
-	// if( gEngfuncs.pfnGetCvarFloat( "cl_bhopcap" ) )
-	// {
-	// 	PM_PreventMegaBunnyJumping();
-	// }
-
-	// PM_PreventMegaBunnyJumping();
+	PM_PreventMegaBunnyJumping();
 
 	float fvel = Length(pmove->velocity);
 	float fvol = 1.0f;
