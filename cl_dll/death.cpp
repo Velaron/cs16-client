@@ -45,6 +45,9 @@ static int DEATHNOTICE_DISPLAY_TIME = 6;
 
 DeathNoticeItem rgDeathNoticeList[ MAX_DEATHNOTICES + 1 ];
 
+cvar_t *cl_killsound;
+cvar_t *cl_killsound_path;
+
 int CHudDeathNotice :: Init( void )
 {
 	gHUD.AddHudElem( this );
@@ -52,6 +55,8 @@ int CHudDeathNotice :: Init( void )
 	HOOK_MESSAGE( gHUD.m_DeathNotice, DeathMsg );
 
 	hud_deathnotice_time = CVAR_CREATE( "hud_deathnotice_time", "6", FCVAR_ARCHIVE );
+	cl_killsound = CVAR_CREATE( "cl_killsound", "0", FCVAR_ARCHIVE );
+	cl_killsound_path = CVAR_CREATE( "cl_killsound_path", "buttons/bell1.wav", FCVAR_ARCHIVE );
 	m_iFlags = 0;
 
 	return 1;
@@ -248,6 +253,14 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + hud_deathnotice_time->value;
 
+	// Play kill sound
+	if ((g_PlayerInfoList[killer].thisplayer || g_iUser2 == killer) &&
+		!rgDeathNoticeList[i].bNonPlayerKill &&
+		!rgDeathNoticeList[i].bSuicide &&
+		cl_killsound->value > 0.0f)
+	{
+		PlaySound(cl_killsound_path->string, cl_killsound->value);
+	}
 
 	if (rgDeathNoticeList[i].bNonPlayerKill)
 	{
