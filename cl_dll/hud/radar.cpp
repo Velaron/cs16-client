@@ -394,6 +394,7 @@ void CHudRadar::DrawPlayerLocation( int y )
 		int len = DrawUtils::ConsoleStringLen( szLocalizedLocation );
 
 		x = x - len / 2;
+		if( x < 0 ) x = 0;
 
 		DrawUtils::DrawConsoleString( x, y, szLocalizedLocation );
 	}
