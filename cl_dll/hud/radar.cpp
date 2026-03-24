@@ -575,6 +575,9 @@ int CHudRadar::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 
 int CHudRadar::MsgFunc_Location(const char *pszName, int iSize, void *pbuf)
 {
+	if ( gHUD.GetGameType() != GAME_CZERO )
+		return 0;
+
 	BufferReader reader( pszName, pbuf, iSize );
 
 	int player = reader.ReadByte();
