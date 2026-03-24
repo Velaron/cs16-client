@@ -171,7 +171,7 @@ void ProcessRain( void )
 
 	Rain.weatherValue = gHUD.cl_weather->value;
 
-	if( Rain.dripsPerSecond == 0 || !Rain.weatherValue )
+	if( Rain.dripsPerSecond == 0 )
 		return; // disabled
 
 	// first frame
@@ -225,6 +225,12 @@ void ProcessRain( void )
 
 			Rain.dripcounter--;
 		}
+	}
+
+	if( !Rain.weatherValue )
+	{
+		Rain.nextspawntime = Rain.curtime;
+		return;
 	}
 
 	int maxDelta = speed * Rain.timedelta; // maximum height randomize distance
