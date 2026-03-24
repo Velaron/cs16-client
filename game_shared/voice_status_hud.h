@@ -63,7 +63,7 @@ public:
 	void GetContentSize( int &wide, int &tall )
 	{
 		// m_pLabel->GetContentSize( wide, tall );
-		wide = DrawUtils::HudStringLen( m_playerName ) + 8;
+		wide = DrawUtils::HudStringLen( m_buf );
 
 		tall = gHUD.GetCharHeight();
 

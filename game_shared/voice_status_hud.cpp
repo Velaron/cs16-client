@@ -43,6 +43,8 @@
 //
 // #include <vgui/ILocalize.h>
 
+#include "utlstring.h"
+
 #include "triangleapi.h"
 #include "draw_util.h"
 
@@ -95,9 +97,8 @@ void CVoiceLabel::SetLocation( const char *location )
 		if ( !m_locationString )
 		{
 			// m_locationString = CloneWString( newLocation );
-			m_locationString = new char[sizeof( newLocation )];
-			strncpy( m_locationString, newLocation, sizeof( m_locationString ) );
-			// m_locationString[sizeof( m_locationString ) - 1] = '\0';
+			m_locationString = new char[strlen( newLocation ) + 1];
+			strcpy( m_locationString, newLocation );
 			RebuildLabelText();
 		}
 	}
@@ -156,16 +157,46 @@ void CVoiceLabel::RebuildLabelText()
 		// localize()->ConvertANSIToUnicode( m_playerName, wsPlayer, sizeof( wsPlayer ) );
 
 		// const wchar_t *formatStr = L"%ls   ";
-		const char *formatStr = "%s   ";
+		const char *locStr = Localize( "#Voice_Location" );
+
 		if ( m_locationString )
 		{
-			// formatStr = localize()->Find( "#Voice_Location" );
-			formatStr = Localize( "#Voice_Location" );
-			if ( !strcmp( formatStr, "#Voice_Location") )
-				formatStr = "%ls/%ls   ";
+			if ( !strcmp( locStr, "#Voice_Location" ) )
+			{
+				snprintf( buf, BufLen, "%s @ %s   ", m_playerName, m_locationString );
+			}
+			else
+			{
+				const char *tokens[2] = { m_playerName, m_locationString };
+				int tokenIdx = 0;
+
+				CUtlString result;
+				for ( const char *src = locStr; *src; )
+				{
+					if ( src[0] == '%' && src[1] == 's' && tokenIdx < 2 )
+					{
+						result += tokens[tokenIdx++];
+						src += 2;
+					}
+					else if ( src[0] == '%' && src[1] != '\0' && src[2] == 's' && tokenIdx < 2 )
+					{
+						result += tokens[tokenIdx++];
+						src += 3;
+					}
+					else
+					{
+						result.AppendChar( *src++ );
+					}
+				}
+				strncpy( buf, result.String(), BufLen - 1 );
+				buf[BufLen - 1] = '\0';
+			}
+		}
+		else
+		{
+			snprintf( buf, BufLen, "%s   ", m_playerName );
 		}
 		// _snwprintf( buf, BufLen, formatStr, wsPlayer, m_locationString );
-		snprintf( buf, BufLen, formatStr, m_playerName, m_locationString );
 	}
 	// /m_pLabel->SetText( buf );
 	strncpy( m_buf, buf, sizeof( m_buf ) );

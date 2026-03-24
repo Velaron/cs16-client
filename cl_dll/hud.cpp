@@ -94,6 +94,19 @@ public:
 	{
 		return !gHUD.m_Scoreboard.m_bForceDraw && !gHUD.m_Scoreboard.m_bShowscoresHeld;
 	}
+
+	const char *GetPlayerLocation( int entindex ) override
+	{
+		if ( gHUD.GetGameType() == GAME_CZERO )
+		{
+			if ( entindex >= 1 && entindex <= MAX_PLAYERS )
+			{
+				return g_PlayerExtraInfo[entindex].location;
+			}
+		}
+
+		return "";
+	}
 };
 static CCStrikeVoiceStatusHelper g_VoiceStatusHelper;
 
