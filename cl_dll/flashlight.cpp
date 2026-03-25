@@ -26,6 +26,7 @@
 #include <stdio.h>
 
 #include "draw_util.h"
+#include "pm_shared.h"
 
 #define BAT_NAME "sprites/%d_Flashlight.spr"
 
@@ -90,6 +91,9 @@ int CHudFlashlight::Draw(float flTime)
 	wrect_t rc;
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
+		return 1;
+
+	if (g_iUser1 == OBS_IN_EYE)
 		return 1;
 
 	if (m_fOn)
