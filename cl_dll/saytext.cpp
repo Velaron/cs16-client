@@ -28,6 +28,7 @@
 #include "vgui_parser.h"
 #include "draw_util.h"
 #include "com_weapons.h"
+#include "utlstring.h"
 //#include "vgui_TeamFortressViewport.h"
 
 extern float *GetClientColor( int clientIndex );
@@ -268,29 +269,23 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 {
 	BufferReader reader( pszName, pbuf, iSize );
 	int client_index, argc, numArgs;		// the client who spoke the message
-	char *arg, *fmt, *argv[3] = {};
+	CUtlString fmt;
+	CUtlString argv[3];
 	const char *fmt_tran = nullptr;
 	bool allowDead, replaceFirstArgToName, swap;
-	int len;
 
 	client_index = reader.ReadByte();
 
 	// find all arguments
-	arg = reader.ReadString();
-	len = strlen( arg );
-	fmt = new char[len+1];
-	strcpy(fmt, arg);
+	fmt = reader.ReadString();
 
 	for( argc = 0; argc < 3; argc++ )
 	{
-		arg = reader.ReadString();
+		const char *arg = reader.ReadString();
 		if( !arg[0] && !reader.Valid() )
 			break;
 
-		len = strlen( arg );
-		argv[argc] = new char[len+1];
-		strncpy( argv[argc], arg, len );
-		argv[argc][len] = 0;
+		argv[argc] = arg;
 	}
 
 	// see if argv[0] is translatable
@@ -317,68 +312,76 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	// no translations
 	if( !fmt_tran )
 	{
-		fmt_tran = fmt;
+		fmt_tran = fmt.Get();
 		numArgs = argc;
 		allowDead = true;
 		replaceFirstArgToName = false;
 		swap = false;
 	}
 
+	// Convert indexed placeholders (%s1, %s2) to standard C-format (%s) 
+	// to ensure compatibility with snprintf below.
+	CUtlString fmt_local = fmt_tran;
+	Localize_StripIndices( fmt_local.Access() );
+
 	// If text is sent from dead player or spectator
 	// don't draw it, until local player isn't specator or dead.
 	if( !allowDead && !CL_IsDead() && !g_iUser1 )
 	{
-		delete[] fmt;
-
-		for( int i = 0; i < 3; i++ )
-			if( argv[i] ) delete argv[i];
-
 		return 1;
+	}
+
+	bool nameArgReplaced = false;
+
+	// Resolve missing nickname locally via client_index mapping.
+	if( !replaceFirstArgToName && client_index > 0 && numArgs > 0 && argv[0].Length() == 0 )
+	{
+		GetPlayerInfo( client_index, &g_PlayerInfoList[client_index] );
+		argv[0] = g_PlayerInfoList[client_index].name;
+		nameArgReplaced = true;
 	}
 
 	if( replaceFirstArgToName )
 	{
 		GetPlayerInfo( client_index, &g_PlayerInfoList[client_index] );
-		delete[] argv[0];
-
 		argv[0] = g_PlayerInfoList[client_index].name;
+		nameArgReplaced = true;
 	}
 
-	char dst[1024];
+	// Strip indices from argument strings too (when not replaced by name)
+	for( int i = 0; i < numArgs; ++i )
+	{
+		if( !(i == 0 && nameArgReplaced) )
+		{
+			Localize_StripIndices( argv[i].Access() );
+		}
+	}
+
+	CUtlString dst;
+	char tmp[1024];
 
 	switch( numArgs )
 	{
 	case 3:
 		if( swap )
-			snprintf( dst, sizeof( dst ), fmt_tran, argv[0], argv[2], argv[1] );
+			snprintf( tmp, sizeof( tmp ), fmt_local.Get(), argv[0].Get(), argv[2].Get(), argv[1].Get() );
 		else
-			snprintf( dst, sizeof( dst ), fmt_tran, argv[0], argv[1], argv[2] );
+			snprintf( tmp, sizeof( tmp ), fmt_local.Get(), argv[0].Get(), argv[1].Get(), argv[2].Get() );
 		break;
 	case 2:
-		snprintf( dst, sizeof( dst ), fmt_tran, argv[0], argv[1] );
+		snprintf( tmp, sizeof( tmp ), fmt_local.Get(), argv[0].Get(), argv[1].Get() );
 		break;
 	case 1:
-		snprintf( dst, sizeof( dst ), fmt_tran, argv[0] );
+		snprintf( tmp, sizeof( tmp ), fmt_local.Get(), argv[0].Get() );
 		break;
 	case 0:
-		strncpy( dst, fmt_tran, sizeof( dst ) );
-		dst[sizeof(dst)-1] = 0;
+		strncpy( tmp, fmt_local.Get(), sizeof( tmp ) );
+		tmp[sizeof(tmp)-1] = 0;
 		break;
 	}
 	
-	SayTextPrint( dst, strlen(dst), client_index );
-
-	delete[] fmt;
-
-	for( int i = 0; i < argc; i++ )
-	{
-		// skip second argument if it was replaced by name
-		if( i == 0 && replaceFirstArgToName )
-			continue;
-
-		if( argv[i] )
-			delete[] argv[i];
-	}
+	dst = tmp;
+	SayTextPrint( dst.Get(), dst.Length(), client_index );
 
 	return 1;
 }
