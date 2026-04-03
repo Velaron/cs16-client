@@ -26,6 +26,20 @@
 #include "vgui_parser.h"
 #include "draw_util.h"
 
+static int Utf8StringLen(const char *pszText)
+{
+	if ( !pszText ) return 0;
+	int length = 0;
+	Con_UtfProcessChar( 0 );
+	while ( *pszText )
+	{
+		int uch = Con_UtfProcessChar( (unsigned char)*pszText );
+		if ( uch )
+			length++;
+		pszText++;
+	}
+	return length;
+}
 
 int CHudMessage::Init(void)
 {
@@ -310,11 +324,18 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 
 		m_parms.x = XPosition( pMessage->x, m_parms.width, m_parms.totalWidth );
 
+		Con_UtfProcessChar( 0 );
 		for ( j = 0; j < m_parms.lineLength; j++ )
 		{
 			m_parms.text = line[j];
-			int next = m_parms.x + gHUD.GetCharWidth( m_parms.text );
+			int uch = Con_UtfProcessChar( m_parms.text );
+			int next = m_parms.x + gHUD.GetCharWidth( uch ? uch : m_parms.text );
+
+			float savedCharTime = m_parms.charTime;
 			MessageScanNextChar();
+
+			if ( !uch )
+				m_parms.charTime = savedCharTime;
 			
 			if ( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
 				m_parms.x += DrawUtils::TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b );
@@ -395,7 +416,7 @@ int CHudMessage::Draw( float fTime )
 			
 			// Fade in is per character in scanning messages
 			case 2:
-				endTime = m_startTime[i] + (pMessage->fadein * strlen( pMessage->pMessage )) + pMessage->fadeout + pMessage->holdtime;
+				endTime = m_startTime[i] + (pMessage->fadein * Utf8StringLen( pMessage->pMessage )) + pMessage->fadeout + pMessage->holdtime;
 				break;
 			}
 
@@ -513,7 +534,7 @@ void CHudMessage::MessageAdd( const char *pName, float time, qboolean hintMessag
 				}
 				else if ( message->pMessage )
 				{
-					float lengthHold = (float)strlen( message->pMessage ) / 25.0f;
+					float lengthHold = (float)Utf8StringLen( message->pMessage ) / 25.0f;
 					if ( lengthHold < 1.0f )
 						lengthHold = 1.0f;
 					message->holdtime = lengthHold;
