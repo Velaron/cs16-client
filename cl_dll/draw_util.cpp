@@ -34,6 +34,7 @@ version.
 #include <string.h>
 #include <ctype.h>
 #include "utflib.h"
+#include "utlvector.h"
 
 float DrawUtils::color[3];
 
@@ -90,7 +91,7 @@ int Con_UtfProcessChar( int in )
 	return Con_UtfProcessCharForce( in );
 }
 
-int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, int r, int g, int b, float scale, bool drawing )
+int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, int r, int g, int b, float scale )
 {
 	int first_xpos = xpos;
 	char *szIt = (char *)str;
@@ -119,9 +120,6 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 				UnpackRGB( r, g, b, RGB_GRAY );
 				continue;
 			case 'R':
-				//if ( drawing )
-					//return xpos;
-				//return DrawHudStringReverse( iMaxX, ypos, first_xpos, ++szIt, r, g, b, scale, true ); // set 'drawing' to true, to stop when '\R' is catched
 				xpos = iMaxX - gHUD.GetCharWidth( 'M' ) * 10;
 				++szIt;
 			}
@@ -140,12 +138,9 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 
 		int uch = Con_UtfProcessChar( (unsigned char)*szIt );
 
-		//if ( !uch )
-			//continue;
-
 		int next = xpos + gHUD.GetCharWidth( uch ); // variable-width fonts look cool
 
-		if ( next > iMaxX )
+		if ( next > iMaxX && iMaxX > 0 )
 			return xpos;
 
 		xpos += TextMessageDrawChar( xpos, ypos, ( unsigned char )*szIt, r, g, b, scale );
@@ -155,67 +150,106 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 }
 
 
-int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, float scale, bool drawing )
+int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, float scale )
 {
 	int first_xpos = xpos;
 
-	// iterate through the string in reverse
-	for ( signed int i = strlen( szString ); i >= 0; i-- )
+	struct CharEntry {
+		int start, end;
+		int uch;
+		int r, g, b;
+	};
+	CUtlVector<CharEntry> chars;
+
+	int curR = r, curG = g, curB = b;
+	Con_UtfProcessChar( 0 );
+
+	// 1. Forward pass to identify characters and their correct colors
+	for ( int i = 0; szString[i] != '\0'; )
 	{
-		if ( i > 1 )
+		if ( szString[i] == '\\' && szString[i + 1] != 0 && szString[i + 1] != '\n' )
 		{
-			if( szString[i - 1] == '\\' )
+			switch ( szString[i + 1] )
 			{
-				// an escape character
-
-				switch ( szString[i] )
+			case 'y': UnpackRGB( curR, curG, curB, RGB_YELLOWISH ); break;
+			case 'r': UnpackRGB( curR, curG, curB, RGB_REDISH ); break;
+			case 'w': UnpackRGB( curR, curG, curB, RGB_WHITE ); break;
+			case 'd': UnpackRGB( curR, curG, curB, RGB_GRAY ); break;
+			case 'R':
+				// Draw any characters collected so far (to the left of \R)
+				for ( int j = chars.Count() - 1; j >= 0; j-- )
 				{
-				case 'y':
-					UnpackRGB( r, g, b, RGB_YELLOWISH );
-					break;
-				case 'r':
-					UnpackRGB( r, g, b, RGB_REDISH );
-					break;
-				case 'w':
-					UnpackRGB( r, g, b, RGB_WHITE );
-					break;
-				case 'R':
-					if ( drawing )
-						return xpos;
-
-					return DrawHudString( iMinX, ypos, first_xpos, &szString[i - 1], r, g, b, scale, true ); // set 'drawing' to true, to stop when '\R' is catched
-				case 'd':
-					UnpackRGB( r, g, b, RGB_GRAY );
-					break;
+					int width = gHUD.GetCharWidth( chars[j].uch );
+					int next = xpos - width;
+					if ( next < iMinX ) break;
+					xpos = next;
+					int drawX = xpos;
+					for ( int k = chars[j].start; k <= chars[j].end; k++ )
+						drawX += TextMessageDrawChar( drawX, ypos, ( unsigned char )szString[k], chars[j].r, chars[j].g, chars[j].b, scale );
 				}
-				continue;
+				chars.Purge();
+				// Draw the rest of the string forward from the left
+				return DrawHudString( iMinX, ypos, first_xpos, &szString[i+2], curR, curG, curB, scale );
 			}
-			else if( IsColorString( szString - 1 ) )
+			i += 2;
+			continue;
+		}
+		else if ( IsColorString( &szString[i] ) )
+		{
+			if ( gHUD.hud_colored->value )
 			{
-				if( gHUD.hud_colored->value )
-				{
-					r = g_color_table[ColorIndex( *szString )][0];
-					g = g_color_table[ColorIndex( *szString )][1];
-					b = g_color_table[ColorIndex( *szString )][2];
-				}
-				i--;
-				continue;
+				curR = g_color_table[ColorIndex( szString[i + 1] )][0];
+				curG = g_color_table[ColorIndex( szString[i + 1] )][1];
+				curB = g_color_table[ColorIndex( szString[i + 1] )][2];
 			}
+			i += 2;
+			continue;
 		}
 
-		int uch = Con_UtfProcessChar( (unsigned char)szString[i] );
+		// Identify the character boundary
+		int start = i;
+		int next_i = i + 1;
+		if ( g_accept_utf8 )
+		{
+			while( szString[next_i] != '\0' && (unsigned char)szString[next_i] >= 0x80 && (unsigned char)szString[next_i] <= 0xBF )
+				next_i++;
+		}
 
-		/*if ( !uch )
-			continue;*/
+		// Decode the character to get its width-code
+		Con_UtfProcessChar( 0 );
+		int uch = 0;
+		for ( int j = start; j < next_i; j++ )
+			uch = Con_UtfProcessChar( (unsigned char)szString[j] );
 
-		int next = xpos - gHUD.GetCharWidth( uch ); // variable-width fonts look cool
+		if ( uch )
+		{
+			CharEntry entry;
+			entry.start = start;
+			entry.end = next_i - 1;
+			entry.uch = uch;
+			entry.r = curR;
+			entry.g = curG;
+			entry.b = curB;
+			chars.AddToTail( entry );
+		}
+		i = next_i;
+	}
+
+	// 2. Backward pass to draw collected characters
+	for ( int i = chars.Count() - 1; i >= 0; i-- )
+	{
+		int width = gHUD.GetCharWidth( chars[i].uch );
+		int next = xpos - width;
 
 		if ( next < iMinX )
 			return xpos;
 
 		xpos = next;
 
-		TextMessageDrawChar( xpos, ypos, (unsigned char)szString[i], r, g, b );
+		// Draw all bytes of this character in forward order
+		int drawX = xpos;
+		for ( int j = chars[i].start; j <= chars[i].end; j++ )
+			drawX += TextMessageDrawChar( drawX, ypos, ( unsigned char )szString[j], chars[i].r, chars[i].g, chars[i].b, scale );
 	}
 
 	return xpos;
