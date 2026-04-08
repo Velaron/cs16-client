@@ -231,8 +231,10 @@ int CHudProgressBar::MsgFunc_BotProgress(const char *pszName, int iSize, void *p
 	int flag = reader.ReadByte();
 	switch( flag )
 	{
-	case UPDATE_BOTPROGRESS:
 	case CREATE_BOTPROGRESS:
+		m_fPercent = 0.0f;
+		break;
+	case UPDATE_BOTPROGRESS:
 		fNewPercent = (float)reader.ReadByte() / 100.0f;
 		// cs behavior:
 		// just don't decrease percent values
