@@ -97,12 +97,9 @@ public:
 
 	const char *GetPlayerLocation( int entindex ) override
 	{
-		if ( gHUD.GetGameType() == GAME_CZERO )
+		if ( entindex >= 1 && entindex <= MAX_PLAYERS )
 		{
-			if ( entindex >= 1 && entindex <= MAX_PLAYERS )
-			{
-				return g_PlayerExtraInfo[entindex].location;
-			}
+			return g_PlayerExtraInfo[entindex].location;
 		}
 
 		return "";
