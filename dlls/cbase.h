@@ -32,8 +32,6 @@
 #include "monsterevent.h"
 #endif
 
-#include <tier1/UtlVector.h>
-
 #undef CREATE_NAMED_ENTITY
 #undef REMOVE_ENTITY
 
@@ -62,8 +60,6 @@ typedef struct hash_item_s
 	int pevIndex;
 }
 hash_item_t;
-
-extern CUtlVector<hash_item_t> stringsHashTable;
 
 int CaseInsensitiveHash(const char *string, int iBounds);
 void EmptyEntityHashTable(void);
