@@ -36,6 +36,7 @@
 
 #include "csprite.h"
 #include "cvardef.h"
+#include "utlstring.h"
 
 #define MIN_ALPHA	 100	
 #define	HUDELEM_ACTIVE	1
@@ -90,7 +91,6 @@ inline bool BIsValidCTModelIndex( int i )
 
 #define MAX_PLAYER_NAME_LENGTH		32
 
-#define	MAX_MOTD_LENGTH				1536
 
 extern cvar_t *cl_fog_r;
 extern cvar_t *cl_fog_g;
@@ -338,7 +338,7 @@ public:
 
 protected:
 	static int MOTD_DISPLAY_TIME;
-	char m_szMOTD[ MAX_MOTD_LENGTH ];
+	CUtlString m_szMOTD;
 	
 	int m_iLines;
 	int m_iMaxLength;

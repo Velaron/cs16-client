@@ -53,7 +53,7 @@ int CHudMOTD :: VidInit( void )
 void CHudMOTD :: Reset( void )
 {
 	m_iFlags &= ~HUD_DRAW;  // start out inactive
-	m_szMOTD[0] = 0;
+	m_szMOTD.Clear();
 	m_iLines = 0;
 	m_bShow = false;
 	ignoreThisMotd = false;
@@ -78,7 +78,7 @@ int CHudMOTD :: Draw( float fTime )
 	gHUD.m_iNoConsolePrint |= 1 << 1;
 	// find the top of where the MOTD should be drawn,  so the whole thing is centered in the screen
 	int ypos = (ScreenHeight - LINE_HEIGHT * m_iLines)/2; // shift it up slightly
-	char *ch = m_szMOTD;
+	char *ch = m_szMOTD.Access();
 	int xpos = (ScreenWidth - gHUD.GetCharWidth( 'M' ) * m_iMaxLength) / 2;
 	if( xpos < 30 ) xpos = 30;
 	int xmax = xpos + gHUD.GetCharWidth( 'M' ) * m_iMaxLength;
@@ -143,10 +143,10 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 	BufferReader reader( pszName, pbuf, iSize );
 
 	int is_finished = reader.ReadByte();
-	strcat( m_szMOTD, reader.ReadString() );
+	m_szMOTD.Append( reader.ReadString() );
 
 	// we still don't support html tags in motd :(
-	if( strcasestr( m_szMOTD, "<!DOCTYPE HTML>" ) )
+	if( strcasestr( m_szMOTD.String(), "<!DOCTYPE HTML>" ) )
 	{
 		Reset();
 		ignoreThisMotd = true;
@@ -160,7 +160,7 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 		m_iFlags |= HUD_DRAW;
 
 
-		for ( char *sz = m_szMOTD; *sz != 0; sz++ )  // count the number of lines in the MOTD
+		for ( const char *sz = m_szMOTD.String(); *sz != 0; sz++ )  // count the number of lines in the MOTD
 		{
 			if ( *sz == '\n' )
 			{
