@@ -16,7 +16,6 @@
 #define PLAYER_H
 
 #include "pm_materials.h"
-#include "hintmessage.h"
 #include "weapons.h"
 
 #define MAX_PLAYER_NAME_LENGTH 32
@@ -476,7 +475,6 @@ public:
 	bool m_bKilledByBomb;
 	Vector m_vBlastVector;
 	bool m_bKilledByGrenade;
-	CHintMessageQueue m_hintMessageQueue;
 	int m_flDisplayHistory;
 	int m_iMenu;
 	int m_iChaseTarget;
