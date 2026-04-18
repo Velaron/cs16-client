@@ -102,6 +102,16 @@ void CVoiceLabel::SetLocation( const char *location )
 			RebuildLabelText();
 		}
 	}
+	else if ( location[0] == '#' )
+	{
+		// if the location is not localized and starts with #, clear the location
+		if ( m_locationString )
+		{
+			delete[] m_locationString;
+			m_locationString = NULL;
+			RebuildLabelText();
+		}
+	}
 	/*
 	else
 	{
