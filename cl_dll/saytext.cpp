@@ -58,6 +58,7 @@ int CHudSayText :: Init( void )
 
 	m_HUD_saytext =			gEngfuncs.pfnRegisterVariable( "hud_saytext_internal", "1", 0 );
 	m_HUD_saytext_time =	gEngfuncs.pfnRegisterVariable( "hud_saytext_time", "5", 0 );
+	m_HUD_saytext_console =	gEngfuncs.pfnRegisterVariable( "hud_saytext_console", "1", 0 );
 
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 
@@ -388,6 +389,12 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 
 void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex )
 {
+	if ( m_HUD_saytext_console->value && pszBuf && *pszBuf )
+	{
+		// Print it straight to the console
+		ConsolePrint( pszBuf );
+	}
+
 	// find an empty string slot
 	int i;
 	for ( i = 0; i < MAX_LINES; i++ )
