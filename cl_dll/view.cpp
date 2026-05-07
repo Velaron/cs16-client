@@ -883,17 +883,22 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 
 	// fudge position around to keep amount of weapon visible
 	// roughly equal with different FOV
-	float backOffset = 0.0f;
-
-	if (gHUD.m_iFOV > 90 && gHUD.m_iFOV <= 100)
-			backOffset = 1.0f;
-	else if (gHUD.m_iFOV > 100 && gHUD.m_iFOV <= 110)
-			backOffset = 2.0f;
-	else if (gHUD.m_iFOV > 110)
-			backOffset = 4.0f;
-
-	for (int i = 0; i < 3; i++)
-			view->origin[i] -= backOffset * pparams->forward[i];
+	if (pparams->viewsize == 110)
+	{
+		view->origin[2] += 1;
+	}
+	else if (pparams->viewsize == 100)
+	{
+		view->origin[2] += 2;
+	}
+	else if (pparams->viewsize == 90)
+	{
+		view->origin[2] += 1;
+	}
+	else if (pparams->viewsize == 80)
+	{
+		view->origin[2] += 0.5;
+	}
 
 	// Don't allow viewmodel, if we are in sniper scope
 	if( gHUD.m_iFOV <= 40 )
