@@ -26,6 +26,10 @@ public:
 	virtual bool IsPlayerGameVoiceMuted(int playerIndex) = 0;
 	virtual void MutePlayerGameVoice(int playerIndex) = 0;
 	virtual void UnmutePlayerGameVoice(int playerIndex) = 0;
+
+	virtual const char *GetLevelName( void ) = 0;
+
+	virtual int GetLocalPlayerTeam( void ) = 0;
 };
 
 #define GAMECLIENTEXPORTS_INTERFACE_VERSION "GameClientExports001"

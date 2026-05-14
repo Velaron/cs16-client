@@ -84,6 +84,18 @@ inline bool BIsValidCTModelIndex( int i )
 		return false;
 }
 
+inline bool IsASMapType()
+{
+	const char *a = gEngfuncs.pfnGetLevelName();
+	return a && (!strnicmp( a, "maps/as_", 8 ) || !strnicmp( a, "as_", 3 ));
+}
+
+inline bool IsDEMapType()
+{
+	const char *a = gEngfuncs.pfnGetLevelName();
+	return a && (!strnicmp( a, "maps/de_", 8 ) || !strnicmp( a, "de_", 3 ));
+}
+
 #define HUD_DRAW         (1 << 0)
 #define HUD_THINK        (1 << 1)
 #define HUD_ACTIVE       (HUD_DRAW | HUD_THINK)
@@ -956,6 +968,7 @@ public:
 	void Init( void );
 	void VidInit( void );
 	void Think( void );
+	void Reset( void );
 	void Shutdown( void );
 	int Redraw( float flTime, int intermission );
 	int UpdateClientData( client_data_t *cdata, float time );

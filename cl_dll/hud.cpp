@@ -554,6 +554,12 @@ void CHud :: VidInit( void )
 	firstinit = false;
 }
 
+void CHud::Reset( void )
+{
+	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )
+		pList->p->Reset();
+}
+
 void CHud::Shutdown( void )
 {
 	for( HUDLIST *pList = m_pHudList; pList; pList = pList->pNext )

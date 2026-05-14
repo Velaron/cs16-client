@@ -595,9 +595,13 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 			teamNumber = TEAM_TERRORIST;
 		else if( !strcmp( teamName, "CT") )
 			teamNumber = TEAM_CT;
-		else if( !strcmp( teamName, "SPECTATOR" ) || !strcmp( teamName, "UNASSIGNED" ) )
+		else if( !strcmp( teamName, "SPECTATOR" ) )
 		{
 			teamNumber = TEAM_SPECTATOR;
+		}
+		else if( !strcmp( teamName, "UNASSIGNED" ) )
+		{
+			teamNumber = TEAM_UNASSIGNED;
 			strncpy( teamName, "SPECTATOR", MAX_TEAM_NAME );
 		}
 		// just in case

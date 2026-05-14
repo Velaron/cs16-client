@@ -317,6 +317,3 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	return 1;
 }
 
-
-
-
