@@ -26,10 +26,11 @@
 #include "pm_shared.h"
 
 #include <string.h>
-#include "interface.h" // not used here
+#include "interface.h"
 #include "render_api.h"
 #include "mobility_int.h"
 #include "vgui_parser.h"
+#include "cl_dll/IGameMenuExports.h"
 
 cl_enginefunc_t		gEngfuncs  = { };
 render_api_t		gRenderAPI = { };
@@ -37,6 +38,31 @@ mobile_engfuncs_t	gMobileAPI = { };
 CHud gHUD;
 int g_iXash = 0; // indicates a buildnum
 int g_iMobileAPIVersion = 0;
+
+IGameMenuExports *g_pMenu = nullptr;
+
+static IGameMenuExports *GetNativeMenuExports( void )
+{
+	if( !g_iMobileAPIVersion || !gMobileAPI.pfnGetNativeObject )
+		return nullptr;
+
+	void *nativeFactory = gMobileAPI.pfnGetNativeObject( "MenuFactory" );
+	if( !nativeFactory )
+		return nullptr;
+
+	CreateInterfaceFn menuFactory = reinterpret_cast<CreateInterfaceFn>( nativeFactory );
+	return static_cast<IGameMenuExports *>( menuFactory( GAMEMENUEXPORTS_INTERFACE_VERSION, NULL ) );
+}
+
+static void LoadMenuInterface( void )
+{
+	if( g_pMenu )
+		return;
+
+	g_pMenu = GetNativeMenuExports();
+	if( !g_pMenu )
+		gEngfuncs.Con_Printf( "Error: native object \"MenuFactory\" is unavailable\n" );
+}
 
 void InitInput (void);
 void Game_HookEvents( void );
@@ -205,8 +231,15 @@ the hud variables.
 
 void DLLEXPORT HUD_Init( void )
 {
+	LoadMenuInterface();
 	InitInput();
 	gHUD.Init();
+	
+	// Initialize menu if it's loaded
+	if( g_pMenu && !g_pMenu->Initialize( Sys_GetFactoryThis() ) )
+	{
+		gEngfuncs.Con_Printf( "Warning: Menu initialization failed\n" );
+	}
 	//Scheme_Init();
 }
 
@@ -258,7 +291,7 @@ Called at start and end of demos to restore to "non"HUD state.
 
 void DLLEXPORT HUD_Reset( void )
 {
-	gHUD.VidInit();
+	gHUD.Reset();
 }
 
 /*
@@ -274,6 +307,17 @@ void DLLEXPORT HUD_Frame( double time )
 #ifdef _CS16CLIENT_ENABLE_GSRC_SUPPORT
 	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
 #endif
+
+	// Handle menu input and mouse movement
+	if( g_pMenu )
+	{
+		int x = 0, y = 0;
+		if( g_pMenu->IsActive() )
+		{
+			gEngfuncs.GetMousePosition( &x, &y );
+			g_pMenu->MouseMove( x, y );
+		}
+	}
 
 	GetClientVoice()->Frame( time );
 }
@@ -342,7 +386,7 @@ int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, re
 	// we have here a Host_Error, so check Xash for version
 	if( g_iXash < MIN_XASH_VERSION )
 	{
-		gRenderAPI.Host_Error("Xash3D version check failed!\nPlease update your Xash3D!\n");
+		gRenderAPI.Host_Error("Xash3D FWGS version check failed!\nPlease update your Xash3D FWGS!\n");
 	}
 
 	return true;
@@ -416,7 +460,7 @@ extern "C" void DLLEXPORT HUD_ChatInputPosition( int *x, int *y )
 extern "C" int DLLEXPORT HUD_GetPlayerTeam(int iplayer)
 {
 	// original seems to return team_id, but I'm not sure it's even set somewhere
-	if ( iplayer <= MAX_PLAYERS )
+	if ( iplayer >= 0 && iplayer < MAX_PLAYERS )
 		return g_PlayerExtraInfo[iplayer].teamnumber;
 	return 0;
 }
@@ -520,7 +564,26 @@ public:
 			GetClientVoice()->SetPlayerBlockedState( playerIndex, false );
 		}
 	}
+
+	const char *GetLevelName( void ) override
+	{
+		const char *fullname = gEngfuncs.pfnGetLevelName();
+		if( fullname[0] )
+		{
+			strncpy( mapname, fullname + 5, sizeof( mapname ));
+			mapname[strlen(mapname) - 4] = '\0';
+		}
+		else mapname[0] = 0;
+
+		return mapname;
+	}
+
+	int GetLocalPlayerTeam() override
+	{
+		return g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber;
+	}
+private:
+	char mapname[64];
 };
 
 EXPOSE_SINGLE_INTERFACE(CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION)
-
