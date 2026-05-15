@@ -116,6 +116,12 @@ inline void CenterPrint( const char *string )
 	gEngfuncs.pfnCenterPrint( string );
 }
 
+// Returns true when client should use old cfg-based touch menus
+inline bool UseOldTouchMenusEnabled()
+{
+	return CVAR_GET_FLOAT("cl_oldtouchmenus") != 0.0f;
+}
+
 // returns the players name of entity no.
 #define GetPlayerInfo (*gEngfuncs.pfnGetPlayerInfo)
 
