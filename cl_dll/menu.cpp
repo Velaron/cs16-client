@@ -279,7 +279,7 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 	int team = g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber;
 	int haveCancel = team != TEAM_UNASSIGNED ? 1 : 0;
 
-	if( g_pMenu )
+	if( g_pMenu && !UseOldTouchMenusEnabled() )
 	{
 		switch( menuType )
 		{
