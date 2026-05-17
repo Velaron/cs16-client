@@ -19,7 +19,6 @@
 //
 
 #include "hud.h"
-#include "cl_util.h"
 #include "netadr.h"
 #include "pmtrace.h"
 
@@ -31,6 +30,12 @@
 #include "mobility_int.h"
 #include "vgui_parser.h"
 #include "cl_dll/IGameMenuExports.h"
+#include "particleman.h"
+#include "IParticleMan_Active.h"
+#include "CMiniMem.h"
+#include "environment.h"
+
+#include "cl_util.h"
 
 cl_enginefunc_t		gEngfuncs  = { };
 render_api_t		gRenderAPI = { };
@@ -40,6 +45,7 @@ int g_iXash = 0; // indicates a buildnum
 int g_iMobileAPIVersion = 0;
 
 IGameMenuExports *g_pMenu = nullptr;
+IParticleMan *g_pParticleMan = NULL;
 
 static IGameMenuExports *GetNativeMenuExports( void )
 {
@@ -68,6 +74,8 @@ void InitInput (void);
 void Game_HookEvents( void );
 void IN_Commands( void );
 void Input_Shutdown (void);
+void CL_LoadParticleMan();
+void CL_UnloadParticleMan();
 
 /*
 ========================== 
@@ -84,11 +92,13 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	gEngfuncs = *pEnginefuncs;
 
 	// Register cvar to allow using old touch menus (1 = use old cfg-based menus)
+
 	CVAR_CREATE("cl_oldtouchmenus", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 
 	sscanf( CVAR_GET_STRING( "host_ver" ), "%d", &g_iXash );
 
 	Game_HookEvents();
+	CL_LoadParticleMan();
 
 	return 1;
 }
@@ -105,6 +115,17 @@ void DLLEXPORT HUD_Shutdown( void )
 	gHUD.Shutdown();
 	Input_Shutdown();
 	Localize_Free();
+	g_Environment.Clear();
+	if (g_pParticleMan)
+	{
+		CL_UnloadParticleMan();
+	}
+	auto miniMem = CMiniMem::Instance();
+	if (miniMem)
+	{
+		miniMem->Reset();
+		miniMem->Shutdown();
+	}
 }
 
 
@@ -217,7 +238,12 @@ int DLLEXPORT HUD_VidInit( void )
 
 	isLoaded = true;
 
-	//VGui_Startup();
+	if (g_pParticleMan)
+	{
+		g_pParticleMan->ResetParticles();
+		g_Environment.Reset();
+		g_Environment.RestoreWeather();
+	}
 
 	return 1;
 }
@@ -466,6 +492,24 @@ extern "C" int DLLEXPORT HUD_GetPlayerTeam(int iplayer)
 	if ( iplayer >= 0 && iplayer < MAX_PLAYERS )
 		return g_PlayerExtraInfo[iplayer].teamnumber;
 	return 0;
+}
+
+void CL_UnloadParticleMan()
+{
+	if (g_pParticleMan)
+	{
+		delete g_pParticleMan;
+		g_pParticleMan = NULL;
+	}
+}
+
+void CL_LoadParticleMan()
+{
+	g_pParticleMan = new IParticleMan_Active();
+	if (g_pParticleMan)
+	{
+		g_pParticleMan->SetUp(&gEngfuncs);
+	}
 }
 
 #include "APIProxy.h"

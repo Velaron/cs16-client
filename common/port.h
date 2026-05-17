@@ -82,8 +82,25 @@ GNU General Public License for more details.
 	#define SetCurrentDirectory( x )	(!chdir( x ))
 	#define FreeLibrary( x )			dlclose( x )
 	#define MAKEWORD(a,b)				((short int)(((unsigned char)(a))|(((short int)((unsigned char)(b)))<<8)))
+#ifdef __cplusplus
+	#include <type_traits>
+	#ifndef CL_UTIL_MAX_MIN_DEFINED
+	#define CL_UTIL_MAX_MIN_DEFINED
+	#ifdef max
+	#undef max
+	#endif
+	#ifdef min
+	#undef min
+	#endif
+	template<typename T, typename U>
+	inline auto max(T a, U b) -> typename std::decay<decltype((a > b) ? a : b)>::type { return (a > b) ? a : b; }
+	template<typename T, typename U>
+	inline auto min(T a, U b) -> typename std::decay<decltype((a < b) ? a : b)>::type { return (a < b) ? a : b; }
+	#endif
+#else
 	#define max(a, b)  (((a) > (b)) ? (a) : (b))
 	#define min(a, b)  (((a) < (b)) ? (a) : (b))
+#endif
 	#define tell(a)						lseek(a, 0, SEEK_CUR)
 
     typedef unsigned char   BYTE;

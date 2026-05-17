@@ -129,8 +129,31 @@ inline bool UseOldTouchMenusEnabled()
 inline void PlaySound( const char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
 inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( iSound, vol ); }
 
+#ifdef __cplusplus
+#include <type_traits>
+#ifndef CL_UTIL_MAX_MIN_DEFINED
+#define CL_UTIL_MAX_MIN_DEFINED
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
+template<typename T, typename U>
+inline auto max(T a, U b) -> typename std::decay<decltype((a > b) ? a : b)>::type { return (a > b) ? a : b; }
+template<typename T, typename U>
+inline auto min(T a, U b) -> typename std::decay<decltype((a < b) ? a : b)>::type { return (a < b) ? a : b; }
+#endif
+#else
+#ifdef max
+#undef max
+#endif
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
+#ifdef min
+#undef min
+#endif
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
+#endif
 #if !defined(__APPLE__) && !defined(_WIN32)
 #define fabs(x)	   ((x) > 0 ? (x) : 0 - (x))
 #endif

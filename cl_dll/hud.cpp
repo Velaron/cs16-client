@@ -30,7 +30,7 @@
 #include "demo.h"
 #include "demo_api.h"
 #include "vgui_parser.h"
-#include "rain.h"
+#include "environment.h"
 
 #include "camera.h"
 
@@ -258,6 +258,25 @@ void __CmdFunc_MouseSucksOpen( void ) { evdev_open = true; }
 void __CmdFunc_MouseSucksClose( void ) { evdev_open = false; }
 #endif
 
+int __MsgFunc_Rain(const char *pszName, int iSize, void *pbuf)
+{
+	return g_Environment.MsgFunc_Rain( pszName, iSize, pbuf );
+}
+
+int __MsgFunc_Snow(const char *pszName, int iSize, void *pbuf)
+{
+	return g_Environment.MsgFunc_Snow( pszName, iSize, pbuf );
+}
+
+int __MsgFunc_WeatherPos(const char *pszName, int iSize, void *pbuf)
+{
+	return g_Environment.MsgFunc_WeatherPos( pszName, iSize, pbuf );
+}
+
+int __MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
+{
+	return g_Environment.MsgFunc_ReceiveW( pszName, iSize, pbuf );
+}
 
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
@@ -290,6 +309,10 @@ void CHud :: Init( void )
 
 	HOOK_MESSAGE( gHUD, Fog );
 
+	gEngfuncs.pfnHookUserMsg( "Rain", __MsgFunc_Rain );
+	gEngfuncs.pfnHookUserMsg( "Snow", __MsgFunc_Snow );
+	gEngfuncs.pfnHookUserMsg( "WeatherPos", __MsgFunc_WeatherPos );
+	gEngfuncs.pfnHookUserMsg( "ReceiveW", __MsgFunc_ReceiveW );
 
 	CVAR_CREATE( "_vgui_menus", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
@@ -404,7 +427,7 @@ void CHud :: Init( void )
 
 	GetClientVoice()->Init( &g_VoiceStatusHelper );
 
-	InitRain();
+
 
 	//ServersInit();
 
