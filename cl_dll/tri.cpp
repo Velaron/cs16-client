@@ -14,7 +14,8 @@
 #include "entity_state.h"
 #include "cl_entity.h"
 #include "triangleapi.h"
-#include "rain.h"
+#include "particleman.h"
+#include "environment.h"
 
 extern int g_iWaterLevel;
 
@@ -61,16 +62,13 @@ HUD_DrawTransparentTriangles
 Render any triangles with transparent rendermode needs here
 =================
 */
-extern bool Rain_Initialized;
 void DLLEXPORT HUD_DrawTransparentTriangles( void )
 {
 	RenderFog();
 
-	if( Rain_Initialized )
+	if ( g_pParticleMan )
 	{
-		ProcessFXObjects();
-		ProcessRain();
-		DrawRain();
-		DrawFXObjects();
+		g_pParticleMan->Update();
+		g_Environment.Update();
 	}
 }

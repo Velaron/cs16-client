@@ -19,6 +19,7 @@
 #define ASSERT( x )
 
 #include <stdint.h>
+#include <cstring>
 
 class BufferReader
 {

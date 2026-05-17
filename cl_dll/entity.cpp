@@ -24,6 +24,8 @@
 #include "eventscripts.h"
 #include "com_weapons.h"
 #include "ev_hldm.h"
+#include "particleman.h"
+#include "particleman_internal.h"
 
 extern vec3_t v_origin;
 
@@ -397,12 +399,13 @@ void DLLEXPORT HUD_TempEntUpdate (
 	TEMPENTITY	*pTemp, *pnext, *pprev;
 	float		gravity, gravitySlow, life, fastFreq;
 
-	// g_flGravity = cl_gravity;
+	g_flGravity = cl_gravity;
 
-/*
+	Vector vAngles;
+	gEngfuncs.GetViewAngles( (float*)vAngles );
+
 	if ( g_pParticleMan )
 		g_pParticleMan->SetVariables( cl_gravity, vAngles );
-*/
 
 	// Nothing to simulate
 	if ( !*ppTempEntActive )		

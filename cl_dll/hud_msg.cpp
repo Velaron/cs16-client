@@ -20,7 +20,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "r_efx.h"
-#include "rain.h"
+#include "environment.h"
 #include "com_model.h"
 #include "studio.h"
 #include "studio_util.h"
@@ -129,7 +129,7 @@ int CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 
 	memset( g_PlayerExtraInfo, 0, sizeof(g_PlayerExtraInfo) );
 
-	ResetRain();
+	g_Environment.Initialize();
 
 	// reset round time
 	g_flRoundTime   = 0.0f;
