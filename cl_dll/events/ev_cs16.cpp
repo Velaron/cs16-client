@@ -704,7 +704,7 @@ void EV_HLDM_FireBullets(int idx,
 
 void EV_CS16Client_KillEveryRound( TEMPENTITY *te, float frametime, float current_time )
 {
-	if( !g_flRoundTime && current_time > g_flRoundTime )
+	if( g_flRoundTime > 0.0f && te->entity.curstate.fuser4 < g_flRoundTime )
 	{
 		// Mark it die on next TempEntUpdate
 		te->die = 0.0f;
