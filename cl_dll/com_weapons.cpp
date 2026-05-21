@@ -58,7 +58,7 @@ void COM_Log( char *pszFile, char *fmt, ...)
 	}
 
 	va_start (argptr,fmt);
-	vsprintf (string, fmt,argptr);
+	vsnprintf( string, sizeof( string ), fmt, argptr );
 	va_end (argptr);
 
 	fp = fopen( pfilename, "a+t");
