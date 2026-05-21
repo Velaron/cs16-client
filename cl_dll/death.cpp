@@ -197,7 +197,14 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	gHUD.m_Scoreboard.GetAllPlayersInfo();
 
 	// Get the Killer's name
-	const char *killer_name = g_PlayerInfoList[ killer ].name;
+	const char *killer_name = NULL;
+	bool killer_this_player = false;
+	if ( killer >= 1 && killer <= MAX_PLAYERS )
+	{
+		killer_name = g_PlayerInfoList[killer].name;
+		killer_this_player = g_PlayerInfoList[killer].thisplayer;
+	}
+
 	if ( !killer_name )
 	{
 		killer_name = "";
@@ -212,9 +219,10 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	// Get the Victim's name
 	const char *victim_name = NULL;
-	// If victim is -1, the killer killed a specific, non-player object (like a sentrygun)
-	if ( ((char)victim) != -1 )
+
+	if ( victim >= 1 && victim <= MAX_PLAYERS )
 		victim_name = g_PlayerInfoList[ victim ].name;
+
 	if ( !victim_name )
 	{
 		victim_name = "";
@@ -228,7 +236,8 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	}
 
 	// Is it a non-player object kill?
-	if ( ((char)victim) == -1 )
+	// If victim is 255, the killer killed a specific, non-player object (like a sentrygun)
+	if( victim == 255 )
 	{
 		rgDeathNoticeList[i].bNonPlayerKill = true;
 
@@ -254,7 +263,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + hud_deathnotice_time->value;
 
 	// Play kill sound
-	if ((g_PlayerInfoList[killer].thisplayer || g_iUser2 == killer) &&
+	if ((killer_this_player || g_iUser2 == killer) &&
 		!rgDeathNoticeList[i].bNonPlayerKill &&
 		!rgDeathNoticeList[i].bSuicide &&
 		cl_killsound->value > 0.0f)
