@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "draw_util.h"
+#include "strl.h"
 
 //#include "vgui_TeamFortressViewport.h"
 
@@ -197,23 +198,20 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 
 	if ( !m_fWaitingForMore ) // this is the start of a new menu
 	{
-		strncpy( g_szPrelocalisedMenuString, menustring, MAX_MENU_STRING - 1 );
+		strlcpy( g_szPrelocalisedMenuString, menustring, sizeof( g_szPrelocalisedMenuString ) );
 	}
 	else
 	{  // append to the current menu string
-		strncat( g_szPrelocalisedMenuString, menustring, MAX_MENU_STRING - strlen(g_szPrelocalisedMenuString) - 1 );
+		strlcat( g_szPrelocalisedMenuString, menustring, sizeof( g_szPrelocalisedMenuString ) );
 	}
-	g_szPrelocalisedMenuString[MAX_MENU_STRING-1] = 0;  // ensure null termination (strncat/strncpy does not)
 
 	if ( !NeedMore )
 	{  // we have the whole string, so we can localise it now
-		strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ), MAX_MENU_STRING );
-		g_szMenuString[MAX_MENU_STRING-1] = 0;
+		strlcpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ), sizeof( g_szMenuString ) );
 		// Swap in characters
 		if ( KB_ConvertString( g_szMenuString, &temp ) )
 		{
-			strncpy( g_szMenuString, temp, MAX_MENU_STRING );
-			g_szMenuString[MAX_MENU_STRING-1] = 0;
+			strlcpy( g_szMenuString, temp, sizeof( g_szMenuString ) );
 			free( temp );
 		}
 	}
@@ -259,8 +257,7 @@ int CHudMenu::MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 void CHudMenu::UserCmd_OldStyleMenuOpen()
 {
 	m_flShutoffTime = -1; // stay open until user will not close it
-	strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString("Buy"), MAX_MENU_STRING );
-	g_szMenuString[MAX_MENU_STRING-1] = 0;
+	strlcpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString("Buy"), sizeof( g_szMenuString ) );
 }
 
 void CHudMenu::UserCmd_OldStyleMenuClose()

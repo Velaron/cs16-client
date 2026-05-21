@@ -26,6 +26,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include <string.h>
+#include "strl.h"
 #include "eventscripts.h"
 
 #include "draw_util.h"
@@ -488,7 +489,7 @@ int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 		if( !strstr(pModel, "models/") )
 			snprintf( szModel, sizeof(szModel), "models/player/%s/%s.mdl", pModel, pModel );
 		else
-			strncpy( szModel, pModel, sizeof( szModel ));
+			strlcpy( szModel, pModel, sizeof( szModel ) );
 	}
 	else
 	{
@@ -509,7 +510,7 @@ int CHudHealth :: MsgFunc_ClCorpse(const char *pszName, int iSize, void *pbuf)
 		}
 		else modelidx = PLAYERMODEL_PLAYER;
 
-		strncpy( szModel, sPlayerModelFiles[modelidx], sizeof( szModel ) );
+		strlcpy( szModel, sPlayerModelFiles[modelidx], sizeof( szModel ) );
 	}
 	CreateCorpse( origin, angles, szModel, delay, seq, classID );
 	return 0;

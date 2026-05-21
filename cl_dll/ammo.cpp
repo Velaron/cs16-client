@@ -26,6 +26,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include "strl.h"
 
 #include "ammohistory.h"
 #include "eventscripts.h"
@@ -962,7 +963,6 @@ void CHudAmmo::UserCmd_Autobuy()
 	char *pfile = afile;
 	char token[1024];
 	char szCmd[1024];
-	int remaining = 1023;
 
 	if( !pfile )
 	{
@@ -970,16 +970,12 @@ void CHudAmmo::UserCmd_Autobuy()
 		return;
 	}
 
-	strcpy(szCmd, "cl_setautobuy");
-	remaining -= sizeof( "cl_setautobuy" );
+	strlcpy( szCmd, "cl_setautobuy", sizeof( szCmd ) );
 
 	while((pfile = gEngfuncs.COM_ParseFile( pfile, token )))
 	{
-		// append space first
-		strncat(szCmd, " ", remaining);
-		strncat(szCmd, token, remaining - 1);
-
-		remaining -= strlen( token ) - 1;
+		strlcat( szCmd, " ", sizeof( szCmd ) );
+		strlcat( szCmd, token, sizeof( szCmd ) );
 	}
 
 	gEngfuncs.pfnServerCmd( szCmd );
@@ -992,8 +988,7 @@ void CHudAmmo::UserCmd_Rebuy()
 	char *pfile = afile;
 	char token[1024];
 	char szCmd[1024];
-	int lastCh;
-	int remaining = 1023;
+	size_t lastCh;
 
 	if( !pfile )
 	{
@@ -1001,22 +996,19 @@ void CHudAmmo::UserCmd_Rebuy()
 		return;
 	}
 
-	// start with \"
-	strcpy(szCmd, "cl_setrebuy \"" );
-	remaining -= sizeof( "cl_setrebuy \"" );
+	strlcpy( szCmd, "cl_setrebuy \"", sizeof( szCmd ) );
 
 	while((pfile = gEngfuncs.COM_ParseFile( pfile, token )))
 	{
-		strncat(szCmd, token, remaining );
-		remaining -= strlen( token );
-
-		// append space after token
-		strncat(szCmd, " ", remaining );
-		remaining--;
+		strlcat( szCmd, token, sizeof( szCmd ) );
+		strlcat( szCmd, " ", sizeof( szCmd ) );
 	}
 	// replace last space with ", before terminator
-	lastCh = strlen(szCmd);
-	szCmd[lastCh] = '\"';
+	lastCh = strlen( szCmd );
+	if( lastCh > 0 && lastCh < sizeof( szCmd ) - 1 )
+	{
+		szCmd[lastCh - 1] = '\"';
+	}
 
 	gEngfuncs.pfnServerCmd( szCmd );
 	gEngfuncs.COM_FreeFile( afile );
