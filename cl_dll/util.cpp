@@ -74,13 +74,21 @@ vec3_t g_ColorGrey	= { 0.8, 0.8, 0.8 };
 
 float *GetClientColor( int clientIndex )
 {
+	if( clientIndex <= 0 || clientIndex > MAX_PLAYERS )
+		return g_ColorGrey;
+
 	switch ( g_PlayerExtraInfo[clientIndex].teamnumber )
 	{
-	case TEAM_CT:         return g_ColorBlue;
-	case TEAM_TERRORIST:  return g_ColorRed;
+	case TEAM_CT:
+		return g_ColorBlue;
+	case TEAM_TERRORIST:
+		return g_ColorRed;
 	case TEAM_UNASSIGNED:
-	case TEAM_SPECTATOR:  return g_ColorGrey;
-	case 4:		          return g_ColorGreen;
-	default:              return g_ColorGrey;
+	case TEAM_SPECTATOR:
+		return g_ColorGrey;
+	case 4:
+		return g_ColorGreen;
+	default:
+		return g_ColorGrey;
 	}
 }
