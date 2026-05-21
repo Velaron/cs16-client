@@ -137,6 +137,7 @@ int KB_ConvertString( char *in, char **ppout )
 	char *p;
 	char *pOut;
 	char *pEnd;
+	char *pLimit = sz + sizeof( sz ) - 1; // reserve one byte for the terminator
 	const char *pBinding;
 
 	if ( !ppout )
@@ -145,7 +146,7 @@ int KB_ConvertString( char *in, char **ppout )
 	*ppout = NULL;
 	p = in;
 	pOut = sz;
-	while ( *p )
+	while ( *p && pOut < pLimit )
 	{
 		if ( *p == '+' )
 		{
@@ -166,7 +167,8 @@ int KB_ConvertString( char *in, char **ppout )
 
 			if ( pBinding )
 			{
-				*pOut++ = '[';
+				if ( pOut < pLimit )
+					*pOut++ = '[';
 				pEnd = (char *)pBinding;
 			}
 			else
@@ -174,12 +176,12 @@ int KB_ConvertString( char *in, char **ppout )
 				pEnd = binding;
 			}
 
-			while ( *pEnd )
+			while ( *pEnd && pOut < pLimit )
 			{
 				*pOut++ = *pEnd++;
 			}
 
-			if ( pBinding )
+			if ( pBinding && pOut < pLimit )
 			{
 				*pOut++ = ']';
 			}
