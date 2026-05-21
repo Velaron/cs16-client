@@ -33,6 +33,10 @@ if(VITA)
 	add_compile_options(-fno-use-cxa-atexit)
 endif()
 
+if(NOT WIN32 AND NOT APPLE)
+	add_link_options(-Wl,--no-undefined)
+endif()
+
 if(BUILD_CLIENT)
 	add_subdirectory(cl_dll)
 endif()
