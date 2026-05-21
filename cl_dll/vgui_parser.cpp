@@ -276,22 +276,56 @@ void Localize_Free( void )
 	hashed_cmds.Purge();
 }
 
-void Localize_StripIndices( char *s )
+// enable non-positional %s formatting, as some servers send plain %s
+// maybe this function should only be used for localized strings
+// but we still need to address possible format string vulnerability
+#ifndef LOCALIZE_FORMAT_BARE_PERCENT_S
+#define LOCALIZE_FORMAT_BARE_PERCENT_S 1
+#endif
+
+size_t Localize_Format( char *dst, size_t dstsize, const char *fmt, const char *const *argv, int argc )
 {
-	if ( strlen( s ) >= 3 )
+	if( !dst || dstsize == 0 )
+		return 0;
+
+	if( !fmt )
 	{
-		for ( size_t i = 0; i < strlen( s ) - 2; i++ )
-		{
-			if ( s[i] == '%' && s[i + 1] == 's' && isdigit( s[i + 2] ) )
-			{
-				char *first = &s[i + 2];
-				char *second = &s[i + 3];
-
-				size_t len = strlen( second );
-
-				memmove( first, second, strlen( second ) );
-				first[len] = '\0'; // one character has been removed and string moved, set null terminator
-			}
-		}
+		dst[0] = '\0';
+		return 0;
 	}
+
+	size_t w = 0;
+#if LOCALIZE_FORMAT_BARE_PERCENT_S
+	int positional = 0;
+#endif
+
+	for( const char *p = fmt; *p && w + 1 < dstsize; )
+	{
+		if( p[0] == '%' && p[1] == 's' && p[2] >= '1' && p[2] <= '9' )
+		{
+			int idx = p[2] - '1';
+			const char *sub = ( idx < argc && argv[idx] ) ? argv[idx] : "";
+			while( *sub && w + 1 < dstsize )
+				dst[w++] = *sub++;
+			p += 3;
+			continue;
+		}
+
+#if LOCALIZE_FORMAT_BARE_PERCENT_S
+		if( p[0] == '%' && p[1] == 's' )
+		{
+			const char *sub = ( positional < argc && argv[positional] ) ? argv[positional] : "";
+			positional++;
+			while( *sub && w + 1 < dstsize )
+				dst[w++] = *sub++;
+			p += 2;
+			continue;
+		}
+#endif
+
+		dst[w++] = *p++;
+	}
+
+	dst[w] = '\0';
+	return w;
 }
