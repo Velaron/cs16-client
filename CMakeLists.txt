@@ -37,6 +37,10 @@ if(NOT WIN32 AND NOT APPLE)
 	add_link_options(-Wl,--no-undefined)
 endif()
 
+include(CheckSymbolExists)
+check_symbol_exists(strlcpy string.h HAVE_STRLCPY)
+check_symbol_exists(strlcat string.h HAVE_STRLCAT)
+
 if(BUILD_CLIENT)
 	add_subdirectory(cl_dll)
 endif()
