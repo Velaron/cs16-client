@@ -62,7 +62,7 @@ int CHudRadio::MsgFunc_SendAudio( const char *pszName, int iSize, void *pbuf )
 
 	Broadcast( sentence, pitch );
 
-	if( SenderID <= MAX_PLAYERS )
+	if( SenderID >= 1 && SenderID <= MAX_PLAYERS )
 	{
 		g_PlayerExtraInfo[SenderID].radarflashes = 22;
 		g_PlayerExtraInfo[SenderID].radarflashtime = gHUD.m_flTime;

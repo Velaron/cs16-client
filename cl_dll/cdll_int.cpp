@@ -363,8 +363,7 @@ Called when a player starts or stops talking.
 void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
 {
 	// gHUD.m_Radio.Voice( entindex, bTalking );
-
-	if ( entindex >= 0 && entindex < gEngfuncs.GetMaxClients() )
+	if ( entindex > 0 && entindex <= gEngfuncs.GetMaxClients() )
 	{
 		if ( bTalking )
 		{
@@ -489,7 +488,7 @@ extern "C" void DLLEXPORT HUD_ChatInputPosition( int *x, int *y )
 extern "C" int DLLEXPORT HUD_GetPlayerTeam(int iplayer)
 {
 	// original seems to return team_id, but I'm not sure it's even set somewhere
-	if ( iplayer >= 0 && iplayer < MAX_PLAYERS )
+	if ( iplayer >= 1 && iplayer <= MAX_PLAYERS )
 		return g_PlayerExtraInfo[iplayer].teamnumber;
 	return 0;
 }

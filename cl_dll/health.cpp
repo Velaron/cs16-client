@@ -185,12 +185,17 @@ int CHudHealth:: MsgFunc_ScoreAttrib(const char *pszName,  int iSize, void *pbuf
 
 	int index = reader.ReadByte();
 	unsigned char flags = reader.ReadByte();
+
+	if( index < 1 || index > MAX_PLAYERS )
+		return 1;
+
 	g_PlayerExtraInfo[index].dead   = !!(flags & PLAYER_DEAD);
 	g_PlayerExtraInfo[index].has_c4 = !!(flags & PLAYER_HAS_C4);
 	g_PlayerExtraInfo[index].vip    = !!(flags & PLAYER_VIP);
 	g_PlayerExtraInfo[index].has_defuse_kit = !!(flags & PLAYER_HAS_DEFUSER);
 	return 1;
 }
+
 // Returns back a color from the
 // Green <-> Yellow <-> Red ramp
 void CHudHealth::GetPainColor( int &r, int &g, int &b, int &a )
@@ -531,7 +536,7 @@ int CHudHealth::MsgFunc_HealthInfo( const char *pszName, int iSize, void *buf )
 	int idx = reader.ReadByte();
 	int health = reader.ReadLong();
 
-	if ( idx < MAX_PLAYERS )
+	if ( idx >= 1 && idx <= MAX_PLAYERS )
 		g_PlayerExtraInfo[idx].sb_health = health;
 
 	return 1;
@@ -544,7 +549,7 @@ int CHudHealth::MsgFunc_Account( const char *pszName, int iSize, void *buf )
 	int idx = reader.ReadByte();
 	int account = reader.ReadLong();
 
-	if ( idx < MAX_PLAYERS )
+	if ( idx >= 1 && idx <= MAX_PLAYERS )
 		g_PlayerExtraInfo[idx].sb_account = account;
 
 	return 1;

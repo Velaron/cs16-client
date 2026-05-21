@@ -147,22 +147,26 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 						switch ( valtype )
 						{
 						case 'p':  // player name
-							GetPlayerInfo( indexval, &g_PlayerInfoList[indexval] );
-							if ( g_PlayerInfoList[indexval].name != NULL )
+							strncpy( szRepString, "******", MAX_PLAYER_NAME_LENGTH );
+
+							if ( indexval > 0 && indexval <= MAX_PLAYERS )
 							{
-								strncpy( szRepString, g_PlayerInfoList[indexval].name, MAX_PLAYER_NAME_LENGTH );
-								gHUD.m_Health.m_iPlayerLastPointedAt = indexval;
-								m_pflNameColors[line_num] = GetClientColor( indexval );
-							}
-							else
-							{
-								strncpy( szRepString, "******", MAX_PLAYER_NAME_LENGTH );
+								GetPlayerInfo( indexval, &g_PlayerInfoList[indexval] );
+								if ( g_PlayerInfoList[indexval].name != NULL )
+								{
+									strncpy( szRepString, g_PlayerInfoList[indexval].name, MAX_PLAYER_NAME_LENGTH );
+									gHUD.m_Health.m_iPlayerLastPointedAt = indexval;
+									m_pflNameColors[line_num] = GetClientColor( indexval );
+								}
 							}
 
 							break;
 						case 'i':  // number
-							g_PlayerExtraInfo[gHUD.m_Health.m_iPlayerLastPointedAt].health = indexval;
-							g_PlayerExtraInfo[gHUD.m_Health.m_iPlayerLastPointedAt].showhealth = gHUD.m_flTime + 5.0f;
+							if( gHUD.m_Health.m_iPlayerLastPointedAt > 0 && gHUD.m_Health.m_iPlayerLastPointedAt <= MAX_PLAYERS )
+							{
+								g_PlayerExtraInfo[gHUD.m_Health.m_iPlayerLastPointedAt].health = indexval;
+								g_PlayerExtraInfo[gHUD.m_Health.m_iPlayerLastPointedAt].showhealth = gHUD.m_flTime + 5.0f;
+							}
 							sprintf( szRepString, "%d", indexval );
 							break;
 						case 'h':  // health

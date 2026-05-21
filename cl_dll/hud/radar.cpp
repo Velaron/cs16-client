@@ -208,6 +208,10 @@ int CHudRadar::MsgFunc_Radar(const char *pszName,  int iSize, void *pbuf )
 	BufferReader reader( pszName, pbuf, iSize );
 
 	int index = reader.ReadByte();
+
+	if( index < 1 || index > MAX_PLAYERS )
+		return 1;
+
 	g_PlayerExtraInfo[index].origin.x = reader.ReadCoord();
 	g_PlayerExtraInfo[index].origin.y = reader.ReadCoord();
 	g_PlayerExtraInfo[index].origin.z = reader.ReadCoord();
@@ -545,7 +549,7 @@ int CHudRadar::MsgFunc_HostagePos(const char *pszName, int iSize, void *pbuf)
 	BufferReader reader( pszName, pbuf, iSize );
 	int Flag = reader.ReadByte();
 	int idx = reader.ReadByte();
-	if( idx <= MAX_HOSTAGES )
+	if( idx >= 1 && idx <= MAX_HOSTAGES )
 	{
 		g_HostageInfo[idx].origin.x = reader.ReadCoord();
 		g_HostageInfo[idx].origin.y = reader.ReadCoord();
@@ -567,7 +571,7 @@ int CHudRadar::MsgFunc_HostageK(const char *pszName, int iSize, void *pbuf)
 {
 	BufferReader reader( pszName, pbuf, iSize );
 	int idx = reader.ReadByte();
-	if ( idx <= MAX_HOSTAGES )
+	if ( idx >= 1 && idx <= MAX_HOSTAGES )
 	{
 		g_HostageInfo[idx].dead = true;
 		g_HostageInfo[idx].radarflashtime = gHUD.m_flTime;
@@ -583,7 +587,7 @@ int CHudRadar::MsgFunc_Location(const char *pszName, int iSize, void *pbuf)
 	BufferReader reader( pszName, pbuf, iSize );
 
 	int player = reader.ReadByte();
-	if( player <= MAX_PLAYERS )
+	if( player >= 1 && player <= MAX_PLAYERS )
 	{
 		const char *location = reader.ReadString();
 
