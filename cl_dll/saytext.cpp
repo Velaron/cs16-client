@@ -29,6 +29,7 @@
 #include "draw_util.h"
 #include "com_weapons.h"
 #include "utlstring.h"
+#include "strl.h"
 //#include "vgui_TeamFortressViewport.h"
 
 extern float *GetClientColor( int clientIndex );
@@ -380,7 +381,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 #endif
 
 
-	strncpy( g_szLineBuffer[i], pszBuf, max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
+	strlcpy( g_szLineBuffer[i], pszBuf, sizeof( g_szLineBuffer[i] ) );
 
 	// make sure the text fits in one line
 	EnsureTextFitsInOneLineAndWrapIfHaveTo( i );
@@ -473,19 +474,12 @@ void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )
 				// copy remaining string into next buffer,  making sure it starts with a space character
 				if ( (char)*last_break == (char)' ' )
 				{
-					int linelen = strlen(g_szLineBuffer[j]);
-					int remaininglen = strlen(last_break);
-
-					if ( (linelen - remaininglen) <= MAX_CHARS_PER_LINE )
-						strcat( g_szLineBuffer[j], last_break );
+					strlcat( g_szLineBuffer[j], last_break, sizeof( g_szLineBuffer[j] ) );
 				}
 				else
 				{
-					if ( (strlen(g_szLineBuffer[j]) - strlen(last_break) - 2) < MAX_CHARS_PER_LINE )
-					{
-						strcat( g_szLineBuffer[j], " " );
-						strcat( g_szLineBuffer[j], last_break );
-					}
+					strlcat( g_szLineBuffer[j], " ", sizeof( g_szLineBuffer[j] ) );
+					strlcat( g_szLineBuffer[j], last_break, sizeof( g_szLineBuffer[j] ) );
 				}
 
 				*last_break = 0; // cut off the last string

@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "draw_util.h"
+#include "strl.h"
 
 float color[3];
 
@@ -172,8 +173,8 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	int headshot = reader.ReadByte();
 
 	char killedwith[32];
-	strncpy( killedwith, "d_", sizeof(killedwith) );
-	strncat( killedwith, reader.ReadString(), sizeof( killedwith ) - 2 );
+	strlcpy( killedwith, "d_", sizeof( killedwith ) );
+	strlcat( killedwith, reader.ReadString(), sizeof( killedwith ) );
 
 	//if (gViewPort)
 	//	gViewPort->DeathMsg( killer, victim );
@@ -213,8 +214,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	else
 	{
 		rgDeathNoticeList[i].KillerColor = GetClientColor( killer );
-		strncpy( rgDeathNoticeList[i].szKiller, killer_name, MAX_PLAYER_NAME_LENGTH );
-		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH-1] = 0;
+		strlcpy( rgDeathNoticeList[i].szKiller, killer_name, sizeof( rgDeathNoticeList[i].szKiller ) );
 	}
 
 	// Get the Victim's name
@@ -231,8 +231,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	else
 	{
 		rgDeathNoticeList[i].VictimColor = GetClientColor( victim );
-		strncpy( rgDeathNoticeList[i].szVictim, victim_name, MAX_PLAYER_NAME_LENGTH );
-		rgDeathNoticeList[i].szVictim[MAX_PLAYER_NAME_LENGTH-1] = 0;
+		strlcpy( rgDeathNoticeList[i].szVictim, victim_name, sizeof( rgDeathNoticeList[i].szVictim ) );
 	}
 
 	// Is it a non-player object kill?
@@ -242,7 +241,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 		rgDeathNoticeList[i].bNonPlayerKill = true;
 
 		// Store the object's name in the Victim slot (skip the d_ bit)
-		strncpy( rgDeathNoticeList[i].szVictim, killedwith+2, sizeof(killedwith) );
+		strlcpy( rgDeathNoticeList[i].szVictim, killedwith+2, sizeof( rgDeathNoticeList[i].szVictim ) );
 	}
 	else
 	{
