@@ -335,14 +335,14 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	bool nameArgReplaced = false;
 
 	// Resolve missing nickname locally via client_index mapping.
-	if( !replaceFirstArgToName && client_index > 0 && numArgs > 0 && argv[0].Length() == 0 )
+	if( !replaceFirstArgToName && client_index > 0 && client_index <= MAX_PLAYERS && numArgs > 0 && argv[0].Length() == 0 )
 	{
 		GetPlayerInfo( client_index, &g_PlayerInfoList[client_index] );
 		argv[0] = g_PlayerInfoList[client_index].name;
 		nameArgReplaced = true;
 	}
 
-	if( replaceFirstArgToName )
+	if( replaceFirstArgToName && client_index > 0 && client_index <= MAX_PLAYERS )
 	{
 		GetPlayerInfo( client_index, &g_PlayerInfoList[client_index] );
 		argv[0] = g_PlayerInfoList[client_index].name;
@@ -414,7 +414,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 
 #if 1
 	// if it's a say message, search for the players name in the string
-	if ( clientIndex > 0 )
+	if ( clientIndex > 0 && clientIndex <= MAX_PLAYERS )
 	{
 		GetPlayerInfo( clientIndex, &g_PlayerInfoList[clientIndex] );
 		const char *pName = g_PlayerInfoList[clientIndex].name;
