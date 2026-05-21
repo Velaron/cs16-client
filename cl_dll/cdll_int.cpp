@@ -60,6 +60,19 @@ static IGameMenuExports *GetNativeMenuExports( void )
 	return static_cast<IGameMenuExports *>( menuFactory( GAMEMENUEXPORTS_INTERFACE_VERSION, NULL ) );
 }
 
+static bool HUD_MessageBox( const char *msg )
+{
+	gEngfuncs.Con_Printf( "%s", msg );
+
+	if( g_iMobileAPIVersion && gMobileAPI.pfnSys_Warn )
+	{
+		gMobileAPI.pfnSys_Warn( "%s", msg );
+		return true;
+	}
+
+	return false;
+}
+
 static void LoadMenuInterface( void )
 {
 	if( g_pMenu )
@@ -67,7 +80,7 @@ static void LoadMenuInterface( void )
 
 	g_pMenu = GetNativeMenuExports();
 	if( !g_pMenu )
-		gEngfuncs.Con_Printf( "Error: native object \"MenuFactory\" is unavailable\n" );
+		HUD_MessageBox( "Error: native object \"MenuFactory\" is unavailable\n" );
 }
 
 void InitInput (void);
