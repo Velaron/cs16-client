@@ -29,6 +29,8 @@
 #ifndef VGUI_PARSER_H
 #define VGUI_PARSER_H
 
+#include <stddef.h>
+
 #define MAX_TOLOCALIZE_STRING_SIZE 256
 #define MAX_LOCALIZEDSTRING_SIZE 2048
 
@@ -38,5 +40,5 @@ void Localize_Free( );
 const char* Localize( const char* string );
 void StripEndNewlineFromString( char *str );
 
-void Localize_StripIndices( char *s );
+size_t Localize_Format( char *dst, size_t dstsize, const char *fmt, const char *const *argv, int argc );
 #endif
