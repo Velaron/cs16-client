@@ -46,7 +46,12 @@ public:
 ///// WEAPON /////
 	int			iOldWeaponBits;
 
-	WEAPON *GetWeapon( int iId ) { return &rgWeapons[iId]; }
+	WEAPON *GetWeapon( int iId )
+	{
+		if ( iId < 0 || iId >= MAX_WEAPONS )
+			return NULL;
+		return &rgWeapons[iId];
+	}
 	void AddWeapon( WEAPON *wp ) 
 	{ 
 		rgWeapons[ wp->iId ] = *wp;	
