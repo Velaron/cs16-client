@@ -139,10 +139,13 @@ static void Localize_AddToDictionary( const char *name, const char *lang )
 
 	if( isUtf16 )
 	{
+		if( len < 4 )
+			goto error;
+
 		int ansiLength = len + 1;
 		uchar16 *autf16 = new uchar16[len/2 + 1];
 
-		memcpy( autf16, pFileBuf + 2, len - 1 );
+		memcpy( autf16, pFileBuf + 2, len - 2 );
 		autf16[len/2-1] = 0; //null terminator
 
 		afile = new char[ansiLength]; // save original pointer, so we can free it later
