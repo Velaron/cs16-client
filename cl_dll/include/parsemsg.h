@@ -58,6 +58,7 @@ private:
 	size_t   m_iSize;
 	size_t   m_iRead;
 	bool     m_bBad;
+	char     m_strBuf[2048];
 };
 
 inline void BufferReader::Flush( void )
@@ -96,13 +97,11 @@ inline T BufferReader::Read( void )
 template<>
 inline char* BufferReader::Read( void )
 {
-	static char string[2048];
-
 	if( m_bBad )
 		return (char*)""; // do not return NULL, may break strcpy's
 
 	size_t l;
-	for( l = 0; l < sizeof(string) - 1; l++)
+	for( l = 0; l < sizeof( m_strBuf ) - 1; l++)
 	{
 		if( m_iRead > m_iSize )
 			break;
@@ -111,13 +110,12 @@ inline char* BufferReader::Read( void )
 		if( c == -1 || c == 0 )
 			break;
 
-		string[l] = c;
+		m_strBuf[l] = c;
 	}
 
-	string[l] = 0;
+	m_strBuf[l] = 0;
 
-	return string;
-
+	return m_strBuf;
 }
 
 template<>
