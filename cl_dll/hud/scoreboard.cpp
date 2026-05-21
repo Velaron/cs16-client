@@ -17,19 +17,18 @@
 //
 // implementation of CHudScoreboard class
 //
-
+#include <string.h>
+#include <stdio.h>
+#include <ctype.h>
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "triangleapi.h"
 #include "com_weapons.h"
 #include "cdll_dll.h"
-
-#include <string.h>
-#include <stdio.h>
 #include "draw_util.h"
 #include "vgui_parser.h"
-#include <ctype.h>
+#include "eventscripts.h"
 
 hud_player_info_t   g_PlayerInfoList[MAX_PLAYERS+1]; // player info from the engine
 extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS+1]; // additional player info sent directly to the client dll
@@ -136,6 +135,11 @@ void CHudScoreboard :: InitHUDData( void )
 
 	for ( int i = 1; i <= MAX_PLAYERS; i++ )
 	{
+		// a1ba: get the cl.playernum from the engine
+		// it shouldn't ever change during normal gameplay
+		if( !m_iPlayerNum && EV_IsLocal( i ))
+			m_iPlayerNum = i;
+
 		g_PlayerExtraInfo[i].sb_health = -1;
 		g_PlayerExtraInfo[i].sb_account = -1;
 	}
@@ -541,13 +545,10 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 
 void CHudScoreboard :: GetAllPlayersInfo( void )
 {
-	for ( int i = 1; i < MAX_PLAYERS; i++ )
-	{
-		GetPlayerInfo( i, &g_PlayerInfoList[i] );
+	memset( &g_PlayerInfoList[0], 0, sizeof( g_PlayerInfoList[0] ));
 
-		if ( g_PlayerInfoList[i].thisplayer )
-			m_iPlayerNum = i;  // !!!HACK: this should be initialized elsewhere... maybe gotten from the engine
-	}
+	for( int i = 1; i < MAX_PLAYERS; i++ )
+		GetPlayerInfo( i, &g_PlayerInfoList[i] );
 }
 
 int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *pbuf )
