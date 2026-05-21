@@ -22,6 +22,18 @@ list(REMOVE_ITEM CS_WPN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/cs_wpn/cs_baseentity.cp
 list(APPEND CS_CLIENT_SRC ../common/interface.cpp)
 list(APPEND CS_CLIENT_SRC ../public/utflib.cpp)
 
+if(HAVE_STRLCPY)
+	add_definitions(-DHAVE_STRLCPY)
+else()
+	list(APPEND CS_CLIENT_SRC ../public/strlcpy.c)
+endif()
+
+if(HAVE_STRLCAT)
+	add_definitions(-DHAVE_STRLCAT)
+else()
+	list(APPEND CS_CLIENT_SRC ../public/strlcat.c)
+endif()
+
 list(APPEND CS_CLIENT_SRC ${CS_EV_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_WPN_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_WPNSH_SRC})
