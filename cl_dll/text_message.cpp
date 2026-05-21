@@ -209,15 +209,13 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 
 	char *psz = szBuf[5];
 
-	// Remove numbers after %s.
-	// VALVEWHY?
-	Localize_StripIndices( msg_text );
+	const char *args[4] = { szBuf[1], szBuf[2], szBuf[3], szBuf[4] };
 
 	switch ( msg_dest )
 	{
 	case HUD_PRINTCENTER:
 	{
-		snprintf( psz, MAX_TEXTMSG_STRING, msg_text, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		Localize_Format( psz, MAX_TEXTMSG_STRING, msg_text, args, 4 );
 
 		ConvertCRtoNL( psz );
 
@@ -230,25 +228,26 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	}
 	case HUD_PRINTNOTIFY:
 		psz[0] = 1;  // mark this message to go into the notify buffer
-		snprintf( psz+1, MAX_TEXTMSG_STRING - 1, msg_text, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		Localize_Format( psz + 1, MAX_TEXTMSG_STRING - 1, msg_text, args, 4 );
 		ConsolePrint( ConvertCRtoNL( psz ) );
 		break;
 
 	case HUD_PRINTTALK:
 		psz[0] = 2; // mark, so SayTextPrint will color it
-		snprintf( psz+1, MAX_TEXTMSG_STRING-1, msg_text, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		Localize_Format( psz + 1, MAX_TEXTMSG_STRING - 1, msg_text, args, 4 );
 		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128 );
 		break;
 
 	case HUD_PRINTCONSOLE:
-		snprintf( psz, MAX_TEXTMSG_STRING, msg_text, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		Localize_Format( psz, MAX_TEXTMSG_STRING, msg_text, args, 4 );
 		ConsolePrint( ConvertCRtoNL( psz ) );
 		break;
 
 	case HUD_PRINTRADIO:
 		psz[0] = 2;
-		Localize_StripIndices( szBuf[1] );
-		snprintf( psz + 1, MAX_TEXTMSG_STRING-1, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		// szBuf[1] is server-controlled and used as the format here.
+		// Localize_Format only honors %s<n>, so a hostile format is inert.
+		Localize_Format( psz + 1, MAX_TEXTMSG_STRING - 1, szBuf[1], &args[1], 3 );
 
 		clientIdx = atoi( szBuf[0] );
 		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128, clientIdx );
