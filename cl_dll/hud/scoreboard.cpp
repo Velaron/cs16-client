@@ -373,23 +373,32 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 		char fmtString[32];
 		const char *fmtStringName = team_info->players == 1 ? "#Cstrike_ScoreBoard_Player" : "#Cstrike_ScoreBoard_Players";
 		strncpy( fmtString, Localize( fmtStringName ), sizeof( fmtString ) );
+		fmtString[sizeof( fmtString ) - 1] = 0;
 
 		if ( !strcmp( fmtString, fmtStringName ) )
-			strncpy( fmtString, team_info->players == 1 ? "%s    -   %s player" : "%s    -   %s players", sizeof( fmtString ) );
-		else
-			Localize_StripIndices( fmtString );
+		{
+			const char *fallback = team_info->players == 1 ? "%s1    -   %s2 player" : "%s1    -   %s2 players";
+			strncpy( fmtString, fallback, sizeof( fmtString ) );
+			fmtString[sizeof( fmtString ) - 1] = 0;
+		}
 
 		GetTeamColor( r, g, b, team_info->teamnumber );
 		switch ( team_info->teamnumber )
 		{
 		case TEAM_TERRORIST:
-			snprintf( teamName, sizeof( teamName ), fmtString, Localize( "#Cstrike_ScoreBoard_Ter" ), numPlayers );
+		{
+			const char *args[2] = { Localize( "#Cstrike_ScoreBoard_Ter" ), numPlayers };
+			Localize_Format( teamName, sizeof( teamName ), fmtString, args, 2 );
 			DrawUtils::DrawHudNumberString( g_Columns[COL_KILLS].start, ypos, g_Columns[COL_KILLS].end, team_info->frags, r, g, b );
 			break;
+		}
 		case TEAM_CT:
-			snprintf( teamName, sizeof( teamName ), fmtString, Localize( "#Cstrike_ScoreBoard_CT" ), numPlayers );
+		{
+			const char *args[2] = { Localize( "#Cstrike_ScoreBoard_CT" ), numPlayers };
+			Localize_Format( teamName, sizeof( teamName ), fmtString, args, 2 );
 			DrawUtils::DrawHudNumberString( g_Columns[COL_KILLS].start, ypos, g_Columns[COL_KILLS].end, team_info->frags, r, g, b );
 			break;
+		}
 		case TEAM_SPECTATOR:
 		case TEAM_UNASSIGNED:
 			strncpy( teamName, Localize( "#Spectators" ), sizeof( teamName ) );
