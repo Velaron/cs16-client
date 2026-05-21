@@ -361,7 +361,7 @@ int CHudRadar::Draw(float flTime)
 	else if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_CT )
 	{
 		// draw hostages for CT
-		for( int i = 0; i < MAX_HOSTAGES; i++ )
+		for( int i = 1; i <= MAX_HOSTAGES; i++ )
 		{
 			if( !HostageFlashTime( flTime, g_HostageInfo + i ) )
 			{
