@@ -200,69 +200,68 @@ struct
 	const char value[64];
 	int numArgs;
 	bool allowDead;
-	bool replaceFirstArgToName;
-	bool swap;
 } sayTextFmt[] =
 {
 	{
 		"#Cstrike_Chat_CT",
-		"\x03(Counter-Terrorist) %s : \x01%s",
-		2, true, true, false
+		"\x03(Counter-Terrorist) %s1 : \x01%s2",
+		2, true
 	},
 	{
 		"#Cstrike_Chat_T",
-		"\x03(Terrorist) %s : \x01%s",
-		2, true, true, false
+		"\x03(Terrorist) %s1 : \x01%s2",
+		2, true
 	},
 	{
 		"#Cstrike_Chat_CT_Dead",
-		"\x03*DEAD*(Counter-Terrorist) %s : \x01%s",
-		2, false, true, false
+		"\x03*DEAD*(Counter-Terrorist) %s1 : \x01%s2",
+		2, false
 	},
 	{
 		"#Cstrike_Chat_T_Dead",
-		"\x03*DEAD*(Terrorist) %s : \x01%s",
-		2, false, true, false
+		"\x03*DEAD*(Terrorist) %s1 : \x01%s2",
+		2, false
 	},
 	{
 		"#Cstrike_Chat_Spec",
-		"\x03(Spectator) %s : \x03%s",
-		2, false, true, false
+		"\x03(Spectator) %s1 : \x03%s2",
+		2, false
 	},
 	{
 		"#Cstrike_Chat_All",
-		"\x03%s : \x01%s",
-		2, true, true, false
+		"\x03%s1 : \x01%s2",
+		2, true
 	},
 	{
 		"#Cstrike_Chat_AllDead",
-		"\x03*DEAD* %s: \x01%s",
-		2, false, true, false
+		"\x03*DEAD* %s1: \x01%s2",
+		2, false
 	},
 	{
 		"#Cstrike_Chat_AllSpec",
-		"\x03*SPEC* %s: \x03%s",
-		2, false, true, false
+		"\x03*SPEC* %s1: \x03%s2",
+		2, false
 	},
 	{
 		"#Cstrike_Name_Change",
-		"\x03* %s changed name to %s",
-		2, true, false, false
+		"\x03* %s1 changed name to %s2",
+		2, true
 	},
+	// VGUI2 indexed args: location is %s2, message is %s3 — natural order.
 	{
 		"#Cstrike_Chat_T_Loc",
-		"\x03*(Terrorist) %s @ %s : \x01%s",
-		3, true, true, true
+		"\x03*(Terrorist) %s1 @ %s2 : \x01%s3",
+		3, true
 	},
 	{
 		"#Cstrike_Chat_CT_Loc",
-		"\x03*(Counter-Terrorist) %s @ %s : \x01%s",
-		3, true, true, true
+		"\x03*(Counter-Terrorist) %s1 @ %s2 : \x01%s3",
+		3, true
 	},
 	{
 		"#Spec_PlayerItem",
-		"%s",
-		1, true, false, false,
+		"%s1",
+		1, true
 	},
 };
 
@@ -273,7 +272,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	CUtlString fmt;
 	CUtlString argv[3];
 	const char *fmt_tran = nullptr;
-	bool allowDead, replaceFirstArgToName, swap;
+	bool allowDead, replaceFirstArgToName;
 
 	client_index = reader.ReadByte();
 
@@ -299,12 +298,6 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 				fmt_tran = (char*)sayTextFmt[i].value;
 				allowDead = sayTextFmt[i].allowDead;
 				numArgs = sayTextFmt[i].numArgs;
-
-				// VALVEWHY: Second argument may be null string, but not on name changing.
-				replaceFirstArgToName = sayTextFmt[i].replaceFirstArgToName;
-
-				// VALVEWHY #2: location is last argument, so swap
-				swap = sayTextFmt[i].swap;
 				break;
 			}
 		}
@@ -316,14 +309,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 		fmt_tran = fmt.Get();
 		numArgs = argc;
 		allowDead = true;
-		replaceFirstArgToName = false;
-		swap = false;
 	}
-
-	// Convert indexed placeholders (%s1, %s2) to standard C-format (%s) 
-	// to ensure compatibility with snprintf below.
-	CUtlString fmt_local = fmt_tran;
-	Localize_StripIndices( fmt_local.Access() );
 
 	// If text is sent from dead player or spectator
 	// don't draw it, until local player isn't specator or dead.
@@ -332,57 +318,18 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 		return 1;
 	}
 
-	bool nameArgReplaced = false;
-
 	// Resolve missing nickname locally via client_index mapping.
-	if( !replaceFirstArgToName && client_index > 0 && client_index <= MAX_PLAYERS && numArgs > 0 && argv[0].Length() == 0 )
+	if( client_index > 0 && client_index <= MAX_PLAYERS && numArgs > 0 && argv[0].Length() == 0 )
 	{
 		GetPlayerInfo( client_index, &g_PlayerInfoList[client_index] );
 		argv[0] = g_PlayerInfoList[client_index].name;
-		nameArgReplaced = true;
 	}
 
-	if( replaceFirstArgToName && client_index > 0 && client_index <= MAX_PLAYERS )
-	{
-		GetPlayerInfo( client_index, &g_PlayerInfoList[client_index] );
-		argv[0] = g_PlayerInfoList[client_index].name;
-		nameArgReplaced = true;
-	}
-
-	// Strip indices from argument strings too (when not replaced by name)
-	for( int i = 0; i < numArgs; ++i )
-	{
-		if( !(i == 0 && nameArgReplaced) )
-		{
-			Localize_StripIndices( argv[i].Access() );
-		}
-	}
-
-	CUtlString dst;
+	const char *args[3] = { argv[0].Get(), argv[1].Get(), argv[2].Get() };
 	char tmp[1024];
+	Localize_Format( tmp, sizeof( tmp ), fmt_tran, args, numArgs );
 
-	switch( numArgs )
-	{
-	case 3:
-		if( swap )
-			snprintf( tmp, sizeof( tmp ), fmt_local.Get(), argv[0].Get(), argv[2].Get(), argv[1].Get() );
-		else
-			snprintf( tmp, sizeof( tmp ), fmt_local.Get(), argv[0].Get(), argv[1].Get(), argv[2].Get() );
-		break;
-	case 2:
-		snprintf( tmp, sizeof( tmp ), fmt_local.Get(), argv[0].Get(), argv[1].Get() );
-		break;
-	case 1:
-		snprintf( tmp, sizeof( tmp ), fmt_local.Get(), argv[0].Get() );
-		break;
-	case 0:
-		strncpy( tmp, fmt_local.Get(), sizeof( tmp ) );
-		tmp[sizeof(tmp)-1] = 0;
-		break;
-	}
-	
-	dst = tmp;
-	SayTextPrint( dst.Get(), dst.Length(), client_index );
+	SayTextPrint( tmp, strlen( tmp ), client_index );
 
 	return 1;
 }
