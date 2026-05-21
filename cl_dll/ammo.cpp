@@ -631,13 +631,13 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )
 {
 	BufferReader reader( pszName, pbuf, iSize );
-	
-	WEAPON Weapon;
+
+	WEAPON Weapon = { 0 };
 
 	strncpy( Weapon.szName, reader.ReadString(), MAX_WEAPON_NAME );
 	Weapon.szName[MAX_WEAPON_NAME-1] = 0;
 	Weapon.iAmmoType = (int)reader.ReadChar();
-	
+
 	Weapon.iMax1 = reader.ReadByte();
 	if (Weapon.iMax1 == 255)
 		Weapon.iMax1 = -1;
@@ -652,6 +652,21 @@ int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )
 	Weapon.iId = reader.ReadChar();
 	Weapon.iFlags = reader.ReadByte();
 	Weapon.iClip = 0;
+
+	if( Weapon.iId < 0 || Weapon.iId >= MAX_WEAPONS )
+		return 0;
+	if( Weapon.iSlot < 0 || Weapon.iSlot >= MAX_WEAPON_SLOTS + 1 )
+		return 0;
+	if( Weapon.iSlotPos < 0 || Weapon.iSlotPos >= MAX_WEAPON_POSITIONS + 1 )
+		return 0;
+	if( Weapon.iAmmoType < -1 || Weapon.iAmmoType >= MAX_AMMO_TYPES )
+		return 0;
+	if( Weapon.iAmmo2Type < -1 || Weapon.iAmmo2Type >= MAX_AMMO_TYPES )
+		return 0;
+	if( Weapon.iAmmoType >= 0 && Weapon.iMax1 == 0 )
+		return 0;
+	if( Weapon.iAmmo2Type >= 0 && Weapon.iMax2 == 0 )
+		return 0;
 
 	gWR.AddWeapon( &Weapon );
 
