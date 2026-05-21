@@ -94,9 +94,12 @@ public:
 	int HasAmmo( WEAPON *p );
 
 ///// AMMO /////
-	AMMO GetAmmo( int iId ) { return iId; }
-
-	void SetAmmo( int iId, int iCount ) { riAmmo[ iId ] = iCount;	}
+	void SetAmmo( int iId, int iCount )
+	{
+		if ( iId < 0 || iId >= MAX_AMMO_TYPES )
+			return;
+		riAmmo[ iId ] = iCount;
+	}
 
 	int CountAmmo( int iId );
 
