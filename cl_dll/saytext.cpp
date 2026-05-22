@@ -248,7 +248,6 @@ struct
 		"\x03* %s1 changed name to %s2",
 		2, true
 	},
-	// VGUI2 indexed args: location is %s2, message is %s3 — natural order.
 	{
 		"#Cstrike_Chat_T_Loc",
 		"\x03*(Terrorist) %s1 @ %s3 : \x01%s2",
