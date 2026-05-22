@@ -251,12 +251,12 @@ struct
 	// VGUI2 indexed args: location is %s2, message is %s3 — natural order.
 	{
 		"#Cstrike_Chat_T_Loc",
-		"\x03*(Terrorist) %s1 @ %s2 : \x01%s3",
+		"\x03*(Terrorist) %s1 @ %s3 : \x01%s2",
 		3, true
 	},
 	{
 		"#Cstrike_Chat_CT_Loc",
-		"\x03*(Counter-Terrorist) %s1 @ %s2 : \x01%s3",
+		"\x03*(Counter-Terrorist) %s1 @ %s3 : \x01%s2",
 		3, true
 	},
 	{
