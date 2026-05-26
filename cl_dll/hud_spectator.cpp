@@ -1327,6 +1327,7 @@ void CHudSpectator::DrawOverviewLayer()
 				gEngfuncs.pTriAPI->TexCoord2f( 0, 1 );
 				gEngfuncs.pTriAPI->Vertex3f (x, y+yStep, z);
 				gEngfuncs.pTriAPI->End();
+				gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 
 				frame++;
 				x+= xStep;
@@ -1370,6 +1371,7 @@ void CHudSpectator::DrawOverviewLayer()
 				gEngfuncs.pTriAPI->TexCoord2f( 1, 0 );
 				gEngfuncs.pTriAPI->Vertex3f (x, y+yStep, z);
 				gEngfuncs.pTriAPI->End();
+				gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 
 				frame++;
 				
@@ -1579,6 +1581,7 @@ void CHudSpectator::DrawOverviewEntities()
 	gEngfuncs.pTriAPI->TexCoord2f( 1, 1 );
 	gEngfuncs.pTriAPI->Vertex3f (x+left[0], y+left[1], (z+left[2]) * zScale);
 	gEngfuncs.pTriAPI->End ();
+	gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 
 }
 
