@@ -41,6 +41,23 @@ extern float *GetClientColor( int clientIndex );
 #define MAX_LINE_WIDTH  ( ScreenWidth - 40 )
 #define LINE_START  10
 
+static void StripSayTextControlCodes( const char *src, char *dst, int dstSize )
+{
+	if ( !src || dstSize <= 0 )
+		return;
+
+	int j = 0;
+	for ( const char *p = src; *p && j < dstSize - 1; ++p )
+	{
+		if ( *p == '\x01' || *p == '\x02' || *p == '\x03' || *p == '\x04' )
+			continue;
+
+		dst[j++] = *p;
+	}
+
+	dst[j] = '\0';
+}
+
 static char g_szLineBuffer[ MAX_LINES + 1 ][ MAX_CHARS_PER_LINE ];
 static float *g_pflNameColors[ MAX_LINES + 1 ];
 static int g_iNameLengths[ MAX_LINES + 1 ];
@@ -339,7 +356,9 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	if ( m_HUD_saytext_console->value && pszBuf && *pszBuf )
 	{
 		// Print it straight to the console
-		ConsolePrint( pszBuf );
+		char szConsoleText[ MAX_CHARS_PER_LINE ];
+		StripSayTextControlCodes( pszBuf, szConsoleText, sizeof( szConsoleText ) );
+		ConsolePrint( szConsoleText );
 	}
 
 	// find an empty string slot
