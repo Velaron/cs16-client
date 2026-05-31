@@ -1051,7 +1051,9 @@ int CHudAmmo::Draw(float flTime)
 	if( gHUD.m_iFOV > 40 )
 	{
 		// draw a dynamic crosshair
-		DrawCrosshair();
+		if( !( gHUD.m_iHideHUDDisplay & HIDEHUD_CROSSHAIR ) )
+			DrawCrosshair();
+
 		DrawSpriteCrosshair();
 	}
 	else
