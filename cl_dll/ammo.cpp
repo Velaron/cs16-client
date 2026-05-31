@@ -1052,6 +1052,9 @@ int CHudAmmo::Draw(float flTime)
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
 		return 1;
 
+	if( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL ) )
+		return 1;
+
 	// place it here, so pretty dynamic crosshair will work even in spectator!
 	if( gHUD.m_iFOV > 40 )
 	{
@@ -1070,9 +1073,6 @@ int CHudAmmo::Draw(float flTime)
 			DrawSpriteCrosshair();
 		}
 	}
-
-	if ( (gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL )) )
-		return 1;
 
 	// Draw Weapon Menu
 	DrawWList(flTime);
