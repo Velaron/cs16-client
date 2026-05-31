@@ -289,7 +289,12 @@ void CHudHealth::DrawHealthBar( float flTime )
 
 		x = CrossWidth + HealthWidth / 2;
 
-		x = DrawUtils::DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
+		int idx = gEngfuncs.GetLocalPlayer()->index;
+
+		if( idx >= 1 && idx <= MAX_PLAYERS && g_PlayerExtraInfo[idx].sb_health > 255 )
+			x = DrawUtils::DrawHudNumber2( x, y, g_PlayerExtraInfo[idx].sb_health, r, g, b );
+		else
+			x = DrawUtils::DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
 	}
 }
 
