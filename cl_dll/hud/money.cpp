@@ -60,7 +60,7 @@ int CHudMoney::VidInit()
 
 int CHudMoney::Draw(float flTime)
 {
-	if(( gHUD.m_iHideHUDDisplay & ( HIDEHUD_HEALTH ) ))
+	if( gHUD.m_iHideHUDDisplay & ( HIDEHUD_MONEY | HIDEHUD_ALL ) )
 		return 1;
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT))))
