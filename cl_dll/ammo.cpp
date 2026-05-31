@@ -631,6 +631,11 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 
 	if( gHUD.m_iFOV >= 90 )
 	{ // normal crosshairs
+		if( fOnTarget && m_pWeapon->hAutoaim )
+			SetCrosshair( m_pWeapon->hAutoaim, m_pWeapon->rcAutoaim, 255, 255, 255 );
+		else
+			SetCrosshair( m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255 );
+
 		HideCrosshair(); // hide static
 	}
 	else
