@@ -565,7 +565,7 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 	if (gEngfuncs.IsSpectateOnly())
 		return 1;
 
-	if ( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_ALL ) )
+	if ( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_ALL | HIDEHUD_CROSSHAIR ) )
 	{
 		gpActiveSel = NULL;
 		HideCrosshair();
@@ -581,11 +581,19 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 //
 int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 {
+	int fOnTarget = FALSE;
+
 	BufferReader reader( pszName, pbuf, iSize );
 
 	int iState = reader.ReadByte();
 	int iId = reader.ReadChar();
 	int iClip = reader.ReadChar();
+
+	// detect if we're also on target
+	if( iState > 1 )
+	{
+		fOnTarget = TRUE;
+	}
 
 	if ( iId < 1 )
 	{
@@ -620,6 +628,18 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 		return 1;
 
 	m_pWeapon = pWeapon;
+
+	if( gHUD.m_iFOV >= 90 )
+	{ // normal crosshairs
+		HideCrosshair(); // hide static
+	}
+	else
+	{ // zoomed crosshairs
+		if( fOnTarget && m_pWeapon->hZoomedAutoaim )
+			SetCrosshair( m_pWeapon->hZoomedAutoaim, m_pWeapon->rcZoomedAutoaim, 255, 255, 255 );
+		else
+			SetCrosshair( m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255 );
+	}
 
 	m_fFade = 200.0f; //!!!
 
@@ -1030,10 +1050,9 @@ int CHudAmmo::Draw(float flTime)
 	// place it here, so pretty dynamic crosshair will work even in spectator!
 	if( gHUD.m_iFOV > 40 )
 	{
-		HideCrosshair(); // hide static
-
 		// draw a dynamic crosshair
 		DrawCrosshair();
+		DrawSpriteCrosshair();
 	}
 	else
 	{
