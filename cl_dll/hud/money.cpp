@@ -38,6 +38,7 @@ version.
 #include <string.h>
 #include "vgui_parser.h"
 #include "draw_util.h"
+#include "pm_shared.h"
 
 int CHudMoney::Init( )
 {
