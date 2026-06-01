@@ -36,6 +36,7 @@ version.
 #include "vgui_parser.h"
 #include <string.h>
 #include "draw_util.h"
+#include "pm_shared.h"
 
 int CHudTimer::Init()
 {
