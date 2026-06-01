@@ -66,6 +66,9 @@ int CHudMoney::Draw(float flTime)
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT))))
 		return 1;
 
+	if( g_iUser1 == OBS_IN_EYE )
+		return 1;
+
 	int r, g, b, alphaBalance;
 	m_fFade -= gHUD.m_flTimeDelta;
 	if( m_fFade < 0)
