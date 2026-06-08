@@ -403,6 +403,7 @@ void CHud :: Init( void )
 	m_StatusIcons.Init();
 	m_Radar.Init();
 	m_Scenario.Init();
+	m_AimAssist.Init();
 
 	// chat, death notice, status bars and other
 	m_SayText.Init();

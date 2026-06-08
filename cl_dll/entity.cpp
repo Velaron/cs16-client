@@ -48,6 +48,18 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *mode
 			VectorCopy(ent->curstate.origin, ent->origin);
 			VectorCopy(ent->curstate.angles, ent->angles);
 		}
+		// aim assist: glow shell over the highlighted target.
+		// Enabled by either the dedicated highlight cvar or the master debug cvar.
+		if( ent->player && g_iAimAssistTarget && ent->index == g_iAimAssistTarget
+			&& ( ( aim_assist_highlight && aim_assist_highlight->value )
+			  || ( aim_assist_debug && aim_assist_debug->value ) ) )
+		{
+			ent->curstate.renderfx      = kRenderFxGlowShell;
+			ent->curstate.rendercolor.r = 0;
+			ent->curstate.rendercolor.g = 255;
+			ent->curstate.rendercolor.b = 0;
+			ent->curstate.renderamt     = 75; // shell thickness
+		}
 		break;
 	case ET_BEAM:
 	case ET_TEMPENTITY:

@@ -290,6 +290,7 @@ private:
 
 #include "health.h"
 #include "radar.h"
+#include "aimassist.h"
 
 #define FADE_TIME 100
 
@@ -1089,6 +1090,7 @@ public:
 	CHudRadar       m_Radar;
 	CHudSpectatorGui m_SpectatorGui;
 	CHudScenario	m_Scenario;
+	CHudAimAssist	m_AimAssist;
 
 	// user messages
 	CHudMsgFunc(Damage);

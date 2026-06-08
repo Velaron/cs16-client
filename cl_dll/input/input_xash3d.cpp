@@ -1,9 +1,17 @@
+#define _USE_MATH_DEFINES // for M_PI (used by DEG2RAD/RAD2DEG on MSVC)
 #include "hud.h"
 #include "usercmd.h"
 #include "cvardef.h"
 #include "kbutton.h"
 #include "keydefs.h"
 #include "input.h"
+#include "cl_util.h"
+#include "cl_entity.h"
+#include "const.h"
+#include "pmtrace.h"
+#include "event_api.h"
+#include "pm_defs.h"
+#include <math.h>
 
 #define	PITCH	0
 #define	YAW		1
@@ -13,6 +21,32 @@ cvar_t	*cl_laddermode;
 cvar_t	*sensitivity;
 cvar_t	*in_joystick;
 cvar_t	*evdev_grab;
+
+// Aim assist (gamepad soft-lock, Max Payne 3 style)
+bool g_bAimAssistKey = false;		// hold state of the dedicated aim button (shared)
+cvar_t	*aim_assist;			// master on/off
+cvar_t	*aim_assist_fov;		// (legacy) tight cone, kept for compatibility
+cvar_t	*aim_assist_lock_fov;		// acquisition cone half-angle while the button is held (degrees)
+cvar_t	*aim_assist_pull;		// magnetism strength 0..1
+cvar_t	*aim_assist_slow;		// sticky slowdown factor applied to stick input
+cvar_t	*aim_assist_range;		// max target distance (units)
+cvar_t	*aim_assist_wallcheck;		// require line of sight to the target
+cvar_t	*aim_assist_debug;		// debug overlay (text + head marker)
+cvar_t	*aim_assist_highlight;		// glow shell over the target model
+
+// Shared state for the debug overlay (cl_dll/hud/aimassist.cpp) and highlight (entity.cpp)
+int   g_iAimAssistTarget = 0;		// entity index of the chosen target (0 = none)
+bool  g_bAimAssistApplying = false;	// assist actively steering (key held + target)
+float g_flAimAssistDist = 0.0f;		// distance to the chosen target
+float g_flAimAssistAngle = 0.0f;	// angular separation (deg) to the chosen target
+int   g_iAimAssistNearestIdx = 0;	// nearest visible enemy by angle, ignoring the cone
+float g_flAimAssistNearestAngle = 0.0f;	// its angle (diagnose a too-tight cone)
+
+// view basis used by the assist, stored each frame for the debug cone visualization
+vec3_t g_vecAimEye   = { 0, 0, 0 };
+vec3_t g_vecAimFwd   = { 0, 0, 0 };
+vec3_t g_vecAimRight = { 0, 0, 0 };
+vec3_t g_vecAimUp    = { 0, 0, 0 };
 
 
 float ac_forwardmove;
@@ -24,6 +58,7 @@ bool bMouseInUse = false;
 
 extern Vector dead_viewangles;
 extern bool evdev_open;
+extern vec3_t v_origin; // actual camera/eye origin, set each frame in view.cpp
 
 #define F 1U<<0	// Forward
 #define B 1U<<1	// Back
@@ -132,6 +167,99 @@ void IN_ClientLookEvent( float relyaw, float relpitch )
 	rel_pitch += relpitch;
 }
 
+// Console commands bound through the Controls menu (+aimassist / -aimassist)
+void IN_AimAssistDown( void ) { g_bAimAssistKey = true;  }
+void IN_AimAssistUp( void )   { g_bAimAssistKey = false; }
+
+// Returns true if no world geometry blocks the line from start to end.
+// We trace against the world ONLY (PM_WORLD_ONLY): tracing against solid players
+// would stop the ray at the very enemy we are checking and report "not visible".
+static bool AimAssist_Visible( float *start, float *end )
+{
+	pmtrace_t tr;
+
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction( false, true );
+	gEngfuncs.pEventAPI->EV_PushPMStates();
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers( -1 );
+	gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+	gEngfuncs.pEventAPI->EV_PlayerTrace( start, end, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &tr );
+	gEngfuncs.pEventAPI->EV_PopPMStates();
+
+	return tr.fraction >= 0.95f; // ~1.0 means nothing solid in the world blocks the view
+}
+
+// Picks the enemy closest to the crosshair within the assist cone, alive and visible.
+static cl_entity_t *AimAssist_FindTarget( float *eye, float *fwd )
+{
+	cl_entity_t *local = gEngfuncs.GetLocalPlayer();
+	int maxc = gEngfuncs.GetMaxClients();
+	int me = local ? local->index : 0;
+	float fov = aim_assist_lock_fov->value; // wide acquisition cone (grab nearest target in front)
+	float maxRange = aim_assist_range->value;
+	float bestAngle = 9999.0f;
+	float nearestAngle = 9999.0f;
+	cl_entity_t *best = NULL;
+
+	g_iAimAssistNearestIdx = 0;
+	g_flAimAssistNearestAngle = 0.0f;
+
+	for( int i = 1; i <= maxc; i++ )
+	{
+		if( i == me )
+			continue;
+
+		cl_entity_t *e = gEngfuncs.GetEntityByIndex( i );
+		if( !e || !e->player )
+			continue;
+		if( e->curstate.solid == SOLID_NOT || g_PlayerExtraInfo[i].dead )
+			continue; // dead / non-solid
+		if( g_iTeamNumber != 0 && g_PlayerExtraInfo[i].teamnumber == g_iTeamNumber )
+			continue; // teammate (skip filter in FFA where team is 0)
+
+		vec3_t dir;
+		VectorSubtract( e->curstate.origin, eye, dir );
+		float dist = sqrt( dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2] );
+		if( dist < 1.0f || dist > maxRange )
+			continue;
+
+		float inv = 1.0f / dist;
+		dir[0] *= inv; dir[1] *= inv; dir[2] *= inv;
+
+		float d = DotProduct( dir, fwd );
+		if( d > 1.0f ) d = 1.0f;
+		float angle = RAD2DEG( acos( d ) );
+
+		// diagnostics: nearest enemy by angle, ignoring the cone and LOS
+		if( angle < nearestAngle )
+		{
+			nearestAngle = angle;
+			g_iAimAssistNearestIdx = i;
+			g_flAimAssistNearestAngle = angle;
+		}
+
+		// distance-adjusted cone: a closer enemy subtends a larger angle, so the
+		// assist window grows when you're near them (fixes "target none" up close).
+		float effFov = fov + RAD2DEG( atan2( 32.0f, dist ) );
+		if( angle > effFov )
+			continue; // crosshair not on the enemy
+		if( angle >= bestAngle )
+			continue; // keep the one closest to the crosshair
+
+		if( aim_assist_wallcheck->value )
+		{
+			vec3_t tgt;
+			VectorCopy( e->curstate.origin, tgt );
+			if( !AimAssist_Visible( eye, tgt ) )
+				continue;
+		}
+
+		bestAngle = angle;
+		best = e;
+	}
+
+	return best;
+}
+
 // Rotate camera and add move values to usercmd
 void IN_Move( float frametime, usercmd_t *cmd )
 {
@@ -176,6 +304,56 @@ void IN_Move( float frametime, usercmd_t *cmd )
 		rel_yaw *= sensitivity->value;
 		rel_pitch *= sensitivity->value;
 	}
+
+	// --- Aim assist: find target (for steering and/or the debug overlay) ---
+	cl_entity_t *aaTarget = NULL;
+	vec3_t aaDesired = { 0, 0, 0 };
+	g_iAimAssistTarget = 0;
+	g_bAimAssistApplying = false;
+	g_flAimAssistDist = g_flAimAssistAngle = 0.0f;
+
+	// store the view basis every frame so the debug cone can be drawn (even while dead)
+	VectorCopy( v_origin, g_vecAimEye );
+	AngleVectors( viewangles, g_vecAimFwd, g_vecAimRight, g_vecAimUp );
+
+	// scan when steering (key held) OR when a debug/highlight view wants the target
+	bool aaScan = aim_assist->value && !CL_IsDead()
+		&& ( g_bAimAssistKey || aim_assist_debug->value || aim_assist_highlight->value )
+		&& !( gHUD.m_MOTD.cl_hide_motd->value == 0.0f && gHUD.m_MOTD.m_bShow );
+	if( aaScan )
+	{
+		cl_entity_t *local = gEngfuncs.GetLocalPlayer();
+		if( local )
+		{
+			aaTarget = AimAssist_FindTarget( g_vecAimEye, g_vecAimFwd );
+			if( aaTarget )
+			{
+				vec3_t dir;
+				VectorSubtract( aaTarget->curstate.origin, g_vecAimEye, dir );
+				float dist = sqrt( dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2] );
+				float hyp = sqrt( dir[0] * dir[0] + dir[1] * dir[1] );
+				aaDesired[YAW]   = RAD2DEG( atan2( dir[1], dir[0] ) );
+				aaDesired[PITCH] = -RAD2DEG( atan2( dir[2], hyp ) ); // GoldSrc: positive pitch looks down
+
+				g_iAimAssistTarget = aaTarget->index;
+				g_flAimAssistDist  = dist;
+				if( dist > 0.0f )
+				{
+					float dot = DotProduct( dir, g_vecAimFwd ) / dist;
+					g_flAimAssistAngle = RAD2DEG( acos( dot > 1.0f ? 1.0f : dot ) );
+				}
+
+				// sticky: dampen manual rotation, but only while actually steering (key held)
+				if( g_bAimAssistKey )
+				{
+					g_bAimAssistApplying = true;
+					rel_yaw   *= aim_assist_slow->value;
+					rel_pitch *= aim_assist_slow->value;
+				}
+			}
+		}
+	}
+
 	if(gHUD.m_MOTD.cl_hide_motd->value == 0.0f && gHUD.m_MOTD.m_bShow)
 	{
 		gHUD.m_MOTD.scroll += rel_pitch;
@@ -191,6 +369,21 @@ void IN_Move( float frametime, usercmd_t *cmd )
 			ac_sidemove = 0;
 		}
 	}
+
+	// --- Aim assist: magnetism pull toward the target (only while steering) ---
+	if( aaTarget && g_bAimAssistKey )
+	{
+		float dyaw   = aaDesired[YAW]   - viewangles[YAW];
+		float dpitch = aaDesired[PITCH] - viewangles[PITCH];
+		while( dyaw > 180.0f )  dyaw -= 360.0f; // shortest way around
+		while( dyaw < -180.0f ) dyaw += 360.0f;
+		float t = aim_assist_pull->value * frametime * 60.0f;
+		if( t > 1.0f ) t = 1.0f;
+		if( t < 0.0f ) t = 0.0f;
+		viewangles[YAW]   += dyaw * t;
+		viewangles[PITCH] += dpitch * t;
+	}
+
 	if (viewangles[PITCH] > cl_pitchdown->value)
 		viewangles[PITCH] = cl_pitchdown->value;
 	if (viewangles[PITCH] < -cl_pitchup->value)
@@ -278,6 +471,19 @@ void IN_Init( void )
 	in_joystick = gEngfuncs.pfnRegisterVariable ( "joystick", "0", FCVAR_ARCHIVE );
 	cl_laddermode = gEngfuncs.pfnRegisterVariable ( "cl_laddermode", "2", FCVAR_ARCHIVE );
 	evdev_grab = gEngfuncs.pfnGetCvarPointer("evdev_grab");
+
+	// Aim assist (bindable via Controls menu as "+aimassist")
+	gEngfuncs.pfnAddCommand( "+aimassist", IN_AimAssistDown );
+	gEngfuncs.pfnAddCommand( "-aimassist", IN_AimAssistUp );
+	aim_assist           = gEngfuncs.pfnRegisterVariable( "aim_assist",           "0",    FCVAR_ARCHIVE );
+	aim_assist_fov       = gEngfuncs.pfnRegisterVariable( "aim_assist_fov",       "10",   FCVAR_ARCHIVE );
+	aim_assist_lock_fov  = gEngfuncs.pfnRegisterVariable( "aim_assist_lock_fov",  "45",   FCVAR_ARCHIVE );
+	aim_assist_pull      = gEngfuncs.pfnRegisterVariable( "aim_assist_pull",      "0.25", FCVAR_ARCHIVE );
+	aim_assist_slow      = gEngfuncs.pfnRegisterVariable( "aim_assist_slow",      "0.4",  FCVAR_ARCHIVE );
+	aim_assist_range     = gEngfuncs.pfnRegisterVariable( "aim_assist_range",     "1500", FCVAR_ARCHIVE );
+	aim_assist_wallcheck = gEngfuncs.pfnRegisterVariable( "aim_assist_wallcheck", "1",    FCVAR_ARCHIVE );
+	aim_assist_debug     = gEngfuncs.pfnRegisterVariable( "aim_assist_debug",     "0",    FCVAR_ARCHIVE );
+	aim_assist_highlight = gEngfuncs.pfnRegisterVariable( "aim_assist_highlight", "0",    FCVAR_ARCHIVE );
 
 	ac_forwardmove = ac_sidemove = rel_yaw = rel_pitch = 0;
 }
