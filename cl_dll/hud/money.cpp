@@ -38,6 +38,7 @@ version.
 #include <string.h>
 #include "vgui_parser.h"
 #include "draw_util.h"
+#include "pm_shared.h"
 
 int CHudMoney::Init( )
 {
@@ -60,10 +61,13 @@ int CHudMoney::VidInit()
 
 int CHudMoney::Draw(float flTime)
 {
-	if(( gHUD.m_iHideHUDDisplay & ( HIDEHUD_HEALTH ) ))
+	if( gHUD.m_iHideHUDDisplay & ( HIDEHUD_MONEY | HIDEHUD_ALL ) )
 		return 1;
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT))))
+		return 1;
+
+	if( g_iUser1 == OBS_IN_EYE )
 		return 1;
 
 	int r, g, b, alphaBalance;

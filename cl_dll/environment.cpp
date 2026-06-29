@@ -1601,6 +1601,14 @@ int CEnvironment::MsgFunc_ReceiveW(const char *pszName, int iSize, void *pbuf)
 
 	const int weatherType = reader.ReadByte();
 
+	if( weatherType == 0 )
+	{
+		m_iSavedWeatherType = 0;
+		RemoveRain(0);
+		RemoveSnow(0);
+		return 1;
+	}
+
 	if (weatherType < 1 || weatherType > 2)
 		return 1;
 

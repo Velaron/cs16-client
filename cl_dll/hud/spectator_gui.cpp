@@ -422,8 +422,10 @@ void CHudSpectatorGui::CalcAllNeededData( )
 		hud_player_info_t sInfo;
 		GetPlayerInfo( g_iUser2, &sInfo );
 
+		int iHealth = g_PlayerExtraInfo[g_iUser2].sb_health > 255 ? g_PlayerExtraInfo[g_iUser2].sb_health : g_PlayerExtraInfo[g_iUser2].health;
+
 		snprintf( label.m_szNameAndHealth, sizeof( label.m_szNameAndHealth ),
-				  "%s (%i)",  sInfo.name, g_PlayerExtraInfo[g_iUser2].health );
+				  "%s (%i)",  sInfo.name, iHealth );
 	}
 	else label.m_szNameAndHealth[0] = '\0';
 }
