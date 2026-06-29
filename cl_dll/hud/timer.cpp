@@ -36,6 +36,7 @@ version.
 #include "vgui_parser.h"
 #include <string.h>
 #include "draw_util.h"
+#include "pm_shared.h"
 
 int CHudTimer::Init()
 {
@@ -60,6 +61,10 @@ int CHudTimer::Draw( float fTime )
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
 		return 1;
+
+	if( g_iUser1 == OBS_IN_EYE )
+		return 1;
+
 	int r, g, b;
 	// time must be positive
 	int minutes = max( 0, (int)( m_iTime + m_fStartTime - gHUD.m_flTime ) / 60);
