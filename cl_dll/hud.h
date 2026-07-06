@@ -858,6 +858,7 @@ public:
 
 private:
 	float left, right, centerx, centery;
+	float physw, physh;
 	int m_iScopeArc[4];
 };
 

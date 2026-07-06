@@ -63,11 +63,25 @@ int CHudSniperScope::VidInit()
 	{
 		gRenderAPI.Host_Error( "^3Error^7: Cannot load Sniper Scope arcs. Check sprites/scope_arc*.tga files\n" );
 	}
-	
-	left = (TrueWidth - TrueHeight)/2.0;
-	right = left + TrueHeight;
-	centerx = TrueWidth/2.0;
-	centery = TrueHeight/2.0;
+
+	// The scope is drawn with raw 2D quads (DrawUtils::Draw2DQuad / TriAPI), whose
+	// coordinate space is the physical framebuffer. On HiDPI/Retina displays that is
+	// larger than the logical ScreenWidth/TrueWidth (e.g. 2048 vs 1024), so using the
+	// logical size made the scope cover only the top-left quarter. Query the real
+	// framebuffer size instead so the scope fills the whole screen at any DPI.
+	physw = gRenderAPI.RenderGetParm( PARM_SCREEN_WIDTH, 0 );
+	physh = gRenderAPI.RenderGetParm( PARM_SCREEN_HEIGHT, 0 );
+	if( physw <= 0 || physh <= 0 )
+	{
+		// fallback for renderers that don't report it
+		physw = ScreenWidth;
+		physh = ScreenHeight;
+	}
+
+	left = (physw - physh)/2.0;
+	right = left + physh;
+	centerx = physw/2.0;
+	centery = physh/2.0;
 	return 1;
 }
 
@@ -93,17 +107,17 @@ int CHudSniperScope::Draw(float flTime)
 
 	DrawTexture( m_iScopeArc[0], left, 0, centerx, centery );
 	DrawTexture( m_iScopeArc[1], centerx, 0, right, centery );
-	DrawTexture( m_iScopeArc[2], centerx, centery, right, TrueHeight );
-	DrawTexture( m_iScopeArc[3], left, centery, centerx, TrueHeight );
+	DrawTexture( m_iScopeArc[2], centerx, centery, right, physh );
+	DrawTexture( m_iScopeArc[3], left, centery, centerx, physh );
 
 	gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
 	// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		DrawUtils::Draw2DQuad( 0, 0, left + 2, TrueHeight );
-		DrawUtils::Draw2DQuad( right, 0, right + ( TrueWidth - right ), TrueHeight );
+		DrawUtils::Draw2DQuad( 0, 0, left + 2, physh );
+		DrawUtils::Draw2DQuad( right, 0, right + ( physw - right ), physh );
 	
 	// default crosshair pixel perfect lines
 		DrawUtils::Draw2DQuad( left, centery + 1, right, centery + 2 );
-		DrawUtils::Draw2DQuad( centerx - 1, 0, centerx, TrueHeight );
+		DrawUtils::Draw2DQuad( centerx - 1, 0, centerx, physh );
 	// gEngfuncs.pTriAPI->End();
 
 	return 0;
