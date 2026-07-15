@@ -1173,6 +1173,9 @@ void CHudAmmo::DrawSpriteCrosshair()
 {
 	int x, y;
 
+	if( g_iUser1 && g_iUser1 != OBS_IN_EYE )
+		return;
+
 	if( !m_hStaticSpr )
 		return;
 
