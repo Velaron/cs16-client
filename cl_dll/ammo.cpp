@@ -322,6 +322,8 @@ int CHudAmmo::Init(void)
 void CHudAmmo::Reset(void)
 {
 	m_fFade = 0;
+	m_bDrawCrosshair = false;
+	m_pWeapon = NULL;
 
 	gpActiveSel = NULL;
 	gHUD.m_iHideHUDDisplay = 0;
