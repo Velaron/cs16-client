@@ -167,26 +167,3 @@ jobs:
         with:
           name: ${{ runner.os }}-${{ matrix.arch }}
           path: build/*.zip
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && always()
-    needs: [ android, windows, linux, psvita, macos ]
-    steps:
-      - name: Fetch artifacts
-        uses: actions/download-artifact@v4
-      - name: Remove old release
-        run: |
-          TAG_NAME=${{ github.ref_name == 'main' && 'continuous' || format('continuous-{0}', github.ref_name) }}
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          if gh release list --repo ${{ github.repository }} | grep -q -e "$TAG_NAME"; then
-            gh release delete "$TAG_NAME" --yes --cleanup-tag --repo ${{ github.repository }}
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload new release
-        run: |
-          gh release create ${{ env.TAG_NAME }} --title "CS16Client development build" --prerelease */CS16Client-* \
-            --repo ${{ github.repository }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
