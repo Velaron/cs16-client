@@ -64,10 +64,10 @@ int CHudSniperScope::VidInit()
 		gRenderAPI.Host_Error( "^3Error^7: Cannot load Sniper Scope arcs. Check sprites/scope_arc*.tga files\n" );
 	}
 	
-	left = (TrueWidth - TrueHeight)/2.0;
-	right = left + TrueHeight;
-	centerx = TrueWidth/2.0;
-	centery = TrueHeight/2.0;
+	left = (ScreenWidth - ScreenHeight)/2.0;
+	right = left + ScreenHeight;
+	centerx = ScreenWidth/2.0;
+	centery = ScreenHeight/2.0;
 	return 1;
 }
 
@@ -93,17 +93,17 @@ int CHudSniperScope::Draw(float flTime)
 
 	DrawTexture( m_iScopeArc[0], left, 0, centerx, centery );
 	DrawTexture( m_iScopeArc[1], centerx, 0, right, centery );
-	DrawTexture( m_iScopeArc[2], centerx, centery, right, TrueHeight );
-	DrawTexture( m_iScopeArc[3], left, centery, centerx, TrueHeight );
+	DrawTexture( m_iScopeArc[2], centerx, centery, right, ScreenHeight );
+	DrawTexture( m_iScopeArc[3], left, centery, centerx, ScreenHeight );
 
 	gRenderAPI.GL_Bind( 0, gHUD.m_WhiteTex );
 	// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		DrawUtils::Draw2DQuad( 0, 0, left + 2, TrueHeight );
-		DrawUtils::Draw2DQuad( right, 0, right + ( TrueWidth - right ), TrueHeight );
+		DrawUtils::Draw2DQuad( 0, 0, left + 2, ScreenHeight );
+		DrawUtils::Draw2DQuad( right, 0, right + ( ScreenWidth - right ), ScreenHeight );
 	
 	// default crosshair pixel perfect lines
 		DrawUtils::Draw2DQuad( left, centery + 1, right, centery + 2 );
-		DrawUtils::Draw2DQuad( centerx - 1, 0, centerx, TrueHeight );
+		DrawUtils::Draw2DQuad( centerx - 1, 0, centerx, ScreenHeight );
 	// gEngfuncs.pTriAPI->End();
 
 	return 0;
