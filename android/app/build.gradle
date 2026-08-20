@@ -75,7 +75,7 @@ android {
 
 			externalNativeBuild {
                 cmake {
-                    cppFlags "-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+                    arguments "-DCMAKE_C_COMPILER_LAUNCHER=ccache", "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
                 }
 			}
 		}

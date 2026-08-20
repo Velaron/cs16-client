@@ -15,6 +15,11 @@ jobs:
         with:
           fetch-depth: 1
           submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install ccache
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -54,7 +59,7 @@ jobs:
     name: PS Vita
     runs-on: ubuntu-latest
     env:
-      VITASDK: /usr/local/vitasdk
+      VITASDK: ${{ github.homedir }}/vitasdk
     steps:
       - name: Checkout sources
         uses: actions/checkout@v5
@@ -68,11 +73,14 @@ jobs:
             libstdc++6 gcc-multilib g++-multilib \
             ninja-build libfontconfig-dev ccache
       - name: Setup VitaSDK cache
-        id: vitasdk-cache
+        id: cache-vitasdk
         uses: actions/cache@v4
         with:
           path: ${{ env.VITASDK }}
-          key: VitaSDK-cache-v1
+          key: VitaSDK-cache-${{ hashFiles('scripts/psvita_sdk.sh') }}
+          restore-keys: |
+            VitaSDK-cache-${{ github.ref_name }}
+            VitaSDK-cache-
       - name: Setup VitaSDK
         if: steps.cache-vitasdk.outputs.cache-hit != 'true'
         run: |
@@ -108,7 +116,7 @@ jobs:
     name: Windows
     runs-on: windows-latest
     env:
-      SCCACHE_GHA_ENABLED: "true"
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
     strategy:
       matrix:
         arch: [ 'x86', 'amd64' ]
@@ -123,6 +131,14 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}
+      - name: Setup compilation cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.SCCACHE_DIR }}
+          key: sccache-${{ runner.os }}-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: |
+            sccache-${{ runner.os }}-${{ matrix.arch }}-${{ github.ref_name }}
+            sccache-${{ runner.os }}-${{ matrix.arch }}-
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.11
       - name: Configure
