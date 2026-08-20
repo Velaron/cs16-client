@@ -18,7 +18,10 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_C_COMPILER": "cl",
-        "CMAKE_CXX_COMPILER": "cl"
+        "CMAKE_CXX_COMPILER": "cl",
+        "CMAKE_C_COMPILER_LAUNCHER": "sccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache",
+        "CMAKE_MSVC_DEBUG_INFORMATION_FORMAT": "Embedded"
       },
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": {
@@ -26,6 +29,9 @@
             "Windows"
           ]
         }
+      },
+      "environment": {
+        "SCCACHE_GHA_ENABLED": "true"
       }
     },
     {
@@ -107,16 +113,20 @@
       "inherits": "linux-release-amd64",
       "displayName": "Linux CI - amd64",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
       }
     },
     {
       "name": "linux-ci-i386",
-      "inherits": "linux-release-i386",
+      "inherits": "linux-ci-amd64",
       "displayName": "Linux CI - i386",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-      }
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "toolchainFile": "${sourceDir}/toolchains/i386-linux-gnu.cmake"
     },
     {
       "name": "win32-ci-amd64",
@@ -147,7 +157,9 @@
         "CMAKE_C_COMPILER": "gcc",
         "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_CXX_STANDARD": "11",
-        "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
       },
       "binaryDir": "${sourceDir}/build"
     },

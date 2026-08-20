@@ -9,7 +9,7 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           submodules: recursive
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -17,6 +17,14 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: gradle
+      - name: Setup compiler cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: Android-ccache-${{ github.sha }}
+          restore-keys: |
+            Android-ccache-${{ github.ref_name }}
+            Android-ccache-
       - name: Build and Sign APK
         env:
           KEYSTORE_FILE_PATH: ${{ github.workspace }}/signingkey.jks
@@ -41,25 +49,44 @@ jobs:
   psvita:
     name: PS Vita
     runs-on: ubuntu-latest
+    env:
+      VITASDK: /usr/local/vitasdk
     steps:
       - name: Checkout sources
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           submodules: recursive
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install libatomic1 libgcc-s1 \
             libstdc++6 gcc-multilib g++-multilib \
-            ninja-build libfontconfig-dev
+            ninja-build libfontconfig-dev ccache
+      - name: Setup VitaSDK cache
+        id: vitasdk-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.VITASDK }}
+          key: VitaSDK-cache-v1
       - name: Setup VitaSDK
+        if: steps.cache-vitasdk.outputs.cache-hit != 'true'
         run: |
           scripts/psvita_sdk.sh
-          echo "VITASDK=/usr/local/vitasdk" >> $GITHUB_ENV
-          echo "$VITASDK/bin" >> $GITHUB_PATH
+      - name: Setup Compiler Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: PSVita-ccache-${{ github.sha }}
+          restore-keys: |
+            PSVita-ccache-${{ github.ref_name }}
+            PSVita-ccache-
       - name: Configure CMake
-        run: cmake --preset "psvita-release"
+        run: |
+          echo "${{ env.VITASDK }}/bin" >> $GITHUB_PATH
+          cmake --preset "psvita-release" \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
       - name: Generate configuration files
         working-directory: build
         run: ${{ github.workspace }}/scripts/psvita_generate_configs.sh
@@ -84,14 +111,16 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           submodules: recursive
       - name: Setup Visual Studio
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.11
       - name: Configure
-        run: cmake --preset "win32-ci-${{ matrix.arch }}"
+        run: cmake -DCMAKE_POLICY_DEFAULT_CMP0141=NEW --preset "win32-ci-${{ matrix.arch }}"
       - name: Build and Package
         run: |
           cmake --build .
@@ -111,9 +140,9 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           submodules: recursive
       - name: Install dependencies
         run: |
@@ -121,7 +150,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install libatomic1:i386 libgcc-s1:i386 \
             libstdc++6:i386 gcc-multilib g++-multilib \
-            ninja-build libfontconfig-dev:i386 libfontconfig-dev
+            ninja-build libfontconfig-dev:i386 libfontconfig-dev ccache
+      - name: Setup compilation cache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-${{ matrix.arch }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch }}-ccache-${{ github.ref_name }}
+            ${{ runner.os }}-${{ matrix.arch }}-ccache-
       - name: Configure
         run: cmake --preset "linux-ci-${{ matrix.arch }}"
       - name: Build and Package
@@ -151,10 +187,17 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           submodules: recursive
       - name: Install dependencies
-        run: brew install cmake gcc ninja fontconfig
+        run: brew install cmake ninja fontconfig ccache
+      - name: Setup compilation cache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-${{ matrix.arch }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch }}-ccache-${{ github.ref_name }}
+            ${{ runner.os }}-${{ matrix.arch }}-ccache-
       - name: Configure
         run: cmake --preset "macos-ci-${{ matrix.arch }}"
       - name: Build and Package
@@ -175,18 +218,23 @@ jobs:
     steps:
       - name: Fetch artifacts
         uses: actions/download-artifact@v4
-      - name: Remove old release
-        run: |
-          TAG_NAME=${{ github.ref_name == 'main' && 'continuous' || format('continuous-{0}', github.ref_name) }}
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          if gh release list --repo ${{ github.repository }} | grep -q -e "$TAG_NAME"; then
-            gh release delete "$TAG_NAME" --yes --cleanup-tag --repo ${{ github.repository }}
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          merge-multiple: true
+#      - name: Remove old release
+#        run: |
+#          TAG_NAME=${{ github.ref_name == 'main' && 'continuous' || format('continuous-{0}', github.ref_name) }}
+#          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+#          if gh release list --repo ${{ github.repository }} | grep -q -e "$TAG_NAME"; then
+#            gh release delete "$TAG_NAME" --yes --cleanup-tag --repo ${{ github.repository }}
+#          fi
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload new release
         run: |
-          gh release create ${{ env.TAG_NAME }} --title "CS16Client development build" --prerelease */CS16Client-* \
-            --repo ${{ github.repository }}
+          TAG_NAME=${{ github.ref_name == 'main' && 'continuous' || format('continuous-{0}', github.ref_name) }}
+          gh release create "$TAG_NAME" --title "CS16Client development build" \
+            --prerelease --repo ${{ github.repository }} || true
+          gh release edit "$TAG_NAME" --target "${{ github.sha }}" --repo ${{ github.repository }}
+          gh release upload "$TAG_NAME" CS16Client-* --clobber --repo ${{ github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

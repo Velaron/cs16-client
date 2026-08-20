@@ -72,6 +72,12 @@ android {
 			initWith(getByName("release"))
 			applicationIdSuffix = ".test"
 			signingConfig = signingConfigs.continuous
+
+			externalNativeBuild {
+                cmake {
+                    cppFlags "-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+                }
+			}
 		}
 	}
 
