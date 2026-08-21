@@ -690,13 +690,8 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 			}
 		}	
 
-		// adjust for speed key
-		if ( in_speed.state & 1 )
-		{
-			cmd->forwardmove *= cl_movespeedkey->value;
-			cmd->sidemove *= cl_movespeedkey->value;
-			cmd->upmove *= cl_movespeedkey->value;
-		}
+		// Allow mice and other controllers to add their inputs
+		IN_Move ( frametime, cmd );
 
 		// clip to maxspeed
 		spd = gEngfuncs.GetClientMaxspeed();
@@ -714,8 +709,17 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 			}
 		}
 
-		// Allow mice and other controllers to add their inputs
-		IN_Move ( frametime, cmd );
+		// adjust for speed key
+		if ( in_speed.state & 1 )
+		{
+			float speed = cl_movespeedkey->value;
+			if ( speed > 0.52f )
+				speed = 0.52f;
+
+			cmd->forwardmove *= speed;
+			cmd->sidemove *= speed;
+			cmd->upmove *= speed;
+		}
 	}
 
 	cmd->impulse = in_impulse;
