@@ -104,7 +104,7 @@ Figure out the height of the gun
 void EV_GetGunPosition( event_args_t *args, Vector &pos, const Vector &origin )
 {
 	int idx;
-	Vector view_ofs(0, 0, 0);
+	Vector view_ofs( 0, 0, DEFAULT_VIEWHEIGHT );
 
 	idx = args->entindex;
 
@@ -120,10 +120,6 @@ void EV_GetGunPosition( event_args_t *args, Vector &pos, const Vector &origin )
 		{
 			view_ofs[2] = VEC_DUCK_VIEW;
 		}
-	}
-	else
-	{
-		view_ofs[2] = DEFAULT_VIEWHEIGHT;
 	}
 
 	pos = origin + view_ofs;
