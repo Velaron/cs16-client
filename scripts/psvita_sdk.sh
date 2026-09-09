@@ -9,13 +9,16 @@ export VDPM_NONINTERACTIVE=1
 
 install_package()
 {
-	./vdpm install "$1" || exit 1
+	# use vdpm installed into the SDK by bootstrap, the one in the checkout
+	# expects pacman at a different path and can't be used after bootstrap
+	"$VITASDK/bin/vdpm" install "$1" || exit 1
 }
 
 echo "Downloading vitasdk..."
 git clone https://github.com/vitasdk/vdpm.git --depth=1 || exit 1
 pushd vdpm || exit 1
 ./bootstrap-vitasdk.sh || exit 1
+export PATH="$VITASDK/bin:$PATH"
 install_package taihen
 install_package kubridge
 install_package zlib
