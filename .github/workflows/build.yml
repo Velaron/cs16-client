@@ -131,6 +131,9 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}
+      - name: Setup YY-Thunks
+        if: matrix.arch == 'x86'
+        run: bash scripts/setup_yy_thunks.sh
       - name: Setup compilation cache
         uses: actions/cache@v4
         with:
