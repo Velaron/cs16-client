@@ -1196,14 +1196,6 @@ void CHudAmmo::DrawSpriteCrosshair()
 #define SOUTH_YPOS (ScreenHeight / 2 + flCrosshairDistance)
 #define NORTH_SOUTH_XPOS (ScreenWidth / 2)
 
-#define WEST_XPOS_R (TrueWidth / 2 - flCrosshairDistance - iLength + 1)
-#define EAST_XPOS_R (flCrosshairDistance + TrueWidth / 2)
-#define EAST_WEST_YPOS_R (TrueHeight / 2)
-
-#define NORTH_YPOS_R (TrueHeight / 2 - flCrosshairDistance - iLength + 1)
-#define SOUTH_YPOS_R (TrueHeight / 2 + flCrosshairDistance)
-#define NORTH_SOUTH_XPOS_R (TrueWidth / 2)
-
 int Distances[30][2] =
 {
 { 8, 3 }, // 0
