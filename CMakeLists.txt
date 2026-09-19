@@ -68,6 +68,14 @@ if(BUILD_SERVER)
 	# 	INSTALL_COMMAND meson install -C build --destdir ${CMAKE_INSTALL_PREFIX}
 	# )
 	add_subdirectory(3rdparty/yapb)
+
+	if(MSVC)
+		# Limit YaPB to one concurrent compile job because MSVC shares one
+		# compiler PDB between all source files of this target.
+		set_property(GLOBAL APPEND PROPERTY JOB_POOLS yapb_compile_pool=1)
+		set_property(TARGET yapb PROPERTY JOB_POOL_COMPILE yapb_compile_pool)
+    endif()
+
 	set_target_postfix(yapb)
 
 	set(XASH_COMPAT ON CACHE BOOL "" FORCE)
