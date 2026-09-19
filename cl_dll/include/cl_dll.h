@@ -32,7 +32,7 @@ typedef unsigned short word;
 typedef float vec_t;
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
-#define MIN_XASH_VERSION 3137
+#define MIN_XASH_VERSION 4190
 
 #include <stdint.h>
 
