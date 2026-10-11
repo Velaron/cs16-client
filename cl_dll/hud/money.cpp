@@ -102,6 +102,14 @@ int CHudMoney::Draw(float flTime)
 			int iDeltaR, iDeltaG, iDeltaB;
 			int iDollarHeight = m_hDollar.rect.Height();
 			int iDeltaAlpha = 255 - interpolate * (255);
+			int iDeltaAbs = m_iDelta < 0 ? -m_iDelta : m_iDelta;
+
+			// the layout is designed for 5 digits, longer numbers grow to the left
+			// together with the sign, so they never overlap it
+			int iDeltaDigits = 5;
+			for( int n = iDeltaAbs / 100000; n > 0; n /= 10 )
+				iDeltaDigits++;
+			int xDelta = x - ( iDeltaDigits - 5 ) * gHUD.m_iFontWidth;
 
 			DrawUtils::UnpackRGB  (iDeltaR, iDeltaG, iDeltaB, m_iDelta < 0 ? RGB_REDISH : RGB_GREENISH);
 			DrawUtils::ScaleColors(iDeltaR, iDeltaG, iDeltaB, iDeltaAlpha);
@@ -114,7 +122,7 @@ int CHudMoney::Draw(float flTime)
 
 				// draw delta
 				SPR_Set(m_hPlus.spr, iDeltaR, iDeltaG, iDeltaB );
-				SPR_DrawAdditive(0, x, y - iDollarHeight * 1.5, &m_hPlus.rect );
+				SPR_DrawAdditive(0, xDelta, y - iDollarHeight * 1.5, &m_hPlus.rect );
 			}
 			else if( m_iDelta < 0)
 			{
@@ -123,13 +131,13 @@ int CHudMoney::Draw(float flTime)
 				b = (RGB_REDISH & 0xFF) - interpolate * (RGB_REDISH & 0xFF);
 
 				SPR_Set(m_hMinus.spr, iDeltaR, iDeltaG, iDeltaB );
-				SPR_DrawAdditive(0, x, y - iDollarHeight * 1.5, &m_hMinus.rect );
+				SPR_DrawAdditive(0, xDelta, y - iDollarHeight * 1.5, &m_hMinus.rect );
 			}
 
-			DrawUtils::DrawHudNumber2( x + iDollarWidth, y - iDollarHeight * 1.5 , false, 5,
-									   m_iDelta < 0 ? -m_iDelta : m_iDelta,
+			DrawUtils::DrawHudNumber2( xDelta + iDollarWidth, y - iDollarHeight * 1.5 , false, iDeltaDigits,
+									   iDeltaAbs,
 									   iDeltaR, iDeltaG, iDeltaB);
-			FillRGBA(x + iDollarWidth / 4, y - iDollarHeight * 1.5 + gHUD.m_iFontHeight / 4, 2, 2, iDeltaR, iDeltaG, iDeltaB, iDeltaAlpha );
+			FillRGBA(xDelta + iDollarWidth / 4, y - iDollarHeight * 1.5 + gHUD.m_iFontHeight / 4, 2, 2, iDeltaR, iDeltaG, iDeltaB, iDeltaAlpha );
 		}
 		else DrawUtils::UnpackRGB( r, g, b, gHUD.m_iDefaultHUDColor );
 	}
@@ -139,10 +147,15 @@ int CHudMoney::Draw(float flTime)
 
 	DrawUtils::ScaleColors( r, g, b, alphaBalance );
 
+	int iDigits = 5;
+	for( int n = m_iMoneyCount / 100000; n > 0; n /= 10 )
+		iDigits++;
+	x -= ( iDigits - 5 ) * gHUD.m_iFontWidth;
+
 	SPR_Set(m_hDollar.spr, r, g, b);
 	SPR_DrawAdditive(0, x, y, &m_hDollar.rect);
 
-	DrawUtils::DrawHudNumber2( x + iDollarWidth, y, false, 5, m_iMoneyCount, r, g, b );
+	DrawUtils::DrawHudNumber2( x + iDollarWidth, y, false, iDigits, m_iMoneyCount, r, g, b );
 	FillRGBA(x + iDollarWidth / 4, y + gHUD.m_iFontHeight / 4, 2, 2, r, g, b, alphaBalance );
 	return 1;
 }
