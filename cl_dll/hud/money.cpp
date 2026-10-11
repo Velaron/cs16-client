@@ -40,6 +40,9 @@ version.
 #include "draw_util.h"
 #include "pm_shared.h"
 
+// Taken from MAX_MONEY_THRESHOLD in ReGameDLL's regamedll/dlls/gamerules.h
+constexpr int MAX_HUD_MONEY = 999999;
+
 int CHudMoney::Init( )
 {
 	HOOK_MESSAGE( gHUD.m_Money, Money );
@@ -164,7 +167,12 @@ int CHudMoney::MsgFunc_Money(const char *pszName, int iSize, void *pbuf)
 {
 	BufferReader buf( pszName, pbuf, iSize );
 	int iOldCount = m_iMoneyCount;
-	m_iMoneyCount = buf.ReadLong();
+	int iNewCount = buf.ReadLong();
+	if( iNewCount < 0 )
+		iNewCount = 0;
+	else if( iNewCount > MAX_HUD_MONEY )
+		iNewCount = MAX_HUD_MONEY;
+	m_iMoneyCount = iNewCount;
 	gEngfuncs.Cvar_SetValue( gHUD.cscl_currentmoney->name, m_iMoneyCount );
 	m_iDelta = m_iMoneyCount - iOldCount;
 	m_fFade = 5.0f; //fade for 5 seconds
