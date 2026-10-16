@@ -26,7 +26,7 @@ GNU General Public License for more details.
 #endif
 
 #ifndef _WIN32
-	#if XASH_LINUX == 1
+	#if XASH_LINUX == 1 || XASH_FREEBSD == 1 || XASH_NETBSD == 1 || XASH_OPENBSD == 1
 	#include <limits.h>
 	#include <dlfcn.h>
 	#endif
