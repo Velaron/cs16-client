@@ -23,7 +23,7 @@
 
 #include "build.h"
 
-#if XASH_LINUX == 1
+#if XASH_LINUX == 1 || XASH_FREEBSD == 1 || XASH_NETBSD == 1 || XASH_OPENBSD == 1
 #include <dlfcn.h> // dlopen,dlclose, et al
 #include <unistd.h>
 #endif
