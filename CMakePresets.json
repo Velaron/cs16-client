@@ -125,6 +125,20 @@
       "toolchainFile": "${sourceDir}/toolchains/i386-linux-gnu.cmake"
     },
     {
+      "name": "freebsd-release-amd64",
+      "inherits": "linux-release-amd64",
+      "displayName": "FreeBSD Release - amd64"
+    },
+    {
+      "name": "freebsd-release-arm64",
+      "inherits": "freebsd-release-amd64",
+      "displayName": "FreeBSD Release - arm64",
+      "architecture": {
+        "value": "arm64",
+        "strategy": "external"
+      }
+    },
+    {
       "name": "win32-ci-amd64",
       "inherits": "win32-debug-amd64",
       "displayName": "Windows CI - amd64",
