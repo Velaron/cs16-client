@@ -810,7 +810,7 @@ void CHudScoreboard	:: UserCmd_ShowScoreboard2()
 	m_flForceRect[2] = atof(gEngfuncs.Cmd_Argv(3));
 	m_flForceRect[3] = atof(gEngfuncs.Cmd_Argv(4));
 	m_colors.r = atoi(gEngfuncs.Cmd_Argv(5));
-	m_colors.b = atoi(gEngfuncs.Cmd_Argv(6));
+	m_colors.g = atoi(gEngfuncs.Cmd_Argv(6));
 	m_colors.b = atoi(gEngfuncs.Cmd_Argv(7));
 	m_colors.a = atoi(gEngfuncs.Cmd_Argv(8));
 	m_bDrawStroke = false;
