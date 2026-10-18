@@ -398,6 +398,7 @@ private:
 	int m_fLastKillTime;
 	RGBA m_colors;
 	bool m_bDrawStroke;
+	float m_flForceRect[4]; // showscoreboard2 rectangle
 	cvar_t *cl_showpacketloss;
 	cvar_t *cl_showplayerversion;
 	cvar_t *cl_show_scoreboard_on_death;
