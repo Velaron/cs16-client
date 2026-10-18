@@ -45,6 +45,46 @@ int g_iTeamNumber;
 int xstart, xend;
 int ystart, yend;
 
+static void GetSafeAreaInsets( float insets[4] )
+{
+	insets[0] = insets[1] = insets[2] = insets[3] = 0.0f;
+
+	if( !g_iMobileAPIVersion || !gMobileAPI.pfnGetNativeObject )
+		return;
+
+	cvar_t *touch_safearea = gEngfuncs.pfnGetCvarPointer( "touch_safearea" );
+	if( touch_safearea && !touch_safearea->value )
+		return;
+
+	// older engines don't know this object and return NULL
+	const float *native = (const float *)gMobileAPI.pfnGetNativeObject( "WindowInsets" );
+	if( !native )
+		return;
+
+	for( int i = 0; i < 4; i++ )
+	{
+		// sanity check, a safe area can't take more than half of the screen
+		if( native[i] > 0.0f )
+			insets[i] = native[i] < 0.5f ? native[i] : 0.5f;
+	}
+
+	if( insets[0] + insets[2] >= 1.0f || insets[1] + insets[3] >= 1.0f )
+		insets[0] = insets[1] = insets[2] = insets[3] = 0.0f;
+}
+
+// Safe area in pixels: x, y, width, height
+static void GetSafeAreaRect( float rect[4] )
+{
+	float insets[4];
+
+	GetSafeAreaInsets( insets );
+
+	rect[0] = ScreenWidth * insets[0];
+	rect[1] = ScreenHeight * insets[1];
+	rect[2] = ScreenWidth * ( 1.0f - insets[0] - insets[2] );
+	rect[3] = ScreenHeight * ( 1.0f - insets[1] - insets[3] );
+}
+
 enum
 {
 	COL_NAME = 0,
@@ -119,6 +159,7 @@ int CHudScoreboard :: VidInit( void )
 	ystart = 100;
 	yend = ScreenHeight - ystart;
 	m_bForceDraw = false;
+	memset( m_flForceRect, 0, sizeof( m_flForceRect ));
 
 	// Load sprites here
 	return 1;
@@ -171,7 +212,17 @@ int CHudScoreboard :: Draw( float flTime )
 	if( !ShouldDrawScoreboard( ))
 		return 1;
 
-	if( !m_bForceDraw )
+	float safe[4];
+	GetSafeAreaRect( safe );
+
+	if( m_bForceDraw )
+	{
+		xstart = safe[0] + safe[2] * m_flForceRect[0] + 0.5f;
+		xend   = safe[0] + safe[2] * m_flForceRect[1] + 0.5f;
+		ystart = safe[1] + safe[3] * m_flForceRect[2] + 0.5f;
+		yend   = safe[1] + safe[3] * m_flForceRect[3] + 0.5f;
+	}
+	else
 	{
 		xstart     = 0.125f * ScreenWidth;
 		xend       = ScreenWidth - xstart;
@@ -182,6 +233,12 @@ int CHudScoreboard :: Draw( float flTime )
 		m_colors.b = 0;
 		m_colors.a = 153;
 		m_bDrawStroke = true;
+
+		// don't let the default layout go under a display cutout
+		if( xstart < safe[0] ) xstart = safe[0];
+		if( xend > safe[0] + safe[2] ) xend = safe[0] + safe[2];
+		if( ystart < safe[1] ) ystart = safe[1];
+		if( yend > safe[1] + safe[3] ) yend = safe[1] + safe[3];
 	}
 
 	return DrawScoreboard(flTime);
@@ -747,10 +804,11 @@ void CHudScoreboard	:: UserCmd_ShowScoreboard2()
 		ConsolePrint("showscoreboard2 <xstart> <xend> <ystart> <yend> <r> <g> <b> <a>");
 	}
 
-	xstart     = atof(gEngfuncs.Cmd_Argv(1)) * ScreenWidth;
-	xend       = atof(gEngfuncs.Cmd_Argv(2)) * ScreenWidth;
-	ystart     = atof(gEngfuncs.Cmd_Argv(3)) * ScreenHeight;
-	yend       = atof(gEngfuncs.Cmd_Argv(4)) * ScreenHeight;
+	// only remember fractions here, pixels are calculated in Draw()
+	m_flForceRect[0] = atof(gEngfuncs.Cmd_Argv(1));
+	m_flForceRect[1] = atof(gEngfuncs.Cmd_Argv(2));
+	m_flForceRect[2] = atof(gEngfuncs.Cmd_Argv(3));
+	m_flForceRect[3] = atof(gEngfuncs.Cmd_Argv(4));
 	m_colors.r = atoi(gEngfuncs.Cmd_Argv(5));
 	m_colors.b = atoi(gEngfuncs.Cmd_Argv(6));
 	m_colors.b = atoi(gEngfuncs.Cmd_Argv(7));
