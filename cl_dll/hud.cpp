@@ -23,6 +23,9 @@
 #include "hud.h"
 #include "aimbot.h"
 #include "sakura_features.h"
+#include "sakura_extra.h"
+#include "sound_esp.h"
+#include "ui/hub_menu.h"
 #include "server_dump.h"
 #include "cl_util.h"
 #include <string.h>
@@ -350,6 +353,9 @@ cl_aim_fov         = gEngfuncs.pfnRegisterVariable( "cl_aim_fov",         "120",
 cl_aim_head_offset = gEngfuncs.pfnRegisterVariable( "cl_aim_head_offset", "72.0", FCVAR_ARCHIVE );
 	Aimbot_Init();
 	Sakura_Init();
+	SakuraExtra_Init();
+	SoundEsp_Init();
+	Hub_Init();
 	ServerDump_Init();
 
 // Clean visibility improvements ...

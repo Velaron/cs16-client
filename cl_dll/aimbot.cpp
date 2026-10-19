@@ -33,6 +33,7 @@
 #include "imgui.h"
 #include "imgui_host.h"
 #include "imgui_menu.h"
+#include "ui/hub_menu.h"
 
 #define AIM_PI       3.14159265358979323846f
 #define AIM_DEG2RAD  ( AIM_PI / 180.0f )
@@ -67,10 +68,6 @@ void VectorAngles( const float *forward, float *angles );
 static aim_box_t g_boxes[AIM_BOX_MAX];
 static int       g_boxCount;
 static double    g_boxTime;
-
-static int   g_menu;
-static int   g_panel;
-static int   g_tab;
 
 static float g_mouse_pitch;
 static float g_mouse_yaw;
@@ -270,22 +267,6 @@ static int ToScreen( const float *world, float *x, float *y )
 
 /* ------------------------------------------------------------------ */
 /* init                                                               */
-/* ------------------------------------------------------------------ */
-
-static void DrawAimbotMenu( void *user );
-static void Cmd_AimbotMenu( void );
-
-static void SetAimMenu( int open )
-{
-	g_menu = open ? 1 : 0;
-	ImGui_SetMenuOpen( ( g_menu || ImGuiMenu_IsOpen() ) ? 1 : 0 );
-}
-
-static void Cmd_AimbotMenu( void )
-{
-	SetAimMenu( !g_menu );
-}
-
 void Aimbot_Init( void )
 {
 	int i;
@@ -369,9 +350,6 @@ void Aimbot_Init( void )
 	cv_old_legs    = gEngfuncs.pfnRegisterVariable( "cl_aim_legs", "0", FCVAR_ARCHIVE );
 	cv_old_body    = gEngfuncs.pfnRegisterVariable( "cl_aim_body", "0", FCVAR_ARCHIVE );
 
-	gEngfuncs.pfnAddCommand( "aimbot_menu", Cmd_AimbotMenu );
-	if( !g_panel )
-		g_panel = ImGui_RegisterPanel( "aimbot", DrawAimbotMenu, NULL );
 
 	/* migracao do smooth antigo: valores <= 1 eram "ganho direto" */
 	if( cl_aim_smooth && cl_aim_smooth->value > 0.f && cl_aim_smooth->value < 1.f )
@@ -1291,7 +1269,7 @@ void Aimbot_Draw( void )
 	DrawFovCircle();
 	DrawTargetOverlay();
 
-	if( On( cl_aim_assist, 0 ) && !g_menu )
+	if( On( cl_aim_assist, 0 ) && !Hub_IsOpen() )
 	{
 		char buf[96];
 		const char *mode = On( cv_silent, 0 ) ? ( On( cv_psilent, 0 ) ? "PSILENT" : "SILENT" ) : "AIM";
@@ -1299,221 +1277,8 @@ void Aimbot_Draw( void )
 		snprintf( buf, sizeof( buf ), "%s", mode );
 		DrawUtils::DrawHudString( XRES( 8 ), YRES( 8 ), ScreenWidth - 8, buf, 255, 220, 80 );
 	}
-	if( On( cv_trig_enable, 0 ) && !g_menu )
+	if( On( cv_trig_enable, 0 ) && !Hub_IsOpen() )
 		DrawUtils::DrawHudString( XRES( 8 ), YRES( 20 ), ScreenWidth - 8, "TRIG", 80, 200, 255 );
-}
-
-/* ------------------------------------------------------------------ */
-/* menu                                                               */
-/* ------------------------------------------------------------------ */
-
-static void CheckCVar( const char *label, cvar_t *cv )
-{
-	bool on = On( cv, 0 ) != 0;
-
-	if( ImGui::Checkbox( label, &on ) && cv && cv->name )
-		SetCvar( cv->name, on ? 1.f : 0.f );
-}
-
-static void SliderCVar( const char *label, cvar_t *cv, float lo, float hi, const char *fmt )
-{
-	float v = CV( cv, lo );
-
-	if( ImGui::SliderFloat( label, &v, lo, hi, fmt ) && cv && cv->name )
-		SetCvar( cv->name, v );
-}
-
-static int ComboCVar( const char *label, cvar_t *cv, const char *items )
-{
-	int v = (int)CV( cv, 0.f );
-
-	if( ImGui::Combo( label, &v, items ) && cv && cv->name )
-		SetCvar( cv->name, (float)v );
-	return v;
-}
-
-static void TabAim( void )
-{
-	float autoSpeed;
-
-	ImGui::TextColored( ImVec4( 1.f, 0.69f, 0.12f, 1.f ), "Aimbot legit" );
-	CheckCVar( "Ligado", cl_aim_assist );
-	CheckCVar( "Mirar no time", cv_team );
-	CheckCVar( "Atravessar parede", cv_walls );
-	CheckCVar( "Desenhar alvo", cv_draw );
-	CheckCVar( "Circulo de FOV", cv_drawfov );
-
-	ImGui::Separator();
-	ComboCVar( "Ativacao", cv_mode, "Sempre\0So ao atirar\0Tecla\0" );
-	if( (int)CV( cv_mode, 1.f ) == 2 )
-	{
-		char buf[64];
-
-		snprintf( buf, sizeof( buf ), "Tecla: %d%s", (int)CV( cv_key, 0.f ),
-			g_captureKey ? " (aperte...)" : "" );
-		if( ImGui::Button( buf ) )
-			g_captureKey = 1;
-		ImGui::SameLine();
-		if( ImGui::Button( "Limpar" ) )
-			SetCvar( "cl_aim_key", 0.f );
-	}
-
-	ImGui::Separator();
-	SliderCVar( "FOV", cl_aim_fov, 0.5f, 45.f, "%.1f graus" );
-	SliderCVar( "Smooth", cl_aim_smooth, 1.f, 250.f, "%.0f" );
-	ComboCVar( "Modo do smooth", cv_smooth_mode, "Linear (Sakura)\0Tempo (FPS independente)\0Instantaneo\0" );
-	ImGui::TextUnformatted( "Smooth 1 = instantaneo, 250 = bem lento." );
-
-	autoSpeed = CV( cv_auto_speed, 0.f );
-	if( ImGui::SliderFloat( "Auto aim speed", &autoSpeed, 0.f, 100.f, "%.0f" ) )
-		SetCvar( "cl_aim_auto_speed", autoSpeed );
-	ImGui::TextUnformatted( "0 = desligado. 100 = instantaneo sem atirar." );
-
-	ImGui::Separator();
-	SliderCVar( "Reaction time", cv_reaction, 0.f, 1000.f, "%.0f ms" );
-	SliderCVar( "Speed scale FOV", cv_speed_fov, 0.f, 100.f, "%.0f %%" );
-	SliderCVar( "Block attack after kill", cv_blockkill, 0.f, 1000.f, "%.0f ms" );
-
-	ImGui::Separator();
-	CheckCVar( "Humanize (spiral)", cv_humanize );
-	SliderCVar( "Spiral X", cv_spiral_x, 0.1f, 10.f, "%.1f" );
-	SliderCVar( "Spiral Y", cv_spiral_y, 0.1f, 10.f, "%.1f" );
-
-	ImGui::Separator();
-	CheckCVar( "Flash check", cv_flashcheck );
-	SliderCVar( "Flash limite", cv_flash_pct, 0.f, 100.f, "%.0f %%" );
-	CheckCVar( "Fast zoom", cv_fastzoom );
-	CheckCVar( "Debug no console", cv_debug );
-
-	ImGui::Separator();
-	ComboCVar( "Escolha do hitbox", cv_hit_mode, "Prioridade\0Mais perto da mira\0" );
-}
-
-static void TabSilent( void )
-{
-	CheckCVar( "Silent aim", cv_silent );
-	ImGui::TextUnformatted( "O comando vai para o alvo e a camera nao se move." );
-
-	ImGui::Separator();
-	CheckCVar( "Perfect silent", cv_psilent );
-	SliderCVar( "Perfect silent FOV", cv_psilent_fov, 0.1f, 15.f, "%.1f" );
-	CheckCVar( "Compensar spread", cv_psilent_spread );
-	ImGui::TextUnformatted( "Perfect silent so age quando o gatilho esta apertado." );
-}
-
-static void TabTrigger( void )
-{
-	int mode;
-
-	CheckCVar( "Ligado", cv_trig_enable );
-	CheckCVar( "Mirar no time", cv_trig_team );
-	CheckCVar( "Atirar na parede", cv_trig_wall );
-	CheckCVar( "So com zoom", cv_trig_zoom );
-	CheckCVar( "Desenhar alvo", cv_trig_draw );
-
-	ImGui::Separator();
-	SliderCVar( "FOV do gatilho", cv_trig_fov, 0.05f, 10.f, "%.2f graus" );
-	SliderCVar( "Delay", cv_trig_delay, 0.f, 1000.f, "%.0f ms" );
-	SliderCVar( "Intervalo do tiro", cv_trig_fire, 10.f, 1000.f, "%.0f ms" );
-	mode = ComboCVar( "Tipo", cv_trig_mode, "Rajada fixa\0Rajada aleatoria\0" );
-	if( mode == 0 )
-		SliderCVar( "Tiros", cv_trig_count, 1.f, 5.f, "%.0f" );
-	else
-		SliderCVar( "Maximo aleatorio", cv_trig_randmax, 2.f, 5.f, "%.0f" );
-
-	ImGui::Separator();
-	ComboCVar( "Accuracy boost", cv_trig_accuracy, "Desligado\0So mirando\0Recuo\0Recuo + spread\0" );
-}
-
-static void TabRecoil( void )
-{
-	ImGui::TextColored( ImVec4( 1.f, 0.69f, 0.12f, 1.f ), "Recoil compensation" );
-	SliderCVar( "Pitch", cv_rc_pitch, 0.f, 100.f, "%.0f %%" );
-	SliderCVar( "Yaw", cv_rc_yaw, 0.f, 100.f, "%.0f %%" );
-	SliderCVar( "FOV adicional", cv_rc_fov, 0.f, 150.f, "%.0f %%" );
-	SliderCVar( "Smooth adicional", cv_rc_smooth, 0.f, 150.f, "%.0f %%" );
-	SliderCVar( "Depois de tiros", cv_rc_after, 0.f, 10.f, "%.0f" );
-
-	ImGui::Separator();
-	ComboCVar( "Accuracy boost", cv_accuracy, "Desligado\0Mirando\0Recuo\0Recuo + spread\0" );
-
-	ImGui::Separator();
-	ImGui::Text( "Arma: %d  Clip: %d  Tiros: %d", g_weaponId, g_clip, g_shots );
-	ImGui::Text( "Punch: %.2f / %.2f", g_punch[0], g_punch[1] );
-	ImGui::Text( "Spread: %.2f graus", SpreadDegrees() );
-	ImGui::Text( "Alvo: %d  angulo %.2f  dist %.0f", g_target, g_targetAngle, g_targetDist );
-	ImGui::Text( "Velocidade: %.0f  flags 0x%x", sqrtf( g_velocity[0] * g_velocity[0] + g_velocity[1] * g_velocity[1] ), g_flags );
-}
-
-static void TabHitboxes( void )
-{
-	int i;
-	int perCol = ( AIM_PART_COUNT + 1 ) / 2;
-
-	ImGui::TextColored( ImVec4( 1.f, 0.69f, 0.12f, 1.f ), "Partes usadas como alvo" );
-
-	if( ImGui::BeginChild( "##hit1", ImVec2( 200, -1 ) ) )
-	{
-		for( i = 0; i < perCol; i++ )
-			CheckCVar( kPartLabel[i], cv_part[i] );
-	}
-	ImGui::EndChild();
-	ImGui::SameLine();
-	if( ImGui::BeginChild( "##hit2", ImVec2( 200, -1 ) ) )
-	{
-		for( i = perCol; i < AIM_PART_COUNT; i++ )
-			CheckCVar( kPartLabel[i], cv_part[i] );
-	}
-	ImGui::EndChild();
-
-	ImGui::TextUnformatted( "A ordem do menu segue os 20 hitboxes do Sakura." );
-}
-
-static void DrawAimbotMenu( void * )
-{
-	int i;
-	static int tab = 0;
-
-	(void)i;
-	if( !g_menu )
-		return;
-
-	ImGui::SetNextWindowPos( ImVec2( 20.0f, 48.0f ), ImGuiCond_FirstUseEver );
-	ImGui::SetNextWindowSize( ImVec2( 470.0f, 0.0f ), ImGuiCond_Always );
-	ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
-	ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4( 0.0f, 0.0f, 0.0f, 0.78f ) );
-	ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
-	ImGui::PushStyleColor( ImGuiCol_FrameBg, ImVec4( 0.15f, 0.15f, 0.15f, 1.0f ) );
-	ImGui::PushStyleColor( ImGuiCol_SliderGrab, ImVec4( 1.0f, 0.69f, 0.12f, 1.0f ) );
-	ImGui::PushStyleColor( ImGuiCol_CheckMark, ImVec4( 1.0f, 0.69f, 0.12f, 1.0f ) );
-
-	if( !ImGui::Begin( "Aimbot", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize ) )
-	{
-		ImGui::End();
-		ImGui::PopStyleColor( 5 );
-		ImGui::PopStyleVar();
-		return;
-	}
-
-	ImGui::TextColored( ImVec4( 1.0f, 0.69f, 0.12f, 1.0f ), "F6 ou aimbot_menu  |  ESC fecha" );
-
-	if( ImGui::BeginTabBar( "##aimtabs" ) )
-	{
-		if( ImGui::BeginTabItem( "Aim" ) ) { TabAim(); ImGui::EndTabItem(); }
-		if( ImGui::BeginTabItem( "Silent" ) ) { TabSilent(); ImGui::EndTabItem(); }
-		if( ImGui::BeginTabItem( "Trigger" ) ) { TabTrigger(); ImGui::EndTabItem(); }
-		if( ImGui::BeginTabItem( "Recoil" ) ) { TabRecoil(); ImGui::EndTabItem(); }
-		if( ImGui::BeginTabItem( "Hitboxes" ) ) { TabHitboxes(); ImGui::EndTabItem(); }
-		ImGui::EndTabBar();
-	}
-	(void)tab;
-
-	if( ImGui::Button( "Fechar" ) )
-		SetAimMenu( 0 );
-
-	ImGui::End();
-	ImGui::PopStyleColor( 5 );
-	ImGui::PopStyleVar();
 }
 
 /* ------------------------------------------------------------------ */
@@ -1522,13 +1287,6 @@ static void DrawAimbotMenu( void * )
 
 int Aimbot_Key( int down, int keynum )
 {
-	if( keynum == K_F6 )
-	{
-		if( down )
-			SetAimMenu( !g_menu );
-		return 0;
-	}
-
 	if( g_captureKey && down )
 	{
 		SetCvar( "cl_aim_key", (float)keynum );
@@ -1542,13 +1300,5 @@ int Aimbot_Key( int down, int keynum )
 		return 1; /* a tecla continua chegando no jogo */
 	}
 
-	if( !g_menu )
-		return 1;
-	if( keynum == K_ESCAPE )
-	{
-		if( down )
-			SetAimMenu( 0 );
-		return 0;
-	}
 	return 1;
 }

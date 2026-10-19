@@ -81,19 +81,27 @@ namespace UI
 
 	void Apply( void )
 	{
+		/* cores vem dos cvars (tab Menu); fallback na paleta do Sakura */
+		const float ar = Get( "cl_hub_accent", kAccent[0] );
+		const float ag = Get( "cl_hub_accent_g", kAccent[1] );
+		const float ab = Get( "cl_hub_accent_b", kAccent[2] );
+		const float br = Get( "cl_hub_bg", kBody[0] );
+		const float bg = Get( "cl_hub_bg_g", kBody[1] );
+		const float bb = Get( "cl_hub_bg_b", kBody[2] );
+
 		ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0, 0 ) );
 		ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
 		ImGui::PushStyleVar( ImGuiStyleVar_FrameRounding, 3.0f );
 		ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 6, 6 ) );
 
 		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.f, 1.f, 1.f, 1.f ) );
-		ImGui::PushStyleColor( ImGuiCol_FrameBg, ImVec4( kBody[0] + 0.06f, kBody[1] + 0.06f, kBody[2] + 0.06f, 1.f ) );
-		ImGui::PushStyleColor( ImGuiCol_SliderGrab, ImVec4( kAccent[0], kAccent[1], kAccent[2], 1.f ) );
-		ImGui::PushStyleColor( ImGuiCol_SliderGrabActive, ImVec4( kAccent[0], kAccent[1], kAccent[2], 1.f ) );
-		ImGui::PushStyleColor( ImGuiCol_CheckMark, ImVec4( kAccent[0], kAccent[1], kAccent[2], 1.f ) );
-		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( kBody[0] + 0.08f, kBody[1] + 0.08f, kBody[2] + 0.08f, 1.f ) );
-		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ImVec4( kAccent[0] * 0.55f, kAccent[1] * 0.55f, kAccent[2] * 0.55f, 1.f ) );
-		ImGui::PushStyleColor( ImGuiCol_ButtonActive, ImVec4( kAccent[0], kAccent[1], kAccent[2], 1.f ) );
+		ImGui::PushStyleColor( ImGuiCol_FrameBg, ImVec4( br + 0.06f, bg + 0.06f, bb + 0.06f, 1.f ) );
+		ImGui::PushStyleColor( ImGuiCol_SliderGrab, ImVec4( ar, ag, ab, 1.f ) );
+		ImGui::PushStyleColor( ImGuiCol_SliderGrabActive, ImVec4( ar, ag, ab, 1.f ) );
+		ImGui::PushStyleColor( ImGuiCol_CheckMark, ImVec4( ar, ag, ab, 1.f ) );
+		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( br + 0.08f, bg + 0.08f, bb + 0.08f, 1.f ) );
+		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ImVec4( ar * 0.55f, ag * 0.55f, ab * 0.55f, 1.f ) );
+		ImGui::PushStyleColor( ImGuiCol_ButtonActive, ImVec4( ar, ag, ab, 1.f ) );
 	}
 
 	void Pop( void )

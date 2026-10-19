@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "hud.h"
 #include "aimbot.h"
+#include "sakura_extra.h"
 #include "cl_util.h"
 #include "const.h"
 #include "com_model.h"
@@ -1062,7 +1063,14 @@ int CGameStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t *pplaye
 		SetupClientAnimation(pplayer);
 	}
 
+	/* chams: troca a cor do modelo antes do draw (End restaura depois) */
+	if( !isLocalPlayer && m_pCurrentEntity && m_pCurrentEntity->player )
+		Chams_Begin( m_pCurrentEntity );
+
 	iret = _StudioDrawPlayer(flags, pplayer);
+
+	/* chams: o modelo ja foi desenhado com a cor trocada, restaura agora */
+	Chams_End( m_pCurrentEntity );
 
 	if (isLocalPlayer)
 		RestorePlayerState(pplayer);

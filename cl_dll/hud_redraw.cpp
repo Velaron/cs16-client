@@ -20,6 +20,8 @@
 #include "spread_predictor.h"
 #include "aimbot.h"
 #include "sakura_features.h"
+#include "sound_esp.h"
+#include "sakura_extra.h"
 #include "server_dump.h"
 #include "cl_util.h"
 #include "triangleapi.h"
@@ -167,6 +169,8 @@ int CHud :: Redraw( float flTime, int intermission )
 	SpreadDot_Draw( flTime );
 	Aimbot_Draw();
 	Sakura_Draw();
+	SoundEsp_Draw();
+	SakuraExtra_Tick();
 	ServerDump_Tick();
 
 	SkinModel_EnforceViewModel();

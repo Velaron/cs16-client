@@ -33,6 +33,7 @@
 #include "imgui.h"
 #include "imgui_host.h"
 #include "imgui_menu.h"
+#include "ui/hub_menu.h"
 
 #define SAK_PI       3.14159265358979323846f
 #define SAK_DEG2RAD  ( SAK_PI / 180.0f )
@@ -121,9 +122,6 @@ static double g_chatNext;
 /* namestealer */
 static int    g_nameStealKey;
 
-/* menu */
-static int g_menu;
-static int g_panel;
 
 /* ------------------------------------------------------------------ */
 /* utilidades                                                         */
@@ -200,20 +198,6 @@ static void Line2D( int x0, int y0, int x1, int y1, int r, int g, int b, int a )
 /* init                                                               */
 /* ------------------------------------------------------------------ */
 
-static void DrawSakuraMenu( void *user );
-static void Cmd_SakuraMenu( void );
-
-static void SetSakuraMenu( int open )
-{
-	g_menu = open ? 1 : 0;
-	ImGui_SetMenuOpen( ( g_menu || ImGuiMenu_IsOpen() ) ? 1 : 0 );
-}
-
-static void Cmd_SakuraMenu( void )
-{
-	SetSakuraMenu( !g_menu );
-}
-
 void Sakura_Init( void )
 {
 	cv_bhop         = gEngfuncs.pfnRegisterVariable( "cl_sak_bhop", "0", FCVAR_ARCHIVE );
@@ -255,7 +239,7 @@ void Sakura_Init( void )
 		cvar_t *open = gEngfuncs.pfnRegisterVariable( "cl_sak_open", "0", FCVAR_ARCHIVE );
 
 		if( open && open->value > 0.5f )
-			SetSakuraMenu( 1 );
+			Hub_Open( 1 );
 	}
 
 	gEngfuncs.Con_Printf( "sakura init: esp_box=%d cross=%d bhop=%d norecoil=%d nospread=%d fov=%.0f menu=%d\n",
@@ -265,12 +249,8 @@ void Sakura_Init( void )
 		cv_norecoil ? (int)cv_norecoil->value : -1,
 		cv_nospread ? (int)cv_nospread->value : -1,
 		cv_fov ? cv_fov->value : -1.f,
-		g_menu ? 1 : 0 );
+		Hub_IsOpen() );
 
-	gEngfuncs.pfnAddCommand( "sakura_menu", Cmd_SakuraMenu );
-	gEngfuncs.pfnAddCommand( "menu_sakura", Cmd_SakuraMenu );
-	if( !g_panel )
-		g_panel = ImGui_RegisterPanel( "sakura", DrawSakuraMenu, NULL );
 }
 
 /* ------------------------------------------------------------------ */
@@ -747,7 +727,7 @@ void Sakura_Draw( void )
 		{
 			openChecked = 1;
 			if( o->value > 0.5f )
-				SetSakuraMenu( 1 );
+				Hub_Open( 1 );
 		}
 	}
 
@@ -808,155 +788,3 @@ int Sakura_DrawViewModel( void )
 	return On( cv_remove_hands, 0 ) ? 0 : 1;
 }
 
-/* ------------------------------------------------------------------ */
-/* menu                                                               */
-/* ------------------------------------------------------------------ */
-
-static void CheckCVar( const char *label, cvar_t *cv )
-{
-	bool on = On( cv, 0 ) != 0;
-
-	if( ImGui::Checkbox( label, &on ) && cv && cv->name )
-		SetCvar( cv->name, on ? 1.f : 0.f );
-}
-
-static void SliderCVar( const char *label, cvar_t *cv, float lo, float hi, const char *fmt )
-{
-	float v = CV( cv, lo );
-
-	if( ImGui::SliderFloat( label, &v, lo, hi, fmt ) && cv && cv->name )
-		SetCvar( cv->name, v );
-}
-
-static void ComboCVar( const char *label, cvar_t *cv, const char *items )
-{
-	int v = (int)CV( cv, 0.f );
-
-	if( ImGui::Combo( label, &v, items ) && cv && cv->name )
-		SetCvar( cv->name, (float)v );
-}
-
-static void TabMovement( void )
-{
-	ImGui::TextColored( ImVec4( 1.f, 0.45f, 0.75f, 1.f ), "HNS / movimento" );
-	CheckCVar( "Bunnyhop", cv_bhop );
-	CheckCVar( "Fastrun", cv_fastrun );
-	CheckCVar( "Groundstrafe", cv_groundstrafe );
-	CheckCVar( "Jumpbug", cv_jumpbug );
-	ImGui::Separator();
-	ImGui::TextUnformatted( "Bunnyhop reaperta o pulo enquanto SPACE estiver segurado." );
-	ImGui::TextUnformatted( "Jumpbug usa trace no chao e duck+jump no ultimo instante." );
-}
-
-static void TabRage( void )
-{
-	ImGui::TextColored( ImVec4( 1.f, 0.45f, 0.75f, 1.f ), "Rage" );
-	CheckCVar( "No recoil", cv_norecoil );
-	CheckCVar( "No spread", cv_nospread );
-	ImGui::Separator();
-	CheckCVar( "Anti-aim", cv_antiaim );
-	ComboCVar( "Pitch", cv_aa_pitch, "Off\0Up\0Down\0Fake down\0Fake up\0Jitter\0Random\0" );
-	ComboCVar( "Yaw", cv_aa_yaw, "Off\0180\0180 jitter\0Slow spin\0Fast spin\0Jitter\0Sideways\0Random\0Static\0" );
-	SliderCVar( "Velocidade do spin", cv_aa_speed, 0.5f, 30.f, "%.1f" );
-	ImGui::Separator();
-	ImGui::TextUnformatted( "Anti-aim so atua quando o aimbot nao escreve no comando." );
-}
-
-static void TabMisc( void )
-{
-	char buf[128];
-
-	ImGui::TextColored( ImVec4( 1.f, 0.45f, 0.75f, 1.f ), "Misc" );
-	CheckCVar( "Anti-AFK", cv_antiafk );
-	CheckCVar( "Chat spammer", cv_chatspam );
-	SliderCVar( "Intervalo do chat", cv_chatspam_delay, 0.5f, 30.f, "%.1f s" );
-
-	snprintf( buf, sizeof( buf ), "%s", cv_chatspam_text && cv_chatspam_text->string
-		? cv_chatspam_text->string : "" );
-	if( ImGui::InputText( "Mensagem", buf, sizeof( buf ) ) )
-		gEngfuncs.Cvar_Set( "cl_sak_chatspam_text", buf );
-
-	ImGui::Separator();
-	CheckCVar( "Name stealer (F7 copia o mais perto)", cv_namestealer );
-	if( ImGui::Button( "Copiar nome do mais proximo" ) )
-		g_nameStealKey = 1;
-	ImGui::Separator();
-	CheckCVar( "Debug no console", cv_debug );
-}
-
-static void TabVisuals( void )
-{
-	ImGui::TextColored( ImVec4( 1.f, 0.45f, 0.75f, 1.f ), "Visuals" );
-	CheckCVar( "Crosshair custom", cv_crosshair );
-	SliderCVar( "Tamanho", cv_crosshair_size, 1.f, 20.f, "%.0f" );
-	SliderCVar( "Espaco", cv_crosshair_gap, 0.f, 20.f, "%.0f" );
-	ImGui::Separator();
-	CheckCVar( "Remover maos (viewmodel)", cv_remove_hands );
-	SliderCVar( "FOV (0 = padrao)", cv_fov, 0.f, 140.f, "%.0f" );
-}
-
-static void TabESP( void )
-{
-	ImGui::TextColored( ImVec4( 1.f, 0.45f, 0.75f, 1.f ), "ESP" );
-	CheckCVar( "Caixa", cv_esp_box );
-	CheckCVar( "Nome", cv_esp_name );
-	CheckCVar( "Vida", cv_esp_health );
-	CheckCVar( "Distancia", cv_esp_dist );
-	CheckCVar( "Snapline", cv_esp_snapline );
-	CheckCVar( "Radar", cv_esp_radar );
-	ImGui::Separator();
-	CheckCVar( "Mostrar time", cv_esp_team );
-	SliderCVar( "Distancia maxima", cv_esp_maxdist, 100.f, 8000.f, "%.0f" );
-}
-
-static void DrawSakuraMenu( void * )
-{
-	static int logged;
-
-	if( !g_menu )
-		return;
-	if( !logged )
-	{
-		logged = 1;
-		gEngfuncs.Con_Printf( "sakura menu: painel desenhando\n" );
-	}
-
-	ImGui::SetNextWindowPos( ImVec2( 500.0f, 48.0f ), ImGuiCond_FirstUseEver );
-	ImGui::SetNextWindowSize( ImVec2( 460.0f, 0.0f ), ImGuiCond_Always );
-	ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
-	ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4( 0.02f, 0.0f, 0.05f, 0.86f ) );
-	ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
-	ImGui::PushStyleColor( ImGuiCol_FrameBg, ImVec4( 0.16f, 0.10f, 0.18f, 1.0f ) );
-	ImGui::PushStyleColor( ImGuiCol_SliderGrab, ImVec4( 1.0f, 0.45f, 0.75f, 1.0f ) );
-	ImGui::PushStyleColor( ImGuiCol_CheckMark, ImVec4( 1.0f, 0.45f, 0.75f, 1.0f ) );
-	ImGui::PushStyleColor( ImGuiCol_Tab, ImVec4( 0.20f, 0.08f, 0.24f, 1.0f ) );
-	ImGui::PushStyleColor( ImGuiCol_TabActive, ImVec4( 0.55f, 0.16f, 0.42f, 1.0f ) );
-
-	if( !ImGui::Begin( "Sakura", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize ) )
-	{
-		ImGui::End();
-		ImGui::PopStyleColor( 7 );
-		ImGui::PopStyleVar();
-		return;
-	}
-
-	ImGui::TextColored( ImVec4( 1.0f, 0.45f, 0.75f, 1.0f ),
-		"sakura_menu / menu_sakura  |  ESC fecha" );
-
-	if( ImGui::BeginTabBar( "##saktabs" ) )
-	{
-		if( ImGui::BeginTabItem( "Movemento" ) ) { TabMovement(); ImGui::EndTabItem(); }
-		if( ImGui::BeginTabItem( "Rage" ) ) { TabRage(); ImGui::EndTabItem(); }
-		if( ImGui::BeginTabItem( "Misc" ) ) { TabMisc(); ImGui::EndTabItem(); }
-		if( ImGui::BeginTabItem( "Visuals" ) ) { TabVisuals(); ImGui::EndTabItem(); }
-		if( ImGui::BeginTabItem( "ESP" ) ) { TabESP(); ImGui::EndTabItem(); }
-		ImGui::EndTabBar();
-	}
-
-	if( ImGui::Button( "Fechar" ) )
-		SetSakuraMenu( 0 );
-
-	ImGui::End();
-	ImGui::PopStyleColor( 7 );
-	ImGui::PopStyleVar();
-}

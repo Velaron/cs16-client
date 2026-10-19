@@ -25,6 +25,8 @@
 #include "com_weapons.h"
 #include "aimbot.h"
 #include "sakura_features.h"
+#include "sakura_extra.h"
+#include "ui/hub_menu.h"
 
 extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
@@ -339,6 +341,8 @@ HUD_Key_Event
 int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
 {
 	(void)pszCurrentBinding;
+	if( !Hub_Key( down, keynum ) )
+		return 0;
 	if( !Aimbot_Key( down, keynum ) )
 		return 0;
 	Sakura_Key( down, keynum );
@@ -704,6 +708,8 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 			gEngfuncs.SetViewAngles( (float *)viewangles );
 		if ( active )
 			Sakura_PostMove( cmd, viewangles );
+		if ( active )
+			SakuraExtra_PostMove( cmd, viewangles );
 		VectorCopy( viewangles, oldangles );
 	}
 }
