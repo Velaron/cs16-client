@@ -43,6 +43,7 @@
 
 #include "hud.h"
 #include "ui/hub_menu.h"
+#include "sakura_more.h"
 #include "cl_util.h"
 #include "imgui.h"
 #include "imgui_host.h"
@@ -1429,6 +1430,7 @@ void ServerDump_Tick( void )
 	static double first;
 	static double lastLog;
 	static int openChecked;
+	static std::string lastNotified;
 
 	FlushLog();
 
@@ -1447,10 +1449,20 @@ void ServerDump_Tick( void )
 
 	if( gEngfuncs.GetClientTime() - lastLog > 5.0 )
 	{
+		std::string done;
+
 		lastLog = gEngfuncs.GetClientTime();
-		gEngfuncs.Con_Printf( "dump tick: auto=%.0f running=%d done=%d t=%.1f\n",
-			cv_auto ? cv_auto->value : -1.f, g_running ? 1 : 0, g_autoDone ? 1 : 0,
-			gEngfuncs.GetClientTime() );
+
+		{
+			std::lock_guard<std::mutex> lock( g_mutex );
+			done = g_lastFile;
+		}
+
+		if( !g_running && !done.empty() && done != lastNotified )
+		{
+			lastNotified = done;
+			Notify_Push( "dump salvo: %s", done.c_str() );
+		}
 	}
 
 	if( !cv_auto || cv_auto->value <= 0.f || g_autoDone )

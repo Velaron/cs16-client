@@ -40,7 +40,7 @@ static const char *kCatName[CAT_COUNT] = { "Rage", "Legit", "Visuals", "Misc" };
 static const char *kSubRage[]    = { "Aimbot", "Hitboxes", "Anti Aim", "Fake Lag", "Speedhack", NULL };
 static const char *kSubLegit[]   = { "Aimbot", "Triggerbot", "Perfect Silent", "Recoil", "Knifebot", "Hitboxes", NULL };
 static const char *kSubVisuals[] = { "Player", "Local", "World", "Radar", "Skins", "Removals", "Sound", "Menu", NULL };
-static const char *kSubMisc[]    = { "Movement", "Servers", "Keybindings", "Player List", "Config", "AntiAFK", NULL };
+static const char *kSubMisc[]    = { "Movement", "Servers", "Keybindings", "Player List", "Config", "AntiAFK", "Notify", "Route", "Backtrack", NULL };
 
 static const char **kSubTabs[CAT_COUNT] = { kSubRage, kSubLegit, kSubVisuals, kSubMisc };
 
@@ -126,6 +126,8 @@ static void TabKeybinds( void );
 static void TabPlayerList( void );
 static void TabConfig( void );
 static void TabAntiAfk( void );
+static void TabNotify( void );
+static void TabRoute( void );
 
 /* ------------------------------------------------------------------ */
 /* tabs: legit                                                        */
@@ -430,7 +432,29 @@ static void TabMovement( void )
 	UI::Check( "cl_sak_fastrun", "Fast run" );
 	UI::Check( "cl_sak_groundstrafe", "Ground strafe" );
 	UI::Check( "cl_sak_jumpbug", "Jump bug" );
+
+	UI::Section( "HNS" );
+	UI::Check( "cl_sak_strafe", "Auto strafe (no ar)" );
+	UI::Slider( "cl_sak_strafe_speed", "Forca do strafe", 100.f, 600.f, "%.0f" );
 	Hint( "Bhop segura o pulo enquanto a tecla de pular estiver pressionada." );
+	Hint( "Auto strafe so age no ar e quando voce nao esta usando A/D." );
+}
+
+static void TabNotify( void )
+{
+	UI::Section( "Notify" );
+	UI::Check( "cl_sak_notify", "Mostrar mensagens" );
+	UI::Slider( "cl_sak_notify_time", "Duracao", 1.f, 10.f, "%.0f s" );
+	Hint( "Mensagens no canto superior direito (dump, killsound, rota)." );
+}
+
+static void TabRoute( void )
+{
+	UI::Section( "Route" );
+	UI::Check( "cl_sak_route_record", "Gravar rota" );
+	UI::Check( "cl_sak_route", "Desenhar rota" );
+	Hint( "Grava um ponto a cada 64 unidades e salva em cstrike/routes/." );
+	Hint( "route_clear no console apaga a rota atual." );
 }
 
 static void TabServers( void )
@@ -567,7 +591,13 @@ static void DrawTabBody( void )
 		case 2: TabKeybinds(); break;
 		case 3: TabPlayerList(); break;
 		case 4: TabConfig(); break;
-		default: TabAntiAfk(); break;
+		case 5: TabAntiAfk(); break;
+		case 6: TabNotify(); break;
+		case 7: TabRoute(); break;
+		default:
+			UI::Section( "Backtrack" );
+			Hint( "Precisa do historico de posicoes do servidor." );
+			break;
 		}
 		break;
 	}

@@ -24,6 +24,7 @@
 #include "aimbot.h"
 #include "sakura_features.h"
 #include "sakura_extra.h"
+#include "sakura_more.h"
 #include "sound_esp.h"
 #include "ui/hub_menu.h"
 #include "server_dump.h"
@@ -355,6 +356,7 @@ cl_aim_head_offset = gEngfuncs.pfnRegisterVariable( "cl_aim_head_offset", "72.0"
 	Sakura_Init();
 	SakuraExtra_Init();
 	SoundEsp_Init();
+	SakuraMore_Init();
 	Hub_Init();
 	ServerDump_Init();
 

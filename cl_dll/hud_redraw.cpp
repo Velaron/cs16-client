@@ -22,6 +22,7 @@
 #include "sakura_features.h"
 #include "sound_esp.h"
 #include "sakura_extra.h"
+#include "sakura_more.h"
 #include "server_dump.h"
 #include "cl_util.h"
 #include "triangleapi.h"
@@ -171,6 +172,7 @@ int CHud :: Redraw( float flTime, int intermission )
 	Sakura_Draw();
 	SoundEsp_Draw();
 	SakuraExtra_Tick();
+	SakuraMore_Draw();
 	ServerDump_Tick();
 
 	SkinModel_EnforceViewModel();

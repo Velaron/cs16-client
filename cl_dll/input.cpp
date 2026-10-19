@@ -26,6 +26,7 @@
 #include "aimbot.h"
 #include "sakura_features.h"
 #include "sakura_extra.h"
+#include "sakura_more.h"
 #include "ui/hub_menu.h"
 
 extern int g_weaponselect;
@@ -703,7 +704,10 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 		 */
 		VectorCopy( viewangles, cmd->viewangles );
 		if ( active )
+		{
 			Sakura_PreMove( cmd, frametime );
+			SakuraMore_PreMove( cmd );
+		}
 		if ( active && Aimbot_Apply( viewangles, cmd ))
 			gEngfuncs.SetViewAngles( (float *)viewangles );
 		if ( active )

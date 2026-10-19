@@ -156,6 +156,12 @@ static const char *kHubCvars[] =
 	"cl_fakelag_variance",
 	"cl_fakelag_move",
 	"cl_fakelag_while_shooting",
+	"cl_sak_strafe",
+	"cl_sak_strafe_speed",
+	"cl_sak_notify",
+	"cl_sak_notify_time",
+	"cl_sak_route",
+	"cl_sak_route_record",
 };
 
 static const int kHubCvarCount = (int)( sizeof( kHubCvars ) / sizeof( kHubCvars[0] ));

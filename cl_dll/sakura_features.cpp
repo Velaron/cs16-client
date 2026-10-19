@@ -257,6 +257,24 @@ void Sakura_Init( void )
 /* estado da predicao                                                 */
 /* ------------------------------------------------------------------ */
 
+void Sakura_GetState( float *vel, float *org, int *flags )
+{
+	if( vel )
+	{
+		vel[0] = g_velocity[0];
+		vel[1] = g_velocity[1];
+		vel[2] = g_velocity[2];
+	}
+	if( org )
+	{
+		org[0] = g_origin[0];
+		org[1] = g_origin[1];
+		org[2] = g_origin[2];
+	}
+	if( flags )
+		*flags = g_flags;
+}
+
 void Sakura_PostRunCmd( local_state_s *from, local_state_s *to,
 	usercmd_s *cmd, unsigned int seed )
 {

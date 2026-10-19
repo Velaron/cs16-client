@@ -24,6 +24,9 @@ void Sakura_Init( void );
 void Sakura_PostRunCmd( struct local_state_s *from, struct local_state_s *to,
 	struct usercmd_s *cmd, unsigned int seed );
 
+/* Ultimo estado previsto (velocidade, origem e flags do jogador local). */
+void Sakura_GetState( float *vel, float *org, int *flags );
+
 /* CL_CreateMove, antes do aimbot: movimento e antiafk. */
 void Sakura_PreMove( struct usercmd_s *cmd, float frametime );
 
