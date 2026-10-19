@@ -694,6 +694,12 @@ static void Cmd_HubSelfTest( void )
 		kHubCvarCount, fail, fail ? "FAIL" : "PASS" );
 }
 
+/* hub_panels: quantos paineis ImGui estao registrados (diagnostico). */
+static void Cmd_HubPanels( void )
+{
+	gEngfuncs.Con_Printf( "paineis ImGui registrados: %d (hub, menus, scoreboard)\n", ImGui_PanelCount() );
+}
+
 int Hub_Key( int down, int keynum )
 {
 	if( keynum == K_F6 )
@@ -752,10 +758,11 @@ void Hub_Init( void )
 	ImGui_RegisterPanel( "hub", DrawHub, NULL );
 	gEngfuncs.pfnAddCommand( "hub_menu", Cmd_HubMenu );
 	gEngfuncs.pfnAddCommand( "hub_selftest", Cmd_HubSelfTest );
+	gEngfuncs.pfnAddCommand( "hub_panels", Cmd_HubPanels );
 
 	/* abre o HUB no inicio quando cl_hub_open 1 (util para teste e cfg) */
 	{
-		cvar_t *open = gEngfuncs.pfnRegisterVariable( "cl_hub_open", "0", FCVAR_ARCHIVE );
+		cvar_t *open = gEngfuncs.pfnRegisterVariable( "cl_hub_open", "0", 0 );
 
 		if( open && open->value > 0.5f )
 			Hub_Open( 1 );

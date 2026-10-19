@@ -23,6 +23,10 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <deque>
+#ifndef _WIN32
+#include <unistd.h>
+#endif
 #include <mutex>
 #include <atomic>
 #include <utility>
@@ -117,6 +121,8 @@ struct DumpOptions
 
 static std::mutex g_mutex;
 static std::thread g_thread;
+/* mensagens da thread esperando para irem ao console na thread principal */
+static std::deque<std::string> g_pending;
 static std::atomic<bool> g_shutdown( false );
 static std::atomic<bool> g_running( false );
 static std::atomic<bool> g_cancel( false );
@@ -158,14 +164,38 @@ static void Log( const char *fmt, ... )
 	vsnprintf( buf, sizeof( buf ), fmt, ap );
 	va_end( ap );
 
-	if( !g_shutdown )
-		gEngfuncs.Con_Printf( "[dump] %s\n", buf );
+	/* Con_Printf NAO pode ser chamado da thread do worker: so enfileira. */
+	{
+		std::lock_guard<std::mutex> lock( g_mutex );
 
-	std::lock_guard<std::mutex> lock( g_mutex );
-	g_log += buf;
-	g_log += "\n";
-	if( g_log.size() > 6000 )
-		g_log.erase( 0, g_log.size() - 6000 );
+		g_log += buf;
+		g_log += "\n";
+		if( g_log.size() > 6000 )
+			g_log.erase( 0, g_log.size() - 6000 );
+
+		g_pending.push_back( buf );
+		if( g_pending.size() > 512 )
+			g_pending.pop_front();
+	}
+}
+
+/* Roda na thread principal: descarrega no console o que a thread escreveu. */
+static void FlushLog( void )
+{
+	std::deque<std::string> local;
+
+	if( g_shutdown )
+		return;
+
+	{
+		std::lock_guard<std::mutex> lock( g_mutex );
+		if( g_pending.empty() )
+			return;
+		local.swap( g_pending );
+	}
+
+	for( std::deque<std::string>::iterator it = local.begin(); it != local.end(); ++it )
+		gEngfuncs.Con_Printf( "[dump] %s\n", it->c_str() );
 }
 
 static void SetStatus( const char *s )
@@ -762,14 +792,15 @@ static void CollectHistory( std::vector<Candidate> *out )
 		return;
 	}
 
-	while( fgets( line, sizeof( line ), f ) )
+	while( fgets( line, sizeof( line ), f ) && out->size() < 512 )
 	{
 		char *p = line;
 		char ip[128];
 		int port = 27015;
 		int i = 0;
+		int ok = 1;
 
-		while( *p == ' ' || *p == '\t' )
+		while( *p == ' ' || *p == '	' )
 			p++;
 		if( strncmp( p, "connect", 7 ) != 0 )
 			continue;
@@ -778,9 +809,29 @@ static void CollectHistory( std::vector<Candidate> *out )
 		while( *p == ' ' )
 			p++;
 
+		/* "steam://connect/1.2.3.4:27015" tambem aparece no historico */
+		if( !strncmp( p, "steam://", 8 ) )
+			p += 8;
+		if( !strncmp( p, "connect/", 8 ) )
+			p += 8;
+
 		while( *p && *p != ':' && *p != ' ' && *p != '\r' && *p != '\n' && i < (int)sizeof( ip ) - 1 )
-			ip[i++] = *p++;
+		{
+			char c = *p++;
+
+			/* so hostname e ipv4 chegam ao socket */
+			if( !( ( c >= '0' && c <= '9' ) || ( c >= 'a' && c <= 'z' ) ||
+				( c >= 'A' && c <= 'Z' ) || c == '.' || c == '-' ) )
+			{
+				ok = 0;
+				break;
+			}
+			ip[i++] = c;
+		}
 		ip[i] = 0;
+
+		if( !ok || i == 0 )
+			continue;
 
 		if( *p == ':' )
 			port = atoi( p + 1 );
@@ -1173,6 +1224,16 @@ static void StartDump( void )
 	}
 
 	g_running = true;
+
+	/*
+	 * A thread anterior termina sozinha e continua joinable. Atribuir um
+	 * std::thread novo a um objeto joinable chama std::terminate() e
+	 * aborta o processo sem mensagem. Como g_running acabou de ser
+	 * checado, essa thread (se existir) ja terminou: o join e instantaneo.
+	 */
+	if( g_thread.joinable() )
+		g_thread.join();
+
 	g_thread = std::thread( DumpWorker, opt );
 }
 
@@ -1183,6 +1244,8 @@ void ServerDump_DrawContent( void )
 	int fields = FieldFlags();
 	std::string status, lastFile, log;
 	int done, total, found;
+
+	FlushLog();
 
 	ImGui::TextColored( ImVec4( 0.4f, 0.9f, 1.0f, 1.0f ), "Dump de servidores" );
 	ImGui::Separator();
@@ -1307,6 +1370,42 @@ static void Cmd_DumpRun( void )
 	StartDump();
 }
 
+/*
+ * dump_servidor_selftest - roda o dump duas vezes seguidas.
+ * Serve de regressao: o bug antigo era std::terminate no segundo run,
+ * porque a thread anterior continuava joinable e era reatribuida.
+ */
+static void Cmd_DumpSelfTest( void )
+{
+	int stage;
+	int guard;
+
+	gEngfuncs.Con_Printf( "DUMP SELFTEST: inicio (historico, 2 execucoes)\n" );
+
+	if( cv_source ) cv_source->value = 3.f;   /* Historico */
+	if( cv_max ) cv_max->value = 2.f;
+	if( cv_timeout ) cv_timeout->value = 300.f;
+
+	for( stage = 0; stage < 2; stage++ )
+	{
+		StartDump();
+
+		guard = 0;
+		while( g_running && guard++ < 500 )
+		{
+#ifdef _WIN32
+			Sleep( 10 );
+#else
+			usleep( 10000 );
+#endif
+		}
+
+		gEngfuncs.Con_Printf( "DUMP SELFTEST: rodada %d concluida (guard=%d)\n", stage + 1, guard );
+	}
+
+	gEngfuncs.Con_Printf( "DUMP SELFTEST: PASS\n" );
+}
+
 static void Cmd_DumpCancel( void )
 {
 	g_cancel = true;
@@ -1330,6 +1429,8 @@ void ServerDump_Tick( void )
 	static double first;
 	static double lastLog;
 	static int openChecked;
+
+	FlushLog();
 
 	/* cl_dump_open e aplicado depois do init (exec da linha de comando) */
 	if( !openChecked )
@@ -1391,6 +1492,7 @@ void ServerDump_Init( void )
 
 	gEngfuncs.pfnAddCommand( "dump_servidor", Cmd_DumpServer );
 	gEngfuncs.pfnAddCommand( "dump_servidor_run", Cmd_DumpRun );
+	gEngfuncs.pfnAddCommand( "dump_servidor_selftest", Cmd_DumpSelfTest );
 	gEngfuncs.pfnAddCommand( "dump_servidor_cancel", Cmd_DumpCancel );
 
 	{
