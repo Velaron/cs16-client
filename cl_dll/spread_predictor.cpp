@@ -618,6 +618,42 @@ void SpreadDot_Capture(local_state_t *from, local_state_t *to, struct usercmd_s 
         g_spreadDot.hasCachedDot = false;
 }
 
+/* Inaccuracy atual da arma em graus (usada pelo accuracy boost da mira). */
+float SpreadDot_GetSpreadDegrees(void)
+{
+    if (!g_spreadDot.valid || !SP_IsBulletWeapon(g_spreadDot.weaponId))
+        return 0.0f;
+
+    const int simulatedShots = g_spreadDot.shotsFired + 1;
+    float spread = SP_ComputeWeaponSpread(g_spreadDot, simulatedShots);
+
+    if (spread < 0.0f)
+        spread = 0.0f;
+
+    return atanf(spread) * (float)(180.0 / M_PI);
+}
+
+/* Offset tangente (radianos) que o proximo tiro recebe com esta seed.
+   Retorna 0 quando a arma nao tem spread modelado. */
+int SpreadDot_GetSpreadOffset(unsigned int seed, float *dx, float *dy)
+{
+    if (!dx || !dy)
+        return 0;
+    *dx = 0.0f;
+    *dy = 0.0f;
+
+    if (!g_spreadDot.valid || !SP_IsBulletWeapon(g_spreadDot.weaponId))
+        return 0;
+
+    const int simulatedShots = g_spreadDot.shotsFired + 1;
+    const float spread = SP_ComputeWeaponSpread(g_spreadDot, simulatedShots);
+    const SpreadDotVec2 off = SP_ComputeSharedSpreadOffset(seed, spread);
+
+    *dx = off.x;
+    *dy = off.y;
+    return 1;
+}
+
 void SpreadDot_UpdateClientData(client_data_t *cdata, float time)
 {
     SP_RegisterCVars();

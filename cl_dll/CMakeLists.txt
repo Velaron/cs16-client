@@ -72,7 +72,8 @@ endif()
 add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
 
 find_package(OpenGL REQUIRED)
-target_link_libraries(${CLIENT_LIB} PRIVATE OpenGL::GL)
+find_package(Threads REQUIRED)
+target_link_libraries(${CLIENT_LIB} PRIVATE OpenGL::GL Threads::Threads)
 
 set_target_postfix(${CLIENT_LIB})
 

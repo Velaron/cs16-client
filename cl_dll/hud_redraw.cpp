@@ -19,6 +19,8 @@
 #include "hud.h"
 #include "spread_predictor.h"
 #include "aimbot.h"
+#include "sakura_features.h"
+#include "server_dump.h"
 #include "cl_util.h"
 #include "triangleapi.h"
 
@@ -164,6 +166,8 @@ int CHud :: Redraw( float flTime, int intermission )
 
 	SpreadDot_Draw( flTime );
 	Aimbot_Draw();
+	Sakura_Draw();
+	ServerDump_Tick();
 
 	SkinModel_EnforceViewModel();
 	return 1;

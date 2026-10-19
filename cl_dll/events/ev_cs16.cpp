@@ -562,6 +562,41 @@ void EV_DescribeBulletTypeParameters(int iBulletType, int &iPenetrationPower, fl
 
 
 
+static void EV_BulletTracer( int idx, const Vector &src, const Vector &end, const Vector &dir )
+{
+	static cvar_t *bullet_tracer;
+	static int sprite;
+
+	if( !bullet_tracer )
+		bullet_tracer = gEngfuncs.pfnGetCvarPointer( "bullet_tracer" );
+	if( !bullet_tracer || bullet_tracer->value <= 0.0f )
+		return;
+
+	if( !sprite )
+		sprite = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/laserbeam.spr" );
+	if( !sprite )
+		return;
+
+	Vector start = src;
+	if( EV_IsLocal( idx ) )
+		VectorMA( src, 28.0f, dir, start );
+
+	gEngfuncs.pEfxAPI->R_BeamPoints(
+		start,
+		(float *)&end.x,
+		sprite,
+		0.05f,
+		0.45f,
+		0.0f,
+		200.0f,
+		0.0f,
+		0,
+		0.0f,
+		255.0f,
+		214.0f,
+		120.0f );
+}
+
 /*
 ================
 EV_HLDM_FireBullets
@@ -589,6 +624,8 @@ void EV_HLDM_FireBullets(int idx,
 		Vector vecShotSrc = vecSrc;
 		int iShotPenetration = iPenetration;
 		Vector vecDir, vecEnd;
+		Vector tracerEnd;
+		bool tracerHit = false;
 
 		if ( iBulletType == BULLET_PLAYER_BUCKSHOT )
 		{
@@ -638,6 +675,9 @@ void EV_HLDM_FireBullets(int idx,
 			{
 				break;
 			}
+
+			tracerEnd = tr.endpos;
+			tracerHit = true;
 
 			if ( flCurrentDistance > flPenetrationDistance )
 				iShotPenetration = 0;
@@ -698,6 +738,9 @@ void EV_HLDM_FireBullets(int idx,
 					EV_HLDM_DecalGunshot( &trOriginal, iBulletType, 0, r_smoke, g_smoke, b_smoke, true, bSparks, cTextureType, isSky );
 			}
 		}
+		if( tracerHit )
+			EV_BulletTracer( idx, vecSrc, tracerEnd, vecDir );
+
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
 

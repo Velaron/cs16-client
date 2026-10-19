@@ -31,6 +31,7 @@
 #include "mobility_int.h"
 #include "vgui_parser.h"
 #include "imgui_host.h"
+#include "server_dump.h"
 
 cl_enginefunc_t		gEngfuncs  = { };
 extern void EspHitbox_BeginFrame(void);
@@ -76,6 +77,7 @@ HUD_Shutdown
 */
 void DLLEXPORT HUD_Shutdown( void )
 {
+	ServerDump_Shutdown();
 	ImGui_Shutdown();
 	gHUD.Shutdown();
 	Input_Shutdown();

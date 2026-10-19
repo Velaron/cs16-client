@@ -107,6 +107,99 @@ static int g_espHbFd = -1;
 static uint32_t g_espSeen;
 static int g_espCount;
 static esp_hb_t g_espBoxes[ESP_HB_MAX];
+static int g_espBoxPart[ESP_HB_MAX];
+
+/* ------------------------------------------------------------------
+ * Classificacao do hitbox em uma das 20 partes do menu (padrao Sakura).
+ * Usa o nome do bone porque o grupo do studio junta varios boxes.
+ * ------------------------------------------------------------------ */
+static void PartLowerCopy( char *dst, const char *src, int max )
+{
+	int i = 0;
+
+	if( !dst || max <= 0 )
+		return;
+	if( src )
+	{
+		for( ; src[i] && i < max - 1; i++ )
+		{
+			char c = src[i];
+
+			if( c >= 'A' && c <= 'Z' )
+				c = (char)( c - 'A' + 'a' );
+			dst[i] = c;
+		}
+	}
+	dst[i] = 0;
+}
+
+static int PartSide( const char *n )
+{
+	if( strstr( n, " l " ) || strstr( n, "left" ) || strncmp( n, "l ", 2 ) == 0 )
+		return 1;
+	if( strstr( n, " r " ) || strstr( n, "right" ) || strncmp( n, "r ", 2 ) == 0 )
+		return 2;
+	return 0;
+}
+
+static int PartFromBone( studiohdr_t *hdr, int bone, int group )
+{
+	char name[48];
+	int side;
+
+	name[0] = 0;
+	if( hdr && bone >= 0 && bone < hdr->numbones )
+	{
+		mstudiobone_t *bones = (mstudiobone_t *)( (byte *)hdr + hdr->boneindex );
+
+		PartLowerCopy( name, bones[bone].name, sizeof( name ) );
+	}
+
+	side = PartSide( name );
+
+	if( strstr( name, "head" ) )
+		return AIM_PART_HEAD;
+	if( strstr( name, "neck" ) )
+		return AIM_PART_NECK;
+	if( strstr( name, "spine4" ) || strstr( name, "spine3" ) || strstr( name, "thorax" ) )
+		return AIM_PART_UPPER_CHEST;
+	if( strstr( name, "spine2" ) )
+		return AIM_PART_LOWER_CHEST;
+	if( strstr( name, "spine1" ) )
+		return AIM_PART_STOMACH;
+	if( strstr( name, "spine" ) || strstr( name, "pelvis" ) || strstr( name, "hip" ) )
+		return AIM_PART_BELT;
+
+	if( strstr( name, "thigh" ) )
+		return side == 2 ? AIM_PART_R_THIGH : AIM_PART_L_THIGH;
+	if( strstr( name, "calf" ) || strstr( name, "tibia" ) || strstr( name, "shin" ) )
+		return side == 2 ? AIM_PART_R_TIBIA : AIM_PART_L_TIBIA;
+	if( strstr( name, "foot" ) || strstr( name, "ankle" ) || strstr( name, "toe" ) )
+		return side == 2 ? AIM_PART_R_FOOT : AIM_PART_L_FOOT;
+
+	if( strstr( name, "clavicle" ) || strstr( name, "shoulder" ) )
+		return side == 2 ? AIM_PART_R_SHOULDER : AIM_PART_L_SHOULDER;
+	if( strstr( name, "upperarm" ) )
+		return side == 2 ? AIM_PART_R_SHOULDER : AIM_PART_L_SHOULDER;
+	if( strstr( name, "forearm" ) || strstr( name, "elbow" ) )
+		return side == 2 ? AIM_PART_R_ELBOW : AIM_PART_L_ELBOW;
+	if( strstr( name, "hand" ) )
+		return side == 2 ? AIM_PART_R_HAND : AIM_PART_L_HAND;
+
+	/* fallback pelo grupo do studio */
+	switch( group )
+	{
+	case 1: return AIM_PART_HEAD;
+	case 2: return AIM_PART_UPPER_CHEST;
+	case 3: return AIM_PART_STOMACH;
+	case 4: return AIM_PART_L_SHOULDER;
+	case 5: return AIM_PART_R_SHOULDER;
+	case 6: return AIM_PART_L_THIGH;
+	case 7: return AIM_PART_R_THIGH;
+	}
+
+	return AIM_PART_GENERIC;
+}
 
 static void EspHitbox_Open(void)
 {
@@ -188,9 +281,16 @@ void EspHitbox_Flush(void)
 			}
 			snap[n].player = g_espBoxes[b].player;
 			snap[n].group = g_espBoxes[b].group;
+			snap[n].part = g_espBoxPart[b];
 			snap[n].origin[0] = o[0] * 0.125f;
 			snap[n].origin[1] = o[1] * 0.125f;
 			snap[n].origin[2] = o[2] * 0.125f;
+			for (k = 0; k < 8; k++)
+			{
+				snap[n].c[k][0] = g_espBoxes[b].c[k][0];
+				snap[n].c[k][1] = g_espBoxes[b].c[k][1];
+				snap[n].c[k][2] = g_espBoxes[b].c[k][2];
+			}
 			n++;
 		}
 		Aimbot_SetBoxes(snap, n);
@@ -1065,6 +1165,7 @@ void CGameStudioModelRenderer::WriteCurrentHitboxes(void)
 		}
 		out->group = hit[i].group;
 		out->player = index;
+		g_espBoxPart[g_espCount] = PartFromBone( hdr, bone, hit[i].group );
 		g_espCount++;
 	}
 

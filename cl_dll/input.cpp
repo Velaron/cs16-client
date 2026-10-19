@@ -24,6 +24,7 @@
 #include "vgui_parser.h"
 #include "com_weapons.h"
 #include "aimbot.h"
+#include "sakura_features.h"
 
 extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
@@ -340,6 +341,7 @@ int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding
 	(void)pszCurrentBinding;
 	if( !Aimbot_Key( down, keynum ) )
 		return 0;
+	Sakura_Key( down, keynum );
 	return ImGui_KeyEvent( down, keynum );
 }
 
@@ -690,9 +692,18 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	}
 	else
 	{
-		if ( active && Aimbot_Apply( viewangles, cmd->buttons ))
-			gEngfuncs.SetViewAngles( (float *)viewangles );
+		/*
+		 * cmd->viewangles comeca igual a camera; o aimbot pode trocar os
+		 * angulos do comando (silent) sem mexer na camera. Quando ele mexe
+		 * na camera, o chamador aplica SetViewAngles.
+		 */
 		VectorCopy( viewangles, cmd->viewangles );
+		if ( active )
+			Sakura_PreMove( cmd, frametime );
+		if ( active && Aimbot_Apply( viewangles, cmd ))
+			gEngfuncs.SetViewAngles( (float *)viewangles );
+		if ( active )
+			Sakura_PostMove( cmd, viewangles );
 		VectorCopy( viewangles, oldangles );
 	}
 }

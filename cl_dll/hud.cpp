@@ -22,6 +22,8 @@
 
 #include "hud.h"
 #include "aimbot.h"
+#include "sakura_features.h"
+#include "server_dump.h"
 #include "cl_util.h"
 #include <string.h>
 #include <stdio.h>
@@ -337,6 +339,7 @@ void CHud :: Init( void )
 	cl_gunsmoke  = CVAR_CREATE( "cl_gunsmoke", "0", FCVAR_ARCHIVE );
 	cl_weapon_sparks = CVAR_CREATE( "cl_weapon_sparks", "1", FCVAR_ARCHIVE );
 	cl_weapon_wallpuff = CVAR_CREATE( "cl_weapon_wallpuff", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "bullet_tracer", "1", FCVAR_ARCHIVE );
 	zoom_sens_ratio = CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
 	cl_viewbob = CVAR_CREATE( "cl_viewbob", "1", FCVAR_ARCHIVE );
 
@@ -346,6 +349,8 @@ cl_aim_smooth      = gEngfuncs.pfnRegisterVariable( "cl_aim_smooth",      "0.35"
 cl_aim_fov         = gEngfuncs.pfnRegisterVariable( "cl_aim_fov",         "120",  FCVAR_ARCHIVE );
 cl_aim_head_offset = gEngfuncs.pfnRegisterVariable( "cl_aim_head_offset", "72.0", FCVAR_ARCHIVE );
 	Aimbot_Init();
+	Sakura_Init();
+	ServerDump_Init();
 
 // Clean visibility improvements ...
 cl_player_outline = gEngfuncs.pfnRegisterVariable("cl_player_outline", "0", FCVAR_ARCHIVE);

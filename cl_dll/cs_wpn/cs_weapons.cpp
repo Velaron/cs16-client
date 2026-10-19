@@ -20,6 +20,8 @@
 #include "cl_util.h"
 #include "hud.h"
 #include "spread_predictor.h"
+#include "aimbot.h"
+#include "sakura_features.h"
 
 #include "extdll.h"
 #include "util.h"
@@ -1523,6 +1525,8 @@ void DLLEXPORT HUD_PostRunCmd( local_state_t *from, local_state_t *to, struct us
 
 	HUD_WeaponsPostThink( from, to, cmd, time, random_seed );
 	SpreadDot_Capture( from, to, cmd, time, random_seed );
+	Aimbot_PostRunCmd( from, to, cmd, runfuncs, random_seed );
+	Sakura_PostRunCmd( from, to, cmd, random_seed );
 	to->client.fov = g_lastFOV;
 
 	if ( g_runfuncs )

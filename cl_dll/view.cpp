@@ -27,6 +27,7 @@
 #include "event_api.h"
 #include "pmtrace.h"
 #include "screenfade.h"
+#include "sakura_features.h"
 #include "shake.h"
 #include "hltv.h"
 #include "r_studioint.h"
@@ -901,7 +902,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	}
 
 	// Don't allow viewmodel, if we are in sniper scope
-	if( gHUD.m_iFOV <= 40 )
+	if( gHUD.m_iFOV <= 40 || !Sakura_DrawViewModel() )
 		view->model = NULL;
 
 	// Add in the punchangle, if any

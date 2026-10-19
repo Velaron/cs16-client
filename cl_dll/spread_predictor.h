@@ -21,3 +21,7 @@ void SpreadDot_Capture(local_state_t *from, local_state_t *to, struct usercmd_s 
                        double time, unsigned int random_seed);
 void SpreadDot_UpdateClientData(client_data_t *cdata, float time);
 void SpreadDot_Draw(float flTime);
+/* Inaccuracy atual em graus (0 quando a arma nao tem spread modelado). */
+float SpreadDot_GetSpreadDegrees(void);
+/* Offset tangente (radianos) do proximo tiro para a seed do comando. */
+int SpreadDot_GetSpreadOffset(unsigned int seed, float *dx, float *dy);

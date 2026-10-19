@@ -20,6 +20,7 @@
 #include "view.h"
 #include "input.h"
 #include "in_defs.h"
+#include "aimbot.h"
 
 #define MOUSE_BUTTON_COUNT 5
 
@@ -158,18 +159,27 @@ void IN_MouseMove ( float frametime, usercmd_t *cmd)
 	(void)frametime;
 
 	if( !mouseinitialized )
+	{
+		Aimbot_NoteMouse( 0.f, 0.f );
 		return;
+	}
 
 	// Third-person camera reads the same sample later in the frame.
 	if( iMouseInUse )
+	{
+		Aimbot_NoteMouse( 0.f, 0.f );
 		return;
+	}
 
 	if( !evdev_dx )
 		evdev_dx = gEngfuncs.pfnGetCvarPointer( "evdev_dx" );
 	if( !evdev_dy )
 		evdev_dy = gEngfuncs.pfnGetCvarPointer( "evdev_dy" );
 	if( !evdev_dx || !evdev_dy || !m_yaw || !m_pitch )
+	{
+		Aimbot_NoteMouse( 0.f, 0.f );
 		return;
+	}
 
 	mx = evdev_dx->value;
 	my = evdev_dy->value;
@@ -177,7 +187,10 @@ void IN_MouseMove ( float frametime, usercmd_t *cmd)
 	evdev_dy->value = 0;
 
 	if( g_iVisibleMouse || gHUD.m_iIntermission )
+	{
+		Aimbot_NoteMouse( 0.f, 0.f );
 		return;
+	}
 
 	if( m_filter && m_filter->value )
 	{
@@ -194,7 +207,10 @@ void IN_MouseMove ( float frametime, usercmd_t *cmd)
 	old_mouse_y = my;
 
 	if( mouse_x == 0.0f && mouse_y == 0.0f )
+	{
+		Aimbot_NoteMouse( 0.f, 0.f );
 		return;
+	}
 
 	sens = gHUD.GetSensitivity();
 	if( sens == 0.0f && sensitivity )
@@ -206,6 +222,9 @@ void IN_MouseMove ( float frametime, usercmd_t *cmd)
 	mouse_y *= sens;
 
 	gEngfuncs.GetViewAngles( (float *)viewangles );
+	{
+		float pitch_before = viewangles[PITCH];
+		float yaw_before = viewangles[YAW];
 
 	if( (in_strafe.state & 1) || (lookstrafe && lookstrafe->value) )
 	{
@@ -235,6 +254,8 @@ void IN_MouseMove ( float frametime, usercmd_t *cmd)
 	}
 
 	gEngfuncs.SetViewAngles( (float *)viewangles );
+	Aimbot_NoteMouse( viewangles[PITCH] - pitch_before, viewangles[YAW] - yaw_before );
+	}
 }
 
 void DLLEXPORT IN_Accumulate (void)
