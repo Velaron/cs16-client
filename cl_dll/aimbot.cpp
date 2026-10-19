@@ -93,6 +93,7 @@ static int    g_health;
 /* alvo do frame */
 static int   g_target;
 static int   g_targetPart;
+static int   g_targetPartMode = 0;   /* AIM_PART_MODE_AIM */
 static float g_targetAim[3];
 static float g_targetAngle;
 static float g_targetDist;
@@ -160,7 +161,16 @@ static cvar_t *cv_trig_fov;
 static cvar_t *cv_trig_draw;
 static cvar_t *cv_trig_accuracy;
 
-static cvar_t *cv_part[AIM_PART_COUNT];
+/* perfis de hitbox: cada modo de mira tem o seu conjunto de partes */
+enum
+{
+	AIM_PART_MODE_AIM = 0,
+	AIM_PART_MODE_SILENT,
+	AIM_PART_MODE_PSILENT,
+	AIM_PART_MODE_COUNT
+};
+
+static cvar_t *cv_part[AIM_PART_MODE_COUNT][AIM_PART_COUNT];
 
 /* compatibilidade com os cvars antigos (cl_aim_head, cl_aim_chest, ...) */
 static cvar_t *cv_old_head;
@@ -170,17 +180,19 @@ static cvar_t *cv_old_arms;
 static cvar_t *cv_old_legs;
 static cvar_t *cv_old_body;
 
-static const char *kPartCvar[AIM_PART_COUNT] =
+static const char *kPartSuffix[AIM_PART_COUNT] =
 {
-	"cl_aim_belt",
-	"cl_aim_lthigh", "cl_aim_ltibia", "cl_aim_lfoot",
-	"cl_aim_rthigh", "cl_aim_rtibia", "cl_aim_rfoot",
-	"cl_aim_stomach", "cl_aim_lchest", "cl_aim_uchest",
-	"cl_aim_neck", "cl_aim_head",
-	"cl_aim_lshoulder", "cl_aim_lelbow", "cl_aim_larm", "cl_aim_lhand",
-	"cl_aim_rshoulder", "cl_aim_relbow", "cl_aim_rarm", "cl_aim_rhand",
-	"cl_aim_generic"
+	"belt",
+	"lthigh", "ltibia", "lfoot",
+	"rthigh", "rtibia", "rfoot",
+	"stomach", "lchest", "uchest",
+	"neck", "head",
+	"lshoulder", "lelbow", "larm", "lhand",
+	"rshoulder", "relbow", "rarm", "rhand",
+	"generic"
 };
+
+static const char *kPartPrefix[AIM_PART_MODE_COUNT] = { "cl_aim_", "cl_silent_", "cl_psilent_" };
 
 static const char *kPartLabel[AIM_PART_COUNT] =
 {
@@ -321,22 +333,35 @@ void Aimbot_Init( void )
 	cv_trig_accuracy= gEngfuncs.pfnRegisterVariable( "cl_trig_accuracy", "0", FCVAR_ARCHIVE );
 
 	{
-		static const char *def[20] =
-		{
-			"0", /* belt */
-			"0", "0", "0",    /* left leg */
-			"0", "0", "0",    /* right leg */
-			"0",              /* stomach */
-			"1", "1",         /* chest */
-			"1", "1",         /* neck, head */
-			"0", "0", "0", "0",
-			"0", "0", "0", "0"
-		};
+		int mode;
 
-		for( i = 0; i < AIM_PART_COUNT - 1; i++ )
-			cv_part[i] = gEngfuncs.pfnRegisterVariable( kPartCvar[i], def[i], FCVAR_ARCHIVE );
-		/* AIM_PART_GENERIC (fallback) fica sempre ligado */
-		cv_part[AIM_PART_GENERIC] = gEngfuncs.pfnRegisterVariable( kPartCvar[AIM_PART_GENERIC], "1", FCVAR_ARCHIVE );
+		for( mode = 0; mode < AIM_PART_MODE_COUNT; mode++ )
+		{
+			for( i = 0; i < AIM_PART_COUNT; i++ )
+			{
+				char name[64];
+				const char *dir;
+
+				if( mode == AIM_PART_MODE_AIM )
+				{
+					/* padrao antigo do aimbot: peito, pescoco e cabeca */
+					dir = ( i == AIM_PART_UPPER_CHEST || i == AIM_PART_LOWER_CHEST ||
+						i == AIM_PART_NECK || i == AIM_PART_HEAD ) ? "1" : "0";
+				}
+				else
+				{
+					/* silents: so a cabeca por padrao */
+					dir = ( i == AIM_PART_HEAD ) ? "1" : "0";
+				}
+
+				/* AIM_PART_GENERIC e o fallback: sempre ligado */
+				if( i == AIM_PART_GENERIC )
+					dir = "1";
+
+				snprintf( name, sizeof( name ), "%s%s", kPartPrefix[mode], kPartSuffix[i] );
+				cv_part[mode][i] = gEngfuncs.pfnRegisterVariable( name, dir, FCVAR_ARCHIVE );
+			}
+		}
 	}
 
 	/*
@@ -456,12 +481,18 @@ void Aimbot_PostRunCmd( local_state_s *from, local_state_s *to,
 /* alvo                                                               */
 /* ------------------------------------------------------------------ */
 
-static int PartEnabled( int part )
+static int PartEnabled( int mode, int part )
 {
+	if( mode < 0 || mode >= AIM_PART_MODE_COUNT )
+		mode = AIM_PART_MODE_AIM;
 	if( part < 0 || part >= AIM_PART_COUNT )
 		part = AIM_PART_GENERIC;
-	if( cv_part[part] && cv_part[part]->value > 0.5f )
+	if( cv_part[mode][part] && cv_part[mode][part]->value > 0.5f )
 		return 1;
+
+	/* os grupos do menu antigo so valem para o aimbot */
+	if( mode != AIM_PART_MODE_AIM )
+		return 0;
 
 	/* grupos do menu antigo */
 	switch( part )
@@ -565,7 +596,7 @@ static float AngleDelta( const float *a, const float *b )
 }
 
 static int FindTarget( const float *eye, const float *view, float fov, int allowTeam,
-	int ignoreWalls, int *outPlayer, float *outAim, float *outAngle, float *outDist )
+	int ignoreWalls, int partMode, int *outPlayer, float *outAim, float *outAngle, float *outDist )
 {
 	int i;
 	int best = 0;
@@ -583,7 +614,7 @@ static int FindTarget( const float *eye, const float *view, float fov, int allow
 		float dist;
 		int rank;
 
-		if( !PartEnabled( g_boxes[i].part ) )
+		if( !PartEnabled( partMode, g_boxes[i].part ) )
 			continue;
 		if( !EnemyAlive( g_boxes[i].player, allowTeam ) )
 			continue;
@@ -635,6 +666,7 @@ static int FindTarget( const float *eye, const float *view, float fov, int allow
 	*outAngle = bestAngle;
 	*outDist = bestDist;
 	g_targetPart = bestPart;
+	g_targetPartMode = partMode;
 	return 1;
 }
 
@@ -830,7 +862,7 @@ static void Trigger_Run( usercmd_t *cmd, const float *eye, const float *view )
 	fov = Clampf( CV( cv_trig_fov, 1.2f ), 0.05f, 45.f );
 
 	if( !FindTarget( eye, view, fov, On( cv_trig_team, 0 ), On( cv_trig_wall, 0 ),
-		&player, aim, &ang, &dist ) )
+		AIM_PART_MODE_AIM, &player, aim, &ang, &dist ) )
 	{
 		Trigger_Reset();
 		return;
@@ -905,6 +937,7 @@ int Aimbot_Apply( float viewangles[3], usercmd_t *cmd )
 	int hasTarget;
 	int silent, psilent;
 	int attacking;
+	int partMode;
 	int i;
 	cl_entity_t *local;
 	double now;
@@ -982,8 +1015,18 @@ int Aimbot_Apply( float viewangles[3], usercmd_t *cmd )
 	if( (int)CV( cv_rc_fov, 0.f ) > 0 && g_shots > (int)CV( cv_rc_after, 0.f ) )
 		fov += fov * CV( cv_rc_fov, 0.f ) * 0.01f;
 
+	/*
+	 * O perfil de hitbox acompanha o mecanismo que vai ser usado:
+	 * psilent so age atirando, silent age sempre, senao e o aimbot normal.
+	 */
+	partMode = AIM_PART_MODE_AIM;
+	if( On( cv_psilent, 0 ) && attacking )
+		partMode = AIM_PART_MODE_PSILENT;
+	else if( On( cv_silent, 0 ) )
+		partMode = AIM_PART_MODE_SILENT;
+
 	hasTarget = FindTarget( eye, view, fov, On( cv_team, 0 ), On( cv_walls, 0 ),
-		&player, aim, &ang, &dist );
+		partMode, &player, aim, &ang, &dist );
 
 	if( !hasTarget )
 	{
@@ -1210,7 +1253,7 @@ static void DrawTargetOverlay( void )
 		{
 			if( g_boxes[i].player != g_target )
 				continue;
-			if( !PartEnabled( g_boxes[i].part ) )
+			if( !PartEnabled( g_targetPartMode, g_boxes[i].part ) )
 				continue;
 			DrawBox( g_boxes[i].c, 255, 60, 60 );
 		}
@@ -1237,7 +1280,7 @@ static void DrawTargetOverlay( void )
 		{
 			if( g_boxes[i].player != g_target )
 				continue;
-			if( !PartEnabled( g_boxes[i].part ) )
+			if( !PartEnabled( g_targetPartMode, g_boxes[i].part ) )
 				continue;
 			org[0] = g_boxes[i].origin[0];
 			org[1] = g_boxes[i].origin[1];

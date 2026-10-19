@@ -37,8 +37,8 @@ enum
 
 static const char *kCatName[CAT_COUNT] = { "Rage", "Legit", "Visuals", "Misc" };
 
-static const char *kSubRage[]    = { "Aimbot", "Anti Aim", "Fake Lag", "Speedhack", NULL };
-static const char *kSubLegit[]   = { "Aimbot", "Triggerbot", "Perfect Silent", "Recoil", "Knifebot", NULL };
+static const char *kSubRage[]    = { "Aimbot", "Hitboxes", "Anti Aim", "Fake Lag", "Speedhack", NULL };
+static const char *kSubLegit[]   = { "Aimbot", "Triggerbot", "Perfect Silent", "Recoil", "Knifebot", "Hitboxes", NULL };
 static const char *kSubVisuals[] = { "Player", "Local", "World", "Radar", "Skins", "Removals", "Sound", "Menu", NULL };
 static const char *kSubMisc[]    = { "Movement", "Servers", "Keybindings", "Player List", "Config", "AntiAFK", NULL };
 
@@ -76,6 +76,19 @@ static const char *kPartLabel[21] =
 	"Resto do corpo"
 };
 
+/* mesmo sufixo usado em cl_dll/aimbot.cpp (kPartSuffix) */
+static const char *kPartSuffix[21] =
+{
+	"belt",
+	"lthigh", "ltibia", "lfoot",
+	"rthigh", "rtibia", "rfoot",
+	"stomach", "lchest", "uchest",
+	"neck", "head",
+	"lshoulder", "lelbow", "larm", "lhand",
+	"rshoulder", "relbow", "rarm", "rhand",
+	"generic"
+};
+
 /* ------------------------------------------------------------------ */
 /* helpers                                                            */
 /* ------------------------------------------------------------------ */
@@ -91,6 +104,8 @@ static void Hint( const char *text )
 }
 
 static void TabAimbotRage( void );
+static void TabHitboxes( void );
+static void TabFakeLag( void );
 static void TabAimbotLegit( void );
 static void TabTrigger( void );
 static void TabPerfectSilent( void );
@@ -228,9 +243,6 @@ static void TabKnifebot( void )
 
 static void TabAimbotRage( void )
 {
-	int i;
-	int half = 11;
-
 	UI::Section( "Rage aimbot" );
 	UI::Check( "cl_aim_assist", "Ligado" );
 	UI::Check( "cl_aim_walls", "Atravessar parede" );
@@ -241,17 +253,37 @@ static void TabAimbotRage( void )
 	UI::Check( "cl_aim_psilent", "Perfect silent" );
 
 	UI::Section( "Hitboxes" );
-	if( ImGui::BeginChild( "##hit_l", ImVec2( 240, 260 ), false ) )
+	Hint( "As partes ficam na tab Hitboxes (Rage ou Legit)." );
+}
+
+/*
+ * TabHitboxes: um perfil por modo de mira (aimbot, silent, perfect silent).
+ * Os cvars sao montados em runtime: cl_aim_*, cl_silent_* e cl_psilent_*.
+ */
+static void TabHitboxes( void )
+{
+	static int profile = 0;
+	static const char *prefix[3] = { "cl_aim_", "cl_silent_", "cl_psilent_" };
+	int i;
+
+	UI::Section( "Partes do corpo" );
+
+	ImGui::TextUnformatted( "Perfil" );
+	ImGui::SameLine( 190 );
+	ImGui::SetNextItemWidth( -1 );
+	ImGui::Combo( "##hb_profile", &profile, "Aimbot\0Silent\0Perfect silent\0" );
+
+	ImGui::Spacing();
+
+	if( ImGui::BeginChild( "##hb_grid", ImVec2( -1, -1 ), false ) )
 	{
-		for( i = 0; i < half; i++ )
-			UI::Check( kPartCvar[i], kPartLabel[i] );
-	}
-	ImGui::EndChild();
-	ImGui::SameLine();
-	if( ImGui::BeginChild( "##hit_r", ImVec2( 240, 260 ), false ) )
-	{
-		for( i = half; i < 21; i++ )
-			UI::Check( kPartCvar[i], kPartLabel[i] );
+		for( i = 0; i < 21; i++ )
+		{
+			char name[64];
+
+			snprintf( name, sizeof( name ), "%s%s", prefix[profile], kPartSuffix[i] );
+			UI::Check( name, kPartLabel[i] );
+		}
 	}
 	ImGui::EndChild();
 }
@@ -264,6 +296,18 @@ static void TabAntiAim( void )
 	UI::Combo( "cl_sak_aa_yaw", "Yaw", "Nenhum\0Esquerda\0Direita\0Jitter\0" );
 	UI::Slider( "cl_sak_aa_speed", "Velocidade", 1.f, 30.f, "%.0f" );
 	Hint( "Anti aim mexe nos angulos enviados ao servidor." );
+}
+
+static void TabFakeLag( void )
+{
+	UI::Section( "Fake lag" );
+	UI::Check( "cl_fakelag", "Ligado" );
+	UI::Slider( "cl_fakelag_limit", "Tempo", 0.f, 200.f, "%.0f ms" );
+	UI::Combo( "cl_fakelag_type", "Tipo", "Dinamico\0Maximo\0Flutuante\0" );
+	UI::Slider( "cl_fakelag_variance", "Variacao", 0.f, 100.f, "%.0f %%" );
+	UI::Combo( "cl_fakelag_move", "Quando", "Sempre\0So parado\0So no ar\0" );
+	UI::Check( "cl_fakelag_while_shooting", "Enquanto atira" );
+	Hint( "Acima de 200 ms o servidor costuma chutar. Use 30-80 ms." );
 }
 
 /* ------------------------------------------------------------------ */
@@ -479,11 +523,9 @@ static void DrawTabBody( void )
 		switch( g_sub[CAT_RAGE] )
 		{
 		case 0: TabAimbotRage(); break;
-		case 1: TabAntiAim(); break;
-		case 2:
-			UI::Section( "Fake lag" );
-			Hint( "Requer segurar pacotes na engine (fase 8 do plano)." );
-			break;
+		case 1: TabHitboxes(); break;
+		case 2: TabAntiAim(); break;
+		case 3: TabFakeLag(); break;
 		default:
 			UI::Section( "Speedhack" );
 			Hint( "O servidor simula o movimento. Nao e possivel no cliente." );
@@ -498,7 +540,8 @@ static void DrawTabBody( void )
 		case 1: TabTrigger(); break;
 		case 2: TabPerfectSilent(); break;
 		case 3: TabRecoil(); break;
-		default: TabKnifebot(); break;
+		case 4: TabKnifebot(); break;
+		default: TabHitboxes(); break;
 		}
 		break;
 
