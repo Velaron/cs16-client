@@ -14,6 +14,8 @@
  */
 
 void ServerDump_Init( void );
+/* desenha o conteudo do dump dentro de uma tab do HUB (sem janela propria). */
+void ServerDump_DrawContent( void );
 /* chamado por frame no HUD: dispara cl_dump_auto depois do mapa carregar. */
 void ServerDump_Tick( void );
 /* encerra a thread do dump no shutdown do client. */

@@ -38,6 +38,7 @@
 #include <netdb.h>
 
 #include "hud.h"
+#include "ui/hub_menu.h"
 #include "cl_util.h"
 #include "imgui.h"
 #include "imgui_host.h"
@@ -139,7 +140,7 @@ static cvar_t *cv_auto;
 static bool g_autoDone = false;
 
 /* painel */
-static int g_panel;
+
 static bool g_open = false;
 static char g_pathBuf[512];
 static char g_manualBuf[4096];
@@ -1175,35 +1176,15 @@ static void StartDump( void )
 	g_thread = std::thread( DumpWorker, opt );
 }
 
-static void DrawServerDumpPanel( void * )
+/* conteudo do dump, desenhado dentro de uma tab do HUB (sem janela propria) */
+void ServerDump_DrawContent( void )
 {
 	int format, source, timeoutMs, maxServers;
 	int fields = FieldFlags();
 	std::string status, lastFile, log;
 	int done, total, found;
 
-	static int logged;
-
-	if( !g_open )
-		return;
-	if( !logged )
-	{
-		logged = 1;
-		gEngfuncs.Con_Printf( "dump painel: desenhando\n" );
-	}
-
-	ImGui::SetNextWindowPos( ImVec2( 260.0f, 90.0f ), ImGuiCond_FirstUseEver );
-	ImGui::SetNextWindowSize( ImVec2( 620.0f, 560.0f ), ImGuiCond_FirstUseEver );
-	ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4( 0.02f, 0.04f, 0.06f, 0.94f ) );
-
-	if( !ImGui::Begin( "Dump de servidores", &g_open, ImGuiWindowFlags_NoCollapse ) )
-	{
-		ImGui::End();
-		ImGui::PopStyleColor();
-		return;
-	}
-
-	ImGui::TextColored( ImVec4( 0.4f, 0.9f, 1.0f, 1.0f ), "dump_servidor" );
+	ImGui::TextColored( ImVec4( 0.4f, 0.9f, 1.0f, 1.0f ), "Dump de servidores" );
 	ImGui::Separator();
 
 	source = cv_source ? (int)cv_source->value : 1;
@@ -1312,14 +1293,13 @@ static void DrawServerDumpPanel( void * )
 	ImGui::BeginChild( "##dumplog", ImVec2( -1.0f, 140.0f ), true );
 	ImGui::TextUnformatted( log.c_str() );
 	ImGui::EndChild();
-
-	ImGui::End();
-	ImGui::PopStyleColor();
 }
 
 static void Cmd_DumpServer( void )
 {
-	g_open = !g_open;
+	/* o dump vive na tab Misc > Servers do HUB */
+	Hub_ShowTab( 3, 1 );
+	Hub_Open( 1 );
 }
 
 static void Cmd_DumpRun( void )
@@ -1419,6 +1399,5 @@ void ServerDump_Init( void )
 		if( open && open->value > 0.5f )
 			g_open = true;
 	}
-	if( !g_panel )
-		g_panel = ImGui_RegisterPanel( "dump_servidores", DrawServerDumpPanel, NULL );
+	/* sem painel proprio: o HUB desenha o dump na tab Servers */
 }

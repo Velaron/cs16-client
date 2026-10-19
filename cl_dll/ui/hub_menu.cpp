@@ -20,6 +20,7 @@
 #include "ui_theme.h"
 #include "hub_menu.h"
 #include "hub_cvars_list.h"
+#include "server_dump.h"
 
 /* ------------------------------------------------------------------ */
 /* navegacao                                                          */
@@ -39,7 +40,7 @@ static const char *kCatName[CAT_COUNT] = { "Rage", "Legit", "Visuals", "Misc" };
 static const char *kSubRage[]    = { "Aimbot", "Anti Aim", "Fake Lag", "Speedhack", NULL };
 static const char *kSubLegit[]   = { "Aimbot", "Triggerbot", "Perfect Silent", "Recoil", "Knifebot", NULL };
 static const char *kSubVisuals[] = { "Player", "Local", "World", "Radar", "Skins", "Removals", "Sound", "Menu", NULL };
-static const char *kSubMisc[]    = { "Movement", "Keybindings", "Player List", "Config", "AntiAFK", NULL };
+static const char *kSubMisc[]    = { "Movement", "Servers", "Keybindings", "Player List", "Config", "AntiAFK", NULL };
 
 static const char **kSubTabs[CAT_COUNT] = { kSubRage, kSubLegit, kSubVisuals, kSubMisc };
 
@@ -105,6 +106,7 @@ static void TabRemovals( void );
 static void TabSound( void );
 static void TabMenu( void );
 static void TabMovement( void );
+static void TabServers( void );
 static void TabKeybinds( void );
 static void TabPlayerList( void );
 static void TabConfig( void );
@@ -387,6 +389,12 @@ static void TabMovement( void )
 	Hint( "Bhop segura o pulo enquanto a tecla de pular estiver pressionada." );
 }
 
+static void TabServers( void )
+{
+	/* o painel antigo virou conteudo desta tab */
+	ServerDump_DrawContent();
+}
+
 static void TabKeybinds( void )
 {
 	UI::Section( "Teclas do HUB" );
@@ -512,9 +520,10 @@ static void DrawTabBody( void )
 		switch( g_sub[CAT_MISC] )
 		{
 		case 0: TabMovement(); break;
-		case 1: TabKeybinds(); break;
-		case 2: TabPlayerList(); break;
-		case 3: TabConfig(); break;
+		case 1: TabServers(); break;
+		case 2: TabKeybinds(); break;
+		case 3: TabPlayerList(); break;
+		case 4: TabConfig(); break;
 		default: TabAntiAfk(); break;
 		}
 		break;
@@ -649,6 +658,17 @@ int Hub_IsOpen( void )
 	return g_open;
 }
 
+void Hub_ShowTab( int cat, int sub )
+{
+	if( cat < 0 || cat >= CAT_COUNT )
+		return;
+	if( sub < 0 )
+		return;
+
+	g_cat = cat;
+	g_sub[cat] = sub;
+}
+
 static void Cmd_HubMenu( void )
 {
 	Hub_Open( !g_open );
@@ -732,4 +752,12 @@ void Hub_Init( void )
 	ImGui_RegisterPanel( "hub", DrawHub, NULL );
 	gEngfuncs.pfnAddCommand( "hub_menu", Cmd_HubMenu );
 	gEngfuncs.pfnAddCommand( "hub_selftest", Cmd_HubSelfTest );
+
+	/* abre o HUB no inicio quando cl_hub_open 1 (util para teste e cfg) */
+	{
+		cvar_t *open = gEngfuncs.pfnRegisterVariable( "cl_hub_open", "0", FCVAR_ARCHIVE );
+
+		if( open && open->value > 0.5f )
+			Hub_Open( 1 );
+	}
 }

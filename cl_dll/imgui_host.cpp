@@ -31,8 +31,6 @@ int g_open = 0;
 int g_menu_open = 0;
 int g_ready = 0;
 int g_gl = 0;
-bool g_show_demo = false;
-bool g_show_host = true;
 float g_last_time = 0.0f;
 bool g_shift = false;
 bool g_ctrl = false;
@@ -166,36 +164,6 @@ void FeedKey( int down, int keynum )
 	io.AddInputCharacter( ch );
 }
 
-void DrawHostWindow( void )
-{
-	if( !g_show_host )
-		return;
-
-	ImGui::SetNextWindowSize( ImVec2( 380.0f, 0.0f ), ImGuiCond_FirstUseEver );
-	if( !ImGui::Begin( "ImGui", &g_show_host ) )
-	{
-		ImGui::End();
-		return;
-	}
-
-	ImGui::TextUnformatted( "Interface nativa do client. Insert ou o comando imgui abre e fecha." );
-	ImGui::Separator();
-	ImGui::Text( "Paineis registrados: %d", ImGui_PanelCount() );
-	ImGui::Text( "Tela: %d x %d", DisplayWidth(), DisplayHeight() );
-	ImGui::Checkbox( "Demo do Dear ImGui", &g_show_demo );
-
-	static float ganho = 0.5f;
-	static bool ativo = true;
-	static char texto[64] = "cs16";
-	ImGui::Checkbox( "Ativo", &ativo );
-	ImGui::SliderFloat( "Ganho", &ganho, 0.0f, 1.0f );
-	ImGui::InputText( "Nome", texto, sizeof( texto ) );
-	if( ImGui::Button( "Fechar interface" ) )
-		ImGui_SetOpen( 0 );
-
-	ImGui::End();
-}
-
 void RestoreEngineGl( void )
 {
 	if( gRenderAPI.GL_CleanUpTextureUnits )
@@ -229,7 +197,7 @@ bool EnsureContext( void )
 
 	g_ready = 1;
 	g_gl = 1;
-	gEngfuncs.Con_Printf( "ImGui nativo pronto. Abra com `imgui` ou Insert.\n" );
+	gEngfuncs.Con_Printf( "ImGui nativo pronto. Abra com F6 (HUB).\n" );
 	return true;
 }
 
@@ -279,14 +247,10 @@ void ImGui_UnregisterPanel( int id )
 void ImGui_SetOpen( int open )
 {
 	int next = open ? 1 : 0;
-	if( next && !g_open )
-		g_show_host = true;
+
 	g_open = next;
 	if( !g_open )
-	{
 		g_shift = g_ctrl = g_alt = false;
-		g_show_demo = false;
-	}
 	SyncCursorCvar();
 }
 
@@ -303,19 +267,9 @@ void ImGui_SetMenuOpen( int open )
 	SyncCursorCvar();
 }
 
-static void ImGui_Toggle_f( void )
-{
-	ImGui_SetOpen( !g_open );
-}
-
 void ImGui_Init( void )
 {
-	static int command = 0;
-	if( !command )
-	{
-		gEngfuncs.pfnAddCommand( "imgui", ImGui_Toggle_f );
-		command = 1;
-	}
+	/* sem comando de console: a interface so abre pelos paineis (HUB/F6) */
 	EnsureContext();
 	SyncCursorCvar();
 }
@@ -388,13 +342,6 @@ void ImGui_Frame( void )
 
 	ImGui_ImplOpenGL2_NewFrame();
 	ImGui::NewFrame();
-
-	if( g_open )
-	{
-		DrawHostWindow();
-		if( g_show_demo )
-			ImGui::ShowDemoWindow( &g_show_demo );
-	}
 
 	for( int i = 0; i < kMaxPanels; ++i )
 	{
