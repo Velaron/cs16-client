@@ -65,7 +65,7 @@ int main( void )
 {
 	int i, j;
 
-	CHECK( kBtCvarCount >= 25, "tabela tem pelo menos 25 cvars" );
+	CHECK( kBtCvarCount >= 37, "tabela tem pelo menos 37 cvars" );
 
 	for( i = 0; i < kBtCvarCount; i++ )
 	{
