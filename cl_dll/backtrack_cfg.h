@@ -40,7 +40,7 @@ struct bt_cvar_def_s
 	X( draw,          "cl_bt_draw",             "0",     0.f,   1.f, 1, "desenhar historico" ) \
 	X( draw_ms,       "cl_bt_draw_ms",          "120",   0.f, 800.f, 1, "janela do desenho" ) \
 	X( draw_line,     "cl_bt_draw_line",        "1",     0.f,   1.f, 1, "marcar pontos" ) \
-	X( draw_target,   "cl_bt_draw_target_only", "0",     0.f,   1.f, 1, "so o alvo atual" ) \
+	X( draw_target_only, "cl_bt_draw_target_only", "0",     0.f,   1.f, 1, "so o alvo atual" ) \
 	X( draw_box,      "cl_bt_draw_box",         "1",     0.f,   1.f, 1, "desenhar a caixa do ghost" ) \
 	X( interp,        "cl_bt_interp",           "1",     0.f,   1.f, 1, "interpolar com o quadro vizinho" ) \
 	X( record_ms,     "cl_bt_record_ms",        "10",    5.f,  50.f, 1, "intervalo de gravacao" ) \

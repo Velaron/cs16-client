@@ -19,32 +19,11 @@
 #include "backtrack_core.h"
 #include "aimbot.h"
 #include "sakura_features.h"
+#include "backtrack_cfg.h"
 
-static cvar_t *cv_enable;
-static cvar_t *cv_mode;
-static cvar_t *cv_trigger_mode;
-static cvar_t *cv_key;
-static cvar_t *cv_team;
-static cvar_t *cv_min_ms;
-static cvar_t *cv_max_ms;
-static cvar_t *cv_step_ms;
-static cvar_t *cv_prefer;
-static cvar_t *cv_visible;
-static cvar_t *cv_walls;
-static cvar_t *cv_max_dist;
-static cvar_t *cv_ping_min;
-static cvar_t *cv_sync_fl;
-static cvar_t *cv_fl_extra;
-static cvar_t *cv_draw;
-static cvar_t *cv_draw_ms;
-static cvar_t *cv_draw_line;
-static cvar_t *cv_draw_target;
-static cvar_t *cv_draw_box;
-static cvar_t *cv_interp;
-static cvar_t *cv_record_ms;
-static cvar_t *cv_max_frames;
-static cvar_t *cv_clear_round;
-static cvar_t *cv_debug;
+#define BT_X( var, name, def, lo, hi, ar, desc ) static cvar_t *cv_##var;
+BT_CVAR_LIST( BT_X )
+#undef BT_X
 
 static bt_buffer_s g_bt;
 static double g_lastRecord;
@@ -121,31 +100,10 @@ int Backtrack_Enabled( void )
 
 void Backtrack_Init( void )
 {
-	cv_enable       = gEngfuncs.pfnRegisterVariable( "cl_bt_enable", "0", FCVAR_ARCHIVE );
-	cv_mode         = gEngfuncs.pfnRegisterVariable( "cl_bt_mode", "1", FCVAR_ARCHIVE );
-	cv_trigger_mode = gEngfuncs.pfnRegisterVariable( "cl_bt_trigger_mode", "0", FCVAR_ARCHIVE );
-	cv_key          = gEngfuncs.pfnRegisterVariable( "cl_bt_key", "0", FCVAR_ARCHIVE );
-	cv_team         = gEngfuncs.pfnRegisterVariable( "cl_bt_team", "0", FCVAR_ARCHIVE );
-	cv_min_ms       = gEngfuncs.pfnRegisterVariable( "cl_bt_min_ms", "40", FCVAR_ARCHIVE );
-	cv_max_ms       = gEngfuncs.pfnRegisterVariable( "cl_bt_max_ms", "200", FCVAR_ARCHIVE );
-	cv_step_ms      = gEngfuncs.pfnRegisterVariable( "cl_bt_step_ms", "20", FCVAR_ARCHIVE );
-	cv_prefer       = gEngfuncs.pfnRegisterVariable( "cl_bt_prefer", "0", FCVAR_ARCHIVE );
-	cv_visible      = gEngfuncs.pfnRegisterVariable( "cl_bt_visible_only", "0", FCVAR_ARCHIVE );
-	cv_walls        = gEngfuncs.pfnRegisterVariable( "cl_bt_ignore_walls", "0", FCVAR_ARCHIVE );
-	cv_max_dist     = gEngfuncs.pfnRegisterVariable( "cl_bt_max_dist", "2500", FCVAR_ARCHIVE );
-	cv_ping_min     = gEngfuncs.pfnRegisterVariable( "cl_bt_ping_min", "0", FCVAR_ARCHIVE );
-	cv_sync_fl      = gEngfuncs.pfnRegisterVariable( "cl_bt_sync_fakelag", "0", FCVAR_ARCHIVE );
-	cv_fl_extra     = gEngfuncs.pfnRegisterVariable( "cl_bt_fakelag_extra", "0", FCVAR_ARCHIVE );
-	cv_draw         = gEngfuncs.pfnRegisterVariable( "cl_bt_draw", "0", FCVAR_ARCHIVE );
-	cv_draw_ms      = gEngfuncs.pfnRegisterVariable( "cl_bt_draw_ms", "120", FCVAR_ARCHIVE );
-	cv_draw_line    = gEngfuncs.pfnRegisterVariable( "cl_bt_draw_line", "1", FCVAR_ARCHIVE );
-	cv_draw_target  = gEngfuncs.pfnRegisterVariable( "cl_bt_draw_target_only", "0", FCVAR_ARCHIVE );
-	cv_draw_box     = gEngfuncs.pfnRegisterVariable( "cl_bt_draw_box", "1", FCVAR_ARCHIVE );
-	cv_interp       = gEngfuncs.pfnRegisterVariable( "cl_bt_interp", "1", FCVAR_ARCHIVE );
-	cv_record_ms    = gEngfuncs.pfnRegisterVariable( "cl_bt_record_ms", "10", FCVAR_ARCHIVE );
-	cv_max_frames   = gEngfuncs.pfnRegisterVariable( "cl_bt_max_frames", "96", FCVAR_ARCHIVE );
-	cv_clear_round  = gEngfuncs.pfnRegisterVariable( "cl_bt_clear_round", "1", FCVAR_ARCHIVE );
-	cv_debug        = gEngfuncs.pfnRegisterVariable( "cl_bt_debug", "0", FCVAR_ARCHIVE );
+#define BT_X( var, name, def, lo, hi, ar, desc ) \
+	cv_##var = gEngfuncs.pfnRegisterVariable( (char *)name, (char *)def, (ar) ? FCVAR_ARCHIVE : 0 );
+	BT_CVAR_LIST( BT_X )
+#undef BT_X
 
 	Backtrack_Reset();
 	Backtrack_SelfTest();
@@ -271,7 +229,7 @@ void Backtrack_Tick( void )
 		int delay = Backtrack_LastDelay();
 		int target;
 
-		if( On( cv_sync_fl, 0 ) && delay > 0 && g_attacking )
+		if( On( cv_sync_fakelag, 0 ) && delay > 0 && g_attacking )
 		{
 			if( !g_flOwned )
 			{
@@ -280,7 +238,7 @@ void Backtrack_Tick( void )
 				g_flOldType = CVAR_GET_FLOAT( "cl_fakelag_type" );
 			}
 
-			target = delay + (int)BtClamp( CV( cv_fl_extra, 0.f ), 0.f, 100.f );
+			target = delay + (int)BtClamp( CV( cv_fakelag_extra, 0.f ), 0.f, 100.f );
 			if( target > 200 )
 				target = 200;
 
@@ -376,7 +334,7 @@ int Backtrack_GetPoint( int player, int part, float out[3], int *out_ms )
 	if( dist > BtClamp( CV( cv_max_dist, 2500.f ), 100.f, 20000.f ))
 		return 0;
 
-	if( On( cv_visible, 0 ) && !Aimbot_PointVisible( q.eye, out, player, On( cv_walls, 0 )))
+	if( On( cv_visible_only, 0 ) && !Aimbot_PointVisible( q.eye, out, player, On( cv_ignore_walls, 0 )))
 		return 0;
 
 	g_lastDelay = out_ms ? *out_ms : 0;
@@ -446,7 +404,7 @@ void Backtrack_Draw( void )
 
 			if( boxes[i].player <= 0 || boxes[i].part < 0 || boxes[i].part >= BT_PARTS )
 				continue;
-			if( On( cv_draw_target, 0 ) && target > 0 && boxes[i].player != target )
+			if( On( cv_draw_target_only, 0 ) && target > 0 && boxes[i].player != target )
 				continue;
 			if( !Bt_Lookup( &g_bt, &q, boxes[i].player, boxes[i].part, hist, &ms ))
 				continue;
