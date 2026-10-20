@@ -471,33 +471,45 @@ static void TabBacktrack( void )
 	UI::Section( "Janela de tempo" );
 	UI::Slider( "cl_bt_min_ms", "Delay minimo", 0.f, 400.f, "%.0f ms" );
 	UI::Slider( "cl_bt_max_ms", "Delay maximo", 0.f, 800.f, "%.0f ms" );
+	UI::Check( "cl_bt_lag_comp", "Janela automatica pelo ping" );
 	UI::Slider( "cl_bt_step_ms", "Resolucao", 0.f, 100.f, "%.0f ms" );
 	UI::Combo( "cl_bt_prefer", "Escolha", "Mais recente\0Mais antigo\0Melhor angulo\0Mais perto\0" );
+	UI::Check( "cl_bt_interp", "Interpolar com o quadro vizinho" );
+	UI::Slider( "cl_bt_smooth", "Peso da interpolacao", 0.f, 1.f, "%.2f" );
 
-	UI::Section( "Filtros" );
-	UI::Check( "cl_bt_visible_only", "So alvo visivel" );
-	UI::Check( "cl_bt_ignore_walls", "Ignorar paredes" );
+	UI::Section( "Alvo" );
+	UI::Combo( "cl_bt_parts", "Hitboxes", "Todas\0Cabeca\0Corpo\0Cabeca + corpo\0" );
+	UI::Slider( "cl_bt_fov", "FOV proprio (0 = aimbot)", 0.f, 180.f, "%.0f" );
 	UI::Slider( "cl_bt_max_dist", "Distancia maxima", 200.f, 8000.f, "%.0f" );
 	UI::Slider( "cl_bt_ping_min", "Ping minimo", 0.f, 300.f, "%.0f ms" );
+	UI::Check( "cl_bt_visible_only", "So alvo visivel" );
+	UI::Check( "cl_bt_ignore_walls", "Ignorar paredes" );
 
 	UI::Section( "Fakelag" );
 	UI::Check( "cl_bt_sync_fakelag", "Sincronizar com fakelag" );
 	UI::Slider( "cl_bt_fakelag_extra", "Extra", 0.f, 100.f, "%.0f ms" );
-	Hint( "Sem sincronizar o servidor nao volta a posicao e o tiro nao registra." );
+	Hint( "Sincroniza so enquanto atira: o servidor precisa voltar a posicao." );
 
 	UI::Section( "Visual" );
 	UI::Check( "cl_bt_draw", "Desenhar historico" );
 	UI::Slider( "cl_bt_draw_ms", "Janela do desenho", 0.f, 800.f, "%.0f ms" );
+	UI::Combo( "cl_bt_draw_style", "Estilo", "Caixa\0Pontos\0Caixa + pontos\0" );
 	UI::Check( "cl_bt_draw_line", "Marcar pontos" );
 	UI::Check( "cl_bt_draw_target_only", "So o alvo atual" );
-	UI::Check( "cl_bt_draw_box", "Caixa cheia" );
+	UI::Slider( "cl_bt_color_r", "R", 0.f, 255.f, "%.0f" );
+	UI::Slider( "cl_bt_color_g", "G", 0.f, 255.f, "%.0f" );
+	UI::Slider( "cl_bt_color_b", "B", 0.f, 255.f, "%.0f" );
+	UI::Slider( "cl_bt_draw_alpha", "Alpha", 0.f, 255.f, "%.0f" );
+	UI::Check( "cl_bt_hud", "Indicador de delay" );
 
 	UI::Section( "Avancado" );
-	UI::Check( "cl_bt_interp", "Interpolar com o quadro vizinho" );
 	UI::Slider( "cl_bt_record_ms", "Intervalo de gravacao", 5.f, 50.f, "%.0f ms" );
-	UI::Slider( "cl_bt_max_frames", "Quadros", 16.f, 96.f, "%.0f" );
-	UI::Check( "cl_bt_clear_round", "Limpar no round" );
-	UI::Check( "cl_bt_debug", "Debug no console" );
+	UI::Slider( "cl_bt_max_frames", "Quadros", 8.f, 96.f, "%.0f" );
+	UI::Slider( "cl_bt_history_ms", "Idade maxima", 100.f, 3000.f, "%.0f ms" );
+	UI::Check( "cl_bt_clear_round", "Limpar ao morrer" );
+	UI::KeyBind( "cl_bt_reset_key", "Tecla para limpar" );
+	UI::Combo( "cl_bt_debug", "Debug", "Off\0Resumo\0Alvo\0Tudo\0" );
+	UI::Check( "cl_bt_notify", "Avisar quando aplica rewind" );
 }
 
 static void TabServers( void )
