@@ -114,6 +114,7 @@ static int   g_strafeDir = 1;
 
 /* antiafk */
 static double g_afkNext;
+static double g_afkBurst;
 static int    g_afkSide;
 
 /* chatspammer */
@@ -384,7 +385,11 @@ void Sakura_PreMove( usercmd_s *cmd, float frametime )
 		}
 	}
 
-	/* antiafk: pequenos movimentos para o servidor nao kickar */
+	/*
+	 * antiafk: um passo curto a cada 20 s.
+	 * Antes o sidemove ficava ligado em todo frame parado, e o player
+	 * deslizava para o lado sem parar. Agora o movimento dura so 80 ms.
+	 */
 	if( On( cv_antiafk, 0 ) )
 	{
 		double now = Now();
@@ -395,8 +400,10 @@ void Sakura_PreMove( usercmd_s *cmd, float frametime )
 			g_afkSide = -g_afkSide;
 			if( g_afkSide == 0 )
 				g_afkSide = 1;
+			g_afkBurst = now + 0.08;
 		}
-		if( cmd->forwardmove == 0.f && cmd->sidemove == 0.f )
+
+		if( now < g_afkBurst && cmd->forwardmove == 0.f && cmd->sidemove == 0.f )
 			cmd->sidemove = 60.f * (float)g_afkSide;
 	}
 }
@@ -609,6 +616,12 @@ static void DrawBox2D( const float c[8][3], int r, int g, int b, int a )
 	Line2D( (int)maxx, (int)miny, (int)maxx, (int)maxy, r, g, b, a );
 	Line2D( (int)maxx, (int)maxy, (int)minx, (int)maxy, r, g, b, a );
 	Line2D( (int)minx, (int)maxy, (int)minx, (int)miny, r, g, b, a );
+}
+
+/* usado pelo backtrack: desenha uma caixa ja em coordenadas de mundo */
+void Esp_DrawBoxCorners( const float c[8][3], int r, int g, int b, int a )
+{
+	DrawBox2D( c, r, g, b, a );
 }
 
 static void DrawESP( void )

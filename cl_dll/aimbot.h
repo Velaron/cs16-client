@@ -61,5 +61,10 @@ int Aimbot_Apply( float viewangles[3], struct usercmd_s *cmd );
 void Aimbot_Draw( void );
 /* Caixas do ultimo frame (para ESP e outros modulos). */
 const aim_box_t *Aimbot_GetBoxes( int *count );
+
+/* acesso usado pelo backtrack */
+int Aimbot_CurrentTarget( void );
+int Aimbot_KeyHeld( void );
+int Aimbot_PointVisible( const float *eye, const float *point, int player, int ignoreWalls );
 /* 0 = tecla consumida, 1 = passa para a engine. */
 int Aimbot_Key( int down, int keynum );

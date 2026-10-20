@@ -22,6 +22,7 @@
 
 #include "hud.h"
 #include "aimbot.h"
+#include "backtrack.h"
 #include "sakura_features.h"
 #include "sakura_extra.h"
 #include "sakura_more.h"
@@ -353,6 +354,8 @@ cl_aim_smooth      = gEngfuncs.pfnRegisterVariable( "cl_aim_smooth",      "0.35"
 cl_aim_fov         = gEngfuncs.pfnRegisterVariable( "cl_aim_fov",         "120",  FCVAR_ARCHIVE );
 cl_aim_head_offset = gEngfuncs.pfnRegisterVariable( "cl_aim_head_offset", "72.0", FCVAR_ARCHIVE );
 	Aimbot_Init();
+	Backtrack_Init();
+	Backtrack_Commands();
 	Sakura_Init();
 	SakuraExtra_Init();
 	SoundEsp_Init();

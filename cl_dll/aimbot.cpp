@@ -29,6 +29,7 @@
 #include "triangleapi.h"
 #include "draw_util.h"
 #include "aimbot.h"
+#include "backtrack.h"
 #include "spread_predictor.h"
 #include "imgui.h"
 #include "imgui_host.h"
@@ -868,6 +869,30 @@ static void Trigger_Run( usercmd_t *cmd, const float *eye, const float *view )
 		return;
 	}
 
+	/*
+	 * Backtrack no gatilho: se o ponto historico do hitbox esta sob a mira,
+	 * libera o tiro como se o alvo estivesse ali. So relaxa o angulo, nunca
+	 * bloqueia o alvo atual.
+	 */
+	if( Backtrack_Enabled() )
+	{
+		float bt[3];
+		float btAim[3];
+		int btms = 0;
+
+		if( Backtrack_GetPoint( player, g_targetPart, bt, &btms ))
+		{
+			float btAng;
+
+			AngleToPoint( eye, bt, btAim );
+			btAim[2] = 0.f;
+			btAng = AngleDelta( view, btAim );
+
+			if( ang <= 0.f || btAng < ang )
+				ang = btAng;
+		}
+	}
+
 	if( !AccuracyAllows( ang, 1 ) )
 		return;
 
@@ -956,6 +981,7 @@ int Aimbot_Apply( float viewangles[3], usercmd_t *cmd )
 	g_lastCmdTime = now;
 
 	attacking = ( cmd->buttons & IN_ATTACK ) != 0;
+	Backtrack_SetContext( attacking );
 	view[0] = viewangles[0];
 	view[1] = viewangles[1];
 	view[2] = 0.f;
@@ -977,6 +1003,7 @@ int Aimbot_Apply( float viewangles[3], usercmd_t *cmd )
 
 	/* o triggerbot pode ter apertado o gatilho neste mesmo comando */
 	attacking = ( cmd->buttons & IN_ATTACK ) != 0;
+	Backtrack_SetContext( attacking );
 
 	if( !On( cl_aim_assist, 0 ) || g_boxCount <= 0 )
 	{
@@ -1056,6 +1083,44 @@ int Aimbot_Apply( float viewangles[3], usercmd_t *cmd )
 	}
 	if( now - g_acquireTime < Clampf( CV( cv_reaction, 0.f ), 0.f, 1000.f ) * 0.001 )
 		return 0;
+
+	/*
+	 * Backtrack: mira onde o hitbox estava N ms atras. Se o ponto historico
+	 * sair do FOV, volta para o ponto atual que o FindTarget ja calculou.
+	 */
+	if( Backtrack_Enabled() )
+	{
+		float bt[3];
+		float keep[3];
+		int btms = 0;
+
+		keep[0] = aim[0];
+		keep[1] = aim[1];
+		keep[2] = aim[2];
+
+		if( Backtrack_GetPoint( player, g_targetPart, bt, &btms ))
+		{
+			float btAng;
+
+			AngleToPoint( eye, bt, aim );
+			aim[2] = 0.f;
+			btAng = AngleDelta( view, aim );
+
+			if( btAng > fov )
+			{
+				aim[0] = keep[0];
+				aim[1] = keep[1];
+				aim[2] = keep[2];
+			}
+			else
+			{
+				ang = btAng;
+				dist = sqrtf( ( bt[0] - eye[0] ) * ( bt[0] - eye[0] ) +
+					( bt[1] - eye[1] ) * ( bt[1] - eye[1] ) +
+					( bt[2] - eye[2] ) * ( bt[2] - eye[2] ) );
+			}
+		}
+	}
 
 	g_prevTarget = player;
 	g_targetAim[0] = aim[0];
@@ -1344,4 +1409,23 @@ int Aimbot_Key( int down, int keynum )
 	}
 
 	return 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* acesso para o backtrack                                            */
+/* ------------------------------------------------------------------ */
+
+int Aimbot_CurrentTarget( void )
+{
+	return g_target;
+}
+
+int Aimbot_KeyHeld( void )
+{
+	return g_keyHeld;
+}
+
+int Aimbot_PointVisible( const float *eye, const float *point, int player, int ignoreWalls )
+{
+	return PointVisible( eye, point, player, ignoreWalls );
 }

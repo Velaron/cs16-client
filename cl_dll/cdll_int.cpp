@@ -32,6 +32,7 @@
 #include "vgui_parser.h"
 #include "imgui_host.h"
 #include "server_dump.h"
+#include "backtrack.h"
 
 cl_enginefunc_t		gEngfuncs  = { };
 extern void EspHitbox_BeginFrame(void);
@@ -233,6 +234,10 @@ int DLLEXPORT HUD_Redraw( float time, int intermission )
 	gHUD.Redraw( time, intermission );
 	ImGui_Frame();
 	EspHitbox_Flush();
+
+	/* backtrack: grava o frame depois do flush e desenha os ghosts */
+	Backtrack_Tick();
+	Backtrack_Draw();
 
 	return 1;
 }

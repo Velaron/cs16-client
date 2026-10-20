@@ -128,6 +128,7 @@ static void TabConfig( void );
 static void TabAntiAfk( void );
 static void TabNotify( void );
 static void TabRoute( void );
+static void TabBacktrack( void );
 
 /* ------------------------------------------------------------------ */
 /* tabs: legit                                                        */
@@ -457,6 +458,48 @@ static void TabRoute( void )
 	Hint( "route_clear no console apaga a rota atual." );
 }
 
+static void TabBacktrack( void )
+{
+	UI::Section( "Backtrack" );
+	UI::Check( "cl_bt_enable", "Ligado" );
+	UI::Combo( "cl_bt_mode", "Modo", "Desligado\0Legit\0Rage\0Adaptativo\0" );
+	UI::Combo( "cl_bt_trigger_mode", "Ativacao", "Sempre\0So ao atirar\0Tecla\0" );
+	if( (int)UI::Get( "cl_bt_trigger_mode", 0 ) == 2 )
+		UI::KeyBind( "cl_bt_key", "Tecla" );
+	UI::Check( "cl_bt_team", "Mirar no time" );
+
+	UI::Section( "Janela de tempo" );
+	UI::Slider( "cl_bt_min_ms", "Delay minimo", 0.f, 400.f, "%.0f ms" );
+	UI::Slider( "cl_bt_max_ms", "Delay maximo", 0.f, 800.f, "%.0f ms" );
+	UI::Slider( "cl_bt_step_ms", "Resolucao", 0.f, 100.f, "%.0f ms" );
+	UI::Combo( "cl_bt_prefer", "Escolha", "Mais recente\0Mais antigo\0Melhor angulo\0Mais perto\0" );
+
+	UI::Section( "Filtros" );
+	UI::Check( "cl_bt_visible_only", "So alvo visivel" );
+	UI::Check( "cl_bt_ignore_walls", "Ignorar paredes" );
+	UI::Slider( "cl_bt_max_dist", "Distancia maxima", 200.f, 8000.f, "%.0f" );
+	UI::Slider( "cl_bt_ping_min", "Ping minimo", 0.f, 300.f, "%.0f ms" );
+
+	UI::Section( "Fakelag" );
+	UI::Check( "cl_bt_sync_fakelag", "Sincronizar com fakelag" );
+	UI::Slider( "cl_bt_fakelag_extra", "Extra", 0.f, 100.f, "%.0f ms" );
+	Hint( "Sem sincronizar o servidor nao volta a posicao e o tiro nao registra." );
+
+	UI::Section( "Visual" );
+	UI::Check( "cl_bt_draw", "Desenhar historico" );
+	UI::Slider( "cl_bt_draw_ms", "Janela do desenho", 0.f, 800.f, "%.0f ms" );
+	UI::Check( "cl_bt_draw_line", "Marcar pontos" );
+	UI::Check( "cl_bt_draw_target_only", "So o alvo atual" );
+	UI::Check( "cl_bt_draw_box", "Caixa cheia" );
+
+	UI::Section( "Avancado" );
+	UI::Check( "cl_bt_interp", "Interpolar com o quadro vizinho" );
+	UI::Slider( "cl_bt_record_ms", "Intervalo de gravacao", 5.f, 50.f, "%.0f ms" );
+	UI::Slider( "cl_bt_max_frames", "Quadros", 16.f, 96.f, "%.0f" );
+	UI::Check( "cl_bt_clear_round", "Limpar no round" );
+	UI::Check( "cl_bt_debug", "Debug no console" );
+}
+
 static void TabServers( void )
 {
 	/* o painel antigo virou conteudo desta tab */
@@ -594,10 +637,8 @@ static void DrawTabBody( void )
 		case 5: TabAntiAfk(); break;
 		case 6: TabNotify(); break;
 		case 7: TabRoute(); break;
-		default:
-			UI::Section( "Backtrack" );
-			Hint( "Precisa do historico de posicoes do servidor." );
-			break;
+		case 8: TabBacktrack(); break;
+		default: break;
 		}
 		break;
 	}

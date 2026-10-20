@@ -41,3 +41,6 @@ int  Sakura_Key( int down, int keynum );
 
 /* Remocao do viewmodel (maos). */
 int  Sakura_DrawViewModel( void );
+
+/* Desenha uma caixa ja em coordenadas de mundo (usado pelo backtrack). */
+void Esp_DrawBoxCorners( const float c[8][3], int r, int g, int b, int a );
