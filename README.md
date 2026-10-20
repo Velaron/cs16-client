@@ -12,6 +12,42 @@ Este README documenta apenas Windows e Linux. Plataformas fora desse alvo foram 
 
 ## Alteracoes Do Fork Por Data
 
+### 2026-10-19
+
+#### HUB unico (F6)
+
+- Menu ImGui no estilo Sakura com 4 categorias (Rage, Legit, Visuals, Misc) e 26 sub-tabs.
+- Tema, widgets (check, combo, slider, keybind) e layout centralizados em `cl_dll/ui/`.
+- Manifesto `tools/hub_cvars.txt` + `tools/gen_hub_cvars.py` + `tools/check_hub_bindings.sh`
+  garantem que toda cvar do manifesto tem widget no HUB.
+
+#### Backtrack
+
+- Novo modulo em duas camadas: `cl_dll/backtrack_core.{h,cpp}` (puro, testavel no host) e
+  `cl_dll/backtrack.{h,cpp}` (glue com engine/HUD).
+- Ring buffer de 96 quadros (~1 s) com gravacao por frame das 21 hitboxes.
+- 37 cvars `cl_bt_*` numa tabela unica (`cl_dll/backtrack_cfg.h`), com tab propria no HUB.
+- Busca por proximidade temporal (nao por igualdade de delay), interpolacao com peso
+  (`cl_bt_smooth`), janela automatica por ping (`cl_bt_lag_comp`), mascara de hitbox
+  (`cl_bt_parts`), FOV proprio (`cl_bt_fov`), cores/HUD configuraveis.
+- Sync opcional de `cl_fakelag` apenas enquanto atira, restaurando os valores originais
+  ao sair.
+- Validacao por codigo em `./tools/bt_check.sh` (sem abrir o jogo).
+
+#### Aimbot, triggerbot e extras
+
+- Aimbot legit/rage com hitbox por modo, humanize (spiral), reaction time, flash check,
+  fast zoom e block attack.
+- Triggerbot com rajada/precisao, perfect silent, recoil compensation e knifebot.
+- ESP de player/hitbox, chams, sound ESP, killsound e notify.
+
+#### Correcoes
+
+- AntiAFK: o `sidemove` ficava ligado em todo frame parado e o player deslizava para o
+  lado; agora e um passo de 80 ms a cada 20 s.
+- HUB: dump dentro do menu, sem a janela de teste do ImGui; historico validado e thread
+  de dump sem `join()` duplicado.
+
 ### 2026-05-26
 
 #### Hitbox e visibilidade
@@ -197,6 +233,11 @@ cl_spreaddot 1
 | `skin_model_ak47_set` | Define o skin model da AK-47. |
 | `skin_model_(weapon)_list` | Lista skins para uma arma especifica. |
 | `skin_model_(weapon)_set` | Define o skin model de uma arma especifica. |
+
+## Documentacao
+
+- [docs/HUB.md](docs/HUB.md) - categorias, sub-tabs e bindings do menu F6.
+- [docs/BACKTRACK.md](docs/BACKTRACK.md) - arquitetura, 37 cvars, comandos e gate de testes.
 
 ## Reportando Problemas
 
