@@ -1429,3 +1429,13 @@ int Aimbot_PointVisible( const float *eye, const float *point, int player, int i
 {
 	return PointVisible( eye, point, player, ignoreWalls );
 }
+
+void Aimbot_AngleToPoint( const float *eye, const float *point, float *angles )
+{
+	AngleToPoint( eye, point, angles );
+}
+
+float Aimbot_AngleDelta( const float *a, const float *b )
+{
+	return AngleDelta( a, b );
+}

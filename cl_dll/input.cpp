@@ -8,6 +8,7 @@
 // cl.input.c  -- builds an intended movement command to send to the server
 
 #include "hud.h"
+#include "backtrack.h"
 #include "cl_util.h"
 #include "camera.h"
 #include "kbutton.h"
@@ -347,6 +348,7 @@ int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding
 	if( !Aimbot_Key( down, keynum ) )
 		return 0;
 	Sakura_Key( down, keynum );
+	Backtrack_Key( down, keynum );
 	return ImGui_KeyEvent( down, keynum );
 }
 

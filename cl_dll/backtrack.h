@@ -29,3 +29,5 @@ void Backtrack_SetContext( int attacking );
 
 /* registra os comandos de console (bt_selftest, bt_clear) */
 void Backtrack_Commands( void );
+/* tecla propria (reset do historico). Retorna 1 = passa pra engine. */
+int  Backtrack_Key( int down, int keynum );

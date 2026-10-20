@@ -66,5 +66,7 @@ const aim_box_t *Aimbot_GetBoxes( int *count );
 int Aimbot_CurrentTarget( void );
 int Aimbot_KeyHeld( void );
 int Aimbot_PointVisible( const float *eye, const float *point, int player, int ignoreWalls );
+void Aimbot_AngleToPoint( const float *eye, const float *point, float *angles );
+float Aimbot_AngleDelta( const float *a, const float *b );
 /* 0 = tecla consumida, 1 = passa para a engine. */
 int Aimbot_Key( int down, int keynum );

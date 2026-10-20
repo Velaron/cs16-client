@@ -19,6 +19,8 @@
 #include "backtrack_core.h"
 #include "aimbot.h"
 #include "sakura_features.h"
+#include "sakura_more.h"
+#include "cl_util.h"
 #include "backtrack_cfg.h"
 
 #define BT_X( var, name, def, lo, hi, ar, desc ) static cvar_t *cv_##var;
@@ -47,6 +49,26 @@ static float CV( cvar_t *cv, float fallback )
 {
 	return cv ? cv->value : fallback;
 }
+
+/* mascara de partes conforme cl_bt_parts */
+static unsigned int PartMask( void )
+{
+	switch( (int)CV( cv_parts, 0.f ))
+	{
+	case 1:
+		return ( 1u << AIM_PART_HEAD ) | ( 1u << AIM_PART_NECK );
+	case 2:
+		return ( 1u << AIM_PART_BELT ) | ( 1u << AIM_PART_STOMACH ) |
+			( 1u << AIM_PART_LOWER_CHEST ) | ( 1u << AIM_PART_UPPER_CHEST );
+	case 3:
+		return ( 1u << AIM_PART_HEAD ) | ( 1u << AIM_PART_NECK ) |
+			( 1u << AIM_PART_BELT ) | ( 1u << AIM_PART_STOMACH ) |
+			( 1u << AIM_PART_LOWER_CHEST ) | ( 1u << AIM_PART_UPPER_CHEST );
+	default:
+		return 0xFFFFFFFFu;
+	}
+}
+
 
 static float BtClamp( float v, float lo, float hi )
 {
@@ -130,6 +152,7 @@ void Backtrack_Tick( void )
 		return;
 
 	Bt_SetLimit( &g_bt, (int)BtClamp( CV( cv_max_frames, 96.f ), 8.f, BT_MAX_FRAMES ));
+	Bt_TrimOlder( &g_bt, now, (int)BtClamp( CV( cv_history_ms, 1200.f ), 100.f, 3000.f ));
 
 	boxes = Aimbot_GetBoxes( &count );
 	if( !boxes || count <= 0 )
@@ -185,7 +208,7 @@ void Backtrack_Tick( void )
 		static int lastAlive = -1;
 		int alive = CL_IsDead() ? 0 : 1;
 
-		if( On( cv_debug, 0 ))
+		if( (int)CV( cv_debug, 0.f ) >= 1 )
 		{
 			static double lastPrint;
 
@@ -267,6 +290,10 @@ static void FillQuery( bt_query_s *q, double now )
 	q->step_ms = (int)BtClamp( CV( cv_step_ms, 20.f ), 0.f, 100.f );
 	q->prefer = (int)CV( cv_prefer, 0.f );
 	q->interp = On( cv_interp, 1 );
+	q->smooth = BtClamp( CV( cv_smooth, 0.5f ), 0.f, 1.f );
+
+	/* janela automatica pelo ping (ida e volta) */
+	q->max_ms = Bt_LagWindow( LocalPing(), q->min_ms, q->max_ms, On( cv_lag_comp, 0 ));
 
 	/* rage usa sempre o delay maximo da janela */
 	if( (int)CV( cv_mode, 1.f ) == 2 )
@@ -291,34 +318,13 @@ static void FillQuery( bt_query_s *q, double now )
 int Backtrack_GetPoint( int player, int part, float out[3], int *out_ms )
 {
 	bt_query_s q;
-	float dx, dy, dz, dist;
+	bt_filter_s flt;
+	float dx, dy, dz;
 
 	if( !Backtrack_Enabled() || player <= 0 )
 		return 0;
 
-	/* ativacao propria: 0 sempre, 1 so ao atirar, 2 tecla */
-	switch( (int)CV( cv_trigger_mode, 0.f ))
-	{
-	case 1:
-		if( !g_attacking )
-			return 0;
-		break;
-	case 2:
-		if( !Aimbot_KeyHeld() )
-			return 0;
-		break;
-	default:
-		break;
-	}
-
-	/* time: nao mirar no proprio time */
-	if( !On( cv_team, 0 ) && g_iTeamNumber != 0 )
-	{
-		if( g_PlayerExtraInfo[player].teamnumber == g_iTeamNumber )
-			return 0;
-	}
-
-	if( CV( cv_ping_min, 0.f ) > 0.f && LocalPing() < (int)CV( cv_ping_min, 0.f ))
+	if( !Bt_PartAllowed( PartMask(), part ))
 		return 0;
 
 	FillQuery( &q, Now() );
@@ -329,18 +335,46 @@ int Backtrack_GetPoint( int player, int part, float out[3], int *out_ms )
 	dx = out[0] - q.eye[0];
 	dy = out[1] - q.eye[1];
 	dz = out[2] - q.eye[2];
-	dist = sqrtf( dx * dx + dy * dy + dz * dz );
 
-	if( dist > BtClamp( CV( cv_max_dist, 2500.f ), 100.f, 20000.f ))
+	memset( &flt, 0, sizeof( flt ));
+	flt.team_ok = ( On( cv_team, 0 ) || g_iTeamNumber == 0 ||
+		g_PlayerExtraInfo[player].teamnumber != g_iTeamNumber );
+	flt.ping = LocalPing();
+	flt.ping_min = (int)CV( cv_ping_min, 0.f );
+	flt.dist = sqrtf( dx * dx + dy * dy + dz * dz );
+	flt.max_dist = BtClamp( CV( cv_max_dist, 2500.f ), 100.f, 20000.f );
+	flt.visible_only = On( cv_visible_only, 0 );
+	flt.visible = flt.visible_only ? Aimbot_PointVisible( q.eye, out, player, On( cv_ignore_walls, 0 )) : 1;
+	flt.attacking = g_attacking;
+	flt.trigger_mode = (int)CV( cv_trigger_mode, 0.f );
+	flt.key_held = Aimbot_KeyHeld();
+
+	if( !Bt_FilterAccepts( &flt ))
 		return 0;
 
-	if( On( cv_visible_only, 0 ) && !Aimbot_PointVisible( q.eye, out, player, On( cv_ignore_walls, 0 )))
-		return 0;
+	/* fov proprio: 0 usa o fov do aimbot */
+	{
+		float fov = CV( cv_fov, 0.f );
+
+		if( fov > 0.f )
+		{
+			float a[3], view[3];
+
+			Aimbot_AngleToPoint( q.eye, out, a );
+			gEngfuncs.GetViewAngles( view );
+
+			if( Aimbot_AngleDelta( view, a ) > BtClamp( fov, 0.5f, 180.f ))
+				return 0;
+		}
+	}
 
 	g_lastDelay = out_ms ? *out_ms : 0;
 	g_lastAimTime = q.now;
 
-	if( On( cv_debug, 0 ))
+	if( On( cv_notify, 0 ))
+		Notify_Push( "bt: %d ms", g_lastDelay );
+
+	if( (int)CV( cv_debug, 0.f ) >= 2 )
 	{
 		static double lastLog;
 
@@ -371,10 +405,29 @@ void Backtrack_Draw( void )
 	int count = 0;
 	int i;
 	int target;
-	int r = 255, g = 20, b = 147, a = 200;
+	int r = (int)BtClamp( CV( cv_color_r, 255.f ), 0.f, 255.f );
+	int g = (int)BtClamp( CV( cv_color_g, 20.f ), 0.f, 255.f );
+	int b = (int)BtClamp( CV( cv_color_b, 147.f ), 0.f, 255.f );
+	int a = (int)BtClamp( CV( cv_draw_alpha, 200.f ), 0.f, 255.f );
+	int style = (int)CV( cv_draw_style, 0.f );
+	int wantDraw = On( cv_draw, 0 );
 	int delay;
 
-	if( !On( cv_draw, 0 ))
+	/* indicador de delay: aparece mesmo sem desenhar o historico */
+	if( On( cv_hud, 0 ))
+	{
+		delay = Backtrack_LastDelay();
+
+		if( delay > 0 )
+		{
+			char buf[64];
+
+			snprintf( buf, sizeof( buf ), "BT %d ms", delay );
+			gEngfuncs.pfnDrawString( ScreenWidth - 90, 120, buf, r, g, b );
+		}
+	}
+
+	if( !wantDraw )
 		return;
 
 	boxes = Aimbot_GetBoxes( &count );
@@ -414,7 +467,7 @@ void Backtrack_Draw( void )
 			delta[2] = hist[2] - boxes[i].origin[2];
 
 			/* ghost = caixa atual deslocada para a posicao historica */
-			if( On( cv_draw_box, 1 ))
+			if( style == 0 || style == 2 )
 			{
 				for( k = 0; k < 8; k++ )
 				{
@@ -427,7 +480,7 @@ void Backtrack_Draw( void )
 			}
 
 			/* marca o ponto historico */
-			if( On( cv_draw_line, 1 ))
+			if( style == 1 || style == 2 || On( cv_draw_line, 1 ))
 			{
 				float p3[3], s2[2];
 
@@ -464,4 +517,15 @@ void Backtrack_Commands( void )
 {
 	gEngfuncs.pfnAddCommand( "bt_selftest", Cmd_BtSelfTest );
 	gEngfuncs.pfnAddCommand( "bt_clear", Cmd_BtClear );
+}
+
+int Backtrack_Key( int down, int keynum )
+{
+	if( down && keynum > 0 && keynum == (int)CV( cv_reset_key, 0.f ))
+	{
+		Backtrack_Reset();
+		Notify_Push( "bt: historico limpo" );
+	}
+
+	return 1;
 }
