@@ -446,7 +446,7 @@ void Backtrack_SelfTest( void )
 {
 	int fail = Bt_SelfTest();
 
-	gEngfuncs.Con_Printf( "BT SELFTEST: total=6 fail=%d %s\n", fail, fail ? "FAIL" : "PASS" );
+	gEngfuncs.Con_Printf( "BT SELFTEST: total=10 fail=%d %s\n", fail, fail ? "FAIL" : "PASS" );
 }
 
 static void Cmd_BtSelfTest( void )

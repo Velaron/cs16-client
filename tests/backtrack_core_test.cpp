@@ -108,7 +108,7 @@ int main( void )
 	Put( &b, 0, 1, 0, 100, 0, 0 );
 	Put( &b, 50, 1, 0, 200, 0, 0 );
 
-	q.min_ms = 0; q.max_ms = 100; q.step_ms = 0; q.prefer = 0; q.interp = 1;
+	q.min_ms = 0; q.max_ms = 100; q.step_ms = 0; q.prefer = 0; q.interp = 1; q.smooth = 0.5f;
 	CHECK( Bt_Lookup( &b, &q, 1, 0, out, &ms ) == 1, "interp acha" );
 	CHECK( fabsf( out[0] - 150.f ) < 0.01f, "interp = media (150)" );
 
@@ -180,6 +180,115 @@ int main( void )
 	Bt_SetLimit( &b, 0 );
 	CHECK( Bt_Lookup( &b, &q, 1, 0, out, &ms ) == 1, "limit 0 usa tudo" );
 	CHECK( fabsf( out[0] - 0.f ) < 0.01f, "limit 0 volta ao mais novo" );
+
+
+	/* 16. mascara de hitbox (bit por parte) */
+	{
+		unsigned int mask = ( 1u << 11 ) | ( 1u << 7 );   /* cabeca + stomach */
+
+		CHECK( Bt_PartAllowed( 0xFFFFFFFFu, 0 ) == 1, "mascara total aceita" );
+		CHECK( Bt_PartAllowed( mask, 11 ) == 1, "mascara aceita cabeca" );
+		CHECK( Bt_PartAllowed( mask, 7 ) == 1, "mascara aceita stomach" );
+		CHECK( Bt_PartAllowed( mask, 0 ) == 0, "mascara rejeita belt" );
+		CHECK( Bt_PartAllowed( mask, BT_PARTS ) == 0, "parte fora do range" );
+	}
+
+	/* 17. janela automatica por ping */
+	CHECK( Bt_LagWindow( 0, 40, 200, 1 ) == 200, "sem ping usa o maximo" );
+	CHECK( Bt_LagWindow( 30, 40, 200, 1 ) == 60, "ping 30 -> 60 ms" );
+	CHECK( Bt_LagWindow( 30, 40, 200, 0 ) == 200, "lag_comp off usa o maximo" );
+	CHECK( Bt_LagWindow( 500, 40, 200, 1 ) == 200, "janela limitada pelo maximo" );
+
+	/* 18. filtros de aceitacao */
+	{
+		bt_filter_s f;
+
+		memset( &f, 0, sizeof( f ));
+		f.team_ok = 1;
+		f.max_dist = 2500.f;
+		f.dist = 500.f;
+
+		CHECK( Bt_FilterAccepts( &f ) == 1, "filtro base aceita" );
+
+		f.team_ok = 0;
+		CHECK( Bt_FilterAccepts( &f ) == 0, "time bloqueado" );
+		f.team_ok = 1;
+
+		f.ping_min = 60;
+		f.ping = 30;
+		CHECK( Bt_FilterAccepts( &f ) == 0, "ping abaixo do minimo" );
+		f.ping = 90;
+		CHECK( Bt_FilterAccepts( &f ) == 1, "ping acima do minimo" );
+		f.ping_min = 0;
+
+		f.dist = 9000.f;
+		CHECK( Bt_FilterAccepts( &f ) == 0, "distancia acima do maximo" );
+		f.dist = 500.f;
+
+		f.visible_only = 1;
+		f.visible = 0;
+		CHECK( Bt_FilterAccepts( &f ) == 0, "exige visivel" );
+		f.visible = 1;
+		CHECK( Bt_FilterAccepts( &f ) == 1, "visivel aceito" );
+		f.visible_only = 0;
+
+		f.trigger_mode = 1;
+		f.attacking = 0;
+		CHECK( Bt_FilterAccepts( &f ) == 0, "so ao atirar bloqueia" );
+		f.attacking = 1;
+		CHECK( Bt_FilterAccepts( &f ) == 1, "atirando aceita" );
+
+		f.trigger_mode = 2;
+		f.key_held = 0;
+		CHECK( Bt_FilterAccepts( &f ) == 0, "tecla solta bloqueia" );
+		f.key_held = 1;
+		CHECK( Bt_FilterAccepts( &f ) == 1, "tecla apertada aceita" );
+	}
+
+	/* 19. descarte por idade */
+	Bt_Reset( &b );
+	for( i = 0; i < 6; i++ )
+		Put( &b, (double)( 500 - i * 100 ), 1, 0, (float)i, 0, 0 );   /* mais velho primeiro */
+
+	Bt_TrimOlder( &b, 100.0, 250 );
+	CHECK( Bt_FrameCount( &b ) == 3, "trim descarta os mais velhos" );
+
+	q.min_ms = 0; q.max_ms = 600; q.step_ms = 0; q.prefer = 1; q.interp = 0;
+	q.now = 100.0;
+	CHECK( Bt_Lookup( &b, &q, 1, 0, out, &ms ) == 1, "trim ainda responde" );
+	CHECK( fabsf( out[0] - 3.f ) < 0.01f, "trim manteve o mais velho valido" );
+
+	/* 20. peso da interpolacao */
+	Bt_Reset( &b );
+	Put( &b, 0, 1, 0, 100, 0, 0 );
+	Put( &b, 50, 1, 0, 200, 0, 0 );
+
+	q.min_ms = 0; q.max_ms = 100; q.step_ms = 0; q.prefer = 0;
+	q.interp = 1; q.now = 100.0;
+
+	q.smooth = 0.25f;
+	CHECK( Bt_Lookup( &b, &q, 1, 0, out, &ms ) == 1, "smooth acha" );
+	CHECK( fabsf( out[0] - 125.f ) < 0.01f, "smooth 0.25 = 125" );
+
+	q.smooth = 0.f;
+	CHECK( Bt_Lookup( &b, &q, 1, 0, out, &ms ) == 1, "smooth 0 acha" );
+	CHECK( fabsf( out[0] - 100.f ) < 0.01f, "smooth 0 = sem interp" );
+
+	/* 21. consistencia: ponto sempre bate com o delay reportado */
+	Bt_Reset( &b );
+	for( i = 0; i < 64; i++ )
+	{
+		double t = ( 63 - i ) * 0.0156;   /* 64 tick, mais velho primeiro */
+
+		Put( &b, t * 1000.0, 1, 0, (float)( 250.0 * t ), 0, 0 );
+	}
+
+	q.now = 100.0; q.min_ms = 90; q.max_ms = 110; q.step_ms = 0;
+	q.prefer = 0; q.interp = 0; q.smooth = 0.5f;
+
+	CHECK( Bt_Lookup( &b, &q, 1, 0, out, &ms ) == 1, "simulacao acha" );
+	CHECK( ms >= 90 && ms <= 110, "delay dentro da janela" );
+	CHECK( fabsf( out[0] - (float)( 250.0 * ms / 1000.0 )) < 1.0f, "ponto bate com o delay" );
 
 	printf( "BT CORE TEST: %d ok, %d fail\n", g_ok, g_fail );
 	return g_fail ? 1 : 0;

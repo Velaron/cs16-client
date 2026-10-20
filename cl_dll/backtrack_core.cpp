@@ -206,8 +206,13 @@ int Bt_Lookup( const bt_buffer_s *b, const bt_query_s *q, int player, int part,
 
 			if( s2 && s2->valid[part] )
 			{
+				float w = q->smooth;
+
+				if( w < 0.f ) w = 0.f;
+				if( w > 1.f ) w = 1.f;
+
 				for( k = 0; k < 3; k++ )
-					out[k] = ( out[k] + s2->part[part][k] ) * 0.5f;
+					out[k] = out[k] + ( s2->part[part][k] - out[k] ) * w;
 			}
 		}
 	}
@@ -267,5 +272,90 @@ int Bt_SelfTest( void )
 	if( Bt_Lookup( &b, &q, 1, 5, out, &ms ))
 		fail++;   /* parte ausente */
 
+	/* predicados novos */
+	if( !Bt_PartAllowed( 1u << 11, 11 )) fail++;
+	if( Bt_PartAllowed( 1u << 11, 7 )) fail++;
+	if( Bt_LagWindow( 30, 40, 200, 1 ) != 60 ) fail++;
+	if( Bt_LagWindow( 30, 40, 200, 0 ) != 200 ) fail++;
+
+	{
+		bt_filter_s f;
+
+		memset( &f, 0, sizeof( f ));
+		f.team_ok = 1;
+		f.max_dist = 1000.f;
+		f.dist = 100.f;
+		if( !Bt_FilterAccepts( &f )) fail++;
+		f.team_ok = 0;
+		if( Bt_FilterAccepts( &f )) fail++;
+	}
+
 	return fail;
+}
+
+int Bt_PartAllowed( unsigned int part_mask, int part )
+{
+	if( part < 0 || part >= BT_PARTS )
+		return 0;
+
+	return ( part_mask >> part ) & 1u;
+}
+
+int Bt_LagWindow( int ping, int min_ms, int max_ms, int lag_comp )
+{
+	int w;
+
+	if( !lag_comp || ping <= 0 )
+		return max_ms;
+
+	w = ping * 2;            /* ida e volta */
+	if( w < min_ms ) w = min_ms;
+	if( w > max_ms ) w = max_ms;
+
+	return w;
+}
+
+int Bt_FilterAccepts( const bt_filter_s *f )
+{
+	if( !f )
+		return 0;
+	if( !f->team_ok )
+		return 0;
+	if( f->ping_min > 0 && f->ping < f->ping_min )
+		return 0;
+	if( f->max_dist > 0.f && f->dist > f->max_dist )
+		return 0;
+	if( f->visible_only && !f->visible )
+		return 0;
+	if( f->trigger_mode == 1 && !f->attacking )
+		return 0;
+	if( f->trigger_mode == 2 && !f->key_held )
+		return 0;
+
+	return 1;
+}
+
+void Bt_TrimOlder( bt_buffer_s *b, double now, int max_age_ms )
+{
+	int valid, i, drop = 0;
+
+	if( !b || max_age_ms <= 0 )
+		return;
+
+	valid = Bt_ValidCount( b );
+
+	for( i = 0; i < valid; i++ )
+	{
+		const bt_frame_s *f = Bt_FrameAt( b, i );
+
+		if( !f )
+			break;
+		if(( now - f->time ) * 1000.0 <= (double)max_age_ms )
+			break;
+
+		drop++;
+	}
+
+	/* tirar do comeco do ring = reduzir o count */
+	b->count -= drop;
 }

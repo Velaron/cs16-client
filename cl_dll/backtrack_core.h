@@ -43,9 +43,37 @@ struct bt_query_s
 	int step_ms;
 	int prefer;    /* 0 recente, 1 antigo, 2 melhor angulo, 3 mais perto */
 	int interp;    /* 1 = media com o quadro vizinho */
+	float smooth;  /* peso da interpolacao (0 = desliga, 0.5 = media) */
 	float view[3];
 	float eye[3];
 };
+
+/* filtros de aceitacao, puros para poderem ser testados no host */
+struct bt_filter_s
+{
+	int team_ok;        /* 1 = pode mirar */
+	int ping;           /* ping local em ms */
+	int ping_min;       /* 0 = sem filtro */
+	float dist;         /* distancia do olho ao ponto */
+	float max_dist;     /* 0 = sem filtro */
+	int visible;        /* 1 = ponto visivel */
+	int visible_only;   /* 1 = exige visivel */
+	int attacking;      /* IN_ATTACK no cmd atual */
+	int trigger_mode;   /* 0 sempre, 1 so ao atirar, 2 tecla */
+	int key_held;       /* estado da tecla do bind */
+};
+
+/* mascara de hitboxes: bit por parte, 0xFFFFFFFF = todas */
+int  Bt_PartAllowed( unsigned int part_mask, int part );
+
+/* janela efetiva: com lag_comp ligado usa o ping (ida e volta) */
+int  Bt_LagWindow( int ping, int min_ms, int max_ms, int lag_comp );
+
+/* decide se o ponto pode ser usado */
+int  Bt_FilterAccepts( const bt_filter_s *f );
+
+/* descarta os quadros mais velhos que max_age_ms (0 = nao mexe) */
+void Bt_TrimOlder( bt_buffer_s *b, double now, int max_age_ms );
 
 void Bt_Reset( bt_buffer_s *b );
 bt_frame_s *Bt_Push( bt_buffer_s *b, double time );
